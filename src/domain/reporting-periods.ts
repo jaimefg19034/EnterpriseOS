@@ -111,3 +111,29 @@ export function isDateWithinReportingPeriodCode(
   );
   return bounds !== null && isDateWithinReportingPeriod(date, bounds);
 }
+
+
+/** Returns inclusive calendar-month bounds, including leap-year February. */
+export function getReportingMonthBounds(
+  year: number,
+  month: number,
+): ReportingPeriodBounds | null {
+  if (
+    !Number.isInteger(year) ||
+    year < 1 ||
+    year > 9999 ||
+    !Number.isInteger(month) ||
+    month < 1 ||
+    month > 12
+  ) return null;
+
+  const start = createUTCDate(year, month - 1, 1);
+  const end = createUTCDate(year, month, 0);
+  const totalDays = Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1;
+
+  return {
+    start: toISODateUTC(start),
+    end: toISODateUTC(end),
+    totalDays,
+  };
+}
