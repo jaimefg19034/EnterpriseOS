@@ -28,16 +28,16 @@ describe("working capital invoice validation", () => {
 
 describe("invoice CSV import", () => {
   it("parses a semicolon-delimited Spanish export with decimal commas", () => {
-    const result = parseInvoiceCsv("tipo;cliente/proveedor;referencia;fecha_emision;fecha_vencimiento;importe;importe_pagado\\ncobrar;Acme;F-100;01/11/2026;20/11/2026;1.250,50;250,50");
+    const result = parseInvoiceCsv("tipo;cliente/proveedor;referencia;fecha_emision;fecha_vencimiento;importe;importe_pagado\ncobrar;Acme;F-100;01/11/2026;20/11/2026;1.250,50;250,50");
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.invoices[0]).toMatchObject({ direction: "receivable", counterparty: "Acme", amount: 1250.5, paidAmount: 250.5, issueDate: "2026-11-01" });
   });
 
   it("rejects missing columns, malformed quoting and invalid rows without partial import", () => {
-    expect(parseInvoiceCsv("company,amount\\nAcme,10").ok).toBe(false);
-    expect(parseInvoiceCsv('direction,counterparty,reference,issueDate,dueDate,amount,paidAmount\\nreceivable,"Acme,INV-1,2026-11-01,2026-11-02,10,0').ok).toBe(false);
-    expect(parseInvoiceCsv("direction,counterparty,reference,issueDate,dueDate,amount,paidAmount\\nreceivable,Acme,INV-1,2026-11-01,2026-11-02,10,0\\nreceivable,Acme,INV-2,2026-11-01,2026-11-02,-5,0").ok).toBe(false);
+    expect(parseInvoiceCsv("company,amount\nAcme,10").ok).toBe(false);
+    expect(parseInvoiceCsv('direction,counterparty,reference,issueDate,dueDate,amount,paidAmount\nreceivable,"Acme,INV-1,2026-11-01,2026-11-02,10,0').ok).toBe(false);
+    expect(parseInvoiceCsv("direction,counterparty,reference,issueDate,dueDate,amount,paidAmount\nreceivable,Acme,INV-1,2026-11-01,2026-11-02,10,0\nreceivable,Acme,INV-2,2026-11-01,2026-11-02,-5,0").ok).toBe(false);
   });
 });
 
