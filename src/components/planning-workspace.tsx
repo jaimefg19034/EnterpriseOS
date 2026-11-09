@@ -5,7 +5,6 @@ import {
   buildPlanningResult,
   makeDemoActualRevenue,
   SCENARIOS,
-  type ActualRevenueByMonth,
   type MonthName,
   type PlanningAssumptions,
   type ScenarioKey,
@@ -13,7 +12,17 @@ import {
 import { formatCurrency, formatPercent } from "@/domain/financials";
 import { translate, type Language } from "@/i18n/translations";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
-import { parseSavedPlanningState, PLANNING_STORAGE_KEY, serialisePlanningState } from "@/domain/planning-storage";
+import {
+  addPlanningYear,
+  createEmptyActualRevenue,
+  createInitialPlanningState,
+  isValidPlanningYear,
+  LEGACY_PLANNING_STORAGE_KEY,
+  parseSavedPlanningState,
+  PLANNING_STORAGE_KEY,
+  serialisePlanningState,
+  type SavedPlanningState,
+} from "@/domain/planning-storage";
 
 const INITIAL_ASSUMPTIONS: PlanningAssumptions = {
   annualRevenueBudget: 2_976_000,
@@ -23,6 +32,12 @@ const INITIAL_ASSUMPTIONS: PlanningAssumptions = {
   annualInterestExpense: 50_400,
   taxRatePercent: 25,
 };
+
+const INITIAL_PLANNING_STATE = createInitialPlanningState(
+  INITIAL_ASSUMPTIONS,
+  makeDemoActualRevenue(INITIAL_ASSUMPTIONS.annualRevenueBudget),
+  "base",
+);
 
 const ASSUMPTION_FIELDS: {
   key: keyof PlanningAssumptions;
@@ -96,6 +111,10 @@ function PlanningChart({
   const performanceLine = points
     .map((point) => `${point.x},${point.performanceY}`)
     .join(" ");
+  const firstForecastIndex = rows.findIndex((row) => row.status === "Forecast");
+  const hasContiguousForecast = firstForecastIndex >= 0 &&
+    rows.slice(firstForecastIndex).every((row) => row.status === "Forecast");
+  const forecastDividerX = hasContiguousForecast ? points[firstForecastIndex].x - 15 : null;
 
   return (
     <div className="planning-chart-wrap">
@@ -108,7 +127,7 @@ function PlanningChart({
         className="planning-chart"
         viewBox="0 0 590 202"
         role="img"
-        aria-label={t("Monthly revenue budget compared with actual revenue through October and forecast for November and December")}
+        aria-label={t("Monthly revenue budget compared with actual revenue and forecast for the remaining months")}
       >
         {[38, 83, 128, 173].map((y) => (
           <line
@@ -132,18 +151,14 @@ function PlanningChart({
               className="plan-performance-point"
             />
             <text x={point.x} y="195" textAnchor="middle" className="chart-month">
-              {rows[index].month}
+              {t(rows[index].month)}
             </text>
           </g>
         ))}
-        <line
-          x1={points[10].x - 15}
-          x2={points[10].x - 15}
-          y1="22"
-          y2="176"
-          className="forecast-divider"
-        />
-        <text x={points[10].x - 9} y="15" className="forecast-label">{t("FORECAST")}</text>
+        {forecastDividerX !== null && <>
+          <line x1={forecastDividerX} x2={forecastDividerX} y1="22" y2="176" className="forecast-divider" />
+          <text x={forecastDividerX + 6} y="15" className="forecast-label">{t("FORECAST")}</text>
+        </>}
       </svg>
     </div>
   );
@@ -188,34 +203,47 @@ function navigateToPlanningSection(event: MouseEvent<HTMLAnchorElement>) {
 
 export function PlanningWorkspace({ language }: { language: Language }) {
   const t = (value: string) => translate(value, language);
-  const [assumptions, setAssumptions] =
-    useState<PlanningAssumptions>(INITIAL_ASSUMPTIONS);
-  const [actualRevenue, setActualRevenue] = useState<ActualRevenueByMonth>(() =>
-    makeDemoActualRevenue(INITIAL_ASSUMPTIONS.annualRevenueBudget),
-  );
-  const [scenario, setScenario] = useState<ScenarioKey>("base");
+  const [savedState, setSavedState] = useState<SavedPlanningState>(INITIAL_PLANNING_STATE);
   const [storageReady, setStorageReady] = useState(false);
   const [storageMessage, setStorageMessage] = useState("");
+  const [newYear, setNewYear] = useState("2027");
+  const [yearMessage, setYearMessage] = useState("");
+
+  const selectedYear = savedState.selectedYear;
+  const selectedPlan = savedState.years[String(selectedYear)] ?? savedState.years["2026"];
+  const assumptions = selectedPlan.assumptions;
+  const actualRevenue = selectedPlan.actualRevenue;
+  const scenario = selectedPlan.scenario;
+  const availableYears = Object.keys(savedState.years).map(Number).sort((a, b) => a - b);
+  const canAddYear = isValidPlanningYear(Number(newYear)) && !savedState.years[newYear];
 
   useEffect(() => {
     let restored: ReturnType<typeof parseSavedPlanningState> = null;
     let message = "";
     try {
-      const raw = window.localStorage.getItem(PLANNING_STORAGE_KEY);
-      if (raw) {
-        restored = parseSavedPlanningState(raw);
-        message = restored
-          ? "Saved plan restored from this browser."
-          : "A saved plan could not be read. The sample plan is loaded instead.";
+      const currentRaw = window.localStorage.getItem(PLANNING_STORAGE_KEY);
+      if (currentRaw) restored = parseSavedPlanningState(currentRaw);
+      if (!restored) {
+        const legacyRaw = window.localStorage.getItem(LEGACY_PLANNING_STORAGE_KEY);
+        if (legacyRaw) {
+          restored = parseSavedPlanningState(legacyRaw);
+          if (restored) {
+            window.localStorage.setItem(PLANNING_STORAGE_KEY, serialisePlanningState(restored));
+            message = "Legacy FY2026 plan migrated to the multi-year format.";
+          }
+        }
+      }
+      if (!restored && currentRaw) {
+        message = "A saved plan could not be read. The sample plan is loaded instead.";
       }
     } catch {
       message = "Browser storage is unavailable. Changes will remain in this session only.";
     }
     window.setTimeout(() => {
       if (restored) {
-        setAssumptions(restored.assumptions);
-        setActualRevenue(restored.actualRevenue);
-        setScenario(restored.scenario);
+        setSavedState(restored);
+        setNewYear(String(Math.max(...Object.keys(restored.years).map(Number)) + 1));
+        if (!message) message = "Saved plan restored from this browser.";
       }
       if (message) setStorageMessage(message);
       setStorageReady(true);
@@ -225,13 +253,13 @@ export function PlanningWorkspace({ language }: { language: Language }) {
   useEffect(() => {
     const restoreAfterBackup = () => {
       try {
-        const raw = window.localStorage.getItem(PLANNING_STORAGE_KEY);
+        const raw = window.localStorage.getItem(PLANNING_STORAGE_KEY) ??
+          window.localStorage.getItem(LEGACY_PLANNING_STORAGE_KEY);
         if (!raw) return;
         const saved = parseSavedPlanningState(raw);
         if (!saved) return;
-        setAssumptions(saved.assumptions);
-        setActualRevenue(saved.actualRevenue);
-        setScenario(saved.scenario);
+        setSavedState(saved);
+        setNewYear(String(Math.max(...Object.keys(saved.years).map(Number)) + 1));
         setStorageMessage("Saved plan restored from this browser.");
       } catch {
         setStorageMessage("Browser storage is unavailable. Changes will remain in this session only.");
@@ -245,12 +273,12 @@ export function PlanningWorkspace({ language }: { language: Language }) {
     if (!storageReady) return;
     let message = "Plan saved automatically in this browser.";
     try {
-      window.localStorage.setItem(PLANNING_STORAGE_KEY, serialisePlanningState(assumptions, actualRevenue, scenario));
+      window.localStorage.setItem(PLANNING_STORAGE_KEY, serialisePlanningState(savedState));
     } catch {
       message = "Browser storage is unavailable. Changes will remain in this session only.";
     }
     window.setTimeout(() => setStorageMessage(message), 0);
-  }, [assumptions, actualRevenue, scenario, storageReady]);
+  }, [savedState, storageReady]);
 
   const result = useMemo(
     () => buildPlanningResult(assumptions, actualRevenue, scenario),
@@ -263,6 +291,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
   const actualMonths = result.monthlyRows.filter(
     (row) => row.status === "Actual",
   ).length;
+  const lastActualMonth = result.monthlyRows.filter((row) => row.status === "Actual").at(-1)?.month;
 
   function updateAssumption(
     key: keyof PlanningAssumptions,
@@ -271,35 +300,69 @@ export function PlanningWorkspace({ language }: { language: Language }) {
     const value = rawValue === "" ? 0 : Number(rawValue);
     if (!Number.isFinite(value)) return;
     const max = key.endsWith("Percent") ? 100 : Number.MAX_SAFE_INTEGER;
-    setAssumptions((current) => ({
-      ...current,
-      [key]: Math.min(max, Math.max(0, value)),
-    }));
+    setSavedState((current) => {
+      const yearKey = String(current.selectedYear);
+      const plan = current.years[yearKey];
+      return { ...current, years: { ...current.years, [yearKey]: {
+        ...plan,
+        assumptions: { ...plan.assumptions, [key]: Math.min(max, Math.max(0, value)) },
+      } } };
+    });
   }
 
   function updateActualRevenue(month: MonthName, rawValue: string) {
     const value = rawValue === "" ? 0 : Number(rawValue);
     if (!Number.isFinite(value)) return;
-    setActualRevenue((current) => ({
-      ...current,
-      [month]: Math.max(0, value),
-    }));
+    setSavedState((current) => {
+      const yearKey = String(current.selectedYear);
+      const plan = current.years[yearKey];
+      return { ...current, years: { ...current.years, [yearKey]: {
+        ...plan,
+        actualRevenue: { ...plan.actualRevenue, [month]: Math.max(0, value) },
+      } } };
+    });
   }
 
   function resetDemo() {
-    setAssumptions(INITIAL_ASSUMPTIONS);
-    setActualRevenue(makeDemoActualRevenue(INITIAL_ASSUMPTIONS.annualRevenueBudget));
-    setScenario("base");
+    setSavedState((current) => {
+      const yearKey = String(current.selectedYear);
+      return { ...current, years: { ...current.years, [yearKey]: {
+        assumptions: { ...INITIAL_ASSUMPTIONS },
+        actualRevenue: current.selectedYear === 2026
+          ? makeDemoActualRevenue(INITIAL_ASSUMPTIONS.annualRevenueBudget)
+          : createEmptyActualRevenue(),
+        scenario: "base",
+      } } };
+    });
+  }
+
+  function selectYear(rawYear: string) {
+    const year = Number(rawYear);
+    if (!isValidPlanningYear(year) || !savedState.years[String(year)]) return;
+    setSavedState((current) => ({ ...current, selectedYear: year }));
+    setYearMessage("");
+  }
+
+  function addYear() {
+    const year = Number(newYear);
+    const next = addPlanningYear(savedState, year);
+    if (!next) {
+      setYearMessage("Choose an unused year between 1900 and 2100.");
+      return;
+    }
+    setSavedState(next);
+    setNewYear(String(Math.min(2100, year + 1)));
+    setYearMessage("");
   }
 
   async function exportPlanningExcel() {
     await downloadExcelWorkbook({
-      filename: "enterpriseos-budget-scenarios-fy2026.xlsx",
+      filename: `enterpriseos-budget-scenarios-fy${selectedYear}.xlsx`,
       sheets: [
         {
           name: t("Monthly Plan"),
           title: t("EnterpriseOS — Budget & Scenarios"),
-          subtitle: `FY 2026 · EUR · ${t("Scenario")}: ${t(result.scenario.label)} · ${actualMonths} ${t("actual revenue months")}`,
+          subtitle: `FY ${selectedYear} · EUR · ${t("Scenario")}: ${t(result.scenario.label)} · ${actualMonths} ${t("actual revenue months")}`,
           headers: [t("Month"), t("Revenue budget"), t("Actual revenue"), t("Forecast revenue"), t("Variance"), t("Status")],
           widths: [16, 22, 22, 22, 20, 18],
           currencyColumns: [2, 3, 4, 5],
@@ -319,7 +382,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
         {
           name: t("FY Summary"),
           title: t("EnterpriseOS — Full-year Summary"),
-          subtitle: `FY 2026 · EUR · ${t("Scenario")}: ${t(result.scenario.label)}`,
+          subtitle: `FY ${selectedYear} · EUR · ${t("Scenario")}: ${t(result.scenario.label)}`,
           headers: [t("Metric"), t("Value"), t("Basis")],
           widths: [36, 22, 48],
           currencyColumns: [2],
@@ -368,20 +431,23 @@ export function PlanningWorkspace({ language }: { language: Language }) {
       <div className="page-heading planning-heading">
         <div>
           <div className="eyebrow">
-            {t("FINANCIAL PLANNING")} <span className="eyebrow-dot" /> {t("FY 2026 · THROUGH OCTOBER")}
+            {t("FINANCIAL PLANNING")} <span className="eyebrow-dot" /> FY {selectedYear} · {lastActualMonth ? `${t("THROUGH")} ${t(lastActualMonth)}` : t("NO ACTUALS ENTERED")}
           </div>
           <h1>{t("Budget & scenarios")}</h1>
           <p>{t("Track revenue against budget and stress-test the remaining two months under different operating assumptions.")}</p>
         </div>
         <div className="heading-actions">
-          <span className="demo-badge"><i /> {t("SAMPLE DATA")}</span>
-          <button className="secondary-button" onClick={resetDemo}>{t("Reset demo")}</button>
+          <span className="demo-badge"><i /> {t("ILLUSTRATIVE MODEL")}</span>
+          <label className="planning-year-control">{t("Planning year")}<select value={selectedYear} onChange={(event) => selectYear(event.target.value)}>{availableYears.map((year) => <option key={year} value={year}>{year}</option>)}</select></label>
+          <label className="planning-year-control">{t("New fiscal year")}<input type="number" min="1900" max="2100" step="1" value={newYear} onChange={(event) => setNewYear(event.target.value)} /></label>
+          <button type="button" className="secondary-button" onClick={addYear} disabled={!canAddYear}>{t("Add year")}</button>
+          <button className="secondary-button" onClick={resetDemo}>{t("Reset selected year")}</button>
           <button className="primary-button" onClick={exportPlanningExcel}>
             <span aria-hidden="true">↓</span> {t("Export plan")}
           </button>
         </div>
       </div>
-      <p className="planning-storage-status" role="status">{t(storageMessage || "Preparing local plan storage…")}</p>
+      <p className="planning-storage-status" role="status">{t(storageMessage || "Preparing local plan storage…")} {yearMessage && t(yearMessage)}</p>
       <nav className="planning-section-nav" aria-label={t("Planning sections")}>
         <a href="#planning-overview" onClick={navigateToPlanningSection}>{t("Planning overview")}</a>
         <a href="#planning-assumptions" onClick={navigateToPlanningSection}>{t("Annual assumptions")}</a>
@@ -403,7 +469,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
               <button
                 key={key}
                 className={`scenario-option ${scenario === key ? "selected" : ""} ${key}`}
-                onClick={() => setScenario(key)}
+                onClick={() => setSavedState((current) => { const yearKey = String(current.selectedYear); return { ...current, years: { ...current.years, [yearKey]: { ...current.years[yearKey], scenario: key } } }; })}
                 aria-pressed={scenario === key}
               >
                 <span className="scenario-option-top">
