@@ -20,7 +20,7 @@ describe("calculateFinancials", () => {
     expect(result.profitBeforeTax).toBe(46_600);
     expect(result.incomeTax).toBe(11_650);
     expect(result.netIncome).toBe(34_950);
-    expect(result.ebitdaMarginPercent).toBeCloseTo(25.5242, 3);
+    expect(result.ebitdaMarginPercent).toBe(25.52);
   });
 
   it("does not recognise income tax on a loss in this simplified model", () => {
