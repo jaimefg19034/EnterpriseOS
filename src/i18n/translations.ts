@@ -589,6 +589,7 @@ const spanish: Record<string, string> = {
   "Download data backup": "Descargar copia de seguridad",
   "Restore backup": "Restaurar copia",
   "A local backup file has been prepared. Store it somewhere private and secure.": "Se ha preparado una copia de seguridad local. Guárdala en un lugar privado y seguro.",
+  "The saved planning model is invalid. No data has been changed.": "El modelo de planificación guardado no es válido. No se ha modificado ningún dato.",
   "The backup file is too large. Maximum size is 5 MB.": "El archivo de copia de seguridad es demasiado grande. El tamaño máximo es de 5 MB.",
   "The file is not valid JSON.": "El archivo no es un JSON válido.",
   "This file is not a supported EnterpriseOS backup.": "Este archivo no es una copia de seguridad compatible con EnterpriseOS.",
