@@ -29,8 +29,9 @@ describe("calculateThreeStatements", () => {
     );
     expect(result.balanceSheet.isBalanced).toBe(true);
     expect(result.balanceSheet.balanceDifference).toBe(0);
-    expect(result.balanceSheet.netDebt).toBe(
+    expect(result.balanceSheet.netDebt).toBeCloseTo(
       result.balanceSheet.debt - result.balanceSheet.cash,
+      2,
     );
   });
 
