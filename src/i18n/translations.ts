@@ -7,7 +7,7 @@ const spanish: Record<string, string> = {
   "Monitor revenue, EBITDA, margins and the main performance trends.": "Consulta ingresos, EBITDA, márgenes y las principales tendencias de rendimiento.",
   "Edit the six operating assumptions and see the income statement recalculate.": "Modifica las seis hipótesis operativas y observa cómo se recalcula la cuenta de resultados.",
   "Compare the plan with actuals and explore Base, Upside and Downside cases.": "Compara el presupuesto con los resultados reales y explora los escenarios Base, Optimista y Pesimista.",
-  "Review the three statements, liquidity, leverage, break-even, returns and the quarterly cash forecast.": "Consulta los tres estados financieros, la liquidez, el endeudamiento, el punto de equilibrio, la rentabilidad y la previsión trimestral de caja.",
+  "Review the three statements, liquidity, leverage, break-even, returns, receivables, payables and the quarterly cash forecast.": "Revisa los tres estados financieros, ratios, capital circulante, facturas de clientes y proveedores y la previsión trimestral de caja.",
   "Export the current model and planning outputs to Excel.": "Exporta a Excel el modelo actual y los resultados de planificación.",
   "Tip: use the EN / ES switch in the top bar to change the interface language. This demo uses illustrative figures.": "Consejo: utiliza el selector EN / ES de la barra superior para cambiar el idioma. Esta demo utiliza cifras ilustrativas.",
   "Close guide": "Cerrar guía",
