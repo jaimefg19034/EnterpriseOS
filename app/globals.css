@@ -1113,3 +1113,50 @@ button:focus-visible, input:focus-visible {
  .cash-forecast-chart-card { padding:15px 12px 8px; }
  .cash-forecast-table-card { margin-left:-2px; margin-right:-2px; }
 }
+
+
+/* Working capital — receivables and payables */
+.working-capital-workspace { display:grid; gap:16px; margin-top:26px; }
+.working-capital-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; }
+.working-capital-heading h2 { margin:5px 0 5px; color:#1e2b43; font-size:22px; letter-spacing:-.55px; }
+.working-capital-heading p { margin:0; color:#78869a; font-size:12px; line-height:1.6; }
+.working-capital-tabs { display:flex; gap:5px; padding:4px; width:max-content; border:1px solid #e5eaf1; border-radius:9px; background:#f4f6fa; }
+.working-capital-tabs button { border:0; border-radius:6px; padding:8px 16px; background:transparent; color:#758197; font-size:11px; font-weight:600; cursor:pointer; }
+.working-capital-tabs button.active { color:#263b66; background:#fff; box-shadow:0 1px 4px #20304b18; }
+.working-capital-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.working-capital-kpis article { display:grid; gap:7px; padding:15px 17px; }
+.working-capital-kpis article span { color:#78869a; font-size:10px; font-weight:650; }
+.working-capital-kpis article strong { color:#23344f; font-size:21px; letter-spacing:-.5px; font-variant-numeric:tabular-nums; }
+.working-capital-kpis article small { color:#98a2b1; font-size:9px; }
+.working-capital-subhead { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
+.working-capital-subhead h3 { margin:0; color:#263750; font-size:14px; }
+.working-capital-subhead span { color:#8995a7; font-size:10px; }
+.working-capital-ageing { padding:18px; }
+.working-capital-buckets { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:13px; }
+.working-capital-buckets > div { display:grid; gap:8px; min-width:0; }
+.working-capital-buckets span { color:#8290a3; font-size:10px; }
+.working-capital-buckets strong { color:#33445e; font-size:13px; font-variant-numeric:tabular-nums; }
+.working-capital-buckets i { display:block; height:5px; overflow:hidden; border-radius:8px; background:#edf1f6; }
+.working-capital-buckets b { display:block; height:100%; border-radius:8px; background:linear-gradient(90deg,#8196d9,#526fbe); }
+.working-capital-form,.working-capital-register { padding:18px; }
+.working-capital-form-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.working-capital-form-grid label { display:grid; gap:6px; color:#758398; font-size:10px; font-weight:600; }
+.working-capital-form-grid input,.working-capital-table-scroll input { min-width:0; width:100%; border:1px solid #e2e8f0; border-radius:6px; padding:9px 10px; color:#2d3e57; background:#fff; font-size:11px; font-weight:500; outline:none; }
+.working-capital-form-grid input:focus,.working-capital-table-scroll input:focus { border-color:#8195d4; box-shadow:0 0 0 3px #8195d41a; }
+.working-capital-form-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:14px; }
+.working-capital-form-footer small,.working-capital-disclaimer { color:#8a96a8; font-size:10px; line-height:1.6; }
+.working-capital-table-scroll { overflow:auto; }
+.working-capital-table-scroll table { width:100%; border-collapse:collapse; white-space:nowrap; }
+.working-capital-table-scroll th { padding:10px 9px; color:#8190a4; background:#f8f9fc; font-size:9px; font-weight:700; text-align:left; }
+.working-capital-table-scroll td { padding:10px 9px; border-bottom:1px solid #edf0f5; color:#4d5d73; font-size:10px; }
+.working-capital-table-scroll td input { width:105px; padding:6px 7px; text-align:right; font-size:10px; }
+.working-capital-outstanding { color:#263b5c!important; font-weight:700; font-variant-numeric:tabular-nums; }
+.working-capital-overdue,.working-capital-current { display:inline-flex; border-radius:20px; padding:4px 7px; font-size:9px; font-weight:650; }
+.working-capital-overdue { color:#a34f52; background:#fff0ef; }
+.working-capital-current { color:#557b68; background:#edf7f1; }
+.working-capital-delete { border:0; background:transparent; color:#a0aaba; font-size:18px; cursor:pointer; }
+.working-capital-delete:hover { color:#b65e62; }
+.working-capital-empty { padding:28px 12px; color:#8995a7; text-align:center; font-size:11px; line-height:1.6; }
+.working-capital-disclaimer { margin:0; }
+@media(max-width:900px) { .working-capital-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } .working-capital-buckets { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:600px) { .working-capital-heading { align-items:flex-start; flex-direction:column; } .working-capital-form-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .working-capital-buckets { grid-template-columns:repeat(2,minmax(0,1fr)); } .working-capital-form-footer { align-items:flex-start; flex-direction:column; } .working-capital-kpis article { padding:13px; } }
