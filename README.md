@@ -43,6 +43,10 @@ The first release focuses on a dependable management P&L model and a lightweight
 - Domain calculations isolated from the UI
 - Supabase is a future option for authentication and Postgres persistence; it is not enabled yet.
 
+## Project roadmap
+
+The product is being developed in deliberate stages. See [the 18-month product roadmap](docs/roadmap.md) for milestones, release gates and the day-by-day working method.
+
 ## Local development
 
 Requirements: Node.js 20.9+ and npm.
