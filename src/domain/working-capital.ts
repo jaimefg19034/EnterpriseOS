@@ -80,13 +80,13 @@ export type InvoiceCsvParseResult =
   | { ok: false; error: string };
 
 export function parseInvoiceCsv(raw: string): InvoiceCsvParseResult {
-  const source = raw.replace(/^\\uFEFF/, "").trim();
+  const source = raw.replace(/^\uFEFF/, "").trim();
   if (!source) return { ok: false, error: "The CSV file is empty." };
-  const firstLine = source.split(/\\r?\\n/, 1)[0] ?? "";
+  const firstLine = source.split(/\r?\n/, 1)[0] ?? "";
   const delimiter = countCsvDelimiter(firstLine, ";") > countCsvDelimiter(firstLine, ",") ? ";" : ",";
   const rows = parseCsvRows(source, delimiter);
   if (!rows || rows.length < 2) return { ok: false, error: "The CSV file must contain a header and at least one invoice." };
-  const normaliseHeader = (value: string) => value.trim().toLocaleLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+  const normaliseHeader = (value: string) => value.trim().toLocaleLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
   const headers = rows[0].map(normaliseHeader);
   const aliases: Record<string, string[]> = {
     direction: ["direction", "tipo", "tipofactura", "tipooperacion"],
@@ -114,19 +114,19 @@ export function parseInvoiceCsv(raw: string): InvoiceCsvParseResult {
       : ["payable", "payableinvoice", "pagar", "proveedor", "porpagar"].includes(directionText)
         ? "payable" : null;
     const parseAmount = (value: string) => {
-      const cleaned = value.replace(/[€$£\\s]/g, "");
+      const cleaned = value.replace(/[€$£\s]/g, "");
       const comma = cleaned.lastIndexOf(",");
       const dot = cleaned.lastIndexOf(".");
       const decimal = comma > dot ? "," : ".";
       const normalised = decimal === ","
-        ? cleaned.replace(/\\./g, "").replace(",", ".")
+        ? cleaned.replace(/\./g, "").replace(",", ".")
         : cleaned.replace(/,/g, "");
       return Number(normalised);
     };
     const parseDate = (value: string) => {
       const trimmed = value.trim();
       if (isValidISODate(trimmed)) return trimmed;
-      const match = /^(\\d{1,2})[\\/.](\\d{1,2})[\\/.](\\d{4})$/.exec(trimmed);
+      const match = /^(\d{1,2})[/.](\d{1,2})[/.](\d{4})$/.exec(trimmed);
       return match ? `${match[3]}-${match[2].padStart(2, "0")}-${match[1].padStart(2, "0")}` : trimmed;
     };
     if (!direction) return { ok: false, error: `CSV row ${index + 1} has an invalid direction. Use receivable/payable or cobrar/pagar.` };
@@ -169,8 +169,8 @@ function parseCsvRows(source: string, delimiter: string): string[][] | null {
     if (char === '"' && quoted && source[i + 1] === '"') { cell += '"'; i += 1; }
     else if (char === '"') quoted = !quoted;
     else if (!quoted && char === delimiter) { row.push(cell); cell = ""; }
-    else if (!quoted && (char === "\\n" || char === "\\r")) {
-      if (char === "\\r" && source[i + 1] === "\\n") i += 1;
+    else if (!quoted && (char === "\n" || char === "\r")) {
+      if (char === "\\r" && source[i + 1] === "\n") i += 1;
       row.push(cell); rows.push(row); row = []; cell = "";
     } else cell += char;
   }
