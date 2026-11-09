@@ -326,6 +326,24 @@ export function ThreeStatementsWorkspace({
             [t("Dividends"), model.drivers.dividends, "EUR"],
           ],
         },
+        {
+          name: t("Financial Ratios"),
+          title: t("EnterpriseOS — Financial Health & Ratios"),
+          subtitle: t("FY 2026 · Illustrative management indicators · Compare with sector peers and prior periods"),
+          headers: [t("Metric"), t("Value"), t("Formula / basis")],
+          widths: [34, 20, 58],
+          percentLabels: ratioGroups.flatMap((group) => group.ratios.filter((item) => item.unit === "percent").map((item) => t(item.key))),
+          currencyLabels: ratioGroups.flatMap((group) => group.ratios.filter((item) => item.unit === "currency").map((item) => t(item.key))),
+          sectionLabels: ratioGroups.map((group) => t(group.key)),
+          rows: ratioGroups.flatMap((group) => [
+            [t(group.key), null, null],
+            ...group.ratios.map((item) => [
+              t(item.key),
+              item.value === null ? t("Not available") : item.unit === "percent" ? item.value / 100 : item.value,
+              t(item.description),
+            ]),
+          ]),
+        },
       ],
     });
   }
@@ -397,7 +415,7 @@ export function ThreeStatementsWorkspace({
                 {group.ratios.map((item) => {
                   const formatted = item.value === null
                     ? t("Not available")
-                    : new Intl.NumberFormat(language === "es" ? "es-ES" : "en-GB", { minimumFractionDigits: item.unit === "days" ? 0 : 2, maximumFractionDigits: item.unit === "days" ? 1 : 2 }).format(item.value) + (item.unit === "percent" ? "%" : item.unit === "days" ? " " + t("days") : "x");
+                    : item.unit === "currency" ? money(item.value, language) : new Intl.NumberFormat(language === "es" ? "es-ES" : "en-GB", { minimumFractionDigits: item.unit === "days" ? 0 : 2, maximumFractionDigits: item.unit === "days" ? 1 : 2 }).format(item.value) + (item.unit === "percent" ? "%" : item.unit === "days" ? " " + t("days") : "x");
                   return (
                     <article className="financial-ratio-item" key={item.key}>
                       <div className="financial-ratio-copy"><strong>{t(item.key)}</strong><small>{t(item.description)}</small></div>
