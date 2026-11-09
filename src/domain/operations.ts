@@ -1,4 +1,4 @@
-import { getReportingPeriodBounds, inclusiveDaysBetween, isDateWithinReportingPeriod, isValidISODate, isValidReportingPeriodCode } from "./reporting-periods";
+import { getReportingPeriodBounds, inclusiveDaysBetween, isDateWithinReportingPeriod, isDateWithinReportingPeriodCode, isValidISODate, isValidReportingPeriodCode } from "./reporting-periods";
 export type OpportunityStage = "lead" | "qualified" | "proposal" | "won" | "lost";
 export type Opportunity = { id: string; company: string; contact: string; value: number; stage: OpportunityStage; expectedClose: string };
 export type ProjectStatus = "planned" | "active" | "onHold" | "completed";
@@ -170,6 +170,7 @@ export function costCenterRunRate(
     : Math.round((manualBaseline + projectedDatedSpend + Number.EPSILON) * 100) / 100;
 
   return {
+    manualBaseline,
     recordedSpend,
     projectedSpend,
     elapsedPercent,
