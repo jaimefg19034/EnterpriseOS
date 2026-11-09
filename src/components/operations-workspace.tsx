@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { translate, type Language } from "@/i18n/translations";
-import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, projectBudgetVariance, riskScore, weightedPipeline, type BusinessKpi, type BusinessRisk, type Opportunity, type OpportunityStage, type OperationsState, type Project, type ProjectStatus } from "@/domain/operations";
+import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, kpiPerformance, projectBudgetVariance, riskScore, weightedPipeline, type BusinessKpi, type BusinessRisk, type Opportunity, type OpportunityStage, type OperationsState, type Project, type ProjectStatus } from "@/domain/operations";
 
 type Section = "sales" | "projects" | "risks" | "kpis";
 const makeId = () => typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `ops-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -21,7 +21,7 @@ function downloadCsv(state: OperationsState) {
   state.opportunities.forEach((x) => rows.push(["Sales", x.company, x.contact, x.value, x.stage, x.expectedClose]));
   state.projects.forEach((x) => rows.push(["Project", x.name, x.owner, x.budget, x.status, `Spent: ${x.spent}; due: ${x.dueDate}`]));
   state.risks.forEach((x) => rows.push(["Risk", x.title, x.owner, riskScore(x), x.status, x.mitigation]));
-  state.kpis.forEach((x) => rows.push(["KPI", x.name, x.unit, x.actual, `Target: ${x.target}`, ""]));
+  state.kpis.forEach((x) => rows.push(["KPI", x.name, x.unit, x.actual, `Target: ${x.target}`, x.direction ?? "higher"]));
   const csv = rows.map((row) => row.map(safe).join(",")).join("\r\n");
   const url = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }));
   const anchor = document.createElement("a");
@@ -55,6 +55,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   const [kpiActual, setKpiActual] = useState("0");
   const [kpiTarget, setKpiTarget] = useState("0");
   const [kpiUnit, setKpiUnit] = useState("%");
+  const [kpiDirection, setKpiDirection] = useState<"higher" | "lower">("higher");
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -103,7 +104,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   const openPipeline = useMemo(() => weightedPipeline(data.opportunities.filter((x) => !["won", "lost"].includes(x.stage))), [data.opportunities]);
   const activeProjects = data.projects.filter((x) => x.status === "active").length;
   const highRisks = data.risks.filter((x) => x.status !== "closed" && riskScore(x) >= 15).length;
-  const kpiOnTrack = data.kpis.filter((x) => x.target === 0 ? x.actual >= 0 : x.actual >= x.target).length;
+  const kpiOnTrack = data.kpis.filter((x) => kpiPerformance(x).onTarget).length;
 
   function addOpportunity(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -132,9 +133,9 @@ export function OperationsWorkspace({ language }: { language: Language }) {
     event.preventDefault();
     const actual = Number(kpiActual); const target = Number(kpiTarget);
     if (!kpiName.trim() || !kpiUnit.trim() || !Number.isFinite(actual) || !Number.isFinite(target)) return;
-    const item: BusinessKpi = { id: makeId(), name: kpiName.trim(), actual, target, unit: kpiUnit.trim() };
+    const item: BusinessKpi = { id: makeId(), name: kpiName.trim(), actual, target, unit: kpiUnit.trim(), direction: kpiDirection };
     setData((current) => ({ ...current, kpis: [item, ...current.kpis] }));
-    setKpiName(""); setKpiActual("0"); setKpiTarget("0");
+    setKpiName(""); setKpiActual("0"); setKpiTarget("0"); setKpiDirection("higher");
   }
   function remove<K extends keyof OperationsState>(key: K, id: string) {
     setData((current) => ({ ...current, [key]: current[key].filter((item) => item.id !== id) }));
@@ -213,10 +214,11 @@ export function OperationsWorkspace({ language }: { language: Language }) {
             <label>{t("Actual")}<input required type="number" step="any" value={kpiActual} onChange={(e) => setKpiActual(e.target.value)} /></label>
             <label>{t("Target")}<input required type="number" step="any" value={kpiTarget} onChange={(e) => setKpiTarget(e.target.value)} /></label>
             <label>{t("Unit")}<input required maxLength={20} value={kpiUnit} onChange={(e) => setKpiUnit(e.target.value)} /></label>
+            <label>{t("Performance direction")}<select value={kpiDirection} onChange={(e) => setKpiDirection(e.target.value as "higher" | "lower")}><option value="higher">{t("Higher is better")}</option><option value="lower">{t("Lower is better")}</option></select></label>
             <button className="primary-button" type="submit">{t("Add KPI")}</button>
           </form>
-          <div className="operations-kpi-grid">{data.kpis.map((x) => { const ratio = x.target === 0 ? (x.actual >= 0 ? 100 : 0) : Math.max(0, Math.min(150, x.actual / x.target * 100)); return <article className="operations-kpi-card" key={x.id}><div className="operations-kpi-heading"><span>{x.name}</span><button className="operations-delete" onClick={() => remove("kpis", x.id)} aria-label={t("Delete record")}>×</button></div><strong>{x.actual.toLocaleString(language === "es" ? "es-ES" : "en-IE")} <small>{x.unit}</small></strong><div className="operations-kpi-track"><i style={{ width: `${ratio}%` }} /></div><div className="operations-kpi-foot"><span>{t("Target")}: {x.target.toLocaleString(language === "es" ? "es-ES" : "en-IE")} {x.unit}</span><b className={x.actual >= x.target ? "on-track" : "behind"}>{x.actual >= x.target ? t("On target") : t("Below target")}</b></div></article>; })}{data.kpis.length === 0 && <div className="operations-empty">{t("No KPIs yet. Add a measurable indicator and target.")}</div>}</div>
-          <p className="operations-note">{t("This scorecard assumes higher values are better. For cost or defect KPIs, use a transformed metric or add direction settings in a later release.")}</p>
+          <div className="operations-kpi-grid">{data.kpis.map((x) => { const performance = kpiPerformance(x); return <article className="operations-kpi-card" key={x.id}><div className="operations-kpi-heading"><span>{x.name}</span><button className="operations-delete" onClick={() => remove("kpis", x.id)} aria-label={t("Delete record")}>×</button></div><strong>{x.actual.toLocaleString(language === "es" ? "es-ES" : "en-IE")} <small>{x.unit}</small></strong><div className="operations-kpi-track"><i style={{ width: `${performance.ratio}%` }} /></div><div className="operations-kpi-foot"><span>{t("Target")}: {x.target.toLocaleString(language === "es" ? "es-ES" : "en-IE")} {x.unit} · {t((x.direction ?? "higher") === "higher" ? "Higher is better" : "Lower is better")}</span><b className={performance.onTarget ? "on-track" : "behind"}>{performance.onTarget ? t("On target") : t("Below target")}</b></div></article>; })}{data.kpis.length === 0 && <div className="operations-empty">{t("No KPIs yet. Add a measurable indicator and target.")}</div>}</div>
+          <p className="operations-note">{t("Each KPI defines whether higher or lower values are better. Progress is capped visually at 150%; the original values remain unchanged.")}</p>
         </>}
       </div>
       <div className="operations-storage-note">◉ {t(storageMessage)}</div>

@@ -4,7 +4,8 @@ export type ProjectStatus = "planned" | "active" | "onHold" | "completed";
 export type Project = { id: string; name: string; owner: string; budget: number; spent: number; dueDate: string; status: ProjectStatus };
 export type RiskLevel = "low" | "medium" | "high" | "critical";
 export type BusinessRisk = { id: string; title: string; owner: string; probability: number; impact: number; mitigation: string; status: "open" | "mitigating" | "closed" };
-export type BusinessKpi = { id: string; name: string; actual: number; target: number; unit: string };
+export type KpiDirection = "higher" | "lower";
+export type BusinessKpi = { id: string; name: string; actual: number; target: number; unit: string; direction?: KpiDirection };
 export type OperationsState = { opportunities: Opportunity[]; projects: Project[]; risks: BusinessRisk[]; kpis: BusinessKpi[] };
 export const OPERATIONS_STORAGE_KEY = "enterpriseos:operations:v1";
 export const EMPTY_OPERATIONS: OperationsState = { opportunities: [], projects: [], risks: [], kpis: [] };
@@ -57,7 +58,7 @@ export function validateOperationsState(value: unknown): value is OperationsStat
     if (!isRecord(row) || !validId(row.id) || !validText(row.name, 100) ||
       typeof row.actual !== "number" || !Number.isFinite(row.actual) ||
       typeof row.target !== "number" || !Number.isFinite(row.target) ||
-      !validText(row.unit, 20)) return false;
+      !validText(row.unit, 20) || (row.direction !== undefined && !["higher", "lower"].includes(String(row.direction)))) return false;
     ids.push(row.id);
   }
   return new Set(ids).size === ids.length;
@@ -80,4 +81,16 @@ export function weightedPipeline(opportunities: Opportunity[]): number {
 }
 export function projectBudgetVariance(project: Project): number {
   return Math.round((project.budget - project.spent) * 100) / 100;
+}
+
+export function kpiPerformance(kpi: BusinessKpi): { ratio: number; onTarget: boolean; variance: number } {
+  const direction = kpi.direction ?? "higher";
+  const onTarget = direction === "higher" ? kpi.actual >= kpi.target : kpi.actual <= kpi.target;
+  let ratio: number;
+  if (direction === "higher") {
+    ratio = kpi.target === 0 ? (kpi.actual >= 0 ? 100 : 0) : Math.max(0, kpi.actual / kpi.target * 100);
+  } else {
+    ratio = kpi.target === 0 ? (kpi.actual <= 0 ? 100 : 0) : (kpi.actual <= 0 ? 150 : Math.max(0, kpi.target / kpi.actual * 100));
+  }
+  return { ratio: Math.min(150, ratio), onTarget, variance: Math.round((kpi.actual - kpi.target) * 100) / 100 };
 }

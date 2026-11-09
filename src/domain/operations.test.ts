@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseOperationsState, projectBudgetVariance, riskScore, weightedPipeline, type OperationsState } from "./operations";
+import { kpiPerformance, parseOperationsState, projectBudgetVariance, riskScore, weightedPipeline, type OperationsState } from "./operations";
 const state: OperationsState = {
   opportunities: [
     { id: "o1", company: "Northstar", contact: "Alex", value: 10000, stage: "proposal", expectedClose: "2026-12-01" },
@@ -20,6 +20,12 @@ describe("operations workspace domain", () => {
   });
   it("calculates probability-weighted pipeline without lost deals", () => {
     expect(weightedPipeline(state.opportunities)).toBe(6000);
+  });
+  it("evaluates higher-is-better and lower-is-better KPIs correctly", () => {
+    expect(kpiPerformance(state.kpis[0]).onTarget).toBe(false);
+    expect(kpiPerformance({ ...state.kpis[0], actual: 4, target: 5, direction: "lower" })).toMatchObject({ onTarget: true, ratio: 125 });
+    expect(kpiPerformance({ ...state.kpis[0], actual: 7, target: 5, direction: "lower" }).onTarget).toBe(false);
+    expect(kpiPerformance({ ...state.kpis[0], actual: 0, target: 0, direction: "lower" }).onTarget).toBe(true);
   });
   it("scores risk and reports remaining project budget", () => {
     expect(riskScore(state.risks[0])).toBe(20);
