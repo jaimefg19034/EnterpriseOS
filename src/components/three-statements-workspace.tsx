@@ -177,6 +177,38 @@ function StatCard({
   );
 }
 
+function PerformanceBarChart({
+  title,
+  description,
+  items,
+  language,
+}: {
+  title: string;
+  description: string;
+  items: { label: string; value: number }[];
+  language: Language;
+}) {
+  const maxValue = Math.max(1, ...items.map((item) => Math.abs(item.value)));
+  return (
+    <section className="panel financial-visual-card">
+      <div className="financial-visual-heading">
+        <div><h3>{title}</h3><p>{description}</p></div>
+        <span>{language === "es" ? "EUR" : "EUR"}</span>
+      </div>
+      <div className="financial-bar-list">
+        {items.map((item) => (
+          <div className="financial-bar-row" key={item.label}>
+            <div className="financial-bar-label"><span>{item.label}</span><strong>{money(item.value, language)}</strong></div>
+            <div className="financial-bar-track" role="img" aria-label={`${item.label}: ${money(item.value, language)}`}>
+              <i className={item.value < 0 ? "negative" : "positive"} style={{ width: `${Math.max(1, Math.abs(item.value) / maxValue * 100)}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function ThreeStatementsWorkspace({
   financials,
   language,
@@ -398,6 +430,32 @@ export function ThreeStatementsWorkspace({
         <StatCard label={t("Current ratio")} value={ratio(bs.currentRatio, language)} detail={t("Current assets divided by current liabilities")} tone="green" />
       </div>
 
+      <section className="financial-visuals-grid" aria-label={t("Financial performance charts")}>
+        <PerformanceBarChart
+          title={t("Profitability profile")}
+          description={t("How revenue converts into each level of profit.")}
+          language={language}
+          items={[
+            { label: t("Revenue"), value: pnl.revenue },
+            { label: t("Gross profit"), value: pnl.grossProfit },
+            { label: "EBITDA", value: pnl.ebitda },
+            { label: "EBIT", value: pnl.ebit },
+            { label: t("Net income"), value: pnl.netIncome },
+          ]}
+        />
+        <PerformanceBarChart
+          title={t("Cash flow composition")}
+          description={t("Cash generated, invested and financed during the period.")}
+          language={language}
+          items={[
+            { label: t("Cash from operations"), value: cf.cashFromOperations },
+            { label: t("Cash from investing"), value: cf.cashFromInvesting },
+            { label: t("Cash from financing"), value: cf.cashFromFinancing },
+            { label: t("Free cash flow"), value: cf.freeCashFlow },
+          ]}
+        />
+      </section>
+
       <section className="financial-ratios-section" aria-labelledby="financial-ratios-title">
         <div className="financial-ratios-heading">
           <div>
@@ -512,14 +570,18 @@ export function ThreeStatementsWorkspace({
               <StatementRow label={t("Revenue")} value={pnl.revenue} language={language} />
               <StatementRow label={t("Cost of goods sold")} value={-pnl.costOfGoodsSold} language={language} subdued />
               <StatementRow label={t("Gross profit")} value={pnl.grossProfit} language={language} emphasis />
+              <div className="three-statement-margin-row"><span>{t("Gross margin")}</span><strong>{pnl.revenue > 0 ? `${new Intl.NumberFormat(language === "es" ? "es-ES" : "en-GB", { maximumFractionDigits: 1 }).format(pnl.grossProfit / pnl.revenue * 100)}%` : t("Not available")}</strong></div>
               <StatementRow label={t("Operating expenses")} value={-pnl.operatingExpenses} language={language} subdued />
               <StatementRow label={t("EBITDA")} value={pnl.ebitda} language={language} emphasis />
+              <div className="three-statement-margin-row"><span>{t("EBITDA margin")}</span><strong>{pnl.revenue > 0 ? `${new Intl.NumberFormat(language === "es" ? "es-ES" : "en-GB", { maximumFractionDigits: 1 }).format(pnl.ebitda / pnl.revenue * 100)}%` : t("Not available")}</strong></div>
               <StatementRow label={t("Depreciation & amortisation")} value={-pnl.depreciationAndAmortisation} language={language} subdued />
               <StatementRow label={t("EBIT")} value={pnl.ebit} language={language} emphasis />
+              <div className="three-statement-margin-row"><span>{t("EBIT margin")}</span><strong>{pnl.revenue > 0 ? `${new Intl.NumberFormat(language === "es" ? "es-ES" : "en-GB", { maximumFractionDigits: 1 }).format(pnl.ebit / pnl.revenue * 100)}%` : t("Not available")}</strong></div>
               <StatementRow label={t("Interest expense")} value={-pnl.interestExpense} language={language} subdued />
               <StatementRow label={t("Profit before tax")} value={pnl.profitBeforeTax} language={language} />
               <StatementRow label={t("Income tax")} value={-pnl.incomeTax} language={language} subdued />
               <StatementRow label={t("Net income")} value={pnl.netIncome} language={language} emphasis />
+              <div className="three-statement-margin-row final-margin-row"><span>{t("Net margin")}</span><strong>{pnl.revenue > 0 ? `${new Intl.NumberFormat(language === "es" ? "es-ES" : "en-GB", { maximumFractionDigits: 1 }).format(pnl.netIncome / pnl.revenue * 100)}%` : t("Not available")}</strong></div>
               <div className="three-statement-table-note">{t("Pulled directly from the existing Financial Model inputs. Expenses are displayed as negative values.")}</div>
             </div>
           )}
