@@ -14,6 +14,11 @@ const today = () => {
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
+const currentCostCenterPeriod = () => {
+  const date = new Date();
+  const quarter = Math.floor(date.getMonth() / 3) + 1;
+  return `${date.getFullYear()}-Q${quarter}`;
+};
 const money = (value: number, language: Language) => new Intl.NumberFormat(language === "es" ? "es-ES" : "en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(value);
 const stageLabels: Record<OpportunityStage, string> = { lead: "Lead", qualified: "Qualified", proposal: "Proposal", won: "Won", lost: "Lost" };
 const projectLabels: Record<ProjectStatus, string> = { planned: "Planned", active: "Active", onHold: "On hold", completed: "Completed" };
@@ -69,7 +74,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   const [costCenterOwner, setCostCenterOwner] = useState("");
   const [costCenterBudget, setCostCenterBudget] = useState("10000");
   const [costCenterSpend, setCostCenterSpend] = useState("0");
-  const [costCenterPeriod, setCostCenterPeriod] = useState(`${new Date().getFullYear()}-Q4`);
+  const [costCenterPeriod, setCostCenterPeriod] = useState(currentCostCenterPeriod);
   const [costCenterPeriodFilter, setCostCenterPeriodFilter] = useState("all");
   const [expenseDate, setExpenseDate] = useState(today());
   const [expenseDescription, setExpenseDescription] = useState("");
