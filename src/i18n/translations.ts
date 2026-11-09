@@ -838,6 +838,17 @@ const spanish: Record<string, string> = {
   "A period-end estimate that adds the unitemized baseline to the run-rate of dated expenses recorded so far.": "Una estimación al cierre del periodo que suma la base no desglosada al ritmo de gasto de los movimientos fechados hasta la fecha.",
   "No cost centre period matches the selected expense date. Change the date or create a matching cost centre.": "Ningún periodo de centro de coste coincide con la fecha del gasto seleccionada. Cambia la fecha o crea un centro de coste con un periodo compatible.",
 
+  "Liquidity summary": "Resumen de liquidez",
+  "Quarterly liquidity overview · EUR · Base forecast and downside sensitivity": "Resumen trimestral de liquidez · EUR · Previsión base y sensibilidad adversa",
+  "BASE CASE": "CASO BASE",
+  "DOWNSIDE SCENARIO": "ESCENARIO ADVERSO",
+  "QUARTER TOTAL": "TOTAL DEL TRIMESTRE",
+  "Ageing summary": "Resumen de antigüedad",
+  "Open invoice balances by ageing bucket · EUR · User-entered records": "Saldos de facturas abiertas por tramo de antigüedad · EUR · Datos introducidos por el usuario",
+  "TOTAL": "TOTAL",
+  "Total paid amount": "Importe total pagado",
+  "Includes dated and undated paid balances": "Incluye saldos pagados con y sin fecha individual",
+
 };
 
 
