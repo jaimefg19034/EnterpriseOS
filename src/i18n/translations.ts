@@ -852,7 +852,7 @@ const spanish: Record<string, string> = {
   "EnterpriseOS — Liquidity summary": "EnterpriseOS — Resumen de liquidez",
   "EnterpriseOS — Ageing summary": "EnterpriseOS — Resumen de antigüedad",
   "Quarterly cash forecast": "Previsión trimestral de caja",
-  "EnterpriseOS — Quarterly cash forecast": "EnterpriseOS — Previsión trimestral de caja",
+
   "EnterpriseOS — Downside cash scenario": "EnterpriseOS — Escenario adverso de caja",
 
   "Direct-method forecast · EUR · Manual estimates plus separately identified invoice schedule": "Previsión por método directo · EUR · Estimaciones manuales y calendario de facturas identificado por separado",
