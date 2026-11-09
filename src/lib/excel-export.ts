@@ -11,6 +11,7 @@ export type ExcelSheetInput = {
   widths?: number[];
   currencyColumns?: number[];
   percentColumns?: number[];
+  percentLabels?: string[];
   totalLabels?: string[];
   sectionLabels?: string[];
 };
@@ -96,10 +97,11 @@ export async function downloadExcelWorkbook(input: ExcelWorkbookInput): Promise<
         cell.border = { bottom: { style: "hair", color: { argb: BORDER } } };
 
         if (typeof value === "number") {
-          if (definition.currencyColumns?.includes(columnIndex + 1)) {
-            cell.numFmt = '€#,##0.00;[Red](€#,##0.00);–';
-          } else if (definition.percentColumns?.includes(columnIndex + 1)) {
+          const rowLabel = String(values[0] ?? "");
+          if (definition.percentLabels?.includes(rowLabel) || definition.percentColumns?.includes(columnIndex + 1)) {
             cell.numFmt = '0.0%;[Red](0.0%);–';
+          } else if (definition.currencyColumns?.includes(columnIndex + 1)) {
+            cell.numFmt = '€#,##0.00;[Red](€#,##0.00);–';
           } else {
             cell.numFmt = '#,##0.00;[Red](#,##0.00);–';
           }
