@@ -209,6 +209,7 @@ const spanish: Record<string, string> = {
   "Export plan": "Exportar plan",
   "Current model": "Modelo actual",
   "Six month revenue and EBITDA trend": "Tendencia de ingresos y EBITDA de seis meses",
+  "Monthly revenue budget compared with actual revenue through October and forecast for November and December": "Presupuesto mensual de ingresos comparado con los datos reales hasta octubre y la previsión de noviembre y diciembre",
   "Main navigation": "Navegación principal",
   "Workspace information": "Información del espacio de trabajo",
   "FINANCIAL PLANNING": "PLANIFICACIÓN FINANCIERA",
