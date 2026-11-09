@@ -340,6 +340,17 @@ const spanish: Record<string, string> = {
   "Closing cash is negative and has been presented as a bank overdraft liability.": "La caja final es negativa y se presenta como un descubierto bancario en el pasivo.",
   "Net PP&E": "Inmovilizado neto"
 
+
+  "EnterpriseOS — Integrated three-statement model": "EnterpriseOS — Modelo integrado de tres estados financieros",
+  "FY 2026 · Illustrative": "Ejercicio 2026 · Ilustrativo",
+  "Opening (EUR)": "Inicial (EUR)",
+  "Closing (EUR)": "Final (EUR)",
+  "Opening cash": "Efectivo inicial",
+  "Debt repayment applied": "Amortización de deuda aplicada",
+  "Dividends": "Dividendos",
+  "Note": "Nota",
+  "Illustrative management model, not statutory accounts or financial advice.": "Modelo de gestión ilustrativo; no son cuentas oficiales ni asesoramiento financiero."
+
 };
 
 export function translate(value: string, language: Language): string {
