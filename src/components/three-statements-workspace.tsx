@@ -7,11 +7,7 @@ import {
   OPENING_BALANCE_SHEET,
   type ThreeStatementAssumptions,
 } from "@/domain/three-statements";
-import {
-  formatCurrency,
-  formatPercent,
-  type FinancialResults,
-} from "@/domain/financials";
+import { type FinancialResults } from "@/domain/financials";
 import { translate, type Language } from "@/i18n/translations";
 
 type StatementTab = "income" | "balance" | "cash";
@@ -93,13 +89,6 @@ function money(value: number, language: Language): string {
     style: "currency",
     currency: "EUR",
     maximumFractionDigits: 0,
-  }).format(value);
-}
-
-function ratio(value: number, language: Language): string {
-  return new Intl.NumberFormat(language === "es" ? "es-ES" : "en-GB", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
   }).format(value);
 }
 
