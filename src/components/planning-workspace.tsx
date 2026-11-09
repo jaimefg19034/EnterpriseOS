@@ -347,6 +347,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
           headers: [t("Assumption"), t("Value"), t("Unit")],
           widths: [40, 22, 18],
           percentLabels: [t("COGS as % of revenue"), t("Assumed tax rate"), t("Scenario revenue adjustment")],
+          currencyLabels: [t("Annual revenue budget"), t("Annual operating expenses"), t("Annual D&A"), t("Annual interest expense")],
           rows: [
             [t("Annual revenue budget"), assumptions.annualRevenueBudget, "EUR"],
             [t("COGS as % of revenue"), assumptions.costOfGoodsSoldPercent / 100, "%"],
