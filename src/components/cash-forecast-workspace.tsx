@@ -291,7 +291,9 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
           <p className="cash-forecast-invoice-empty">{t("No open invoices fall within this quarter. Add invoices in Receivables & Payables to preview their cash impact.")}</p>
         )}
         <p className="cash-forecast-invoice-note">
-          {t("Preview only until enabled. Past-due balances are scheduled in Week 1; invoices after this quarter are excluded.")}
+          {t(includeInvoices
+            ? "Open invoices are included in the forecast. Past-due balances are scheduled in Week 1; invoices after this quarter are excluded."
+            : "Preview only until enabled. Past-due balances are scheduled in Week 1; invoices after this quarter are excluded.")}
           {" "}{t("Linked invoice amounts are added to manual estimates. Remove the same invoice amounts from manual inputs to avoid double counting.")}
         </p>
       </section>
