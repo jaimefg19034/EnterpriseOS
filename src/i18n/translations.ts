@@ -1,6 +1,8 @@
 export type Language = "en" | "es";
 
 const spanish: Record<string, string> = {
+  "Business operations": "Operaciones de negocio",
+  "Finance": "Finanzas",
   "ENTERPRISEOS QUICK GUIDE": "GUÍA RÁPIDA DE ENTERPRISEOS",
   "A clearer view of your business.": "Una visión más clara de tu negocio.",
   "Choose a workspace to understand what it shows and how to use it.": "Elige un área para entender qué muestra y cómo utilizarla.",
