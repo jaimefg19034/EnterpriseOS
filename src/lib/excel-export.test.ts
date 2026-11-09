@@ -29,6 +29,28 @@ describe("Excel workbook export", () => {
     expect(sheet?.views[0]?.state).toBe("frozen");
   });
 
+  it("formats currency, percentages and percentage-point assumptions distinctly", async () => {
+    const workbook = await buildExcelWorkbook({
+      filename: "assumptions.xlsx",
+      sheets: [{
+        name: "Assumptions", title: "Assumptions", subtitle: "FY 2026",
+        headers: ["Assumption", "Value", "Unit"],
+        currencyLabels: ["Annual revenue budget"],
+        percentLabels: ["Scenario revenue adjustment"],
+        rows: [
+          ["Annual revenue budget", 250000, "EUR"],
+          ["Scenario revenue adjustment", 0.12, "%"],
+          ["Scenario COGS adjustment", -1.5, "percentage points"],
+        ],
+      }],
+    });
+    const sheet = workbook.getWorksheet("Assumptions");
+    expect(sheet?.getCell("B5").numFmt).toContain("€");
+    expect(sheet?.getCell("B6").numFmt).toContain("%");
+    expect(sheet?.getCell("B7").value).toBe(-1.5);
+    expect(sheet?.getCell("B7").numFmt).not.toContain("%");
+  });
+
   it("exports a separate payment movement sheet with dated and undated records", async () => {
     const workbook = await buildExcelWorkbook({
       filename: "payment-ledger.xlsx",
