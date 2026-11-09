@@ -337,7 +337,7 @@ const spanish: Record<string, string> = {
   "The closing balance sheet does not balance. Review the model assumptions.": "El balance final no cuadra. Revisa las hipótesis del modelo.",
   "Depreciation exceeds opening net PP&E plus capital expenditure.": "La depreciación supera el inmovilizado neto inicial más las inversiones del periodo.",
   "Closing cash is negative and has been presented as a bank overdraft liability.": "La caja final es negativa y se presenta como un descubierto bancario en el pasivo.",
-  "Net PP&E": "Inmovilizado neto"
+  "Net PP&E": "Inmovilizado neto",
 
 
   "EnterpriseOS — Integrated three-statement model": "EnterpriseOS — Modelo integrado de tres estados financieros",
