@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { calculateInvoiceAgeing, normaliseInvoice, summarizeInvoices, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
+import { calculateInvoiceAgeing, normaliseInvoice, summarizeInvoices, validateWorkingCapitalInvoice, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { createEmptyCashForecast } from "@/domain/cash-forecast";
 import { createLocalFinanceBackup, parseLocalFinanceBackup } from "@/domain/cash-working-capital-backup";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
@@ -40,14 +40,10 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
       if (raw) {
         const parsed: unknown = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-          restored = parsed.filter((item): item is WorkingCapitalInvoice =>
-            item && typeof item === "object" &&
-            (item.direction === "receivable" || item.direction === "payable") &&
-            typeof item.counterparty === "string" && typeof item.reference === "string" &&
-            typeof item.issueDate === "string" && typeof item.dueDate === "string" &&
-            typeof item.amount === "number" && typeof item.paidAmount === "number" &&
-            typeof item.id === "string"
-          ).map(normaliseInvoice);
+          restored = parsed
+            .map((item) => validateWorkingCapitalInvoice(item))
+            .filter((result) => result.valid)
+            .map((result) => result.invoice);
         }
       }
     } catch {
