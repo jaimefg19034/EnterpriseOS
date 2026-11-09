@@ -1160,3 +1160,31 @@ button:focus-visible, input:focus-visible {
 .working-capital-disclaimer { margin:0; }
 @media(max-width:900px) { .working-capital-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } .working-capital-buckets { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media(max-width:600px) { .working-capital-heading { align-items:flex-start; flex-direction:column; } .working-capital-form-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .working-capital-buckets { grid-template-columns:repeat(2,minmax(0,1fr)); } .working-capital-form-footer { align-items:flex-start; flex-direction:column; } .working-capital-kpis article { padding:13px; } }
+
+
+/* Invoice register → quarterly cash forecast */
+.cash-forecast-invoice-panel { padding:17px 18px; margin-bottom:13px; }
+.cash-forecast-invoice-head { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; }
+.cash-forecast-invoice-head h3 { margin:3px 0 5px; color:#2d3b52; font:750 13px/1.4 "Manrope",sans-serif; }
+.cash-forecast-invoice-head p { max-width:650px; margin:0; color:#738197; font-size:10px; line-height:1.6; }
+.cash-forecast-invoice-toggle { display:flex; align-items:center; gap:8px; flex:0 0 auto; padding:9px 12px; border:1px solid #dfe6f0; border-radius:8px; color:#354663; background:#f8faff; font-size:10px; font-weight:750; cursor:pointer; }
+.cash-forecast-invoice-toggle input { width:15px; height:15px; margin:0; accent-color:#5872c7; }
+.cash-forecast-invoice-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:14px; }
+.cash-forecast-invoice-summary > div { display:grid; gap:4px; min-width:0; padding:11px 12px; border:1px solid #edf0f5; border-radius:8px; background:#fbfcfe; }
+.cash-forecast-invoice-summary span { color:#78869a; font-size:9px; font-weight:700; }
+.cash-forecast-invoice-summary strong { color:#2c416e; font-size:15px; font-weight:800; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.cash-forecast-invoice-summary small { color:#8995a7; font-size:9px; }
+.cash-forecast-invoice-schedule { display:grid; gap:6px; margin-top:13px; }
+.cash-forecast-invoice-schedule-title { color:#596a84; font-size:9px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; }
+.cash-forecast-invoice-row { display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:10px; padding:8px 10px; border-radius:6px; color:#6b7890; background:#f7f9fc; font-size:9px; font-variant-numeric:tabular-nums; }
+.cash-forecast-invoice-row strong { color:#354663; }
+.cash-forecast-invoice-empty,.cash-forecast-invoice-note { margin:12px 0 0; color:#78869a; font-size:9px; line-height:1.6; }
+.cash-forecast-invoice-note { padding-top:9px; border-top:1px solid #edf0f5; }
+.cash-forecast-linked-amount { display:block; margin-top:4px; color:#5872a9; font-size:8px; font-weight:700; }
+@media (max-width:760px) {
+ .cash-forecast-invoice-panel { padding:14px 12px; }
+ .cash-forecast-invoice-head { flex-direction:column; gap:12px; }
+ .cash-forecast-invoice-toggle { align-self:flex-start; }
+ .cash-forecast-invoice-summary { grid-template-columns:1fr; }
+ .cash-forecast-invoice-row { grid-template-columns:1fr; gap:4px; }
+}
