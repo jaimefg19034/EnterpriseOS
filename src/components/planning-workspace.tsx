@@ -209,6 +209,25 @@ export function PlanningWorkspace({ language }: { language: Language }) {
   }, []);
 
   useEffect(() => {
+    const restoreAfterBackup = () => {
+      try {
+        const raw = window.localStorage.getItem(PLANNING_STORAGE_KEY);
+        if (!raw) return;
+        const saved = parseSavedPlanningState(raw);
+        if (!saved) return;
+        setAssumptions(saved.assumptions);
+        setActualRevenue(saved.actualRevenue);
+        setScenario(saved.scenario);
+        setStorageMessage("Saved plan restored from this browser.");
+      } catch {
+        setStorageMessage("Browser storage is unavailable. Changes will remain in this session only.");
+      }
+    };
+    window.addEventListener("enterpriseos:planning-updated", restoreAfterBackup);
+    return () => window.removeEventListener("enterpriseos:planning-updated", restoreAfterBackup);
+  }, []);
+
+  useEffect(() => {
     if (!storageReady) return;
     let message = "Plan saved automatically in this browser.";
     try {
