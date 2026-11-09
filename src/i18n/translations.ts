@@ -563,6 +563,7 @@ const spanish: Record<string, string> = {
   "Payable payments": "Pagos a proveedores",
   "Overdue receivables": "Clientes vencidos",
   "Overdue payables": "Proveedores vencidos",
+  "Manual entries and invoice projections remain separate; changes are saved only in this browser and are not shared with a company team or synced to a server.": "Las entradas manuales y las previsiones de facturas permanecen separadas; los cambios solo se guardan en este navegador y no se comparten con un equipo ni se sincronizan con un servidor.",
   "Records are stored only in this browser and are not connected to accounting software. You can preview open invoice balances in the quarterly cash forecast and choose whether to include them; no invoice is marked as paid automatically.": "Los registros se guardan únicamente en este navegador y no están conectados a un programa contable. Puedes previsualizar los saldos pendientes en la previsión trimestral de caja y elegir si incluirlos; ninguna factura se marca como pagada automáticamente.",
   "Manual entries and invoice projections remain separate; changes are saved only in this browser and are not shared with a company team or synced to a server.": "Las entradas manuales y las previsiones de facturas permanecen separadas; los cambios solo se guardan en este navegador y no se comparten con un equipo ni se sincronizan con un servidor.",
   "notDue": "No vencido",
