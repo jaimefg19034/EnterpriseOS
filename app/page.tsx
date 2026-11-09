@@ -325,7 +325,7 @@ export default function Home() {
     }));
   }
 
-  async function exportCsv() {
+  async function exportExcel() {
     await downloadExcelWorkbook({
       filename: "enterpriseos-management-pnl-fy2026.xlsx",
       sheets: [{
@@ -449,7 +449,7 @@ export default function Home() {
             <button className="icon-button" aria-label={t("Workspace information")} title={t("Demo workspace")}>
               <Icon name="info" size={17} />
             </button>
-            <button className="export-button" onClick={exportCsv}>
+            <button className="export-button" onClick={exportExcel}>
               <Icon name="download" size={16} /> <span>{t("Export Excel")}</span>
             </button>
             <div className="topbar-avatar">{t("FT")}</div>
@@ -629,7 +629,7 @@ export default function Home() {
                     <div className="statement-row final-row"><span>{t("Net income")}</span><strong className={results.netIncome < 0 ? "negative-value" : ""}>{formatCurrency(results.netIncome)}</strong></div>
                     <div className="statement-margin final-margin"><span>{t("Net margin")}</span><span>{formatPercent(results.netMarginPercent)}</span></div>
                   </div>
-                  <button className="statement-export" onClick={exportCsv}><Icon name="download" size={15} /> {t("Download statement (Excel)")}</button>
+                  <button className="statement-export" onClick={exportExcel}><Icon name="download" size={15} /> {t("Download statement (Excel)")}</button>
                 </section>
               </div>
 
@@ -662,7 +662,7 @@ export default function Home() {
                   <p>{t("A detailed P&L statement with formulas, margins and model assumptions for FY 2026.")}</p>
                   <div className="report-tags"><span>{t("Excel workbook")}</span><span>{t("EUR currency")}</span><span>{t("Live values")}</span></div>
                 </div>
-                <button className="primary-button" onClick={exportCsv}><Icon name="download" size={16} /> {t("Export report")}</button>
+                <button className="primary-button" onClick={exportExcel}><Icon name="download" size={16} /> {t("Export report")}</button>
               </section>
               <div className="report-summary-grid">
                 <MetricCard label={t("Revenue")} value={formatCurrency(results.revenue, true)} change={t("Current model")} tone="blue" icon="wallet" language={language} />
