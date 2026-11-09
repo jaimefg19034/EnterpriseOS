@@ -27,6 +27,15 @@ describe("invoice cash forecast integration", () => {
     expect(result[1].payableCount).toBe(1);
   });
 
+  it("flags invoices that became overdue earlier in the current week", () => {
+    const result = allocateInvoicesToCashWeeks([
+      invoice({ dueDate: "2026-11-10" }),
+    ], "2026-11-09", 2, "2026-11-12");
+
+    expect(result[0].receivableCollections).toBe(800);
+    expect(result[0].overdueReceivables).toBe(800);
+  });
+
   it("places overdue invoices in the first week and flags their balances", () => {
     const result = allocateInvoicesToCashWeeks([
       invoice({ dueDate: "2026-11-01" }),
@@ -43,7 +52,7 @@ describe("invoice cash forecast integration", () => {
     const result = allocateInvoicesToCashWeeks([
       invoice({ paidAmount: 1000 }),
       invoice({ id: "bad-date", dueDate: "2026-02-30" }),
-      invoice({ id: "future", dueDate: "2027-01-01" }),
+      invoice({ id: "future", dueDate: "2027-03-01" }),
     ], "2026-11-09", 13);
 
     expect(result.reduce((sum, week) => sum + week.receivableCollections + week.payablePayments, 0)).toBe(0);
