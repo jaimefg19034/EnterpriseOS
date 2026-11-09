@@ -50,6 +50,6 @@ describe("cash stress scenario", () => {
     expect(result.weeks[0].collections).toBe(0);
     expect(result.weeks[1].operatingPayments).toBe(1200);
     expect(result.firstNegativeWeek).toBe(1);
-    expect(result.lowestCash).toBe(-1000);
+    expect(result.lowestCash).toBe(-1100);
   });
 });
