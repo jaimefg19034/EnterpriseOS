@@ -352,7 +352,19 @@ const spanish: Record<string, string> = {
   "Net working capital": "Capital circulante neto",
   "Receivables plus inventory less payables": "Clientes más existencias menos proveedores",
   "Current ratio": "Ratio corriente",
-  "Current assets divided by current liabilities": "Activo corriente dividido entre pasivo corriente"
+  "Current assets divided by current liabilities": "Activo corriente dividido entre pasivo corriente",
+  "INCOME STATEMENT": "CUENTA DE RESULTADOS",
+  "Balance check": "Comprobación del balance",
+  "CASH FLOW STATEMENT": "ESTADO DE FLUJOS DE EFECTIVO",
+  "Change in accounts receivable": "Variación de clientes y cuentas a cobrar",
+  "Change in inventory": "Variación de existencias",
+  "Change in accounts payable": "Variación de proveedores y cuentas a pagar",
+  "Cash from operations": "Flujo de caja de explotación",
+  "Cash from investing": "Flujo de caja de inversión",
+  "Cash from financing": "Flujo de caja de financiación",
+  "Days sales outstanding": "Días de cobro a clientes",
+  "Inventory days": "Días de inventario",
+  "Payable days": "Días de pago a proveedores"
 
 };
 
