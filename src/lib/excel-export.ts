@@ -34,7 +34,7 @@ function safeSheetName(value: string): string {
   return value.replace(/[\\/?*:[\]]/g, " ").slice(0, 31) || "Report";
 }
 
-export async function downloadExcelWorkbook(input: ExcelWorkbookInput): Promise<void> {
+export async function buildExcelWorkbook(input: ExcelWorkbookInput): Promise<ExcelJS.Workbook> {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "EnterpriseOS";
   workbook.subject = "Financial management report";
@@ -145,6 +145,11 @@ export async function downloadExcelWorkbook(input: ExcelWorkbookInput): Promise<
     sheet.headerFooter.oddFooter = "&LEnterpriseOS | Illustrative management model&RPAGE &P OF &N";
   }
 
+  return workbook;
+}
+
+export async function downloadExcelWorkbook(input: ExcelWorkbookInput): Promise<void> {
+  const workbook = await buildExcelWorkbook(input);
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
