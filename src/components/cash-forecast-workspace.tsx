@@ -275,8 +275,9 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
         widths: [18, 22, 22, 24, 22, 22, 18, 22, 22],
         currencyColumns: [2, 3, 4, 5, 6, 7, 8, 9],
         dateColumns: [1],
-        totalLabels: [t("Net cash movement"), t("Closing cash")],
-        rows: results.map((week, index) => [
+        totalLabels: [t("QUARTER TOTAL")],
+        rows: [
+          ...results.map((week, index) => [
           excelDateOnly(dates[index]),
           weeks[index].collections,
           includeInvoices ? invoiceProjection[index].receivableCollections : 0,
@@ -284,7 +285,9 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
           includeInvoices ? invoiceProjection[index].payablePayments : 0,
           weeks[index].capitalExpenditure, weeks[index].debtService,
           week.netCashMovement, week.closingCash,
-        ]),
+          ]),
+          [t("QUARTER TOTAL"), null, null, null, null, null, null, finalCash - openingCash, finalCash],
+        ],
       }, {
         name: t("Invoice cash schedule"),
         title: t("EnterpriseOS — Invoice cash schedule"),
@@ -313,7 +316,11 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
         headers: [t("Week"), t("Base closing cash"), t("Downside closing cash"), t("Downside net movement")],
         widths: [14, 24, 24, 24],
         currencyColumns: [2, 3, 4],
-        rows: stress.weeks.map((week, index) => [index + 1, results[index].closingCash, week.closingCash, week.netCashMovement]),
+        totalLabels: [t("QUARTER TOTAL")],
+        rows: [
+          ...stress.weeks.map((week, index) => [index + 1, results[index].closingCash, week.closingCash, week.netCashMovement]),
+          [t("QUARTER TOTAL"), finalCash, stress.finalCash, stress.finalCash - openingCash],
+        ],
       }],
     });
   }
