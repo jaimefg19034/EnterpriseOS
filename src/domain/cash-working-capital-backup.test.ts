@@ -52,6 +52,21 @@ describe("local finance backup", () => {
     expect(restored.data.quarterlyCashForecast).toHaveLength(13);
   });
 
+  it("round-trips dated payment history without changing legacy balances", () => {
+    const source = invoice({
+      paidAmount: 550,
+      payments: [{ id: "payment-1", date: "2026-11-08", amount: 300, note: "Bank transfer" }],
+    });
+    const backup = createLocalFinanceBackup([source], createEmptyCashForecast(13));
+    const restored = parseLocalFinanceBackup(JSON.stringify(backup));
+    expect(restored.ok).toBe(true);
+    if (!restored.ok) return;
+    expect(restored.data.workingCapitalInvoices[0].paidAmount).toBe(550);
+    expect(restored.data.workingCapitalInvoices[0].payments).toEqual([
+      { id: "payment-1", date: "2026-11-08", amount: 300, note: "Bank transfer" },
+    ]);
+  });
+
   it("upgrades version 1 backups and preserves legacy paid balances", () => {
     const legacy = createLocalFinanceBackup([invoice()], createEmptyCashForecast(13));
     const versionOne = { ...legacy, schemaVersion: 1 };
