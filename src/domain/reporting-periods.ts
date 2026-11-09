@@ -17,6 +17,7 @@ function createUTCDate(year: number, monthIndex: number, day: number): Date {
 export function parseISODateUTC(value: string): Date | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
   const [year, month, day] = value.split("-").map(Number);
+  if (year < 1) return null;
   const date = createUTCDate(year, month - 1, day);
   if (
     date.getUTCFullYear() !== year ||
@@ -53,6 +54,7 @@ export function getReportingPeriodBounds(
     fiscalYearStartMonth > 12
   ) return null;
 
+  if (!["FY", "Q1", "Q2", "Q3", "Q4"].includes(period)) return null;
   const quarterIndex = period === "FY" ? 0 : Number(period.slice(1)) - 1;
   if (period !== "FY" && (!Number.isInteger(quarterIndex) || quarterIndex < 0 || quarterIndex > 3)) return null;
 
@@ -82,4 +84,20 @@ export function inclusiveDaysBetween(start: string, end: string): number {
   const endDate = parseISODateUTC(end);
   if (!startDate || !endDate || endDate < startDate) return 0;
   return Math.floor((endDate.getTime() - startDate.getTime()) / 86_400_000) + 1;
+}
+
+/** Checks a YYYY-Qn or YYYY-FY code against a date using the shared calendar rules. */
+export function isDateWithinReportingPeriodCode(
+  date: string,
+  periodCode: string,
+  fiscalYearStartMonth = 1,
+): boolean {
+  const match = /^(\\d{4})-(FY|Q[1-4])$/.exec(periodCode);
+  if (!match) return false;
+  const bounds = getReportingPeriodBounds(
+    Number(match[1]),
+    match[2] as ReportingPeriodCode,
+    fiscalYearStartMonth,
+  );
+  return bounds !== null && isDateWithinReportingPeriod(date, bounds);
 }
