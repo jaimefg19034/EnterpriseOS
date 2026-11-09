@@ -291,6 +291,7 @@ function isValidInvoicePayment(value: unknown): value is InvoicePayment {
   return typeof payment.id === "string" && payment.id.trim().length > 0 && payment.id.length <= 100 &&
     typeof payment.date === "string" && isValidISODate(payment.date) &&
     typeof payment.amount === "number" && Number.isFinite(payment.amount) && payment.amount > 0 &&
+    Math.round((payment.amount + Number.EPSILON) * 100) / 100 > 0 &&
     payment.amount <= 1_000_000_000_000 &&
     (payment.note === undefined || (typeof payment.note === "string" && payment.note.length <= 200));
 }
