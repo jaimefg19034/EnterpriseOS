@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createEmptyCashForecast } from "./cash-forecast";
 import { createLocalFinanceBackup, parseLocalFinanceBackup } from "./cash-working-capital-backup";
 import type { WorkingCapitalInvoice } from "./working-capital";
+import { parseSavedPlanningState, serialisePlanningState } from "./planning-storage";
 
 const invoice = (overrides: Partial<WorkingCapitalInvoice> = {}): WorkingCapitalInvoice => ({
   id: "invoice-1",
@@ -41,6 +42,35 @@ describe("local finance backup", () => {
     const invalidDate = createLocalFinanceBackup([invoice({ id: "bad", dueDate: "2026-02-30" })], createEmptyCashForecast());
     expect(parseLocalFinanceBackup(JSON.stringify(duplicate)).ok).toBe(false);
     expect(parseLocalFinanceBackup(JSON.stringify(invalidDate)).ok).toBe(false);
+  });
+
+  it("includes and restores the saved planning model", () => {
+    const assumptions = {
+      annualRevenueBudget: 2_976_000,
+      costOfGoodsSoldPercent: 39,
+      annualOperatingExpenses: 1_060_800,
+      annualDepreciationAndAmortisation: 150_000,
+      annualInterestExpense: 50_400,
+      taxRatePercent: 25,
+    };
+    const planning = parseSavedPlanningState(serialisePlanningState(
+      assumptions,
+      { Jan: 250_000, Feb: null },
+      "upside",
+      "2026-11-09T14:00:00.000Z",
+    ));
+    const backup = createLocalFinanceBackup([], createEmptyCashForecast(13), undefined, planning);
+    const restored = parseLocalFinanceBackup(JSON.stringify(backup));
+    expect(restored.ok).toBe(true);
+    if (!restored.ok) return;
+    expect(restored.data.planningState?.scenario).toBe("upside");
+    expect(restored.data.planningState?.actualRevenue.Jan).toBe(250_000);
+  });
+
+  it("rejects a corrupted planning model inside an otherwise valid backup", () => {
+    const backup = createLocalFinanceBackup([], createEmptyCashForecast(13));
+    (backup as { planningState?: unknown }).planningState = { scenario: "unknown" };
+    expect(parseLocalFinanceBackup(JSON.stringify(backup)).ok).toBe(false);
   });
 
   it("rejects incomplete forecasts and negative cash inputs", () => {
