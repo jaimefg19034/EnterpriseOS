@@ -146,4 +146,6 @@ Append a short entry after each completed work session:
 
 **Session 2 completed (9 Nov 2026):** the current and target monthly finance workflows were mapped in [the core finance workflow](core-finance-workflow.md). The map makes explicit that the current operations, P&L, invoice and cash modules are not yet one reconciled system of record.
 
-The next planned session is **Session 3: audit the management P&L calculation definitions**. We will compare every formula and sign convention in code, tests, UI labels and exports before expanding the model.
+**Session 3 completed (9 Nov 2026):** the management P&L formula contract was compared with its implementation and tests. One edge case was hardened: extreme monetary values are now capped at the same safe-integer boundary used by the input UI, preventing non-finite margin results from direct domain calls.
+
+The next planned session is **Session 4: audit balance-sheet and cash-flow links**. We will test opening/closing balance integrity, cash movement, debt, overdrafts and working-capital assumptions before extending the model.

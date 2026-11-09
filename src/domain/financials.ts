@@ -25,6 +25,11 @@ export type FinancialResults = {
   netMarginPercent: number;
 };
 
+const MAX_FINANCIAL_AMOUNT = Number.MAX_SAFE_INTEGER;
+
+const normaliseAmount = (value: number): number =>
+  Math.min(MAX_FINANCIAL_AMOUNT, Math.max(0, Number.isFinite(value) ? value : 0));
+
 const roundCurrency = (value: number): number =>
   Math.round((value + Number.EPSILON) * 100) / 100;
 
@@ -41,25 +46,11 @@ const safeMargin = (numerator: number, denominator: number): number =>
 export function calculateFinancials(
   inputs: FinancialInputs,
 ): FinancialResults {
-  const revenue = Math.max(0, Number.isFinite(inputs.revenue) ? inputs.revenue : 0);
-  const costOfGoodsSold = Math.max(
-    0,
-    Number.isFinite(inputs.costOfGoodsSold) ? inputs.costOfGoodsSold : 0,
-  );
-  const operatingExpenses = Math.max(
-    0,
-    Number.isFinite(inputs.operatingExpenses) ? inputs.operatingExpenses : 0,
-  );
-  const depreciationAndAmortisation = Math.max(
-    0,
-    Number.isFinite(inputs.depreciationAndAmortisation)
-      ? inputs.depreciationAndAmortisation
-      : 0,
-  );
-  const interestExpense = Math.max(
-    0,
-    Number.isFinite(inputs.interestExpense) ? inputs.interestExpense : 0,
-  );
+  const revenue = normaliseAmount(inputs.revenue);
+  const costOfGoodsSold = normaliseAmount(inputs.costOfGoodsSold);
+  const operatingExpenses = normaliseAmount(inputs.operatingExpenses);
+  const depreciationAndAmortisation = normaliseAmount(inputs.depreciationAndAmortisation);
+  const interestExpense = normaliseAmount(inputs.interestExpense);
   const taxRatePercent = Math.min(
     100,
     Math.max(0, Number.isFinite(inputs.taxRatePercent) ? inputs.taxRatePercent : 0),

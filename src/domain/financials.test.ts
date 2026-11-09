@@ -69,6 +69,21 @@ describe("calculateFinancials", () => {
     expect(result.netIncome).toBe(0);
   });
 
+  it("caps extreme monetary inputs at the supported safe integer range", () => {
+    const result = calculateFinancials({
+      revenue: 1,
+      costOfGoodsSold: Number.MAX_VALUE,
+      operatingExpenses: Number.MAX_VALUE,
+      depreciationAndAmortisation: Number.MAX_VALUE,
+      interestExpense: Number.MAX_VALUE,
+      taxRatePercent: 25,
+    });
+
+    expect(result.costOfGoodsSold).toBe(Number.MAX_SAFE_INTEGER);
+    expect(result.operatingExpenses).toBe(Number.MAX_SAFE_INTEGER);
+    expect(Object.values(result).every(Number.isFinite)).toBe(true);
+  });
+
   it("caps the tax-rate assumption at 100 percent", () => {
     const result = calculateFinancials({
       ...baseline,
