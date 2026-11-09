@@ -60,6 +60,10 @@ function mondayOf(date: Date) {
   return result;
 }
 
+function excelDateOnly(date: Date) {
+  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+}
+
 function addDays(date: Date, days: number) {
   const result = new Date(date);
   result.setDate(result.getDate() + days);
@@ -246,9 +250,10 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
         ],
         widths: [18, 22, 22, 24, 22, 22, 18, 22, 22],
         currencyColumns: [2, 3, 4, 5, 6, 7, 8, 9],
+        dateColumns: [1],
         totalLabels: [t("Net cash movement"), t("Closing cash")],
         rows: results.map((week, index) => [
-          dates[index].toLocaleDateString(language === "es" ? "es-ES" : "en-GB"),
+          excelDateOnly(dates[index]),
           weeks[index].collections,
           includeInvoices ? invoiceProjection[index].receivableCollections : 0,
           weeks[index].operatingPayments,
@@ -267,6 +272,7 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
         ],
         widths: [18, 22, 22, 22, 22, 20, 20],
         currencyColumns: [2, 3, 4, 5],
+        dateColumns: [1],
         rows: invoiceProjection.map((week, index) => [
           dates[index].toLocaleDateString(language === "es" ? "es-ES" : "en-GB"),
           week.receivableCollections, week.payablePayments, week.overdueReceivables,
