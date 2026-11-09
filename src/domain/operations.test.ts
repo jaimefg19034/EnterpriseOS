@@ -102,6 +102,17 @@ describe("operations workspace domain", () => {
       expect(parseOperationsState(JSON.stringify(invalid))).toBeNull();
     }
   });
+  it("accepts dated expenses from any quarter for a full-year cost centre", () => {
+    const annual = {
+      ...state,
+      costCenters: [{ ...state.costCenters[0], period: "2026-FY" }],
+      expenses: [
+        { ...state.expenses[0], date: "2026-02-15" },
+        { ...state.expenses[1], date: "2026-10-20" },
+      ],
+    };
+    expect(parseOperationsState(JSON.stringify(annual))).not.toBeNull();
+  });
   it("rejects expenses dated outside their linked cost-centre period", () => {
     const invalid = { ...state, expenses: [{ ...state.expenses[0], date: "2026-07-15" }] };
     expect(parseOperationsState(JSON.stringify(invalid))).toBeNull();
