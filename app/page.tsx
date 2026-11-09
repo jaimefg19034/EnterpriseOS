@@ -216,7 +216,7 @@ function TrendChart({ language }: { language: Language }) {
         className="trend-chart"
         viewBox="0 0 570 220"
         role="img"
-        aria-label="Six month revenue and EBITDA trend"
+        aria-label={t("Six month revenue and EBITDA trend")}
       >
         <defs>
           <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
@@ -234,7 +234,7 @@ function TrendChart({ language }: { language: Language }) {
           <g key={t(TREND[index].month)}>
             <circle cx={point.x} cy={point.revenueY} r="3.5" className="revenue-point" />
             <text x={point.x} y="211" textAnchor="middle" className="chart-month">
-              {TREND[index].month}
+              {t(TREND[index].month)}
             </text>
           </g>
         ))}
@@ -375,7 +375,7 @@ export default function Home() {
         </div>
 
         <div className="nav-label">{t("WORKSPACE")}</div>
-        <nav className="primary-nav" aria-label="Main navigation">
+        <nav className="primary-nav" aria-label={t("Main navigation")}>
           {navItems.map((item) => (
             <button
               key={item.id}
@@ -435,7 +435,7 @@ export default function Home() {
             </div>
             <span className="period-pill"><Icon name="clock" size={14} /> {t("FY 2026")}</span>
             <span className="topbar-divider" />
-            <button className="icon-button" aria-label="Workspace information" title="Demo workspace">
+            <button className="icon-button" aria-label={t("Workspace information")} title={t("Demo workspace")}>
               <Icon name="info" size={17} />
             </button>
             <button className="export-button" onClick={exportCsv}>
@@ -457,7 +457,7 @@ export default function Home() {
                 <div className="heading-actions">
                   <span className="demo-badge"><i /> {t("SAMPLE DATA")}</span>
                   <button className="secondary-button" onClick={() => setInputs(DEMO_INPUTS)}>
-                    <Icon name="refresh" size={15} /> Reset demo
+                    <Icon name="refresh" size={15} /> {t("Reset demo")}
                   </button>
                 </div>
               </div>
@@ -652,9 +652,9 @@ export default function Home() {
                 <button className="primary-button" onClick={exportCsv}><Icon name="download" size={16} /> {t("Export report")}</button>
               </section>
               <div className="report-summary-grid">
-                <MetricCard label="Revenue" value={formatCurrency(results.revenue, true)} change={t("Current model")} tone="blue" icon="wallet" />
-                <MetricCard label="EBITDA" value={formatCurrency(results.ebitda, true)} change="Current model" tone="green" icon="trend" />
-                <MetricCard label="Net income" value={formatCurrency(results.netIncome, true)} change="Current model" tone="amber" icon="building" />
+                <MetricCard label={t("Revenue")} value={formatCurrency(results.revenue, true)} change={t("Current model")} tone="blue" icon="wallet" language={language} />
+                <MetricCard label={t("EBITDA")} value={formatCurrency(results.ebitda, true)} change={t("Current model")} tone="green" icon="trend" language={language} />
+                <MetricCard label={t("Net income")} value={formatCurrency(results.netIncome, true)} change={t("Current model")} tone="amber" icon="building" language={language} />
               </div>
               <div className="report-disclaimer"><Icon name="info" size={17} /><p><strong>{t("Illustrative data only.")}</strong> {t("This MVP does not produce statutory accounts, audited statements or tax filings. Review calculations and accounting policies with a qualified professional before relying on outputs.")}</p></div>
             </>
