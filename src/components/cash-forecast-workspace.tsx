@@ -8,7 +8,7 @@ import {
 } from "@/domain/cash-forecast";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
 import { allocateInvoicesToCashWeeks } from "@/domain/invoice-cash-integration";
-import { normaliseInvoice, type WorkingCapitalInvoice } from "@/domain/working-capital";
+import { normaliseInvoice, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { translate, type Language } from "@/i18n/translations";
 
 type CashForecastWorkspaceProps = {
@@ -30,17 +30,10 @@ function readStoredInvoices(): WorkingCapitalInvoice[] {
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((item): item is WorkingCapitalInvoice =>
-      item && typeof item === "object" &&
-      ((item as WorkingCapitalInvoice).direction === "receivable" || (item as WorkingCapitalInvoice).direction === "payable") &&
-      typeof (item as WorkingCapitalInvoice).id === "string" &&
-      typeof (item as WorkingCapitalInvoice).counterparty === "string" &&
-      typeof (item as WorkingCapitalInvoice).reference === "string" &&
-      typeof (item as WorkingCapitalInvoice).issueDate === "string" &&
-      typeof (item as WorkingCapitalInvoice).dueDate === "string" &&
-      typeof (item as WorkingCapitalInvoice).amount === "number" &&
-      typeof (item as WorkingCapitalInvoice).paidAmount === "number"
-    ).map(normaliseInvoice);
+    return parsed
+      .map((item) => validateWorkingCapitalInvoice(item))
+      .filter((result) => result.valid)
+      .map((result) => result.invoice);
   } catch {
     return [];
   }
