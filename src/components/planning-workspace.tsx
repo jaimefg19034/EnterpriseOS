@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   buildPlanningResult,
   makeDemoActualRevenue,
@@ -13,6 +13,7 @@ import {
 import { formatCurrency, formatPercent } from "@/domain/financials";
 import { translate, type Language } from "@/i18n/translations";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
+import { parseSavedPlanningState, PLANNING_STORAGE_KEY, serialisePlanningState } from "@/domain/planning-storage";
 
 const INITIAL_ASSUMPTIONS: PlanningAssumptions = {
   annualRevenueBudget: 2_976_000,
@@ -179,6 +180,38 @@ export function PlanningWorkspace({ language }: { language: Language }) {
     makeDemoActualRevenue(INITIAL_ASSUMPTIONS.annualRevenueBudget),
   );
   const [scenario, setScenario] = useState<ScenarioKey>("base");
+  const [storageReady, setStorageReady] = useState(false);
+  const [storageMessage, setStorageMessage] = useState("");
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(PLANNING_STORAGE_KEY);
+      if (raw) {
+        const saved = parseSavedPlanningState(raw);
+        if (saved) {
+          setAssumptions(saved.assumptions);
+          setActualRevenue(saved.actualRevenue);
+          setScenario(saved.scenario);
+          setStorageMessage("Saved plan restored from this browser.");
+        } else {
+          setStorageMessage("A saved plan could not be read. The sample plan is loaded instead.");
+        }
+      }
+    } catch {
+      setStorageMessage("Browser storage is unavailable. Changes will remain in this session only.");
+    }
+    setStorageReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!storageReady) return;
+    try {
+      window.localStorage.setItem(PLANNING_STORAGE_KEY, serialisePlanningState(assumptions, actualRevenue, scenario));
+      setStorageMessage("Plan saved automatically in this browser.");
+    } catch {
+      setStorageMessage("Browser storage is unavailable. Changes will remain in this session only.");
+    }
+  }, [assumptions, actualRevenue, scenario, storageReady]);
 
   const result = useMemo(
     () => buildPlanningResult(assumptions, actualRevenue, scenario),
@@ -308,6 +341,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
           </button>
         </div>
       </div>
+      <p className="planning-storage-status" role="status">{t(storageMessage || "Preparing local plan storage…")}</p>
 
       <section className="planning-scenario-panel panel">
         <div className="planning-scenario-intro">
