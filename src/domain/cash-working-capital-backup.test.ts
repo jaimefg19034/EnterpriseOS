@@ -52,6 +52,17 @@ describe("local finance backup", () => {
     expect(restored.data.quarterlyCashForecast).toHaveLength(13);
   });
 
+  it("upgrades version 1 backups and preserves legacy paid balances", () => {
+    const legacy = createLocalFinanceBackup([invoice()], createEmptyCashForecast(13));
+    const versionOne = { ...legacy, schemaVersion: 1 };
+    const restored = parseLocalFinanceBackup(JSON.stringify(versionOne));
+    expect(restored.ok).toBe(true);
+    if (!restored.ok) return;
+    expect(restored.data.schemaVersion).toBe(2);
+    expect(restored.data.workingCapitalInvoices[0].paidAmount).toBe(250);
+    expect(restored.data.workingCapitalInvoices[0].payments).toEqual([]);
+  });
+
   it("rejects malformed files without producing partial data", () => {
     expect(parseLocalFinanceBackup("{broken").ok).toBe(false);
     expect(parseLocalFinanceBackup(JSON.stringify({ product: "Other", schemaVersion: 1 })).ok).toBe(false);
