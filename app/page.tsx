@@ -299,7 +299,6 @@ function MetricCard({
 
 export default function Home() {
   const [view, setView] = useState<View>("overview");
-  const [expandedNav, setExpandedNav] = useState<Record<string, boolean>>({ finance: true, operations: false });
   const [showWorkspaceInfo, setShowWorkspaceInfo] = useState(false);
   const [showHelpGuide, setShowHelpGuide] = useState(false);
   const language = useSyncExternalStore(
@@ -361,18 +360,6 @@ export default function Home() {
     });
   }
 
-  const navGroups: { id: string; label: string; items: { id: View; label: string; icon: string }[] }[] = [
-    { id: "finance", label: t("Finance"), items: [
-      { id: "model", label: t("Financial model"), icon: "chart" },
-      { id: "planning", label: t("Budget & scenarios"), icon: "trend" },
-      { id: "statements", label: t("3 statements"), icon: "chart" },
-      { id: "reports", label: t("Reports & exports"), icon: "file" },
-    ] },
-    { id: "operations", label: t("Business operations"), items: [
-      { id: "operations", label: t("Operations & intelligence"), icon: "building" },
-    ] },
-  ];
-
   return (
     <main className="app-shell">
       <aside className="sidebar">
@@ -402,33 +389,17 @@ export default function Home() {
           >
             <Icon name="grid" size={18} /><span>{t("Overview")}</span>
           </button>
-          {navGroups.map((group) => {
-            const expanded = expandedNav[group.id] || group.items.some((item) => item.id === view);
-            return (
-              <div className="nav-group" key={group.id}>
-                <button
-                  type="button"
-                  className={`nav-group-trigger ${group.items.some((item) => item.id === view) ? "active" : ""}`}
-                  onClick={() => setExpandedNav((current) => ({ ...current, [group.id]: !expanded }))}
-                  aria-expanded={expanded}
-                >
-                  <span>{group.label}</span><span className={`nav-group-chevron ${expanded ? "expanded" : ""}`}>⌄</span>
-                </button>
-                {expanded && <div className="nav-group-items">
-                  {group.items.map((item) => (
-                    <button
-                      key={item.id}
-                      className={`nav-item nav-subitem ${view === item.id ? "active" : ""}`}
-                      onClick={() => setView(item.id)}
-                      aria-current={view === item.id ? "page" : undefined}
-                    >
-                      <Icon name={item.icon} size={17} /><span>{item.label}</span>
-                    </button>
-                  ))}
-                </div>}
-              </div>
-            );
-          })}
+          {([
+            { id: "model", label: t("Financial model"), icon: "chart" },
+            { id: "planning", label: t("Budget & scenarios"), icon: "trend" },
+            { id: "statements", label: t("3 statements"), icon: "chart" },
+            { id: "reports", label: t("Reports & exports"), icon: "file" },
+            { id: "operations", label: t("Operations & intelligence"), icon: "building" },
+          ] as { id: View; label: string; icon: string }[]).map((item) => (
+            <button key={item.id} className={`nav-item ${view === item.id ? "active" : ""}`} onClick={() => setView(item.id)} aria-current={view === item.id ? "page" : undefined}>
+              <Icon name={item.icon} size={18} /><span>{item.label}</span>
+            </button>
+          ))}
         </nav>
 
         <div className="sidebar-divider" />
