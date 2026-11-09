@@ -1065,3 +1065,51 @@ button:focus-visible, input:focus-visible {
   .financial-visual-heading h3 { font-size: 13px; }
   .financial-bar-list { gap: 12px; }
 }
+
+
+/* 13-week cash forecast */
+.cash-forecast-workspace { margin: 26px 0 24px; }
+.cash-forecast-heading { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; margin-bottom:15px; }
+.cash-forecast-heading h2 { margin:5px 0 5px; color:#26354b; font:800 19px/1.3 "Manrope",sans-serif; letter-spacing:-.4px; }
+.cash-forecast-heading p { max-width:640px; margin:0; color:#5d6b80; font-size:12px; line-height:1.6; }
+.cash-forecast-actions { display:flex; flex-wrap:wrap; gap:8px; flex:0 0 auto; }
+.cash-forecast-kpis { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:13px; }
+.cash-forecast-kpis article { min-width:0; padding:15px 16px; display:grid; gap:6px; }
+.cash-forecast-kpis article > span { color:#6b7a90; font-size:10px; font-weight:700; }
+.cash-forecast-kpis article > strong { color:#263957; font-size:20px; font-weight:800; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.cash-forecast-kpis article > strong.negative { color:#b65e62; }
+.cash-forecast-kpis article > small { color:#7b889b; font-size:9px; line-height:1.5; }
+.cash-forecast-chart-card { padding:18px 20px 10px; margin-bottom:13px; }
+.cash-forecast-chart-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.cash-forecast-chart-head h3,.cash-forecast-table-heading h3 { margin:0 0 5px; color:#2d3b52; font:750 13px/1.4 "Manrope",sans-serif; }
+.cash-forecast-chart-head p,.cash-forecast-table-heading p { margin:0; color:#738197; font-size:10px; line-height:1.5; }
+.cash-forecast-chart-head > strong { color:#2c416e; font-size:15px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.cash-forecast-svg { display:block; width:100%; height:auto; margin-top:7px; overflow:visible; }
+.cash-forecast-warning { margin:0 0 8px; padding:9px 11px; border-radius:8px; color:#92534d; background:#fff4f1; font-size:10px; line-height:1.55; }
+.cash-forecast-table-card { padding:17px 0 0; overflow:hidden; }
+.cash-forecast-table-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:0 18px 13px; }
+.cash-forecast-table-heading > span { padding:5px 8px; border:1px solid #e7ebf2; border-radius:6px; color:#65748b; font-size:9px; font-weight:800; white-space:nowrap; }
+.cash-forecast-table-scroll { overflow-x:auto; overscroll-behavior-x:contain; }
+.cash-forecast-table { width:100%; min-width:930px; border-collapse:separate; border-spacing:0; font-size:10px; }
+.cash-forecast-table th,.cash-forecast-table td { padding:9px 10px; border-top:1px solid #edf0f5; text-align:right; white-space:nowrap; }
+.cash-forecast-table thead th { position:sticky; top:0; z-index:1; color:#718097; background:#f7f9fc; font-size:9px; font-weight:800; }
+.cash-forecast-table th:first-child,.cash-forecast-table td:first-child { padding-left:17px; text-align:left; }
+.cash-forecast-table tbody th { color:#42516a; font-weight:750; }
+.cash-forecast-table td { color:#53627a; font-variant-numeric:tabular-nums; }
+.cash-forecast-table td.positive { color:#477c66; }
+.cash-forecast-table td.negative { color:#b65e62; }
+.cash-forecast-table td.closing-cash { color:#2c416e; font-weight:800; }
+.cash-forecast-table td.closing-cash.negative { color:#b65e62; }
+.cash-forecast-input-wrap { display:block; }
+.cash-forecast-input-wrap input { width:112px; padding:7px 8px; border:1px solid #e3e9f1; border-radius:6px; outline:none; color:#33435c; background:#fff; text-align:right; font-family:inherit; font-size:10px; font-weight:600; line-height:1.2; font-variant-numeric:tabular-nums; }
+.cash-forecast-input-wrap input:focus { border-color:#8296d8; box-shadow:0 0 0 3px rgba(88,114,199,.11); }
+.cash-forecast-input-wrap input::placeholder { color:#a2adbc; }
+.cash-forecast-footnote { padding:11px 17px 13px; color:#78869a; background:#fafbfd; font-size:9px; line-height:1.6; }
+@media (max-width:760px) {
+ .cash-forecast-heading { align-items:flex-start; flex-direction:column; }
+ .cash-forecast-actions { width:100%; }
+ .cash-forecast-kpis { grid-template-columns:1fr; }
+ .cash-forecast-kpis article { padding:13px 14px; }
+ .cash-forecast-chart-card { padding:15px 12px 8px; }
+ .cash-forecast-table-card { margin-left:-2px; margin-right:-2px; }
+}
