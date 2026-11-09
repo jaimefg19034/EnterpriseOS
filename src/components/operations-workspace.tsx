@@ -24,8 +24,7 @@ function downloadCsv(state: OperationsState) {
   state.kpis.forEach((x) => rows.push(["KPI", x.name, x.unit, x.actual, `Target: ${x.target}`, x.direction ?? "higher"]));
   state.costCenters.forEach((x) => rows.push(["Cost centre", x.name, x.owner, x.budget, `Manual spend baseline: ${x.actualSpend}`, x.period]));
   state.expenses.forEach((x) => rows.push(["Expense", x.description, x.supplier, x.amount, x.status, `${x.date}; ${x.category}; cost centre ${x.costCenterId}`]));
-  const csv = rows.map((row) => row.map(safe).join(",")).join("\r
-");
+  const csv = rows.map((row) => row.map(safe).join(",")).join("\r\n");
   const url = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }));
   const anchor = document.createElement("a");
   anchor.href = url; anchor.download = "enterpriseos-operations.csv"; anchor.click();

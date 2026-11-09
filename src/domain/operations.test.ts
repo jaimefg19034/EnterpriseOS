@@ -24,7 +24,7 @@ describe("operations workspace domain", () => {
     expect(parseOperationsState(JSON.stringify({ ...state, risks: [{ ...state.risks[0], id: "o1" }] }))).toBeNull();
   });
   it("loads legacy operations data without cost centres", () => {
-    const { costCenters: _ignored, expenses: _ignoredExpenses, ...legacy } = state;
+    const legacy = { ...state, costCenters: undefined, expenses: undefined };
     expect(parseOperationsState(JSON.stringify(legacy))).toMatchObject({ costCenters: [], expenses: [] });
   });
   it("calculates probability-weighted pipeline without lost deals", () => {
