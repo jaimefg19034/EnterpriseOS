@@ -4,6 +4,16 @@ import { calculateInvoiceAgeing, findDuplicateInvoice, normaliseInvoice, parseIn
 const invoice = (overrides: Partial<WorkingCapitalInvoice> = {}): WorkingCapitalInvoice => ({
   id: "inv-1", direction: "receivable", counterparty: "Acme", reference: "INV-1",
   issueDate: "2026-10-01", dueDate: "2026-10-01", amount: 1000, paidAmount: 200, ...overrides,
+});
+
+describe("working capital invoice validation", () => {
+  it("rejects impossible dates, reversed dates and invalid payment balances", () => {
+    expect(validateWorkingCapitalInvoice(invoice({ dueDate: "2026-02-30" })).valid).toBe(false);
+    expect(validateWorkingCapitalInvoice(invoice({ issueDate: "2026-11-10", dueDate: "2026-11-09" })).valid).toBe(false);
+    expect(validateWorkingCapitalInvoice(invoice({ paidAmount: 1001 })).valid).toBe(false);
+    expect(validateWorkingCapitalInvoice(invoice({ amount: 0 })).valid).toBe(false);
+  });
+
 
   it("uses strict shared calendar validation for early years and year zero", () => {
     expect(validateWorkingCapitalInvoice(invoice({
@@ -14,16 +24,6 @@ const invoice = (overrides: Partial<WorkingCapitalInvoice> = {}): WorkingCapital
       issueDate: "0099-12-30",
       dueDate: "0099-12-31",
     })).valid).toBe(true);
-  });
-
-});
-
-describe("working capital invoice validation", () => {
-  it("rejects impossible dates, reversed dates and invalid payment balances", () => {
-    expect(validateWorkingCapitalInvoice(invoice({ dueDate: "2026-02-30" })).valid).toBe(false);
-    expect(validateWorkingCapitalInvoice(invoice({ issueDate: "2026-11-10", dueDate: "2026-11-09" })).valid).toBe(false);
-    expect(validateWorkingCapitalInvoice(invoice({ paidAmount: 1001 })).valid).toBe(false);
-    expect(validateWorkingCapitalInvoice(invoice({ amount: 0 })).valid).toBe(false);
   });
 
   it("requires a counterparty and a reference", () => {
