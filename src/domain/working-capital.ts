@@ -271,16 +271,21 @@ export function addInvoicePayment(
     return { valid: false, error: "This payment has already been recorded." };
   }
   const cleanInvoice = normaliseInvoice(invoice);
+  const cleanPayment = {
+    ...payment,
+    amount: roundCurrency(payment.amount),
+    ...(payment.note?.trim() ? { note: payment.note.trim() } : {}),
+  };
   const remaining = roundCurrency(cleanInvoice.amount - cleanInvoice.paidAmount);
-  if (payment.amount - remaining > 0.005) {
+  if (cleanPayment.amount > remaining) {
     return { valid: false, error: "Payment exceeds the invoice outstanding balance." };
   }
   return {
     valid: true,
     invoice: normaliseInvoice({
       ...cleanInvoice,
-      paidAmount: cleanInvoice.paidAmount + payment.amount,
-      payments: [...(cleanInvoice.payments ?? []), payment],
+      paidAmount: cleanInvoice.paidAmount + cleanPayment.amount,
+      payments: [...(cleanInvoice.payments ?? []), cleanPayment],
     }),
   };
 }
