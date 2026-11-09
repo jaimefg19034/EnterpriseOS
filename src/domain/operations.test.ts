@@ -39,7 +39,7 @@ describe("operations workspace domain", () => {
   it("calculates cost-centre headroom, utilisation and overspend", () => {
     expect(costCenterActualSpend(state.costCenters[0], state.expenses)).toBe(11500);
     expect(costCenterActualSpend({ ...state.costCenters[0], period: "2026-FY" }, state.expenses)).toBe(11500);
-    expect(costCenterPerformance({ ...state.costCenters[0], actualSpend: costCenterActualSpend(state.costCenters[0], state.expenses) })).toEqual({ remaining: -1200, utilizationPercent: 112, overBudget: true });
+    expect(costCenterPerformance({ ...state.costCenters[0], actualSpend: costCenterActualSpend(state.costCenters[0], state.expenses) })).toEqual({ remaining: -1500, utilizationPercent: 115, overBudget: true });
     expect(costCenterPerformance({ ...state.costCenters[0], budget: 0, actualSpend: 0 })).toMatchObject({ utilizationPercent: 0, overBudget: false });
   });
   it("adds the unitemized baseline once to dated expenses and ignores payment status", () => {
