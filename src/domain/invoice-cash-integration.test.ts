@@ -54,9 +54,9 @@ describe("invoice cash forecast integration", () => {
     const result = allocateInvoicesToCashWeeks([
       invoice({ amount: 10.105, paidAmount: 0 }),
       invoice({ id: "second", amount: 10.105, paidAmount: 0 }),
-    ], "not-a-date", 13);
+    ], "2026-11-09", 13);
 
     expect(result).toHaveLength(13);
-    expect(result.every((week) => week.receivableCollections === 0)).toBe(true);
+    expect(result[0].receivableCollections).toBe(20.22);
   });
 });
