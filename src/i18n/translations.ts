@@ -710,10 +710,7 @@ const spanish: Record<string, string> = {
   "CSV row": "Fila CSV",
   "CSV row 1": "Fila CSV 1",
   "No invoice records were found in the CSV file.": "No se han encontrado facturas en el archivo CSV.",
-  "An invoice with this direction, customer or supplier and reference already exists.": "Ya existe una factura con este tipo, cliente o proveedor y referencia.",
-  "The operations workspace is invalid. No data has been changed.": "El espacio de operaciones no es válido. No se ha modificado ningún dato.",
   "Restoring this backup replaces the finance and operations data included in the file in this browser. Continue?": "Restaurar esta copia sustituirá los datos financieros y operativos incluidos en el archivo en este navegador. ¿Continuar?",
-  "Browser storage could not be read. Check storage permissions and try again.": "No se pudo leer el almacenamiento del navegador. Comprueba los permisos e inténtalo de nuevo."
 };
 
 
