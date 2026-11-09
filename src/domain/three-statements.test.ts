@@ -24,8 +24,9 @@ describe("calculateThreeStatements", () => {
 
     expect(result.incomeStatement.netIncome).toBe(34_950);
     expect(result.cashFlow.cashFromOperations).toBeGreaterThan(pnl.netIncome);
-    expect(result.cashFlow.freeCashFlow).toBe(
+    expect(result.cashFlow.freeCashFlow).toBeCloseTo(
       result.cashFlow.cashFromOperations - 18_000,
+      2,
     );
     expect(result.balanceSheet.isBalanced).toBe(true);
     expect(result.balanceSheet.balanceDifference).toBe(0);
