@@ -499,7 +499,6 @@ const spanish: Record<string, string> = {
   "Direct-method forecast · EUR · User-entered weekly estimates, not actual transactions": "Previsión por método directo · EUR · Estimaciones semanales introducidas por el usuario, no transacciones reales",
   "Net cash movement": "Movimiento neto de caja",
   "This is a planning worksheet, not a bank feed. No transactions are generated or assumed. Your entries are saved only in this browser and are not shared with a company team or synced to a server.": "Esta es una hoja de planificación, no una conexión bancaria. No se generan ni se presuponen transacciones. Tus datos se guardan únicamente en este navegador y no se comparten con el equipo ni se sincronizan con un servidor.",
-  "WORKING CAPITAL": "CAPITAL CIRCULANTE",
   "Receivables & payables": "Clientes y proveedores",
   "Track invoice balances, overdue exposure and upcoming cash commitments.": "Controla los saldos de facturas, los importes vencidos y los próximos compromisos de caja.",
   "Export register": "Exportar registro",
@@ -547,7 +546,6 @@ const spanish: Record<string, string> = {
   "over90": "Más de 90 días",
   "Review the three statements, liquidity, leverage, break-even, returns and the quarterly cash forecast.": "Revisa los tres estados financieros, ratios, capital circulante, facturas de clientes y proveedores y la previsión trimestral de caja.",
   "EnterpriseOS — Quarterly cash forecast": "EnterpriseOS — Previsión trimestral de caja",
-  "13 WEEKS · 1 QUARTER": "13 SEMANAS · 1 TRIMESTRE",
   "Ageing bucket": "Tramo de antigüedad",
 };
 
