@@ -9,6 +9,7 @@ import {
 } from "@/domain/three-statements";
 import { type FinancialResults } from "@/domain/financials";
 import { translate, type Language } from "@/i18n/translations";
+import { downloadExcelWorkbook } from "@/lib/excel-export";
 
 type StatementTab = "income" | "balance" | "cash";
 
@@ -211,91 +212,116 @@ export function ThreeStatementsWorkspace({
     setAssumptions(DEFAULT_THREE_STATEMENT_ASSUMPTIONS);
   }
 
-  function exportStatements() {
+  async function exportStatements() {
     const bs = model.balanceSheet;
     const cf = model.cashFlow;
     const pnl = model.incomeStatement;
-    const rows = [
-      ["EnterpriseOS — Integrated three-statement model"],
-      ["Reporting period", "FY 2026 · Illustrative"],
-      ["Currency", "EUR"],
-      [],
-      ["INCOME STATEMENT", "Amount (EUR)"],
-      ["Revenue", pnl.revenue],
-      ["Cost of goods sold", -pnl.costOfGoodsSold],
-      ["Gross profit", pnl.grossProfit],
-      ["Operating expenses", -pnl.operatingExpenses],
-      ["EBITDA", pnl.ebitda],
-      ["Depreciation & amortisation", -pnl.depreciationAndAmortisation],
-      ["EBIT", pnl.ebit],
-      ["Interest expense", -pnl.interestExpense],
-      ["Profit before tax", pnl.profitBeforeTax],
-      ["Income tax", -pnl.incomeTax],
-      ["Net income", pnl.netIncome],
-      [],
-      ["BALANCE SHEET", "Opening (EUR)", "Closing (EUR)"],
-      ["Cash", OPENING_BALANCE_SHEET.cash, bs.cash],
-      ["Accounts receivable", OPENING_BALANCE_SHEET.accountsReceivable, bs.accountsReceivable],
-      ["Inventory", OPENING_BALANCE_SHEET.inventory, bs.inventory],
-      ["Net PP&E", OPENING_BALANCE_SHEET.netPropertyPlantAndEquipment, bs.netPropertyPlantAndEquipment],
-      ["Total assets", bs.openingAssets, bs.totalAssets],
-      ["Accounts payable", OPENING_BALANCE_SHEET.accountsPayable, bs.accountsPayable],
-      ["Debt", OPENING_BALANCE_SHEET.debt, bs.debt],
-      ["Bank overdraft", 0, bs.overdraft],
-      ["Share capital", OPENING_BALANCE_SHEET.shareCapital, bs.shareCapital],
-      ["Retained earnings", OPENING_BALANCE_SHEET.retainedEarnings, bs.retainedEarnings],
-      ["Total liabilities and equity", bs.openingLiabilitiesAndEquity, bs.totalLiabilitiesAndEquity],
-      ["Balance check", bs.openingBalanceDifference, bs.balanceDifference],
-      [],
-      ["CASH FLOW STATEMENT", "Amount (EUR)"],
-      ["Net income", cf.netIncome],
-      ["Depreciation & amortisation", cf.depreciationAndAmortisation],
-      ["Change in accounts receivable", -cf.changeInAccountsReceivable],
-      ["Change in inventory", -cf.changeInInventory],
-      ["Change in accounts payable", cf.changeInAccountsPayable],
-      ["Cash from operations", cf.cashFromOperations],
-      ["Capital expenditure", cf.capitalExpenditure],
-      ["Cash from investing", cf.cashFromInvesting],
-      ["New borrowings", cf.debtDrawdown],
-      ["Debt repayment", cf.debtRepayment],
-      ["Dividends", cf.dividends],
-      ["Cash from financing", cf.cashFromFinancing],
-      ["Net change in cash", cf.netChangeInCash],
-      ["Opening cash", cf.openingCash],
-      ["Closing cash before overdraft", cf.closingCashBeforeOverdraft],
-      ["Free cash flow", cf.freeCashFlow],
-      [],
-      ["MODEL DRIVERS", "Value"],
-      ["Days sales outstanding", model.drivers.daysSalesOutstanding],
-      ["Inventory days", model.drivers.inventoryDays],
-      ["Payable days", model.drivers.payableDays],
-      ["Capital expenditure", model.drivers.capitalExpenditure],
-      ["Debt repayment applied", model.drivers.debtRepaymentApplied],
-      ["New borrowings", model.drivers.newBorrowings],
-      ["Dividends", model.drivers.dividends],
-      [],
-      ["Note", "Illustrative management model, not statutory accounts or financial advice."],
-    ];
-    const localizedRows = rows.map((row) => row.map((cell) => typeof cell === "string" ? t(cell) : cell));
-    const csv = localizedRows
-      .map((row) =>
-        row
-          .map((cell) => {
-            const value = typeof cell === "number" ? cell.toFixed(2) : String(cell ?? "");
-            return `"${value.replaceAll('"', '""')}"`;
-          })
-          .join(","),
-      )
-      .join("\r\n");
-    const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "enterpriseos-three-statement-model-fy2026.csv";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+    await downloadExcelWorkbook({
+      filename: "enterpriseos-three-statements-fy2026.xlsx",
+      sheets: [
+        {
+          name: t("Income Statement"),
+          title: t("EnterpriseOS — Income Statement"),
+          subtitle: t("FY 2026 · EUR · Illustrative management model"),
+          headers: [t("Line item"), t("Amount (EUR)")],
+          widths: [42, 22],
+          currencyColumns: [2],
+          totalLabels: [t("Gross profit"), "EBITDA", "EBIT", t("Profit before tax"), t("Net income")],
+          rows: [
+            [t("Revenue"), pnl.revenue],
+            [t("Cost of goods sold"), -pnl.costOfGoodsSold],
+            [t("Gross profit"), pnl.grossProfit],
+            [t("Operating expenses"), -pnl.operatingExpenses],
+            ["EBITDA", pnl.ebitda],
+            [t("Depreciation & amortisation"), -pnl.depreciationAndAmortisation],
+            ["EBIT", pnl.ebit],
+            [t("Interest expense"), -pnl.interestExpense],
+            [t("Profit before tax"), pnl.profitBeforeTax],
+            [t("Income tax"), -pnl.incomeTax],
+            [t("Net income"), pnl.netIncome],
+          ],
+        },
+        {
+          name: t("Balance Sheet"),
+          title: t("EnterpriseOS — Balance Sheet"),
+          subtitle: t("FY 2026 · EUR · Opening and closing balances"),
+          headers: [t("Line item"), t("Opening (EUR)"), t("Closing (EUR)")],
+          widths: [42, 22, 22],
+          currencyColumns: [2, 3],
+          totalLabels: [t("Total assets"), t("Total liabilities"), t("Total equity"), t("Total liabilities and equity")],
+          rows: [
+            [t("ASSETS"), null, null],
+            [t("Cash"), OPENING_BALANCE_SHEET.cash, bs.cash],
+            [t("Accounts receivable"), OPENING_BALANCE_SHEET.accountsReceivable, bs.accountsReceivable],
+            [t("Inventory"), OPENING_BALANCE_SHEET.inventory, bs.inventory],
+            [t("Total current assets"), OPENING_BALANCE_SHEET.cash + OPENING_BALANCE_SHEET.accountsReceivable + OPENING_BALANCE_SHEET.inventory, bs.currentAssets],
+            [t("Net property, plant & equipment"), OPENING_BALANCE_SHEET.netPropertyPlantAndEquipment, bs.netPropertyPlantAndEquipment],
+            [t("Total assets"), bs.openingAssets, bs.totalAssets],
+            [t("LIABILITIES"), null, null],
+            [t("Accounts payable"), OPENING_BALANCE_SHEET.accountsPayable, bs.accountsPayable],
+            [t("Bank overdraft"), 0, bs.overdraft],
+            [t("Debt"), OPENING_BALANCE_SHEET.debt, bs.debt],
+            [t("Total liabilities"), OPENING_BALANCE_SHEET.accountsPayable + OPENING_BALANCE_SHEET.debt, bs.totalLiabilities],
+            [t("EQUITY"), null, null],
+            [t("Share capital"), OPENING_BALANCE_SHEET.shareCapital, bs.shareCapital],
+            [t("Retained earnings"), OPENING_BALANCE_SHEET.retainedEarnings, bs.retainedEarnings],
+            [t("Total equity"), OPENING_BALANCE_SHEET.shareCapital + OPENING_BALANCE_SHEET.retainedEarnings, bs.totalEquity],
+            [t("Total liabilities and equity"), bs.openingLiabilitiesAndEquity, bs.totalLiabilitiesAndEquity],
+            [t("Balance check"), bs.openingBalanceDifference, bs.balanceDifference],
+          ],
+          sectionLabels: [t("ASSETS"), t("LIABILITIES"), t("EQUITY")],
+        },
+        {
+          name: t("Cash Flow"),
+          title: t("EnterpriseOS — Cash Flow Statement"),
+          subtitle: t("FY 2026 · EUR · Indirect method · Illustrative"),
+          headers: [t("Line item"), t("Amount (EUR)")],
+          widths: [46, 22],
+          currencyColumns: [2],
+          totalLabels: [t("Cash from operations"), t("Cash from investing"), t("Cash from financing"), t("Net change in cash"), t("Free cash flow")],
+          sectionLabels: [t("OPERATING ACTIVITIES"), t("INVESTING ACTIVITIES"), t("FINANCING ACTIVITIES")],
+          rows: [
+            [t("OPERATING ACTIVITIES"), null],
+            [t("Net income"), cf.netIncome],
+            [t("Depreciation & amortisation"), cf.depreciationAndAmortisation],
+            [t("Change in accounts receivable"), -cf.changeInAccountsReceivable],
+            [t("Change in inventory"), -cf.changeInInventory],
+            [t("Change in accounts payable"), cf.changeInAccountsPayable],
+            [t("Cash from operations"), cf.cashFromOperations],
+            [t("INVESTING ACTIVITIES"), null],
+            [t("Capital expenditure"), cf.capitalExpenditure],
+            [t("Cash from investing"), cf.cashFromInvesting],
+            [t("FINANCING ACTIVITIES"), null],
+            [t("New borrowings"), cf.debtDrawdown],
+            [t("Debt repayment"), cf.debtRepayment],
+            [t("Dividends"), cf.dividends],
+            [t("Cash from financing"), cf.cashFromFinancing],
+            [t("Net change in cash"), cf.netChangeInCash],
+            [t("Opening cash"), cf.openingCash],
+            [t("Closing cash before overdraft"), cf.closingCashBeforeOverdraft],
+            [t("Closing cash on balance sheet"), cf.closingCash],
+            [t("Bank overdraft on balance sheet"), cf.overdraft],
+            [t("Free cash flow"), cf.freeCashFlow],
+          ],
+        },
+        {
+          name: t("Model Drivers"),
+          title: t("EnterpriseOS — Model Drivers"),
+          subtitle: t("FY 2026 · Operating and financing assumptions"),
+          headers: [t("Driver"), t("Value"), t("Unit")],
+          widths: [38, 20, 20],
+          rows: [
+            [t("Days sales outstanding"), model.drivers.daysSalesOutstanding, t("days")],
+            [t("Inventory days"), model.drivers.inventoryDays, t("days")],
+            [t("Payable days"), model.drivers.payableDays, t("days")],
+            [t("Capital expenditure"), model.drivers.capitalExpenditure, "EUR"],
+            [t("Debt repayment applied"), model.drivers.debtRepaymentApplied, "EUR"],
+            [t("New borrowings"), model.drivers.newBorrowings, "EUR"],
+            [t("Dividends"), model.drivers.dividends, "EUR"],
+          ],
+        },
+      ],
+    });
   }
 
   const cf = model.cashFlow;
