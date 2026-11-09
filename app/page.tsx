@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { PlanningWorkspace } from "@/components/planning-workspace";
 import { ThreeStatementsWorkspace } from "@/components/three-statements-workspace";
+import { OperationsWorkspace } from "@/components/operations-workspace";
 import { translate, type Language } from "@/i18n/translations";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
 import {
@@ -12,7 +13,7 @@ import {
   type FinancialInputs,
 } from "@/domain/financials";
 
-type View = "overview" | "model" | "planning" | "statements" | "reports";
+type View = "overview" | "model" | "planning" | "statements" | "operations" | "reports";
 type InputKey = keyof FinancialInputs;
 
 const LANGUAGE_CHANGE_EVENT = "enterpriseos-language-change";
@@ -364,6 +365,7 @@ export default function Home() {
     { id: "model", label: t("Financial model"), icon: "chart" },
     { id: "planning", label: t("Budget & scenarios"), icon: "trend" },
     { id: "statements", label: t("3 statements"), icon: "chart" },
+    { id: "operations", label: t("Operations"), icon: "building" },
     { id: "reports", label: t("Reports"), icon: "file" },
   ];
 
@@ -439,7 +441,7 @@ export default function Home() {
         <header className="topbar">
           <div className="breadcrumb">
             <span>{t("Workspace")}</span><span className="breadcrumb-separator">/</span>
-            <strong>{view === "overview" ? t("Overview") : view === "model" ? t("Financial model") : view === "planning" ? t("Budget & scenarios") : view === "statements" ? t("3 statements") : t("Reports")}</strong>
+            <strong>{view === "overview" ? t("Overview") : view === "model" ? t("Financial model") : view === "planning" ? t("Budget & scenarios") : view === "statements" ? t("3 statements") : view === "operations" ? t("Operations") : t("Reports")}</strong>
           </div>
           <div className="topbar-actions">
             <div className="language-switch" role="group" aria-label={t("Language")}>
@@ -689,6 +691,8 @@ export default function Home() {
           {view === "planning" && <PlanningWorkspace language={language} />}
 
           {view === "statements" && <ThreeStatementsWorkspace financials={results} language={language} />}
+
+          {view === "operations" && <OperationsWorkspace language={language} />}
 
           {view === "reports" && (
             <>

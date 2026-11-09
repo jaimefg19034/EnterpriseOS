@@ -1207,3 +1207,62 @@ button:focus-visible, input:focus-visible {
   font-size: 10px;
   line-height: 1.5;
 }
+
+
+/* Operations & intelligence workspace */
+.operations-workspace { display: flex; flex-direction: column; gap: 17px; }
+.operations-workspace .page-heading { margin-bottom: 2px; }
+.operations-metrics { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 13px; }
+.operations-metrics .metric-card { display: flex; flex-direction: column; gap: 7px; }
+.operations-metrics .metric-card strong { color: #1d2b43; font: 800 24px/1.2 "Manrope",sans-serif; letter-spacing: -.6px; }
+.operations-metrics .metric-card small { color: #8a96a8; font-size: 9px; }
+.operations-tabs { display: flex; gap: 7px; padding: 6px; border: 1px solid #e8edf4; border-radius: 11px; background: #fff; }
+.operations-tabs button { display: inline-flex; align-items: center; gap: 8px; padding: 9px 13px; color: #78859a; border: 0; border-radius: 7px; background: transparent; font-size: 10px; font-weight: 700; }
+.operations-tabs button.active { color: #3657bd; background: #eef2ff; }
+.operations-tabs button span { display: inline-grid; min-width: 19px; height: 19px; place-items: center; padding: 0 5px; border-radius: 6px; background: rgba(100,125,215,.1); font-size: 9px; }
+.operations-content { padding: 21px; border: 1px solid #e8edf4; border-radius: 12px; background: #fff; box-shadow: var(--shadow); }
+.operations-section-heading h2 { margin: 6px 0 4px; color: #25334a; font: 750 16px "Manrope",sans-serif; }
+.operations-section-heading p { margin: 0; color: #8b97a8; font-size: 10px; line-height: 1.6; }
+.operations-form { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; align-items: end; margin: 18px 0; padding: 15px; border: 1px solid #edf0f5; border-radius: 10px; background: #fafbfe; }
+.operations-form label,.operations-status-label { display: flex; flex-direction: column; gap: 6px; color: #6d7a90; font-size: 9px; font-weight: 700; }
+.operations-form input,.operations-form select,.operations-table select,.operations-status-label select { width: 100%; min-width: 0; height: 35px; padding: 0 9px; color: #344158; border: 1px solid #e2e7f0; border-radius: 7px; background: #fff; font-size: 10px; }
+.operations-form .primary-button { min-height: 35px; }
+.operations-wide { grid-column: span 2; }
+.operations-table-wrap { width: 100%; overflow-x: auto; border: 1px solid #edf0f5; border-radius: 9px; }
+.operations-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+.operations-table th { padding: 11px 12px; color: #8995a8; background: #fafbfe; text-align: left; font-size: 8px; letter-spacing: .5px; text-transform: uppercase; }
+.operations-table td { padding: 11px 12px; color: #68768d; border-top: 1px solid #eff2f6; font-size: 10px; }
+.operations-table td strong { color: #2e3b52; font-weight: 700; }
+.operations-table td select { min-width: 105px; height: 29px; }
+.operations-subline { display: block; margin-top: 4px; color: #9aa4b3; font-size: 8px; }
+.operations-delete { width: 26px; height: 26px; color: #a1aabb; border: 0; border-radius: 6px; background: transparent; font-size: 18px; }
+.operations-delete:hover { color: #c44f5c; background: #fff0f1; }
+.operations-negative { color: #c14c58 !important; font-weight: 700; }
+.operations-empty { padding: 26px 14px; color: #96a1b1; text-align: center; font-size: 10px; }
+.operations-note,.operations-disclaimer { margin: 12px 0 0; color: #929daf; font-size: 9px; line-height: 1.6; }
+.operations-risk-grid,.operations-kpi-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin-top: 17px; }
+.operations-risk-card,.operations-kpi-card { min-width: 0; padding: 15px; border: 1px solid #e9edf4; border-radius: 10px; background: linear-gradient(145deg,#fff,#fbfcff); }
+.operations-risk-top,.operations-kpi-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.operations-risk-top > span { padding: 5px 7px; border-radius: 5px; font-size: 8px; font-weight: 800; }
+.operations-risk-top .critical,.operations-risk-top .high { color: #b34d57; background: #fff0f1; }
+.operations-risk-top .medium { color: #a9782d; background: #fff7e9; }
+.operations-risk-top .low { color: #238469; background: #edf8f3; }
+.operations-risk-card h3 { margin: 12px 0 8px; color: #2c3950; font: 700 13px "Manrope",sans-serif; }
+.operations-risk-card p { margin: 5px 0; color: #8290a4; font-size: 9px; }
+.operations-mitigation { display: flex; flex-direction: column; gap: 5px; margin: 12px 0; padding: 10px; border-radius: 7px; background: #f7f8fb; font-size: 9px; }
+.operations-mitigation strong { color: #647188; }
+.operations-mitigation span { color: #8793a5; line-height: 1.5; }
+.operations-status-label { max-width: 170px; }
+.operations-kpi-heading { color: #748198; font-size: 10px; font-weight: 700; }
+.operations-kpi-card > strong { display: block; margin: 12px 0; color: #26354c; font: 800 23px "Manrope",sans-serif; }
+.operations-kpi-card > strong small { color: #8d99aa; font: 600 10px "DM Sans",sans-serif; }
+.operations-kpi-track { height: 7px; overflow: hidden; border-radius: 8px; background: #eef1f6; }
+.operations-kpi-track i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#7f99ed,#4e70d4); }
+.operations-kpi-foot { display: flex; justify-content: space-between; gap: 8px; margin-top: 9px; color: #929daf; font-size: 8px; }
+.operations-kpi-foot b { font-size: 8px; }
+.operations-kpi-foot .on-track { color: #238c70; }
+.operations-kpi-foot .behind { color: #b47c36; }
+.operations-storage-note { padding: 10px 12px; color: #6f7d92; border: 1px solid #e9edf4; border-radius: 8px; background: #f9faff; font-size: 9px; }
+.operations-disclaimer { margin: 0; }
+@media (max-width: 900px) { .operations-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); } .operations-form { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 600px) { .operations-content { padding: 14px; } .operations-tabs { overflow-x: auto; } .operations-tabs button { white-space: nowrap; } .operations-form { grid-template-columns: 1fr; } .operations-wide { grid-column: auto; } .operations-risk-grid,.operations-kpi-grid { grid-template-columns: 1fr; } .operations-metrics .metric-card strong { font-size: 20px; } .operations-workspace .page-heading { align-items: flex-start; flex-direction: column; } }
