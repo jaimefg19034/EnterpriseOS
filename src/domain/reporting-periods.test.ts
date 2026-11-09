@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  getReportingMonthBounds,
   getReportingPeriodBounds,
   inclusiveDaysBetween,
   isDateWithinReportingPeriod,
@@ -72,4 +73,30 @@ describe("shared reporting-period boundaries", () => {
     expect(inclusiveDaysBetween("2026-03-02", "2026-03-01")).toBe(0);
     expect(inclusiveDaysBetween("invalid", "2026-03-01")).toBe(0);
   });
+
+  it("calculates calendar-month bounds across leap years and year changes", () => {
+    expect(getReportingMonthBounds(2024, 2)).toEqual({
+      start: "2024-02-01",
+      end: "2024-02-29",
+      totalDays: 29,
+    });
+    expect(getReportingMonthBounds(2025, 2)).toEqual({
+      start: "2025-02-01",
+      end: "2025-02-28",
+      totalDays: 28,
+    });
+    expect(getReportingMonthBounds(2026, 12)).toEqual({
+      start: "2026-12-01",
+      end: "2026-12-31",
+      totalDays: 31,
+    });
+  });
+
+  it("rejects invalid calendar-month parameters", () => {
+    expect(getReportingMonthBounds(0, 1)).toBeNull();
+    expect(getReportingMonthBounds(2026, 0)).toBeNull();
+    expect(getReportingMonthBounds(2026, 13)).toBeNull();
+    expect(getReportingMonthBounds(2026.5, 2)).toBeNull();
+  });
+
 });
