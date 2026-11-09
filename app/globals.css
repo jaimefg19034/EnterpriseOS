@@ -827,3 +827,8 @@ button:focus-visible, input:focus-visible {
   background: #f1f5fb; font-size: 11px;
 }
 .workspace-info-confirm { margin-top: 14px; width: 100%; justify-content: center; }
+
+.workspace-switcher { width: calc(100% - 2px); color: inherit; text-align: left; font: inherit; cursor: pointer; transition: border-color .18s ease, background .18s ease; }
+.workspace-switcher:hover { border-color: rgba(215,227,255,.22); background: linear-gradient(115deg, rgba(255,255,255,.12), rgba(255,255,255,.055)); }
+.sidebar-help { width: 100%; color: inherit; text-align: left; font: inherit; cursor: pointer; transition: border-color .18s ease, background .18s ease; }
+.sidebar-help:hover { border-color: rgba(139,160,236,.25); background: rgba(255,255,255,.065); }
