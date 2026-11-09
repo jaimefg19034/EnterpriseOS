@@ -15,7 +15,7 @@ The first release focuses on a dependable management P&L model and a lightweight
 - Edit the key operating assumptions in a guided form.
 - Recalculate gross profit, EBITDA, EBIT, pre-tax profit and net income immediately.
 - See the key performance indicators and a monthly trend.
-- Export a clean CSV for use in existing workflows.
+- Export structured Excel workbooks for management accounts, planning, three statements, invoice ageing and quarterly cash forecasts.
 - Work with clearly labelled sample data until secure persistence is implemented.
 - Compare monthly revenue actuals against a seasonal budget.
 - Model base, upside and downside scenarios for the remaining forecast months.
@@ -23,6 +23,8 @@ The first release focuses on a dependable management P&L model and a lightweight
 - Link the management P&L to a cash flow statement and a balance sheet.
 - Model working-capital days (DSO, DIO and DPO), capital expenditure, debt movements and dividends.
 - Reconcile opening and closing balance sheets and flag negative cash as an overdraft.
+- Track customer receivables and supplier payables with invoice ageing, outstanding balances and due dates.
+- Optionally include open invoice balances in the quarterly direct-method cash forecast, keeping manual estimates separate and exposing the invoice schedule in Excel.
 - Switch the workspace between English and Spanish; export financial statements in the selected language.
 
 ### Explicitly out of scope for the first release
@@ -71,6 +73,9 @@ src/
     financials.ts
     planning.ts
     three-statements.ts
+    working-capital.ts
+    cash-forecast.ts
+    invoice-cash-integration.ts
   components/
     planning-workspace.tsx
     three-statements-workspace.tsx
@@ -109,7 +114,7 @@ The opening balance sheet is an illustrative, balanced demonstration baseline. W
 
 ## Security posture
 
-The initial app uses local demo data only. Do not enter confidential company information.
+The initial app uses illustrative model inputs and browser-local storage for the invoice register and quarterly cash worksheet. These records remain in the current browser profile; they are not synced to a server or shared with other users. Do not enter confidential company information or treat local browser storage as a backed-up company system.
 
 Before onboarding customers, implement server-side authentication, tenant isolation, database row-level security, audit logging, backups, secure file handling and a documented retention policy. Never expose service-role keys or secrets in browser code.
 
