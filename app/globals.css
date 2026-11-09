@@ -851,3 +851,70 @@ button:focus-visible, input:focus-visible {
   .help-guide-dialog { padding: 19px; }
   .help-guide-list button { grid-template-columns: 30px minmax(0,1fr) 16px; gap: 9px; padding: 11px 9px; }
 }
+
+
+/* Main workspace typography: prioritize comfortable reading over tiny dashboard labels. */
+.content-area .page-heading p { font-size: 13px; line-height: 1.7; color: #58677c; }
+.content-area .panel-header p,
+.content-area .quick-model-copy p,
+.content-area .report-feature-copy p,
+.content-area .planning-scenario-intro p,
+.content-area .planning-profit-heading p,
+.content-area .three-statements-intro-copy p { font-size: 12px; line-height: 1.65; color: #5d6b80; }
+.content-area .metric-label { font-size: 11px; }
+.content-area .metric-foot { font-size: 10px; }
+.content-area .chart-legend,
+.content-area .chart-summary span,
+.content-area .breakdown-row,
+.content-area .activity-row strong,
+.content-area .activity-row span,
+.content-area .integrity-panel p { font-size: 11px; }
+.content-area .breakdown-row strong,
+.content-area .activity-row strong { font-size: 12px; }
+.content-area .breakdown-note,
+.content-area .assumptions-footnote,
+.content-area .formula-note p,
+.content-area .report-disclaimer p,
+.content-area .planning-disclaimer p,
+.content-area .three-statements-method-note p,
+.content-area .three-statement-driver-note p { font-size: 10px; line-height: 1.65; }
+.content-area .field-main strong,
+.content-area .planning-field-label strong,
+.content-area .three-statement-input-row strong { font-size: 11px; }
+.content-area .field-main small,
+.content-area .planning-field-label small,
+.content-area .three-statement-input-row small { font-size: 10px; line-height: 1.5; }
+.content-area .input-wrap input,
+.content-area .planning-input-wrap input,
+.content-area .actual-revenue-input input,
+.content-area .three-statement-input input { font-size: 12px; }
+.content-area .statement-row { font-size: 11px; }
+.content-area .statement-row strong,
+.content-area .statement-row > span:last-child { font-size: 11px; }
+.content-area .statement-row.muted-row,
+.content-area .statement-row.muted-row > span:last-child { font-size: 10px; }
+.content-area .statement-margin { font-size: 9px; }
+.content-area .scenario-option strong { font-size: 11px; }
+.content-area .scenario-option small { font-size: 10px; line-height: 1.5; }
+.content-area .planning-metric-head { font-size: 10px; }
+.content-area .planning-metric > small { font-size: 9px; }
+.content-area .planning-chart-legend { font-size: 10px; }
+.content-area .monthly-plan-table { font-size: 10px; }
+.content-area .monthly-plan-table th { font-size: 9px; }
+.content-area .monthly-plan-table td { font-size: 10px; }
+.content-area .variance-value,
+.content-area .month-status { font-size: 10px; }
+.content-area .planning-profit-table > div { font-size: 10px; }
+.content-area .planning-profit-table strong { font-size: 10px; }
+.content-area .three-statement-row { font-size: 10px; }
+.content-area .three-statement-row strong { font-size: 10px; }
+.content-area .three-statement-table-note { font-size: 9px; line-height: 1.6; }
+@media (max-width: 560px) {
+  .content-area .page-heading p { font-size: 12px; }
+  .content-area .panel-header p,
+  .content-area .quick-model-copy p,
+  .content-area .report-feature-copy p { font-size: 11px; }
+  .content-area .field-main small,
+  .content-area .planning-field-label small,
+  .content-area .three-statement-input-row small { font-size: 9px; }
+}
