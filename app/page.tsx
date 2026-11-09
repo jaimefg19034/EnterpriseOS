@@ -450,7 +450,7 @@ export default function Home() {
               <Icon name="info" size={17} />
             </button>
             <button className="export-button" onClick={exportCsv}>
-              <Icon name="download" size={16} /> <span>{t("Export CSV")}</span>
+              <Icon name="download" size={16} /> <span>{t("Export Excel")}</span>
             </button>
             <div className="topbar-avatar">{t("FT")}</div>
           </div>
