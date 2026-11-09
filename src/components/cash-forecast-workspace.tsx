@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   calculateCashForecast,
   createEmptyCashForecast,
@@ -13,6 +13,8 @@ type CashForecastWorkspaceProps = {
   openingCash: number;
   language: Language;
 };
+
+const STORAGE_KEY = "enterpriseos:cash-forecast:v1";
 
 const FIELDS: { key: keyof CashForecastWeekInput; label: string; short: string }[] = [
   { key: "collections", label: "Customer collections", short: "Collections" },
@@ -79,6 +81,46 @@ function CashBalanceChart({ values, openingCash, language }: {
 export function CashForecastWorkspace({ openingCash, language }: CashForecastWorkspaceProps) {
   const t = (value: string) => translate(value, language);
   const [weeks, setWeeks] = useState<CashForecastWeekInput[]>(() => createEmptyCashForecast(13));
+  const [storageReady, setStorageReady] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed: unknown = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length === 13) {
+          const restored = parsed.map((item): CashForecastWeekInput => {
+            const record = item && typeof item === "object" ? item as Record<string, unknown> : {};
+            const amount = (key: keyof CashForecastWeekInput) => {
+              const value = record[key];
+              return typeof value === "number" && Number.isFinite(value) ? Math.max(0, value) : 0;
+            };
+            return {
+              collections: amount("collections"),
+              operatingPayments: amount("operatingPayments"),
+              capitalExpenditure: amount("capitalExpenditure"),
+              debtService: amount("debtService"),
+            };
+          });
+          setWeeks(restored);
+        }
+      }
+    } catch {
+      // Storage can be disabled by browser privacy settings; the worksheet remains usable in memory.
+    } finally {
+      setStorageReady(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!storageReady) return;
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(weeks));
+    } catch {
+      // Keep edits in the current session if local storage is unavailable or full.
+    }
+  }, [weeks, storageReady]);
+
   const results = useMemo(() => calculateCashForecast(openingCash, weeks), [openingCash, weeks]);
   const start = useMemo(() => mondayOf(new Date()), []);
   const dates = useMemo(() => Array.from({ length: 13 }, (_, index) => addDays(start, index * 7)), [start]);
@@ -156,7 +198,7 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
             </tbody>
           </table>
         </div>
-        <div className="cash-forecast-footnote">{t("This is a planning worksheet, not a bank feed. No transactions are generated or assumed. Values reset when the page is reloaded until company data storage is connected.")}</div>
+        <div className="cash-forecast-footnote">{t("This is a planning worksheet, not a bank feed. No transactions are generated or assumed. Your entries are saved only in this browser and are not shared with a company team or synced to a server.")}</div>
       </div>
     </section>
   );
