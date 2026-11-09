@@ -23,6 +23,8 @@ describe("local finance backup", () => {
       projects: [],
       risks: [],
       kpis: [],
+      costCenters: [],
+      expenses: [],
     };
     const backup = createLocalFinanceBackup([], createEmptyCashForecast(13), undefined, null, operations);
     const restored = parseLocalFinanceBackup(JSON.stringify(backup));
