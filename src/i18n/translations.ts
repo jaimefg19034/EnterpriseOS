@@ -7,7 +7,7 @@ const spanish: Record<string, string> = {
   "Monitor revenue, EBITDA, margins and the main performance trends.": "Consulta ingresos, EBITDA, márgenes y las principales tendencias de rendimiento.",
   "Edit the six operating assumptions and see the income statement recalculate.": "Modifica las seis hipótesis operativas y observa cómo se recalcula la cuenta de resultados.",
   "Compare the plan with actuals and explore Base, Upside and Downside cases.": "Compara el presupuesto con los resultados reales y explora los escenarios Base, Optimista y Pesimista.",
-  "Review the three statements, liquidity, leverage, break-even and returns.": "Consulta los tres estados financieros, la liquidez, el endeudamiento, el punto de equilibrio y la rentabilidad.",
+  "Review the three statements, liquidity, leverage, break-even, returns and the 13-week cash forecast.": "Consulta los tres estados financieros, la liquidez, el endeudamiento, el punto de equilibrio, la rentabilidad y la previsión de caja a 13 semanas.",
   "Export the current model and planning outputs to Excel.": "Exporta a Excel el modelo actual y los resultados de planificación.",
   "Tip: use the EN / ES switch in the top bar to change the interface language. This demo uses illustrative figures.": "Consejo: utiliza el selector EN / ES de la barra superior para cambiar el idioma. Esta demo utiliza cifras ilustrativas.",
   "Close guide": "Cerrar guía",
@@ -498,6 +498,7 @@ const spanish: Record<string, string> = {
   "Linked to the closing cash in the three-statement model": "Vinculado al saldo final de caja del modelo de tres estados",
   "Direct-method forecast · EUR · User-entered weekly estimates, not actual transactions": "Previsión por método directo · EUR · Estimaciones semanales introducidas por el usuario, no transacciones reales",
   "Net cash movement": "Movimiento neto de caja",
+  "This is a planning worksheet, not a bank feed. No transactions are generated or assumed. Your entries are saved only in this browser and are not shared with a company team or synced to a server.": "Esta es una hoja de planificación, no una conexión bancaria. No se generan ni se presuponen transacciones. Tus datos se guardan únicamente en este navegador y no se comparten con el equipo ni se sincronizan con un servidor.",
 };
 
 export function translate(value: string, language: Language): string {
