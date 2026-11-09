@@ -873,6 +873,17 @@ const spanish: Record<string, string> = {
   "Payable invoices": "Facturas de proveedores",
   "Balance": "Saldo",
 
+  "Legacy FY2026 plan migrated to the multi-year format.": "Plan heredado del ejercicio 2026 migrado al formato multianual.",
+  "Choose an unused year between 1900 and 2100.": "Elige un ejercicio disponible entre 1900 y 2100.",
+  "Planning year": "Ejercicio de planificación",
+  "New fiscal year": "Nuevo ejercicio fiscal",
+  "Add year": "Añadir ejercicio",
+  "Reset selected year": "Restablecer ejercicio seleccionado",
+  "ACTUAL MONTHS ENTERED": "MESES CON DATOS REALES",
+  "NO ACTUALS ENTERED": "SIN DATOS REALES INTRODUCIDOS",
+  "Track revenue against budget and stress-test the remaining forecast under different operating assumptions.": "Compara los ingresos con el presupuesto y somete la previsión restante a pruebas de estrés con distintos supuestos operativos.",
+  "Monthly revenue budget compared with actual revenue and forecast for the remaining months": "Presupuesto mensual de ingresos comparado con los ingresos reales y la previsión de los meses restantes",
+
 };
 
 
