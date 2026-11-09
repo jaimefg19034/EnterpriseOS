@@ -11,6 +11,7 @@ import { type FinancialResults } from "@/domain/financials";
 import { translate, type Language } from "@/i18n/translations";
 import { calculateFinancialRatios } from "@/domain/financial-analysis";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
+import { CashForecastWorkspace } from "@/components/cash-forecast-workspace";
 
 type StatementTab = "income" | "balance" | "cash";
 
@@ -644,6 +645,8 @@ export function ThreeStatementsWorkspace({
           )}
         </section>
       </div>
+
+      <CashForecastWorkspace openingCash={cf.closingCash} language={language} />
 
       <div className="three-statements-method-note">
         <span aria-hidden="true">ⓘ</span>
