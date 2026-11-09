@@ -35,6 +35,8 @@ The ambition is not to build every enterprise feature. We will earn complexity t
 | Months 15–16 · Jan–Feb 2028 | Reliability & commercial readiness | Performance, observability, support process, product packaging and pricing tests | Operational runbook, incident path, support expectations and cost model documented |
 | Months 17–18 · Mar–Apr/May 2028 | Launch decision | Stable release candidate and evidence-based go/no-go decision | Critical defects closed; security and data controls verified; users demonstrate recurring value |
 
+**Dedicated design and UX phase (gated, not calendar-led):** after the core functionality and priority workflows are implemented and validated, reserve a focused product-wide pass for visual identity, design system, layout hierarchy, typography, data visualisation, tables, responsive behaviour, accessibility, interaction feedback and motion. This is deliberately not part of the current foundation work; it begins only when the functional structure is stable enough that we are not repeatedly redesigning unfinished workflows. It must improve clarity and usability, not add decoration for its own sake.
+
 Dates are planning targets, not promises. A stage does not advance just because its calendar window has ended. If an exit gate fails, we fix the gap before adding scope.
 
 ## Current priority order
@@ -148,4 +150,6 @@ Append a short entry after each completed work session:
 
 **Session 3 completed (9 Nov 2026):** the management P&L formula contract was compared with its implementation and tests. One edge case was hardened: extreme monetary values are now capped at the same safe-integer boundary used by the input UI, preventing non-finite margin results from direct domain calls.
 
-The next planned session is **Session 4: audit balance-sheet and cash-flow links**. We will test opening/closing balance integrity, cash movement, debt, overdrafts and working-capital assumptions before extending the model.
+**Session 4 completed (9 Nov 2026, commit `360485c`):** added multi-scenario reconciliation tests covering operating losses, zero revenue, working-capital movements, large CapEx, new borrowing, debt repayment and dividends. Added a direct indirect-cash-flow reconciliation test. Quality checks, production build and both GitHub Pages deployment workflows completed successfully for this commit.
+
+The next planned session is **Session 5: build a financial-model test matrix**. We will make the edge-case coverage explicit and systematic before moving to period handling.
