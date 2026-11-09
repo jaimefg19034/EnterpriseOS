@@ -6,9 +6,10 @@ export type RiskLevel = "low" | "medium" | "high" | "critical";
 export type BusinessRisk = { id: string; title: string; owner: string; probability: number; impact: number; mitigation: string; status: "open" | "mitigating" | "closed" };
 export type KpiDirection = "higher" | "lower";
 export type BusinessKpi = { id: string; name: string; actual: number; target: number; unit: string; direction?: KpiDirection };
-export type OperationsState = { opportunities: Opportunity[]; projects: Project[]; risks: BusinessRisk[]; kpis: BusinessKpi[] };
+export type CostCenterBudget = { id: string; name: string; owner: string; budget: number; actualSpend: number; period: string };
+export type OperationsState = { opportunities: Opportunity[]; projects: Project[]; risks: BusinessRisk[]; kpis: BusinessKpi[]; costCenters: CostCenterBudget[] };
 export const OPERATIONS_STORAGE_KEY = "enterpriseos:operations:v1";
-export const EMPTY_OPERATIONS: OperationsState = { opportunities: [], projects: [], risks: [], kpis: [] };
+export const EMPTY_OPERATIONS: OperationsState = { opportunities: [], projects: [], risks: [], kpis: [], costCenters: [] };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -61,13 +62,13 @@ export function validateOperationsState(value: unknown): value is OperationsStat
       !validText(row.unit, 20) || (row.direction !== undefined && !["higher", "lower"].includes(String(row.direction)))) return false;
     ids.push(row.id);
   }
-  return new Set(ids).size === ids.length;
+  for (const row of costCenters as unknown[]) {\n    if (!isRecord(row) || !validId(row.id) || !validText(row.name, 100) || !validText(row.owner, 100) || !validMoney(row.budget) || !validMoney(row.actualSpend) || !/^\\d{4}-(Q[1-4]|FY)$/.test(String(row.period))) return false;\n    ids.push(row.id);\n  }\n  return new Set(ids).size === ids.length;
 }
 export function parseOperationsState(raw: string | null): OperationsState | null {
   if (!raw) return null;
   try {
     const value: unknown = JSON.parse(raw);
-    return validateOperationsState(value) ? value : null;
+    return validateOperationsState(value) ? { ...value, costCenters: (value as OperationsState).costCenters ?? [] } : null;
   } catch {
     return null;
   }
@@ -94,3 +95,4 @@ export function kpiPerformance(kpi: BusinessKpi): { ratio: number; onTarget: boo
   }
   return { ratio: Math.min(150, ratio), onTarget, variance: Math.round((kpi.actual - kpi.target) * 100) / 100 };
 }
+\nexport function costCenterPerformance(item: CostCenterBudget): { remaining: number; utilizationPercent: number; overBudget: boolean } {\n  return { remaining: Math.round((item.budget - item.actualSpend) * 100) / 100, utilizationPercent: item.budget > 0 ? Math.round((item.actualSpend / item.budget) * 1000) / 10 : item.actualSpend > 0 ? 100 : 0, overBudget: item.actualSpend > item.budget };\n}\n
