@@ -5,7 +5,7 @@ import { addInvoicePayment, calculateInvoiceAgeing, findDuplicateInvoice, parseI
 import { parseISODateUTC } from "@/domain/reporting-periods";
 import { createEmptyCashForecast } from "@/domain/cash-forecast";
 import { createLocalFinanceBackup, parseLocalFinanceBackup } from "@/domain/cash-working-capital-backup";
-import { parseSavedPlanningState, PLANNING_STORAGE_KEY } from "@/domain/planning-storage";
+import { LEGACY_PLANNING_STORAGE_KEY, parseSavedPlanningState, PLANNING_STORAGE_KEY } from "@/domain/planning-storage";
 import { OPERATIONS_STORAGE_KEY, parseOperationsState } from "@/domain/operations";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
 import { translate, type Language } from "@/i18n/translations";
@@ -262,7 +262,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
     let planning = null;
     let operations = null;
     try {
-      const rawPlanning = window.localStorage.getItem(PLANNING_STORAGE_KEY);
+      const rawPlanning = window.localStorage.getItem(PLANNING_STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_PLANNING_STORAGE_KEY);
       planning = rawPlanning ? parseSavedPlanningState(rawPlanning) : null;
       const rawOperations = window.localStorage.getItem(OPERATIONS_STORAGE_KEY);
       operations = rawOperations ? parseOperationsState(rawOperations) : null;
