@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateInvoiceAgeing, findDuplicateInvoice, normaliseInvoice, parseInvoiceCsv, summarizeInvoices, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "./working-capital";
+import { addInvoicePayment, calculateInvoiceAgeing, findDuplicateInvoice, normaliseInvoice, parseInvoiceCsv, summarizeInvoices, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "./working-capital";
 
 const invoice = (overrides: Partial<WorkingCapitalInvoice> = {}): WorkingCapitalInvoice => ({
   id: "inv-1", direction: "receivable", counterparty: "Acme", reference: "INV-1",
@@ -29,6 +29,41 @@ describe("working capital invoice validation", () => {
   it("requires a counterparty and a reference", () => {
     expect(validateWorkingCapitalInvoice(invoice({ counterparty: " " })).valid).toBe(false);
     expect(validateWorkingCapitalInvoice(invoice({ reference: "" })).valid).toBe(false);
+  });
+
+  it("migrates legacy paid balances without inventing payment dates", () => {
+    const legacy = normaliseInvoice(invoice({ paidAmount: 250 }));
+    expect(legacy.paidAmount).toBe(250);
+    expect(legacy.payments).toEqual([]);
+  });
+
+  it("records dated partial payments and updates the outstanding balance", () => {
+    const result = addInvoicePayment(invoice({ paidAmount: 0 }), {
+      id: "payment-1", date: "2026-11-05", amount: 300, note: "Bank transfer",
+    });
+    expect(result.valid).toBe(true);
+    if (!result.valid) return;
+    expect(result.invoice.paidAmount).toBe(300);
+    expect(result.invoice.amount - result.invoice.paidAmount).toBe(700);
+    expect(result.invoice.payments).toHaveLength(1);
+  });
+
+  it("rejects duplicate, invalid and overpayment transactions", () => {
+    const first = addInvoicePayment(invoice({ paidAmount: 0 }), {
+      id: "payment-1", date: "2026-11-05", amount: 300,
+    });
+    expect(first.valid).toBe(true);
+    if (!first.valid) return;
+    expect(addInvoicePayment(first.invoice, { id: "payment-1", date: "2026-11-06", amount: 100 }).valid).toBe(false);
+    expect(addInvoicePayment(first.invoice, { id: "payment-2", date: "2026-02-30", amount: 100 }).valid).toBe(false);
+    expect(addInvoicePayment(first.invoice, { id: "payment-3", date: "2026-11-06", amount: 701 }).valid).toBe(false);
+  });
+
+  it("rejects payment history that exceeds the recorded paid balance", () => {
+    expect(validateWorkingCapitalInvoice(invoice({
+      paidAmount: 100,
+      payments: [{ id: "p1", date: "2026-11-05", amount: 101 }],
+    })).valid).toBe(false);
   });
 
   it("rounds invoice and paid balances to cents", () => {
