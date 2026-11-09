@@ -240,6 +240,30 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
     await downloadExcelWorkbook({
       filename: "enterpriseos-quarterly-cash-forecast.xlsx",
       sheets: [{
+        name: t("Liquidity summary"),
+        title: t("EnterpriseOS — Liquidity summary"),
+        subtitle: t("Quarterly liquidity overview · EUR · Base forecast and downside sensitivity"),
+        headers: [t("Metric"), t("Value"), t("Basis")],
+        widths: [34, 22, 58],
+        currencyLabels: [
+          t("Opening cash"), t("Projected cash · Week 13"), t("Lowest projected cash"),
+          t("Downside closing cash"), t("Lowest downside cash"), t("Change versus base case"),
+        ],
+        percentLabels: [t("Collection reduction"), t("Operating payment increase")],
+        sectionLabels: [t("BASE CASE"), t("DOWNSIDE SCENARIO")],
+        rows: [
+          [t("BASE CASE"), null, null],
+          [t("Opening cash"), openingCash, t("Linked to the closing cash in the three-statement model")],
+          [t("Projected cash · Week 13"), finalCash, t("After all entered weekly movements")],
+          [t("Lowest projected cash"), lowestCash, firstNegative >= 0 ? `${t("First negative balance: Week")} ${firstNegative + 1}` : t("No negative balance in the entered forecast")],
+          [t("DOWNSIDE SCENARIO"), null, null],
+          [t("Collection reduction"), collectionReduction / 100, "%"],
+          [t("Operating payment increase"), paymentIncrease / 100, "%"],
+          [t("Downside closing cash"), stress.finalCash, t("At the end of the quarter")],
+          [t("Lowest downside cash"), stress.lowestCash, stress.firstNegativeWeek >= 0 ? `${t("First negative balance: Week")} ${stress.firstNegativeWeek + 1}` : t("No negative balance in the downside case")],
+          [t("Change versus base case"), stressDifference, t("Difference in quarter-end cash")],
+        ],
+      }, {
         name: t("Quarterly cash forecast"),
         title: t("EnterpriseOS — Quarterly cash forecast"),
         subtitle: t("Direct-method forecast · EUR · Manual estimates plus separately identified invoice schedule"),
