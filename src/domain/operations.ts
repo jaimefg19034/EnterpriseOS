@@ -7,7 +7,7 @@ export type RiskLevel = "low" | "medium" | "high" | "critical";
 export type BusinessRisk = { id: string; title: string; owner: string; probability: number; impact: number; mitigation: string; status: "open" | "mitigating" | "closed" };
 export type KpiDirection = "higher" | "lower";
 export type BusinessKpi = { id: string; name: string; actual: number; target: number; unit: string; direction?: KpiDirection };
-export type CostCenterBudget = { id: string; name: string; owner: string; budget: number; actualSpend: number; period: string };
+export type CostCenterBudget = { id: string; name: string; owner: string; budget: number; /** Unitemized manual spend for this period; must exclude expense records below. */ actualSpend: number; period: string };
 export type ExpenseRecord = { id: string; date: string; description: string; supplier: string; category: string; costCenterId: string; amount: number; status: "paid" | "unpaid" };
 export type OperationsState = { opportunities: Opportunity[]; projects: Project[]; risks: BusinessRisk[]; kpis: BusinessKpi[]; costCenters: CostCenterBudget[]; expenses: ExpenseRecord[] };
 export const OPERATIONS_STORAGE_KEY = "enterpriseos:operations:v1";
@@ -68,9 +68,16 @@ export function validateOperationsState(value: unknown): value is OperationsStat
     if (!isRecord(row) || !validId(row.id) || !validText(row.name, 100) || !validText(row.owner, 100) || !validMoney(row.budget) || !validMoney(row.actualSpend) || !validReportingPeriod(row.period)) return false;
     ids.push(row.id);
   }
-  const costCenterIds = new Set((costCenters as unknown[]).filter(isRecord).map((row) => row.id));
+  const costCenterPeriods = new Map((costCenters as unknown[]).filter(isRecord)
+    .map((row) => [String(row.id), row.period]));
   for (const row of expenses as unknown[]) {
-    if (!isRecord(row) || !validId(row.id) || !validDate(row.date) || !validText(row.description, 160) || !validText(row.supplier, 120) || !validText(row.category, 80) || !validId(row.costCenterId) || !costCenterIds.has(row.costCenterId) || !validMoney(row.amount) || row.amount <= 0 || !["paid", "unpaid"].includes(String(row.status))) return false;
+    if (!isRecord(row) || !validId(row.id) || !validDate(row.date) ||
+      !validText(row.description, 160) || !validText(row.supplier, 120) ||
+      !validText(row.category, 80) || !validId(row.costCenterId) ||
+      !validMoney(row.amount) || row.amount <= 0 ||
+      !["paid", "unpaid"].includes(String(row.status))) return false;
+    const linkedPeriod = costCenterPeriods.get(row.costCenterId);
+    if (typeof linkedPeriod !== "string" || !isDateWithinReportingPeriodCode(row.date, linkedPeriod)) return false;
     ids.push(row.id);
   }
   return new Set(ids).size === ids.length;
@@ -124,6 +131,7 @@ export function costCenterActualSpend(item: CostCenterBudget, expenses: ExpenseR
 
 
 export type CostCenterRunRate = {
+  manualBaseline: number;
   recordedSpend: number;
   projectedSpend: number | null;
   elapsedPercent: number;
@@ -140,7 +148,8 @@ export function costCenterRunRate(
   expenses: ExpenseRecord[],
   asOfDate: string,
 ): CostCenterRunRate {
-  const empty: CostCenterRunRate = { recordedSpend: 0, projectedSpend: null, elapsedPercent: 0, projectedOverBudget: false };
+  const manualBaseline = Math.round((center.actualSpend + Number.EPSILON) * 100) / 100;
+  const empty: CostCenterRunRate = { manualBaseline, recordedSpend: 0, projectedSpend: null, elapsedPercent: 0, projectedOverBudget: false };
   if (!isValidISODate(asOfDate)) return empty;
 
   const [yearText, period] = center.period.split("-");
@@ -153,9 +162,12 @@ export function costCenterRunRate(
   }, 0) * 100) / 100;
   const elapsedDays = inclusiveDaysBetween(bounds.start, asOfDate);
   const elapsedPercent = Math.round((elapsedDays / bounds.totalDays) * 1000) / 10;
-  const projectedSpend = recordedSpend > 0
+  const projectedDatedSpend = recordedSpend > 0
     ? Math.round((recordedSpend / (elapsedDays / bounds.totalDays) + Number.EPSILON) * 100) / 100
     : null;
+  const projectedSpend = projectedDatedSpend === null
+    ? null
+    : Math.round((manualBaseline + projectedDatedSpend + Number.EPSILON) * 100) / 100;
 
   return {
     recordedSpend,
