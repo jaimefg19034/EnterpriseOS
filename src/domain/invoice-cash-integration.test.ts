@@ -68,4 +68,22 @@ describe("invoice cash forecast integration", () => {
     expect(result).toHaveLength(13);
     expect(result[0].receivableCollections).toBe(20.22);
   });
+
+  it("rejects year zero and impossible dates through the shared UTC parser", () => {
+    const invoices = [
+      invoice({ id: "year-zero", dueDate: "0000-12-31" }),
+      invoice({ id: "impossible", dueDate: "0099-02-29" }),
+    ];
+    const invalidStart = allocateInvoicesToCashWeeks(invoices, "0000-01-01", 2);
+    const validEarlyYear = allocateInvoicesToCashWeeks(
+      [invoice({ dueDate: "0099-12-31" })],
+      "0099-12-30",
+      2,
+    );
+
+    expect(invalidStart).toHaveLength(2);
+    expect(invalidStart.every((week) => week.receivableCollections === 0)).toBe(true);
+    expect(validEarlyYear[0].receivableCollections).toBe(800);
+  });
+
 });
