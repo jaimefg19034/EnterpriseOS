@@ -167,10 +167,11 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
   }, []);
 
   const start = useMemo(() => mondayOf(new Date()), []);
+  const asOfDate = useMemo(() => toISODate(new Date()), []);
   const dates = useMemo(() => Array.from({ length: 13 }, (_, index) => addDays(start, index * 7)), [start]);
   const invoiceProjection = useMemo(
-    () => allocateInvoicesToCashWeeks(invoices, toISODate(start), 13),
-    [invoices, start],
+    () => allocateInvoicesToCashWeeks(invoices, toISODate(start), 13, asOfDate),
+    [invoices, start, asOfDate],
   );
   const forecastWeeks = useMemo(() => weeks.map((week, index) => includeInvoices ? ({
     ...week,
