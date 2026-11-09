@@ -686,6 +686,9 @@ const spanish: Record<string, string> = {
   "Changes saved in this browser.": "Cambios guardados en este navegador.",
   "Operations records are stored only in this browser. They are not synced, shared with a team or connected to CRM, HR, project or accounting platforms. Export a CSV backup before clearing browser data. Do not enter confidential company information.": "Los registros de operaciones se guardan únicamente en este navegador. No se sincronizan, comparten con un equipo ni se conectan a plataformas CRM, RR. HH., proyectos o contabilidad. Exporta una copia CSV antes de borrar los datos del navegador. No introduzcas información empresarial confidencial.",
 
+  "An invoice with this direction, customer or supplier and reference already exists.": "Ya existe una factura con este tipo, cliente o proveedor y referencia.",
+  "Browser storage could not be read. Check storage permissions and try again.": "No se pudo leer el almacenamiento del navegador. Comprueba los permisos e inténtalo de nuevo.",
+  "The operations workspace is invalid. No data has been changed.": "El espacio de operaciones no es válido. No se ha modificado ningún dato.",
 };
 
 export function translate(value: string, language: Language): string {

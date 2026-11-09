@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateInvoiceAgeing, normaliseInvoice, summarizeInvoices, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "./working-capital";
+import { calculateInvoiceAgeing, findDuplicateInvoice, normaliseInvoice, summarizeInvoices, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "./working-capital";
 
 const invoice = (overrides: Partial<WorkingCapitalInvoice> = {}): WorkingCapitalInvoice => ({
   id: "inv-1", direction: "receivable", counterparty: "Acme", reference: "INV-1",
@@ -23,6 +23,15 @@ describe("working capital invoice validation", () => {
     const clean = normaliseInvoice(invoice({ amount: 10.105, paidAmount: 2.105 }));
     expect(clean.amount).toBe(10.11);
     expect(clean.paidAmount).toBe(2.11);
+  });
+});
+
+describe("duplicate invoice detection", () => {
+  it("matches direction, counterparty and reference without case or whitespace differences", () => {
+    const existing = invoice();
+    expect(findDuplicateInvoice({ direction: "receivable", counterparty: " acme ", reference: "inv-1" }, [existing])).toEqual(existing);
+    expect(findDuplicateInvoice({ direction: "payable", counterparty: "Acme", reference: "INV-1" }, [existing])).toBeUndefined();
+    expect(findDuplicateInvoice({ direction: "receivable", counterparty: "Acme", reference: "INV-2" }, [existing])).toBeUndefined();
   });
 });
 

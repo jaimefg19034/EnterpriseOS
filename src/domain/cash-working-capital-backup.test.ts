@@ -17,6 +17,24 @@ const invoice = (overrides: Partial<WorkingCapitalInvoice> = {}): WorkingCapital
 });
 
 describe("local finance backup", () => {
+  it("includes and restores operations records", () => {
+    const operations = {
+      opportunities: [{ id: "deal-1", company: "Acme", contact: "", value: 5000, stage: "proposal" as const, expectedClose: "2026-12-01" }],
+      projects: [],
+      risks: [],
+      kpis: [],
+    };
+    const backup = createLocalFinanceBackup([], createEmptyCashForecast(13), undefined, null, operations);
+    const restored = parseLocalFinanceBackup(JSON.stringify(backup));
+    expect(restored.ok).toBe(true);
+    if (restored.ok) expect(restored.data.operationsState?.opportunities[0].company).toBe("Acme");
+  });
+
+  it("rejects corrupted operations data before restore", () => {
+    const backup = createLocalFinanceBackup([], createEmptyCashForecast(13));
+    (backup as { operationsState?: unknown }).operationsState = { projects: "not-an-array" };
+    expect(parseLocalFinanceBackup(JSON.stringify(backup)).ok).toBe(false);
+  });
   it("round-trips invoices and 13-week forecast data", () => {
     const backup = createLocalFinanceBackup(
       [invoice()],

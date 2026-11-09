@@ -71,6 +71,23 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   }, []);
 
   useEffect(() => {
+    function refreshFromBackup() {
+      const timer = window.setTimeout(() => {
+        try {
+          const restored = parseOperationsState(window.localStorage.getItem(OPERATIONS_STORAGE_KEY));
+          if (restored) setData(restored);
+        } catch {
+          setStorageMessage("Browser storage is unavailable. Changes remain in this session.");
+        }
+      }, 0);
+      return timer;
+    }
+    const onRestored = () => { refreshFromBackup(); };
+    window.addEventListener("enterpriseos:operations-updated", onRestored);
+    return () => window.removeEventListener("enterpriseos:operations-updated", onRestored);
+  }, []);
+
+  useEffect(() => {
     if (!loaded) return;
     const timer = window.setTimeout(() => {
       try {

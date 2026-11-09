@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { calculateInvoiceAgeing, normaliseInvoice, summarizeInvoices, validateWorkingCapitalInvoice, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
+import { calculateInvoiceAgeing, findDuplicateInvoice, normaliseInvoice, summarizeInvoices, validateWorkingCapitalInvoice, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { createEmptyCashForecast } from "@/domain/cash-forecast";
 import { createLocalFinanceBackup, parseLocalFinanceBackup } from "@/domain/cash-working-capital-backup";
 import { parseSavedPlanningState, PLANNING_STORAGE_KEY } from "@/domain/planning-storage";
+import { OPERATIONS_STORAGE_KEY, parseOperationsState } from "@/domain/operations";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
 import { translate, type Language } from "@/i18n/translations";
 
@@ -76,6 +77,11 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
       setInvoiceFormError(t(validation.error));
       return;
     }
+    const duplicate = findDuplicateInvoice(validation.invoice, invoices);
+    if (duplicate) {
+      setInvoiceFormError(t("An invoice with this direction, customer or supplier and reference already exists."));
+      return;
+    }
     setInvoices((current) => [...current, validation.invoice]);
     setInvoiceFormError("");
     setCounterparty(""); setReference(""); setAmount(""); setPaidAmount("0");
@@ -127,9 +133,18 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   }
 
   function downloadLocalBackup() {
-    const rawPlanning = window.localStorage.getItem(PLANNING_STORAGE_KEY);
-    const planning = rawPlanning ? parseSavedPlanningState(rawPlanning) : null;
-    const backup = createLocalFinanceBackup(invoices, readCashForecastForBackup(), undefined, planning);
+    let planning = null;
+    let operations = null;
+    try {
+      const rawPlanning = window.localStorage.getItem(PLANNING_STORAGE_KEY);
+      planning = rawPlanning ? parseSavedPlanningState(rawPlanning) : null;
+      const rawOperations = window.localStorage.getItem(OPERATIONS_STORAGE_KEY);
+      operations = rawOperations ? parseOperationsState(rawOperations) : null;
+    } catch {
+      setBackupMessage(t("Browser storage could not be read. Check storage permissions and try again."));
+      return;
+    }
+    const backup = createLocalFinanceBackup(invoices, readCashForecastForBackup(), undefined, planning, operations);
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -155,14 +170,16 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
         setBackupMessage(t(result.error));
         return;
       }
-      if (!window.confirm(t("Restoring this backup replaces the current invoice register and quarterly cash forecast in this browser. Continue?"))) return;
+      if (!window.confirm(t("Restoring this backup replaces the finance and operations data included in the file in this browser. Continue?"))) return;
       const previousInvoices = window.localStorage.getItem(STORAGE_KEY);
       const previousForecast = window.localStorage.getItem(CASH_FORECAST_STORAGE_KEY);
       const previousPlanning = window.localStorage.getItem(PLANNING_STORAGE_KEY);
+      const previousOperations = window.localStorage.getItem(OPERATIONS_STORAGE_KEY);
       try {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(result.data.workingCapitalInvoices));
         window.localStorage.setItem(CASH_FORECAST_STORAGE_KEY, JSON.stringify(result.data.quarterlyCashForecast));
         if (result.data.planningState) window.localStorage.setItem(PLANNING_STORAGE_KEY, JSON.stringify(result.data.planningState));
+        if (result.data.operationsState) window.localStorage.setItem(OPERATIONS_STORAGE_KEY, JSON.stringify(result.data.operationsState));
       } catch (storageError) {
         try {
           if (previousInvoices === null) window.localStorage.removeItem(STORAGE_KEY);
@@ -171,6 +188,8 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
           else window.localStorage.setItem(CASH_FORECAST_STORAGE_KEY, previousForecast);
           if (previousPlanning === null) window.localStorage.removeItem(PLANNING_STORAGE_KEY);
           else window.localStorage.setItem(PLANNING_STORAGE_KEY, previousPlanning);
+          if (previousOperations === null) window.localStorage.removeItem(OPERATIONS_STORAGE_KEY);
+          else window.localStorage.setItem(OPERATIONS_STORAGE_KEY, previousOperations);
         } catch {
           // Best-effort rollback if the browser blocks all storage writes.
         }
@@ -180,6 +199,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
       window.dispatchEvent(new Event("enterpriseos:working-capital-updated"));
       window.dispatchEvent(new Event("enterpriseos:cash-forecast-updated"));
       if (result.data.planningState) window.dispatchEvent(new Event("enterpriseos:planning-updated"));
+      if (result.data.operationsState) window.dispatchEvent(new Event("enterpriseos:operations-updated"));
       setBackupMessage(t("Backup restored successfully. Your current browser data has been replaced."));
     } catch {
       setBackupMessage(t("The backup could not be restored. No data has been changed."));

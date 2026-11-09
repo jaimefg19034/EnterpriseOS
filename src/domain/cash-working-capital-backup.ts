@@ -1,6 +1,7 @@
 import type { CashForecastWeekInput } from "./cash-forecast";
 import { normaliseInvoice, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "./working-capital";
 import { parseSavedPlanningState, type SavedPlanningState } from "./planning-storage";
+import { validateOperationsState, type OperationsState } from "./operations";
 
 export const LOCAL_FINANCE_BACKUP_VERSION = 1;
 
@@ -11,6 +12,7 @@ export type LocalFinanceBackup = {
   workingCapitalInvoices: WorkingCapitalInvoice[];
   quarterlyCashForecast: CashForecastWeekInput[];
   planningState?: SavedPlanningState;
+  operationsState?: OperationsState;
 };
 
 export type LocalFinanceBackupResult =
@@ -22,6 +24,7 @@ export function createLocalFinanceBackup(
   weeks: CashForecastWeekInput[],
   exportedAt = new Date().toISOString(),
   planningState?: SavedPlanningState | null,
+  operationsState?: OperationsState | null,
 ): LocalFinanceBackup {
   return {
     product: "EnterpriseOS",
@@ -30,6 +33,7 @@ export function createLocalFinanceBackup(
     workingCapitalInvoices: invoices.map(normaliseInvoice),
     quarterlyCashForecast: weeks.map(sanitiseWeek),
     ...(planningState ? { planningState } : {}),
+    ...(operationsState ? { operationsState } : {}),
   };
 }
 
@@ -61,6 +65,10 @@ export function parseLocalFinanceBackup(raw: string): LocalFinanceBackupResult {
     return { ok: false, error: "The saved planning model is invalid. No data has been changed." };
   }
 
+  if (parsed.operationsState !== undefined && !validateOperationsState(parsed.operationsState)) {
+    return { ok: false, error: "The operations workspace is invalid. No data has been changed." };
+  }
+
   const invoices = parsed.workingCapitalInvoices.map((item) => normaliseInvoice(item as WorkingCapitalInvoice));
   const weeks = parsed.quarterlyCashForecast.map((item) => sanitiseWeek(item as CashForecastWeekInput));
   const ids = new Set<string>();
@@ -78,6 +86,7 @@ export function parseLocalFinanceBackup(raw: string): LocalFinanceBackupResult {
       workingCapitalInvoices: invoices,
       quarterlyCashForecast: weeks,
       ...(planningState ? { planningState } : {}),
+      ...(parsed.operationsState ? { operationsState: parsed.operationsState as OperationsState } : {}),
     },
   };
 }

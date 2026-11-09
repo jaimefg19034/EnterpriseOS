@@ -63,6 +63,18 @@ export function validateWorkingCapitalInvoice(value: unknown): InvoiceValidation
   return { valid: true, invoice: normaliseInvoice(item as unknown as WorkingCapitalInvoice) };
 }
 
+export function findDuplicateInvoice(
+  candidate: Pick<WorkingCapitalInvoice, "direction" | "counterparty" | "reference">,
+  invoices: WorkingCapitalInvoice[],
+): WorkingCapitalInvoice | undefined {
+  const normalise = (value: string) => value.trim().toLocaleLowerCase();
+  return invoices.find((invoice) =>
+    invoice.direction === candidate.direction &&
+    normalise(invoice.counterparty) === normalise(candidate.counterparty) &&
+    normalise(invoice.reference) === normalise(candidate.reference),
+  );
+}
+
 export function isValidISODate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const [year, month, day] = value.split("-").map(Number);
