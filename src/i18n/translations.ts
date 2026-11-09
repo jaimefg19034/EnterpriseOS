@@ -364,8 +364,7 @@ const spanish: Record<string, string> = {
   "Cash from financing": "Flujo de caja de financiación",
   "Days sales outstanding": "Días de cobro a clientes",
   "Inventory days": "Días de inventario",
-  "Payable days": "Días de pago a proveedores"
-
+  "Payable days": "Días de pago a proveedores",
   "Income Statement": "Cuenta de resultados",
   "Balance Sheet": "Balance de situación",
   "Cash Flow": "Flujo de caja",
