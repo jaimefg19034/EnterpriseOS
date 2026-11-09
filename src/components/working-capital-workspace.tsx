@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent 
 import { calculateInvoiceAgeing, normaliseInvoice, summarizeInvoices, validateWorkingCapitalInvoice, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { createEmptyCashForecast } from "@/domain/cash-forecast";
 import { createLocalFinanceBackup, parseLocalFinanceBackup } from "@/domain/cash-working-capital-backup";
+import { parseSavedPlanningState, PLANNING_STORAGE_KEY } from "@/domain/planning-storage";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
 import { translate, type Language } from "@/i18n/translations";
 
@@ -126,7 +127,9 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   }
 
   function downloadLocalBackup() {
-    const backup = createLocalFinanceBackup(invoices, readCashForecastForBackup());
+    const rawPlanning = window.localStorage.getItem(PLANNING_STORAGE_KEY);
+    const planning = rawPlanning ? parseSavedPlanningState(rawPlanning) : null;
+    const backup = createLocalFinanceBackup(invoices, readCashForecastForBackup(), undefined, planning);
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -155,15 +158,19 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
       if (!window.confirm(t("Restoring this backup replaces the current invoice register and quarterly cash forecast in this browser. Continue?"))) return;
       const previousInvoices = window.localStorage.getItem(STORAGE_KEY);
       const previousForecast = window.localStorage.getItem(CASH_FORECAST_STORAGE_KEY);
+      const previousPlanning = window.localStorage.getItem(PLANNING_STORAGE_KEY);
       try {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(result.data.workingCapitalInvoices));
         window.localStorage.setItem(CASH_FORECAST_STORAGE_KEY, JSON.stringify(result.data.quarterlyCashForecast));
+        if (result.data.planningState) window.localStorage.setItem(PLANNING_STORAGE_KEY, JSON.stringify(result.data.planningState));
       } catch (storageError) {
         try {
           if (previousInvoices === null) window.localStorage.removeItem(STORAGE_KEY);
           else window.localStorage.setItem(STORAGE_KEY, previousInvoices);
           if (previousForecast === null) window.localStorage.removeItem(CASH_FORECAST_STORAGE_KEY);
           else window.localStorage.setItem(CASH_FORECAST_STORAGE_KEY, previousForecast);
+          if (previousPlanning === null) window.localStorage.removeItem(PLANNING_STORAGE_KEY);
+          else window.localStorage.setItem(PLANNING_STORAGE_KEY, previousPlanning);
         } catch {
           // Best-effort rollback if the browser blocks all storage writes.
         }
@@ -172,6 +179,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
       setInvoices(result.data.workingCapitalInvoices);
       window.dispatchEvent(new Event("enterpriseos:working-capital-updated"));
       window.dispatchEvent(new Event("enterpriseos:cash-forecast-updated"));
+      if (result.data.planningState) window.dispatchEvent(new Event("enterpriseos:planning-updated"));
       setBackupMessage(t("Backup restored successfully. Your current browser data has been replaced."));
     } catch {
       setBackupMessage(t("The backup could not be restored. No data has been changed."));
