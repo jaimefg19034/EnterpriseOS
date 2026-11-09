@@ -774,10 +774,6 @@ button:focus-visible, input:focus-visible {
 .scenario-option small { color: #65748a; }
 .three-statement-input-row > span > small { color: #617087; }
 .three-statement-group-title { color: #58677c; }
-.sidebar .nav-label { color: #9aa9c0; }
-.sidebar .tool-link { color: #c1ccdc; }
-.sidebar .soon-label { color: #aab8cc; }
-.sidebar-help span, .user-copy span { color: #aab8c9; }
 
 .workspace-info-backdrop {
   position: fixed;
@@ -832,3 +828,26 @@ button:focus-visible, input:focus-visible {
 .workspace-switcher:hover { border-color: rgba(215,227,255,.22); background: linear-gradient(115deg, rgba(255,255,255,.12), rgba(255,255,255,.055)); }
 .sidebar-help { width: 100%; color: inherit; text-align: left; font: inherit; cursor: pointer; transition: border-color .18s ease, background .18s ease; }
 .sidebar-help:hover { border-color: rgba(139,160,236,.25); background: rgba(255,255,255,.065); }
+
+/* Help guide and content readability refinement */
+.help-guide-dialog { width: min(100%, 540px); max-height: min(88vh, 760px); overflow-y: auto; }
+.help-guide-dialog > p { margin: 0; color: #536176; font-size: 13px; line-height: 1.65; }
+.help-guide-dialog h2 { max-width: 420px; font-size: 23px; letter-spacing: -.55px; }
+.help-guide-list { display: grid; gap: 8px; margin: 20px 0 15px; }
+.help-guide-list button {
+  width: 100%; display: grid; grid-template-columns: 34px minmax(0,1fr) 18px; align-items: center; gap: 12px;
+  padding: 12px 13px; text-align: left; border: 1px solid #e5eaf2; border-radius: 12px;
+  color: #25334a; background: linear-gradient(110deg,#fff,#f8faff); transition: transform .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+.help-guide-list button:hover { transform: translateY(-1px); border-color: #bdcaef; box-shadow: 0 7px 18px rgba(39,62,111,.08); }
+.help-guide-list button > span:nth-child(2) { display: grid; gap: 4px; }
+.help-guide-list strong { color: #23324a; font-size: 12px; font-weight: 750; }
+.help-guide-list small { color: #617087; font-size: 11px; line-height: 1.5; }
+.help-guide-list button > svg { color: #7185c5; }
+.help-guide-number { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 9px; color: #405bb4; background: #edf1ff; font-size: 10px; font-weight: 800; }
+.help-guide-dialog .help-guide-footnote { margin-top: 12px; padding: 11px 12px; border-radius: 9px; color: #5b6a80; background: #f3f6fb; font-size: 11px; line-height: 1.55; }
+.help-guide-dialog .workspace-info-confirm { margin-top: 4px; }
+@media (max-width: 560px) {
+  .help-guide-dialog { padding: 19px; }
+  .help-guide-list button { grid-template-columns: 30px minmax(0,1fr) 16px; gap: 9px; padding: 11px 9px; }
+}
