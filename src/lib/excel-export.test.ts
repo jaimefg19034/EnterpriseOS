@@ -29,6 +29,24 @@ describe("Excel workbook export", () => {
     expect(sheet?.views[0]?.state).toBe("frozen");
   });
 
+  it("exports a separate payment movement sheet with dated and undated records", async () => {
+    const workbook = await buildExcelWorkbook({
+      filename: "payment-ledger.xlsx",
+      sheets: [
+        { name: "Invoices", title: "Invoices", subtitle: "Open balances", headers: ["Invoice", "Paid"], rows: [["INV-1", 250]] },
+        { name: "Payment movements", title: "Payment movements", subtitle: "User-entered records", headers: ["Date", "Type", "Amount"], currencyColumns: [3], rows: [
+          ["2026-11-08", "Payment", 150],
+          ["—", "Historical paid balance (undated)", 100],
+        ] },
+      ],
+    });
+    const sheet = workbook.getWorksheet("Payment movements");
+    expect(sheet?.getCell("A5").value).toBe("2026-11-08");
+    expect(sheet?.getCell("C5").value).toBe(150);
+    expect(sheet?.getCell("B6").value).toBe("Historical paid balance (undated)");
+    expect(sheet?.getCell("C6").numFmt).toContain("€");
+  });
+
   it("serializes to a valid XLSX buffer that can be read back", async () => {
     const workbook = await buildExcelWorkbook({
       filename: "round-trip.xlsx",
