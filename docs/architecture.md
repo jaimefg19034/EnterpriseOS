@@ -17,7 +17,7 @@ The MVP proves two connected finance workflows:
 6. Maintain an invoice register for receivables and payables, including paid-to-date amounts, outstanding balances, ageing and individual dated payment movements.
 7. Project invoice cash movements into a quarterly direct-method forecast by due date, with an explicit opt-in and separate manual inputs.
 
-The app is deliberately not a general-purpose spreadsheet. No customer financial data is persisted in this first iteration.
+The app is deliberately not a general-purpose spreadsheet. No customer financial data is persisted in this first iteration. Excel exports are built from the same derived client-side results shown on screen; cash and invoice workbooks include summary sheets and totals, date-only values are exported as sortable Excel dates, and percentage-point assumptions are kept distinct from percentage rates.
 
 ### Launch-critical
 

@@ -37,6 +37,8 @@ This describes the current screen-level journey, not a fully integrated accounti
 
 Cost-centre budgets use a manual unitemized baseline plus dated expense records. Expense dates must fall within the linked cost-centre period; paid and unpaid expense records both count toward spend. The baseline has no transaction-level source, so the system cannot automatically detect a duplicate amount entered both as baseline and as an expense. The UI therefore defines the baseline as spend not itemised in the register and explains that it must not overlap. Run-rate projections carry the baseline as fixed spend and extrapolate only dated expenses.
 
+The current Excel workbooks now carry the visible cash and invoice summary metrics, quarter totals and ageing balances, and distinguish true percentage rates from percentage-point assumptions. Date-only fields are exported as Excel date cells so users can sort and filter them reliably.
+
 These are architecture and workflow gaps, not merely missing buttons. They should be solved in the right order.
 
 ## Target monthly management-review workflow
