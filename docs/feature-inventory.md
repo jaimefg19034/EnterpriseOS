@@ -14,7 +14,7 @@
 | Three statements | P&L, balance sheet and indirect cash flow; working-capital assumptions; financial ratios; balance check; Excel export | Pure three-statement and analysis modules; opening balance sheet is illustrative | Integrated model prototype, not a ledger |
 | Cash forecast | Quarterly cash view with weekly internal schedule, invoice-linked receipts/payments, manual movements kept separate, downside liquidity stress test and Excel export | Browser-local storage plus pure invoice allocation and forecast functions | Useful planning tool; not bank-reconciled |
 | Working capital | Receivables/payables invoice register, due dates, outstanding balances, ageing, dated partial-payment ledger, CSV import, payment-history Excel export and backup integration | Browser-local storage; validated invoice and payment records; historic aggregate paid balances remain undated | Local single-browser register; no bank reconciliation or automatic payment matching |
-| Operations | Sales pipeline, projects, risks, KPIs, cost-centre budgets, expense register, budget pressure/run-rate and management reporting | Domain calculations and operations state in localStorage | Broad prototype; no shared company database |
+| Operations | Sales pipeline, projects, risks, KPIs, cost-centre budgets with editable unitemized baselines, period-matched expense register, baseline-aware run-rate and management reporting | Domain calculations and validated operations state in localStorage | Broad prototype; no shared company database; baseline/expense overlap depends on user-entered unitemized semantics |
 | Reports & exports | Structured Excel outputs for financial model, planning and three statements; operational CSV export | Exported values from current client-side state | Reporting prototype; no audit-grade reporting pack |
 
 ## Data persistence matrix
@@ -36,6 +36,8 @@
 - Financial calculation logic is separated into domain modules and has unit tests.
 - The P&L, three statements, working capital and cash forecast are connected through explicit calculation functions.
 - Planning, operations and invoice/cash data have validation and local backup/restore support; invoice payment movements survive backup/restore and are separately exported to Excel.
+- Expense records must fall inside the reporting period of their linked cost centre. Unitemized baseline spend is added once to those dated expenses; the user must not enter the same cost in both places.
+- Run-rate projections carry the baseline as fixed known spend and extrapolate only dated expenses. Aggregate budget/actual totals are hidden when the filter combines full-year and quarterly periods.
 - Excel exports are structured and styled rather than raw data dumps.
 - English and Spanish are supported.
 - Lint, typecheck, unit tests and production build run in GitHub Actions before release.
@@ -51,7 +53,7 @@
 
 ### High — finance workflow completeness
 - The P&L is a simplified management model, not a statutory accounting engine.
-- Historical cost and expense actuals are incomplete relative to the revenue actuals workflow.
+- Historical cost and expense actuals are incomplete relative to the revenue actuals workflow. The manual unitemized baseline has no source-level detail, so the app cannot automatically detect whether a user has also entered the same transaction in the expense register.
 - The opening balance sheet is an illustrative baseline.
 - Forecast outputs and actuals need consistent period definitions, provenance and labels across every screen. Operations now uses shared month/quarter/FY date boundaries, but Budget & Scenarios remains a single FY2026 plan; adding multi-year planning requires a versioned storage migration that preserves existing FY2026 actuals and backup compatibility.
 - Excel import, source mapping and reconciliation need a deliberate design before supporting real customer files.

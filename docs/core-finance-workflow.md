@@ -17,7 +17,7 @@ flowchart TD
   B --> C[Budget & scenarios: revenue actuals and forecast]
   B --> D[Three statements: modelled P&L, balance sheet and cash flow]
   E[Working capital: receivables and payables] --> F[Quarterly cash forecast]
-  G[Operations: expenses, cost centres, projects, risks and KPIs] --> H[Management reports]
+  G[Operations: unitemized cost-centre baselines, period-matched expenses, projects, risks and KPIs] --> H[Management reports]
   C --> I[Excel exports]
   D --> I
   F --> I
@@ -34,6 +34,8 @@ This describes the current screen-level journey, not a fully integrated accounti
 4. **No close process.** There is no formal review, approval, locked period, reopening reason or immutable close snapshot.
 5. **No end-to-end reconciliation.** Exporting several workbooks does not prove that their totals reconcile to one source of truth.
 6. **No shared workspace.** Browser-local data cannot support a finance team working across devices.
+
+Cost-centre budgets use a manual unitemized baseline plus dated expense records. Expense dates must fall within the linked cost-centre period; paid and unpaid expense records both count toward spend. The baseline has no transaction-level source, so the system cannot automatically detect a duplicate amount entered both as baseline and as an expense. The UI therefore defines the baseline as spend not itemised in the register and explains that it must not overlap. Run-rate projections carry the baseline as fixed spend and extrapolate only dated expenses.
 
 These are architecture and workflow gaps, not merely missing buttons. They should be solved in the right order.
 
