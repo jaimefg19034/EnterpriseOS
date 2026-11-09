@@ -215,6 +215,12 @@ function TrendChart() {
         role="img"
         aria-label="Six month revenue and EBITDA trend"
       >
+        <defs>
+          <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#6681e2" />
+            <stop offset="100%" stopColor="#6681e2" stopOpacity="0" />
+          </linearGradient>
+        </defs>
         {[35, 86, 138, 190].map((y) => (
           <line key={y} x1="28" x2="548" y1={y} y2={y} className="chart-gridline" />
         ))}
@@ -547,7 +553,7 @@ export default function Home() {
                         <span className="field-number">{String(index + 1).padStart(2, "0")}</span>
                         <span className="field-main"><strong>{field.label}</strong><small>{field.description}</small></span>
                         <span className="input-wrap">
-                          <span className="input-prefix">{field.suffix ?? "€"}</span>
+                          <span className="input-prefix">{field.suffix ? "" : "€"}</span>
                           <input
                             aria-label={field.label}
                             type="number"
@@ -557,6 +563,7 @@ export default function Home() {
                             value={inputs[field.key]}
                             onChange={(event) => updateInput(field.key, event.target.value)}
                           />
+                          {field.suffix && <span className="input-suffix">{field.suffix}</span>}
                         </span>
                       </label>
                     ))}
