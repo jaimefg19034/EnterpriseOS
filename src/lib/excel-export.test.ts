@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import ExcelJS from "exceljs";
-import { buildExcelWorkbook } from "@/lib/excel-export";
+import { buildExcelWorkbook } from "./excel-export";
 
 describe("Excel workbook export", () => {
   it("builds a formatted workbook with frozen headers and numeric formats", async () => {
