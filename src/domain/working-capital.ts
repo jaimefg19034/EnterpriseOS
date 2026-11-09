@@ -1,4 +1,4 @@
-import { isValidISODate } from "./reporting-periods";
+import { isValidISODate, parseISODateUTC } from "./reporting-periods";
 
 export type InvoiceDirection = "receivable" | "payable";
 
@@ -181,16 +181,21 @@ function parseCsvRows(source: string, delimiter: string): string[][] | null {
   return rows;
 }
 
+function isoDateOrdinal(value: string): number | null {
+  const date = parseISODateUTC(value);
+  return date ? Math.floor(date.getTime() / 86_400_000) : null;
+}
+
 export function calculateInvoiceAgeing(
   invoices: WorkingCapitalInvoice[],
   today: string,
 ): InvoiceAgeing[] {
-  const todayDate = new Date(`${today}T12:00:00`);
+  const todayDay = isoDateOrdinal(today);
   return invoices.map((invoice) => {
     const outstanding = Math.max(0, invoice.amount - invoice.paidAmount);
-    const dueDate = new Date(`${invoice.dueDate}T12:00:00`);
-    const overdueDays = outstanding > 0 && isValidISODate(today) && isValidISODate(invoice.dueDate)
-      ? Math.max(0, Math.floor((todayDate.getTime() - dueDate.getTime()) / 86400000))
+    const dueDay = isoDateOrdinal(invoice.dueDate);
+    const overdueDays = outstanding > 0 && todayDay !== null && dueDay !== null
+      ? Math.max(0, todayDay - dueDay)
       : 0;
     const bucket: AgeingBucket = overdueDays === 0 ? "notDue"
       : overdueDays <= 30 ? "1to30"
@@ -201,7 +206,7 @@ export function calculateInvoiceAgeing(
 }
 
 export function summarizeInvoices(items: InvoiceAgeing[], today: string): InvoiceSummary {
-  const now = isValidISODate(today) ? new Date(`${today}T12:00:00`).getTime() : 0;
+  const todayDay = isoDateOrdinal(today);
   const buckets: Record<AgeingBucket, number> = { notDue: 0, "1to30": 0, "31to60": 0, "61to90": 0, over90: 0 };
   let outstanding = 0;
   let overdue = 0;
@@ -212,9 +217,9 @@ export function summarizeInvoices(items: InvoiceAgeing[], today: string): Invoic
     outstanding += amount;
     buckets[item.bucket] += amount;
     if (item.overdueDays > 0) overdue += amount;
-    if (!isValidISODate(today) || !isValidISODate(item.invoice.dueDate)) continue;
-    const due = new Date(`${item.invoice.dueDate}T12:00:00`).getTime();
-    const daysUntilDue = Math.ceil((due - now) / 86400000);
+    const dueDay = isoDateOrdinal(item.invoice.dueDate);
+    if (todayDay === null || dueDay === null) continue;
+    const daysUntilDue = dueDay - todayDay;
     if (amount > 0 && daysUntilDue >= 0 && daysUntilDue <= 7) dueNext7Days += amount;
     if (amount > 0 && daysUntilDue >= 0 && daysUntilDue <= 30) dueNext30Days += amount;
   }
