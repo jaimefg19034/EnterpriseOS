@@ -8,7 +8,7 @@ import {
 } from "@/domain/cash-forecast";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
 import { allocateInvoicesToCashWeeks } from "@/domain/invoice-cash-integration";
-import { normaliseInvoice, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "@/domain/working-capital";
+import { validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { translate, type Language } from "@/i18n/translations";
 
 type CashForecastWorkspaceProps = {
