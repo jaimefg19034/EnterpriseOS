@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { translate, type Language } from "@/i18n/translations";
 import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, costCenterActualSpend, costCenterPerformance, kpiPerformance, projectBudgetVariance, riskScore, weightedPipeline, type BusinessKpi, type CostCenterBudget, type ExpenseRecord, type BusinessRisk, type Opportunity, type OpportunityStage, type OperationsState, type Project, type ProjectStatus } from "@/domain/operations";
 
-type Section = "sales" | "projects" | "risks" | "kpis" | "cost-centers" | "expenses";
+type Section = "sales" | "projects" | "risks" | "kpis" | "cost-centers" | "expenses" | "reports";
 const makeId = () => typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `ops-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const today = () => new Date().toISOString().slice(0, 10);
 const money = (value: number, language: Language) => new Intl.NumberFormat(language === "es" ? "es-ES" : "en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(value);
@@ -122,6 +122,13 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   const kpiOnTrack = data.kpis.filter((x) => kpiPerformance(x).onTarget).length;
   const costCenterPeriods = [...new Set(data.costCenters.map((x) => x.period))].sort((a, b) => b.localeCompare(a));
   const visibleCostCenters = data.costCenters.filter((x) => costCenterPeriodFilter === "all" || x.period === costCenterPeriodFilter);
+  const totalExpenses = data.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const unpaidExpenses = data.expenses.filter((expense) => expense.status === "unpaid").reduce((sum, expense) => sum + expense.amount, 0);
+  const paidExpenses = totalExpenses - unpaidExpenses;
+  const categorySpend = Object.entries(data.expenses.reduce<Record<string, number>>((totals, expense) => { totals[expense.category] = (totals[expense.category] ?? 0) + expense.amount; return totals; }, {})).sort((a, b) => b[1] - a[1]);
+  const overBudgetCenters = data.costCenters.map((center) => ({ ...center, actualSpend: costCenterActualSpend(center, data.expenses) })).filter((center) => center.actualSpend > center.budget);
+  const openHighRisks = data.risks.filter((risk) => risk.status !== "closed" && riskScore(risk) >= 15);
+  const projectsOverBudget = data.projects.filter((project) => project.spent > project.budget && project.status !== "completed");
   const updateCostCenter = (id: string, changes: Partial<CostCenterBudget>) => setData((current) => ({ ...current, costCenters: current.costCenters.map((row) => row.id === id ? { ...row, ...changes } : row) }));
 
   function addOpportunity(event: React.FormEvent<HTMLFormElement>) {
@@ -192,6 +199,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
     { id: "kpis", label: "KPI scorecard", count: data.kpis.length },
     { id: "cost-centers", label: "Cost centres", count: data.costCenters.length },
     { id: "expenses", label: "Expense register", count: data.expenses.length },
+    { id: "reports", label: "Management reports", count: overBudgetCenters.length + openHighRisks.length + projectsOverBudget.length },
   ];
 
   return (
@@ -275,6 +283,29 @@ export function OperationsWorkspace({ language }: { language: Language }) {
             {visibleCostCenters.map((x) => { const actualSpend = costCenterActualSpend(x, data.expenses); const performance = costCenterPerformance({ ...x, actualSpend }); return <tr key={x.id}><td><strong>{x.name}</strong></td><td>{x.owner}</td><td>{x.period}</td><td><input aria-label={t("Budget (€)")} type="number" min="0" step="0.01" value={x.budget} onChange={(e) => { const value = Number(e.target.value); if (Number.isFinite(value) && value >= 0) updateCostCenter(x.id, { budget: value }); }} /></td><td><strong>{money(actualSpend, language)}</strong><small className="operations-subline">{t("Includes manual baseline and registered expenses")}</small></td><td className={performance.overBudget ? "operations-negative" : ""}>{money(performance.remaining, language)}</td><td><span className={performance.overBudget ? "operations-negative" : ""}>{performance.utilizationPercent.toLocaleString(language === "es" ? "es-ES" : "en-IE")}%</span></td><td><button className="operations-delete" onClick={() => removeCostCenter(x.id)} aria-label={t("Delete record")}>×</button></td></tr>; })}
           </tbody></table>{visibleCostCenters.length === 0 && <div className="operations-empty">{t("No cost centres in this period. Add a department budget or choose another period.")}</div>}</div>
           <p className="operations-note">{t("Edit budget and actual spend directly in the table. Values are manual and are not imported from banks or accounting systems. Full-year and quarterly budgets are kept separate to avoid double counting.")}</p>
+        </>}
+        {section === "reports" && <>
+          <div className="operations-section-heading"><div><div className="panel-kicker">{t("EXECUTIVE OVERVIEW")}</div><h2>{t("Management reports")}</h2><p>{t("A live summary of the records entered in your operations workspace. Figures update as you change expenses, budgets, projects and risks.")}</p></div></div>
+          <div className="operations-metrics">
+            <article className="metric-card"><span className="metric-label">{t("Total recorded expenses")}</span><strong>{money(totalExpenses, language)}</strong><small>{data.expenses.length} {t("expense records")}</small></article>
+            <article className="metric-card"><span className="metric-label">{t("Unpaid expenses")}</span><strong>{money(unpaidExpenses, language)}</strong><small>{t("Recorded as unpaid")}</small></article>
+            <article className="metric-card"><span className="metric-label">{t("Paid expenses")}</span><strong>{money(paidExpenses, language)}</strong><small>{t("Recorded as paid")}</small></article>
+            <article className="metric-card"><span className="metric-label">{t("Budget overruns")}</span><strong>{overBudgetCenters.length + projectsOverBudget.length}</strong><small>{t("Cost centres and active projects")}</small></article>
+          </div>
+          <div className="operations-section-heading"><div><h2>{t("Management alerts")}</h2><p>{t("Items that may need management attention.")}</p></div></div>
+          <div className="operations-risk-grid">
+            {overBudgetCenters.map((center) => <article className="operations-risk-card" key={`budget-${center.id}`}><div className="operations-risk-top"><span className="high">{t("Over budget")}</span><strong>{money(center.actualSpend - center.budget, language)}</strong></div><h3>{center.name}</h3><p>{t("Actual spend")}: {money(center.actualSpend, language)} / {money(center.budget, language)}</p><p>{t("Period")}: {center.period} · {t("Owner")}: {center.owner}</p></article>)}
+            {projectsOverBudget.map((project) => <article className="operations-risk-card" key={`project-${project.id}`}><div className="operations-risk-top"><span className="high">{t("Project overrun")}</span><strong>{money(project.spent - project.budget, language)}</strong></div><h3>{project.name}</h3><p>{t("Spent")}: {money(project.spent, language)} / {money(project.budget, language)}</p><p>{t("Owner")}: {project.owner}</p></article>)}
+            {openHighRisks.map((risk) => <article className="operations-risk-card" key={`risk-${risk.id}`}><div className="operations-risk-top"><span className="critical">{t("High-priority risk")} · {riskScore(risk)}/25</span></div><h3>{risk.title}</h3><p>{t("Owner")}: {risk.owner}</p><p>{t("Status")}: {t(risk.status === "open" ? "Open" : "Mitigating")}</p></article>)}
+            {overBudgetCenters.length + projectsOverBudget.length + openHighRisks.length === 0 && <div className="operations-empty">{t("No high-priority alerts based on the records currently entered.")}</div>}
+          </div>
+          <div className="operations-section-heading"><div><h2>{t("Cost-centre budget performance")}</h2><p>{t("Each budget period is shown separately. Full-year and quarterly figures are not added together.")}</p></div></div>
+          <div className="operations-table-wrap"><table className="operations-table"><thead><tr><th>{t("Cost centre")}</th><th>{t("Period")}</th><th>{t("Budget")}</th><th>{t("Actual spend")}</th><th>{t("Variance")}</th><th>{t("Utilisation")}</th></tr></thead><tbody>
+            {data.costCenters.map((center) => { const actual = costCenterActualSpend(center, data.expenses); const variance = center.budget - actual; const performance = costCenterPerformance({ ...center, actualSpend: actual }); return <tr key={center.id}><td><strong>{center.name}</strong><small className="operations-subline">{center.owner}</small></td><td>{center.period}</td><td>{money(center.budget, language)}</td><td>{money(actual, language)}</td><td className={variance < 0 ? "operations-negative" : ""}>{money(variance, language)}</td><td><span className={performance.overBudget ? "operations-negative" : ""}>{performance.utilizationPercent.toLocaleString(language === "es" ? "es-ES" : "en-IE")}%</span></td></tr>; })}
+          </tbody></table>{data.costCenters.length === 0 && <div className="operations-empty">{t("Add cost-centre budgets to see departmental performance.")}</div>}</div>
+          <div className="operations-section-heading"><div><h2>{t("Spend by category")}</h2><p>{t("Based on expense records; no external accounting transactions are included.")}</p></div></div>
+          <div className="operations-kpi-grid">{categorySpend.map(([category, amount]) => <article className="operations-kpi-card" key={category}><div className="operations-kpi-heading"><span>{category}</span><strong>{money(amount, language)}</strong></div><div className="operations-kpi-track"><i style={{ width: `${totalExpenses > 0 ? amount / totalExpenses * 100 : 0}%` }} /></div><div className="operations-kpi-foot"><span>{t("Share of recorded expenses")}</span><b>{(totalExpenses > 0 ? amount / totalExpenses * 100 : 0).toLocaleString(language === "es" ? "es-ES" : "en-IE", { maximumFractionDigits: 1 })}%</b></div></article>)}{categorySpend.length === 0 && <div className="operations-empty">{t("Add expenses to see a category breakdown.")}</div>}</div>
+          <p className="operations-note">{t("This report is calculated from data entered in this browser. Unpaid expenses are not automatically accounts payable, and the report does not represent audited financial statements or a bank reconciliation.")}</p>
         </>}
         {section === "expenses" && <>
           <div className="operations-section-heading"><div><div className="panel-kicker">{t("SPEND MANAGEMENT")}</div><h2>{t("Expense register")}</h2><p>{t("Record department expenses and automatically roll them into the matching cost-centre budget.")}</p></div></div>
