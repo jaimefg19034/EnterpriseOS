@@ -101,7 +101,18 @@ Expenses are entered as positive amounts. D&A is excluded from operating expense
 - Profit before tax = EBIT − interest expense
 - Income tax = max(0, profit before tax × tax rate)
 - Net income = profit before tax − income tax
-- Each margin = corresponding profit / revenue\n\nThree-statement links:\n- Closing receivables = revenue / 365 × DSO.\n- Closing inventory = COGS / 365 × DIO.\n- Closing payables = COGS / 365 × DPO.\n- Cash from operations = net income + D&A − Δreceivables − Δinventory + Δpayables.\n- Cash from investing = −CapEx.\n- Cash from financing = new borrowings − debt repayment − dividends.\n- Closing cash = opening cash + net cash movement; negative cash is presented as an overdraft liability.\n- Closing net PP&E = opening net PP&E + CapEx − D&A.\n- Closing retained earnings = opening retained earnings + net income − dividends.
+- Each margin = corresponding profit / revenue
+
+Three-statement links:
+- Closing receivables = revenue / 365 × DSO.
+- Closing inventory = COGS / 365 × DIO.
+- Closing payables = COGS / 365 × DPO.
+- Cash from operations = net income + D&A − Δreceivables − Δinventory + Δpayables.
+- Cash from investing = −CapEx.
+- Cash from financing = new borrowings − debt repayment − dividends.
+- Closing cash = opening cash + net cash movement; negative cash is presented as an overdraft liability.
+- Closing net PP&E = opening net PP&E + CapEx − D&A.
+- Closing retained earnings = opening retained earnings + net income − dividends.
 
 This is a simplified management model. Real accounting policies, lease treatment, exceptional items, capitalisation, tax losses, deferred tax and jurisdiction-specific rules require further modelling and professional review.
 
