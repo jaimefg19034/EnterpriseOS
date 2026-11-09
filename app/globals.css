@@ -1273,3 +1273,43 @@ button:focus-visible, input:focus-visible {
 .working-capital-import-preview p { color: #8793a5; font-size: 9px; }
 
 
+
+
+/* In-page navigation for long planning workspaces */
+.planning-section-nav {
+  position: sticky;
+  top: 10px;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 8px;
+  margin: 14px 0 18px;
+  border: 1px solid rgba(142, 160, 190, .18);
+  border-radius: 12px;
+  background: rgba(13, 22, 39, .92);
+  backdrop-filter: blur(14px);
+  scrollbar-width: thin;
+}
+.planning-section-nav a {
+  flex: 0 0 auto;
+  padding: 8px 11px;
+  border-radius: 8px;
+  color: #aebbd0;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 650;
+  transition: background .18s ease, color .18s ease;
+}
+.planning-section-nav a:hover,
+.planning-section-nav a:focus-visible {
+  color: #fff;
+  background: rgba(112, 143, 220, .18);
+  outline: none;
+}
+.planning-workspace [id^="planning-"] { scroll-margin-top: 88px; }
+@media (max-width: 700px) {
+  .planning-section-nav { top: 4px; margin-inline: -2px; }
+  .planning-section-nav a { padding: 8px 9px; font-size: 10px; }
+}
