@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { translate, type Language } from "@/i18n/translations";
-import { isDateWithinReportingPeriodCode, isValidISODate } from "@/domain/reporting-periods";
+import { isDateWithinReportingPeriodCode, isValidISODate, isValidReportingPeriodCode } from "@/domain/reporting-periods";
 import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, costCenterActualSpend, costCenterPerformance, costCenterRunRate, kpiPerformance, projectBudgetVariance, riskScore, weightedPipeline, type BusinessKpi, type CostCenterBudget, type ExpenseRecord, type BusinessRisk, type Opportunity, type OpportunityStage, type OperationsState, type Project, type ProjectStatus } from "@/domain/operations";
 
 type Section = "sales" | "projects" | "risks" | "kpis" | "cost-centers" | "expenses" | "reports";
