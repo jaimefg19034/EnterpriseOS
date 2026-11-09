@@ -7,6 +7,8 @@ import {
   type CashForecastWeekInput,
 } from "@/domain/cash-forecast";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
+import { allocateInvoicesToCashWeeks } from "@/domain/invoice-cash-integration";
+import { normaliseInvoice, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { translate, type Language } from "@/i18n/translations";
 
 type CashForecastWorkspaceProps = {
@@ -15,6 +17,34 @@ type CashForecastWorkspaceProps = {
 };
 
 const STORAGE_KEY = "enterpriseos:cash-forecast:v1";
+const INVOICE_STORAGE_KEY = "enterpriseos:working-capital:v1";
+const INVOICE_UPDATED_EVENT = "enterpriseos:working-capital-updated";
+
+function toISODate(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function readStoredInvoices(): WorkingCapitalInvoice[] {
+  try {
+    const raw = window.localStorage.getItem(INVOICE_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is WorkingCapitalInvoice =>
+      item && typeof item === "object" &&
+      ((item as WorkingCapitalInvoice).direction === "receivable" || (item as WorkingCapitalInvoice).direction === "payable") &&
+      typeof (item as WorkingCapitalInvoice).id === "string" &&
+      typeof (item as WorkingCapitalInvoice).counterparty === "string" &&
+      typeof (item as WorkingCapitalInvoice).reference === "string" &&
+      typeof (item as WorkingCapitalInvoice).issueDate === "string" &&
+      typeof (item as WorkingCapitalInvoice).dueDate === "string" &&
+      typeof (item as WorkingCapitalInvoice).amount === "number" &&
+      typeof (item as WorkingCapitalInvoice).paidAmount === "number"
+    ).map(normaliseInvoice);
+  } catch {
+    return [];
+  }
+}
 
 const FIELDS: { key: keyof CashForecastWeekInput; label: string; short: string }[] = [
   { key: "collections", label: "Customer collections", short: "Collections" },
@@ -82,6 +112,8 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
   const t = (value: string) => translate(value, language);
   const [weeks, setWeeks] = useState<CashForecastWeekInput[]>(() => createEmptyCashForecast(13));
   const [storageReady, setStorageReady] = useState(false);
+  const [invoices, setInvoices] = useState<WorkingCapitalInvoice[]>([]);
+  const [includeInvoices, setIncludeInvoices] = useState(false);
 
   useEffect(() => {
     let restored: CashForecastWeekInput[] | null = null;
@@ -123,9 +155,40 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
     }
   }, [weeks, storageReady]);
 
-  const results = useMemo(() => calculateCashForecast(openingCash, weeks), [openingCash, weeks]);
+  useEffect(() => {
+    const refreshInvoices = () => setInvoices(readStoredInvoices());
+    refreshInvoices();
+    window.addEventListener(INVOICE_UPDATED_EVENT, refreshInvoices);
+    window.addEventListener("storage", refreshInvoices);
+    return () => {
+      window.removeEventListener(INVOICE_UPDATED_EVENT, refreshInvoices);
+      window.removeEventListener("storage", refreshInvoices);
+    };
+  }, []);
+
   const start = useMemo(() => mondayOf(new Date()), []);
   const dates = useMemo(() => Array.from({ length: 13 }, (_, index) => addDays(start, index * 7)), [start]);
+  const invoiceProjection = useMemo(
+    () => allocateInvoicesToCashWeeks(invoices, toISODate(start), 13),
+    [invoices, start],
+  );
+  const forecastWeeks = useMemo(() => weeks.map((week, index) => includeInvoices ? ({
+    ...week,
+    collections: week.collections + invoiceProjection[index].receivableCollections,
+    operatingPayments: week.operatingPayments + invoiceProjection[index].payablePayments,
+  }) : week), [weeks, invoiceProjection, includeInvoices]);
+  const results = useMemo(() => calculateCashForecast(openingCash, forecastWeeks), [openingCash, forecastWeeks]);
+  const invoiceTotals = useMemo(() => invoiceProjection.reduce((total, week) => ({
+    receivables: total.receivables + week.receivableCollections,
+    payables: total.payables + week.payablePayments,
+    overdueReceivables: total.overdueReceivables + week.overdueReceivables,
+    overduePayables: total.overduePayables + week.overduePayables,
+    receivableCount: total.receivableCount + week.receivableCount,
+    payableCount: total.payableCount + week.payableCount,
+  }), { receivables: 0, payables: 0, overdueReceivables: 0, overduePayables: 0, receivableCount: 0, payableCount: 0 }), [invoiceProjection]);
+  const invoiceWeeksWithActivity = invoiceProjection.flatMap((week, index) =>
+    week.receivableCollections > 0 || week.payablePayments > 0 ? [{ week, index }] : [],
+  );
   const finalCash = results.at(-1)?.closingCash ?? openingCash;
   const lowestCash = Math.min(openingCash, ...results.map((week) => week.closingCash));
   const firstNegative = results.findIndex((week) => week.closingCash < 0);
@@ -144,15 +207,39 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
       sheets: [{
         name: t("Quarterly cash forecast"),
         title: t("EnterpriseOS — Quarterly cash forecast"),
-        subtitle: t("Direct-method forecast · EUR · User-entered weekly estimates, not actual transactions"),
-        headers: [t("Week starting"), ...FIELDS.map((field) => t(field.label)), t("Net cash movement"), t("Closing cash")],
-        widths: [18, 22, 22, 22, 22, 22, 22],
-        currencyColumns: [2, 3, 4, 5, 6, 7],
+        subtitle: t("Direct-method forecast · EUR · Manual estimates plus separately identified invoice schedule"),
+        headers: [
+          t("Week starting"), t("Manual collections"), t("Invoice collections included"),
+          t("Manual operating payments"), t("Invoice payments included"),
+          t("Capital expenditure"), t("Debt service"), t("Net cash movement"), t("Closing cash"),
+        ],
+        widths: [18, 22, 22, 24, 22, 22, 18, 22, 22],
+        currencyColumns: [2, 3, 4, 5, 6, 7, 8, 9],
         totalLabels: [t("Net cash movement"), t("Closing cash")],
         rows: results.map((week, index) => [
           dates[index].toLocaleDateString(language === "es" ? "es-ES" : "en-GB"),
-          week.collections, week.operatingPayments, week.capitalExpenditure, week.debtService,
+          weeks[index].collections,
+          includeInvoices ? invoiceProjection[index].receivableCollections : 0,
+          weeks[index].operatingPayments,
+          includeInvoices ? invoiceProjection[index].payablePayments : 0,
+          weeks[index].capitalExpenditure, weeks[index].debtService,
           week.netCashMovement, week.closingCash,
+        ]),
+      }, {
+        name: t("Invoice cash schedule"),
+        title: t("EnterpriseOS — Invoice cash schedule"),
+        subtitle: t("Open invoice balances by due date · Preview only unless enabled in the cash forecast"),
+        headers: [
+          t("Week starting"), t("Receivable collections"), t("Payable payments"),
+          t("Overdue receivables"), t("Overdue payables"),
+          t("Receivable invoices"), t("Payable invoices"),
+        ],
+        widths: [18, 22, 22, 22, 22, 20, 20],
+        currencyColumns: [2, 3, 4, 5],
+        rows: invoiceProjection.map((week, index) => [
+          dates[index].toLocaleDateString(language === "es" ? "es-ES" : "en-GB"),
+          week.receivableCollections, week.payablePayments, week.overdueReceivables,
+          week.overduePayables, week.receivableCount, week.payableCount,
         ]),
       }],
     });
@@ -171,6 +258,43 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
           <button type="button" className="primary-button" onClick={exportForecast}>{t("Export forecast")}</button>
         </div>
       </div>
+
+      <section className="panel cash-forecast-invoice-panel" aria-labelledby="invoice-cash-integration-title">
+        <div className="cash-forecast-invoice-head">
+          <div>
+            <span className="panel-kicker">{t("RECEIVABLES & PAYABLES")}</span>
+            <h3 id="invoice-cash-integration-title">{t("Bring invoices into the cash forecast")}</h3>
+            <p>{t("Open customer invoices become expected collections; open supplier invoices become operating payments, based on their due dates.")}</p>
+          </div>
+          <label className="cash-forecast-invoice-toggle">
+            <input type="checkbox" checked={includeInvoices} onChange={(event) => setIncludeInvoices(event.target.checked)} />
+            <span>{t("Include open invoices")}</span>
+          </label>
+        </div>
+        <div className="cash-forecast-invoice-summary">
+          <div><span>{t("Open receivables · 13 weeks")}</span><strong>{formatMoney(invoiceTotals.receivables, language)}</strong><small>{invoiceTotals.receivableCount} {t("invoices")}</small></div>
+          <div><span>{t("Open payables · 13 weeks")}</span><strong>{formatMoney(invoiceTotals.payables, language)}</strong><small>{invoiceTotals.payableCount} {t("invoices")}</small></div>
+          <div><span>{t("Overdue receivables / payables")}</span><strong>{formatMoney(invoiceTotals.overdueReceivables, language)} / {formatMoney(invoiceTotals.overduePayables, language)}</strong><small>{t("Overdue balances placed in Week 1")}</small></div>
+        </div>
+        {invoiceWeeksWithActivity.length > 0 ? (
+          <div className="cash-forecast-invoice-schedule">
+            <div className="cash-forecast-invoice-schedule-title">{t("Invoice due-date preview")}</div>
+            {invoiceWeeksWithActivity.map(({ week, index }) => (
+              <div className="cash-forecast-invoice-row" key={index}>
+                <span>{t("Week")} {index + 1} · {dates[index].toLocaleDateString(language === "es" ? "es-ES" : "en-GB", { day: "2-digit", month: "short" })}</span>
+                <span>{t("Collections")}: <strong>{formatMoney(week.receivableCollections, language)}</strong></span>
+                <span>{t("Payments")}: <strong>{formatMoney(week.payablePayments, language)}</strong></span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="cash-forecast-invoice-empty">{t("No open invoices fall within this quarter. Add invoices in Receivables & Payables to preview their cash impact.")}</p>
+        )}
+        <p className="cash-forecast-invoice-note">
+          {t("Preview only until enabled. Past-due balances are scheduled in Week 1; invoices after this quarter are excluded.")}
+          {" "}{t("Linked invoice amounts are added to manual estimates. Remove the same invoice amounts from manual inputs to avoid double counting.")}
+        </p>
+      </section>
 
       <div className="cash-forecast-kpis">
         <article className="panel"><span>{t("Opening cash")}</span><strong>{formatMoney(openingCash, language)}</strong><small>{t("Linked to the closing cash in the three-statement model")}</small></article>
@@ -192,7 +316,11 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
               {results.map((week, index) => (
                 <tr key={index}>
                   <th scope="row">{dates[index].toLocaleDateString(language === "es" ? "es-ES" : "en-GB", { day: "2-digit", month: "short" })}</th>
-                  {FIELDS.map((field) => <td key={field.key}><label className="cash-forecast-input-wrap"><span className="sr-only">{t(field.label)} — {t("Week")} {index + 1}</span><input type="number" min="0" step="100" inputMode="decimal" value={week[field.key] || ""} placeholder="0" onChange={(event) => updateWeek(index, field.key, event.target.value)} /></label></td>)}
+                  {FIELDS.map((field) => <td key={field.key}>
+                    <label className="cash-forecast-input-wrap"><span className="sr-only">{t(field.label)} — {t("Week")} {index + 1}</span><input type="number" min="0" step="100" inputMode="decimal" value={week[field.key] || ""} placeholder="0" onChange={(event) => updateWeek(index, field.key, event.target.value)} /></label>
+                    {includeInvoices && field.key === "collections" && invoiceProjection[index].receivableCollections > 0 && <small className="cash-forecast-linked-amount">+{formatMoney(invoiceProjection[index].receivableCollections, language)} {t("invoices")}</small>}
+                    {includeInvoices && field.key === "operatingPayments" && invoiceProjection[index].payablePayments > 0 && <small className="cash-forecast-linked-amount">+{formatMoney(invoiceProjection[index].payablePayments, language)} {t("invoices")}</small>}
+                  </td>)}
                   <td className={week.netCashMovement < 0 ? "negative" : "positive"}>{formatMoney(week.netCashMovement, language)}</td>
                   <td className={week.closingCash < 0 ? "negative closing-cash" : "closing-cash"}>{formatMoney(week.closingCash, language)}</td>
                 </tr>
@@ -200,7 +328,7 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
             </tbody>
           </table>
         </div>
-        <div className="cash-forecast-footnote">{t("This is a planning worksheet, not a bank feed. No transactions are generated or assumed. Your entries are saved only in this browser and are not shared with a company team or synced to a server.")}</div>
+        <div className="cash-forecast-footnote">{t("This is a planning worksheet, not a bank feed. No transactions are generated or assumed. Manual entries and invoice projections remain separate; changes are saved only in this browser and are not shared with a company team or synced to a server.")}</div>
       </div>
     </section>
   );
