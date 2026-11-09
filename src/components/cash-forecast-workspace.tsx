@@ -61,7 +61,7 @@ function CashBalanceChart({ values, openingCash, language }: {
         <div><h3>{translate("Projected cash balance", language)}</h3><p>{translate("Opening cash plus the cumulative weekly net movements.", language)}</p></div>
         <strong>{formatMoney(values.at(-1) ?? openingCash, language)}</strong>
       </div>
-      <svg className="cash-forecast-svg" viewBox="0 0 720 180" role="img" aria-label={translate("13-week projected cash balance chart", language)}>
+      <svg className="cash-forecast-svg" viewBox="0 0 720 180" role="img" aria-label={translate("Quarterly projected cash balance chart", language)}>
         <line x1="24" y1={zeroY} x2="696" y2={zeroY} stroke="#dce3ee" strokeDasharray="4 5" />
         {[0, 1, 2, 3].map((tick) => {
           const value = min + (range * tick) / 3;
@@ -102,7 +102,7 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
               debtService: amount("debtService"),
             };
           });
-          setWeeks(restored);
+          window.setTimeout(() => setWeeks(restored), 0);
         }
       }
     } catch {
@@ -138,10 +138,10 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
 
   async function exportForecast() {
     await downloadExcelWorkbook({
-      filename: "enterpriseos-13-week-cash-forecast.xlsx",
+      filename: "enterpriseos-quarterly-cash-forecast.xlsx",
       sheets: [{
-        name: t("13-week cash forecast"),
-        title: t("EnterpriseOS — 13-week cash forecast"),
+        name: t("Quarterly cash forecast"),
+        title: t("EnterpriseOS — Quarterly cash forecast"),
         subtitle: t("Direct-method forecast · EUR · User-entered weekly estimates, not actual transactions"),
         headers: [t("Week starting"), ...FIELDS.map((field) => t(field.label)), t("Net cash movement"), t("Closing cash")],
         widths: [18, 22, 22, 22, 22, 22, 22],
@@ -161,7 +161,7 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
       <div className="cash-forecast-heading">
         <div>
           <span className="panel-kicker">{t("SHORT-TERM LIQUIDITY")}</span>
-          <h2 id="cash-forecast-title">{t("13-week cash flow forecast")}</h2>
+          <h2 id="cash-forecast-title">{t("Quarterly cash flow forecast")}</h2>
           <p>{t("Plan expected cash collections and payments week by week to anticipate liquidity pressure.")}</p>
         </div>
         <div className="cash-forecast-actions">
@@ -181,7 +181,7 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
       <div className="panel cash-forecast-table-card">
         <div className="cash-forecast-table-heading">
           <div><h3>{t("Weekly cash plan")}</h3><p>{t("Enter positive amounts. Payments are deducted automatically from the cash balance.")}</p></div>
-          <span>{t("13 WEEKS")}</span>
+          <span>{t("13 WEEKS · 1 QUARTER")}</span>
         </div>
         <div className="cash-forecast-table-scroll">
           <table className="cash-forecast-table">
