@@ -175,7 +175,11 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
           widths: [26, 20, 16, 16, 18, 18, 18, 18],
           dateColumns: [3, 4],
           currencyColumns: [5, 6, 7],
-          rows: aged.map((row) => [row.invoice.counterparty, row.invoice.reference, excelDate(row.invoice.issueDate), excelDate(row.invoice.dueDate), row.invoice.amount, row.invoice.paidAmount, row.outstanding, t(row.bucket)]),
+          totalLabels: [t("TOTAL")],
+          rows: [
+            ...aged.map((row) => [row.invoice.counterparty, row.invoice.reference, excelDate(row.invoice.issueDate), excelDate(row.invoice.dueDate), row.invoice.amount, row.invoice.paidAmount, row.outstanding, t(row.bucket)]),
+            [t("TOTAL"), "", "", "", aged.reduce((total, row) => total + row.invoice.amount, 0), aged.reduce((total, row) => total + row.invoice.paidAmount, 0), summary.outstanding, ""],
+          ],
         },
         {
           name: t("Payment movements"),
@@ -185,7 +189,9 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
           widths: [18, 30, 26, 20, 20, 40],
           dateColumns: [1],
           currencyColumns: [5],
-          rows: aged.flatMap(({ invoice }) => {
+          totalLabels: [t("Total paid amount")],
+          rows: [
+            ...aged.flatMap(({ invoice }) => {
             const recorded = invoice.payments ?? [];
             const recordedTotal = recorded.reduce((total, payment) => total + payment.amount, 0);
             const legacyBalance = Math.max(0, Math.round((invoice.paidAmount - recordedTotal + Number.EPSILON) * 100) / 100);
@@ -200,7 +206,29 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
                 t("Legacy paid balance without transaction date"),
               ]] : []),
             ];
-          }),
+            }),
+            [t("Total paid amount"), "", "", "", aged.reduce((total, row) => total + row.invoice.paidAmount, 0), t("Includes dated and undated paid balances")],
+          ],
+        },
+        {
+          name: t("Ageing summary"),
+          title: `EnterpriseOS — ${t("Ageing summary")}`,
+          subtitle: t("Open invoice balances by ageing bucket · EUR · User-entered records"),
+          headers: [t("Metric"), t("Balance")],
+          widths: [36, 22],
+          currencyColumns: [2],
+          totalLabels: [t("Outstanding")],
+          rows: [
+            [t("Outstanding"), summary.outstanding],
+            [t("Overdue"), summary.overdue],
+            [t("Due in 7 days"), summary.dueNext7Days],
+            [t("Due in 30 days"), summary.dueNext30Days],
+            [t("Not due"), summary.buckets.notDue],
+            [t("1–30 days"), summary.buckets["1to30"]],
+            [t("31–60 days"), summary.buckets["31to60"]],
+            [t("61–90 days"), summary.buckets["61to90"]],
+            [t("90+ days"), summary.buckets.over90],
+          ],
         },
       ],
     });
