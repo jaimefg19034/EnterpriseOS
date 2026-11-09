@@ -10,13 +10,16 @@ Our first customer hypothesis is finance teams and owner-operators at small and 
 
 ### MVP: one workflow, done well
 
-The first release focuses on a dependable management P&L model:
+The first release focuses on a dependable management P&L model and a lightweight budget/scenario workflow:
 
 - Edit the key operating assumptions in a guided form.
 - Recalculate gross profit, EBITDA, EBIT, pre-tax profit and net income immediately.
 - See the key performance indicators and a monthly trend.
 - Export a clean CSV for use in existing workflows.
 - Work with clearly labelled sample data until secure persistence is implemented.
+- Compare monthly revenue actuals against a seasonal budget.
+- Model base, upside and downside scenarios for the remaining forecast months.
+- Review a full-year modelled EBITDA and net income projection.
 
 ### Explicitly out of scope for the first release
 
@@ -62,6 +65,9 @@ app/
 src/
   domain/
     financials.ts
+    planning.ts
+  components/
+    planning-workspace.tsx
 docs/
   architecture.md
 ```
