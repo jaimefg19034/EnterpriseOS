@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createEmptyCashForecast } from "./cash-forecast";
 import { createLocalFinanceBackup, parseLocalFinanceBackup } from "./cash-working-capital-backup";
 import type { WorkingCapitalInvoice } from "./working-capital";
-import { parseSavedPlanningState, serialisePlanningState } from "./planning-storage";
+import { addPlanningYear, createInitialPlanningState, parseSavedPlanningState, serialisePlanningState } from "./planning-storage";
 
 const invoice = (overrides: Partial<WorkingCapitalInvoice> = {}): WorkingCapitalInvoice => ({
   id: "invoice-1",
@@ -73,7 +73,7 @@ describe("local finance backup", () => {
     const restored = parseLocalFinanceBackup(JSON.stringify(versionOne));
     expect(restored.ok).toBe(true);
     if (!restored.ok) return;
-    expect(restored.data.schemaVersion).toBe(2);
+    expect(restored.data.schemaVersion).toBe(3);
     expect(restored.data.workingCapitalInvoices[0].paidAmount).toBe(250);
     expect(restored.data.workingCapitalInvoices[0].payments).toEqual([]);
   });
@@ -90,7 +90,7 @@ describe("local finance backup", () => {
     expect(parseLocalFinanceBackup(JSON.stringify(invalidDate)).ok).toBe(false);
   });
 
-  it("includes and restores the saved planning model", () => {
+  it("migrates version 1 and 2 backups with the legacy flat planning model", () => {
     const assumptions = {
       annualRevenueBudget: 2_976_000,
       costOfGoodsSoldPercent: 39,
@@ -99,18 +99,44 @@ describe("local finance backup", () => {
       annualInterestExpense: 50_400,
       taxRatePercent: 25,
     };
-    const planning = parseSavedPlanningState(serialisePlanningState(
+    const legacyPlanning = {
       assumptions,
-      { Jan: 250_000, Feb: null },
-      "upside",
-      "2026-11-09T14:00:00.000Z",
-    ));
+      actualRevenue: { Jan: 250_000, Feb: null },
+      scenario: "upside",
+      savedAt: "2026-11-09T14:00:00.000Z",
+    };
+    const current = createLocalFinanceBackup([invoice()], createEmptyCashForecast(13));
+    for (const version of [1, 2]) {
+      const oldBackup = { ...current, schemaVersion: version, planningState: legacyPlanning };
+      const restored = parseLocalFinanceBackup(JSON.stringify(oldBackup));
+      expect(restored.ok).toBe(true);
+      if (!restored.ok) continue;
+      expect(restored.data.schemaVersion).toBe(3);
+      expect(restored.data.planningState?.selectedYear).toBe(2026);
+      expect(restored.data.planningState?.years["2026"].actualRevenue.Jan).toBe(250_000);
+      expect(restored.data.planningState?.years["2026"].scenario).toBe("upside");
+    }
+  });
+
+  it("includes and restores the saved multi-year planning model", () => {
+    const assumptions = {
+      annualRevenueBudget: 2_976_000,
+      costOfGoodsSoldPercent: 39,
+      annualOperatingExpenses: 1_060_800,
+      annualDepreciationAndAmortisation: 150_000,
+      annualInterestExpense: 50_400,
+      taxRatePercent: 25,
+    };
+    const initial = createInitialPlanningState(assumptions, { Jan: 250_000, Feb: null }, "upside", "2026-11-09T14:00:00.000Z");
+    const planning = parseSavedPlanningState(serialisePlanningState(addPlanningYear(initial, 2027)!, "2026-11-09T15:00:00.000Z"));
     const backup = createLocalFinanceBackup([], createEmptyCashForecast(13), undefined, planning);
     const restored = parseLocalFinanceBackup(JSON.stringify(backup));
     expect(restored.ok).toBe(true);
     if (!restored.ok) return;
-    expect(restored.data.planningState?.scenario).toBe("upside");
-    expect(restored.data.planningState?.actualRevenue.Jan).toBe(250_000);
+    expect(restored.data.planningState?.selectedYear).toBe(2027);
+    expect(restored.data.planningState?.years["2026"].scenario).toBe("upside");
+    expect(restored.data.planningState?.years["2026"].actualRevenue.Jan).toBe(250_000);
+    expect(restored.data.planningState?.years["2027"].actualRevenue.Jan).toBeNull();
   });
 
   it("rejects a corrupted planning model inside an otherwise valid backup", () => {
