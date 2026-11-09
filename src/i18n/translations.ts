@@ -1,6 +1,7 @@
 export type Language = "en" | "es";
 
 const spanish: Record<string, string> = {
+  "Open workspace information": "Abrir información del espacio de trabajo",
   "Close": "Cerrar",
   "WORKSPACE INFORMATION": "INFORMACIÓN DEL ESPACIO DE TRABAJO",
   "Reporting period": "Periodo de información",
