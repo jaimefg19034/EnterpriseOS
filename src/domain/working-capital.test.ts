@@ -3,14 +3,14 @@ import { calculateInvoiceAgeing, summarizeInvoices, type WorkingCapitalInvoice }
 
 const invoice = (overrides: Partial<WorkingCapitalInvoice> = {}): WorkingCapitalInvoice => ({
   id: "inv-1", direction: "receivable", counterparty: "Acme", reference: "INV-1",
-  issueDate: "2026-10-01", dueDate: "2026-10-10", amount: 1000, paidAmount: 200, ...overrides,
+  issueDate: "2026-10-01", dueDate: "2026-10-01", amount: 1000, paidAmount: 200, ...overrides,
 });
 
 describe("working capital invoice ageing", () => {
   it("assigns overdue balances to the correct ageing bucket", () => {
     const rows = calculateInvoiceAgeing([
       invoice(),
-      invoice({ id: "2", dueDate: "2026-09-20" }),
+      invoice({ id: "2", dueDate: "2026-08-01" }),
       invoice({ id: "3", dueDate: "2026-07-01" }),
     ], "2026-11-09");
     expect(rows.map((row) => row.bucket)).toEqual(["31to60", "over90", "over90"]);
