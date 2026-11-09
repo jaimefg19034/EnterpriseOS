@@ -102,7 +102,7 @@ export function isDateWithinReportingPeriodCode(
   periodCode: string,
   fiscalYearStartMonth = 1,
 ): boolean {
-  const match = /^(\\d{4})-(FY|Q[1-4])$/.exec(periodCode);
+  const match = /^(\d{4})-(FY|Q[1-4])$/.exec(periodCode);
   if (!match) return false;
   const bounds = getReportingPeriodBounds(
     Number(match[1]),
