@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { PlanningWorkspace } from "@/components/planning-workspace";
 import { translate, type Language } from "@/i18n/translations";
 import {
@@ -12,6 +12,26 @@ import {
 
 type View = "overview" | "model" | "planning" | "reports";
 type InputKey = keyof FinancialInputs;
+
+const LANGUAGE_CHANGE_EVENT = "enterpriseos-language-change";
+
+function subscribeToLanguage(onStoreChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener(LANGUAGE_CHANGE_EVENT, onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+  return () => {
+    window.removeEventListener(LANGUAGE_CHANGE_EVENT, onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+  };
+}
+
+function getLanguageSnapshot(): Language {
+  return typeof window !== "undefined" && window.localStorage.getItem("enterpriseos-language") === "es" ? "es" : "en";
+}
+
+function getServerLanguageSnapshot(): Language {
+  return "en";
+}
 
 const DEMO_INPUTS: FinancialInputs = {
   revenue: 248000,
@@ -276,16 +296,18 @@ function MetricCard({
 
 export default function Home() {
   const [view, setView] = useState<View>("overview");
-  const [language, setLanguage] = useState<Language>("en");
+  const language = useSyncExternalStore(
+    subscribeToLanguage,
+    getLanguageSnapshot,
+    getServerLanguageSnapshot,
+  );
+  const setLanguage = (nextLanguage: Language) => {
+    window.localStorage.setItem("enterpriseos-language", nextLanguage);
+    window.dispatchEvent(new Event(LANGUAGE_CHANGE_EVENT));
+  };
   const t = (value: string) => translate(value, language);
 
   useEffect(() => {
-    const savedLanguage = window.localStorage.getItem("enterpriseos-language");
-    if (savedLanguage === "en" || savedLanguage === "es") setLanguage(savedLanguage);
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem("enterpriseos-language", language);
     document.documentElement.lang = language;
   }, [language]);
   const [inputs, setInputs] = useState<FinancialInputs>(DEMO_INPUTS);
