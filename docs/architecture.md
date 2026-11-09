@@ -7,12 +7,12 @@
 
 The first customer hypothesis is an SME finance lead or owner who repeatedly assembles a management profit-and-loss statement from spreadsheets.
 
-The MVP proves one narrow workflow:
+The MVP proves two connected finance workflows:
 
-1. Enter six operating assumptions for a reporting period.
-2. Calculate a consistent management P&L.
-3. Review the resulting margins and headline KPIs.
-4. Export the statement as CSV.
+1. Enter six operating assumptions and calculate a management P&L.
+2. Compare monthly revenue actuals with a seasonally allocated annual budget.
+3. Stress-test the remaining forecast months using base, upside and downside scenarios.
+4. Review a modelled full-year profitability projection and export the plan as CSV.
 
 The app is deliberately not a general-purpose spreadsheet. No customer financial data is persisted in this first iteration.
 
@@ -22,6 +22,9 @@ The app is deliberately not a general-purpose spreadsheet. No customer financial
 - Typed financial input model.
 - Pure, independently testable calculation functions.
 - Live management P&L and margin calculations.
+- Monthly revenue budget vs editable revenue actuals.
+- Scenario-adjusted revenue forecast for remaining months.
+- Full-year modelled EBITDA, EBIT and net income.
 - CSV export with values and formula descriptions.
 - Clear demo-data and non-statutory-accounting disclosures.
 - Automated type, lint and production-build checks before each release.
@@ -31,7 +34,7 @@ The app is deliberately not a general-purpose spreadsheet. No customer financial
 - Authentication and company workspaces.
 - Persistent models, version history and audit events.
 - Excel import and export with formula/value validation.
-- Monthly and quarterly periods, budgets and scenarios.
+- Monthly and quarterly periods beyond the initial FY 2026 revenue plan.
 - Accounting integrations and controlled data ingestion.
 - Team permissions and approval workflows.
 - AI-assisted explanations and model creation.
@@ -58,12 +61,26 @@ User edits an input
 React component state (demo data in browser memory)
       |
       v
-calculateFinancials() — pure domain function
+calculateFinancials() / buildPlanningResult() — pure domain functions
       |
       +----> KPI cards / chart summaries
       |
       +----> Management P&L rows
       |
+      +----> CSV export
+
+Budget & scenarios:
+
+User edits assumptions / monthly revenue actuals / scenario
+      |
+      v
+React component state (sample data in browser memory)
+      |
+      v
+buildPlanningResult() — pure domain function
+      |
+      +----> monthly budget vs actual / forecast
+      +----> annual profitability projection
       +----> CSV export
 ```
 
@@ -110,9 +127,9 @@ Supabase's current Next.js SSR guidance uses cookie-backed sessions and separate
 - First responsive workspace and demo P&L.
 - CSV export and visible limitations.
 
-### Phase 1 — correctness and usability
-- Add unit tests for positive, zero-revenue, loss-making, tax-rate and invalid-input cases.
-- Add model input validation and number formatting tests.
+### Phase 1 — correctness and usability (in progress)
+- Unit tests cover management P&L, monthly budget allocation, scenarios, zero revenue and invalid assumptions.
+- Add deeper model input validation and number formatting tests.
 - Add accessible labels, keyboard flows and mobile QA.
 - Verify build and deployment with CI.
 
@@ -133,8 +150,8 @@ Supabase's current Next.js SSR guidance uses cookie-backed sessions and separate
 
 ## 7. Primary technical risk and mitigation
 
-**Risk:** users may expect accounting-grade correctness from generic financial labels, while actual company reporting conventions differ.
+**Risk:** users may mistake scenario-driven profitability outputs for booked actual results. In this release, monthly revenue actuals are editable, but historical COGS and operating expenses are not supplied as actuals; annual profitability remains a modelled estimate.
 
-**Mitigation:** keep the first model narrow, show formulas and assumptions, use explicit definitions for each line item, add automated calculation tests, and have an accountant/finance professional review model semantics before a paid production pilot.
+**Mitigation:** label historical revenue separately from forecast and modelled profitability, disclose the cost assumptions on screen and in exports, show scenario definitions, add automated calculation tests, and have an accountant/finance professional review model semantics before a paid production pilot.
 
 The hardest future technical task is reliable spreadsheet ingestion and formula compatibility. Do not build a formula engine prematurely. Start with structured templates and validated CSV/XLSX import for one customer workflow.
