@@ -31,8 +31,8 @@ function validId(value: unknown): value is string {
 }
 export function validateOperationsState(value: unknown): value is OperationsState {
   if (!isRecord(value)) return false;
-  const { opportunities, projects, risks, kpis } = value;
-  if (![opportunities, projects, risks, kpis].every(Array.isArray)) return false;
+  const { opportunities, projects, risks, kpis, costCenters = [] } = value;
+  if (![opportunities, projects, risks, kpis, costCenters].every(Array.isArray)) return false;
   const ids: string[] = [];
   for (const row of opportunities as unknown[]) {
     if (!isRecord(row) || !validId(row.id) || !validText(row.company, 120) ||
@@ -62,7 +62,11 @@ export function validateOperationsState(value: unknown): value is OperationsStat
       !validText(row.unit, 20) || (row.direction !== undefined && !["higher", "lower"].includes(String(row.direction)))) return false;
     ids.push(row.id);
   }
-  for (const row of costCenters as unknown[]) {\n    if (!isRecord(row) || !validId(row.id) || !validText(row.name, 100) || !validText(row.owner, 100) || !validMoney(row.budget) || !validMoney(row.actualSpend) || !/^\\d{4}-(Q[1-4]|FY)$/.test(String(row.period))) return false;\n    ids.push(row.id);\n  }\n  return new Set(ids).size === ids.length;
+  for (const row of costCenters as unknown[]) {
+    if (!isRecord(row) || !validId(row.id) || !validText(row.name, 100) || !validText(row.owner, 100) || !validMoney(row.budget) || !validMoney(row.actualSpend) || !/^\d{4}-(Q[1-4]|FY)$/.test(String(row.period))) return false;
+    ids.push(row.id);
+  }
+  return new Set(ids).size === ids.length;
 }
 export function parseOperationsState(raw: string | null): OperationsState | null {
   if (!raw) return null;
@@ -95,4 +99,7 @@ export function kpiPerformance(kpi: BusinessKpi): { ratio: number; onTarget: boo
   }
   return { ratio: Math.min(150, ratio), onTarget, variance: Math.round((kpi.actual - kpi.target) * 100) / 100 };
 }
-\nexport function costCenterPerformance(item: CostCenterBudget): { remaining: number; utilizationPercent: number; overBudget: boolean } {\n  return { remaining: Math.round((item.budget - item.actualSpend) * 100) / 100, utilizationPercent: item.budget > 0 ? Math.round((item.actualSpend / item.budget) * 1000) / 10 : item.actualSpend > 0 ? 100 : 0, overBudget: item.actualSpend > item.budget };\n}\n
+
+export function costCenterPerformance(item: CostCenterBudget): { remaining: number; utilizationPercent: number; overBudget: boolean } {
+  return { remaining: Math.round((item.budget - item.actualSpend) * 100) / 100, utilizationPercent: item.budget > 0 ? Math.round((item.actualSpend / item.budget) * 1000) / 10 : item.actualSpend > 0 ? 100 : 0, overBudget: item.actualSpend > item.budget };
+}

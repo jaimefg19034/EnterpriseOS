@@ -7,7 +7,8 @@ const state: OperationsState = {
   ],
   projects: [{ id: "p1", name: "ERP rollout", owner: "Sam", budget: 20000, spent: 12500, dueDate: "2026-12-31", status: "active" }],
   risks: [{ id: "r1", title: "Supplier delay", owner: "Lee", probability: 4, impact: 5, mitigation: "Second source", status: "mitigating" }],
-  kpis: [{ id: "k1", name: "Retention", actual: 92, target: 95, unit: "%" }],\n  costCenters: [{ id: "c1", name: "Marketing", owner: "Taylor", budget: 10000, actualSpend: 11200, period: "2026-Q4" }],
+  kpis: [{ id: "k1", name: "Retention", actual: 92, target: 95, unit: "%" }],
+  costCenters: [{ id: "c1", name: "Marketing", owner: "Taylor", budget: 10000, actualSpend: 11200, period: "2026-Q4" }],
 };
 describe("operations workspace domain", () => {
   it("round-trips valid local workspace data", () => {
@@ -18,6 +19,10 @@ describe("operations workspace domain", () => {
     expect(parseOperationsState(JSON.stringify({ ...state, projects: [{ ...state.projects[0], dueDate: "2026-02-30" }] }))).toBeNull();
     expect(parseOperationsState(JSON.stringify({ ...state, risks: [{ ...state.risks[0], id: "o1" }] }))).toBeNull();
   });
+  it("loads legacy operations data without cost centres", () => {
+    const { costCenters: _ignored, ...legacy } = state;
+    expect(parseOperationsState(JSON.stringify(legacy))).toMatchObject({ costCenters: [] });
+  });
   it("calculates probability-weighted pipeline without lost deals", () => {
     expect(weightedPipeline(state.opportunities)).toBe(6000);
   });
@@ -27,7 +32,11 @@ describe("operations workspace domain", () => {
     expect(kpiPerformance({ ...state.kpis[0], actual: 7, target: 5, direction: "lower" }).onTarget).toBe(false);
     expect(kpiPerformance({ ...state.kpis[0], actual: 0, target: 0, direction: "lower" }).onTarget).toBe(true);
   });
-  it("calculates cost-centre headroom, utilisation and overspend", () => {\n    expect(costCenterPerformance(state.costCenters[0])).toEqual({ remaining: -1200, utilizationPercent: 112, overBudget: true });\n    expect(costCenterPerformance({ ...state.costCenters[0], budget: 0, actualSpend: 0 })).toMatchObject({ utilizationPercent: 0, overBudget: false });\n  });\n  it("scores risk and reports remaining project budget", () => {
+  it("calculates cost-centre headroom, utilisation and overspend", () => {
+    expect(costCenterPerformance(state.costCenters[0])).toEqual({ remaining: -1200, utilizationPercent: 112, overBudget: true });
+    expect(costCenterPerformance({ ...state.costCenters[0], budget: 0, actualSpend: 0 })).toMatchObject({ utilizationPercent: 0, overBudget: false });
+  });
+  it("scores risk and reports remaining project budget", () => {
     expect(riskScore(state.risks[0])).toBe(20);
     expect(projectBudgetVariance(state.projects[0])).toBe(7500);
   });

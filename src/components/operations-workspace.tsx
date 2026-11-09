@@ -21,8 +21,10 @@ function downloadCsv(state: OperationsState) {
   state.opportunities.forEach((x) => rows.push(["Sales", x.company, x.contact, x.value, x.stage, x.expectedClose]));
   state.projects.forEach((x) => rows.push(["Project", x.name, x.owner, x.budget, x.status, `Spent: ${x.spent}; due: ${x.dueDate}`]));
   state.risks.forEach((x) => rows.push(["Risk", x.title, x.owner, riskScore(x), x.status, x.mitigation]));
-  state.kpis.forEach((x) => rows.push(["KPI", x.name, x.unit, x.actual, `Target: ${x.target}`, x.direction ?? "higher"]));\n  state.costCenters.forEach((x) => rows.push(["Cost centre", x.name, x.owner, x.budget, `Actual spend: ${x.actualSpend}`, x.period]));
-  const csv = rows.map((row) => row.map(safe).join(",")).join("\r\n");
+  state.kpis.forEach((x) => rows.push(["KPI", x.name, x.unit, x.actual, `Target: ${x.target}`, x.direction ?? "higher"]));
+  state.costCenters.forEach((x) => rows.push(["Cost centre", x.name, x.owner, x.budget, `Actual spend: ${x.actualSpend}`, x.period]));
+  const csv = rows.map((row) => row.map(safe).join(",")).join("\r
+");
   const url = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }));
   const anchor = document.createElement("a");
   anchor.href = url; anchor.download = "enterpriseos-operations.csv"; anchor.click();
@@ -55,7 +57,13 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   const [kpiActual, setKpiActual] = useState("0");
   const [kpiTarget, setKpiTarget] = useState("0");
   const [kpiUnit, setKpiUnit] = useState("%");
-  const [kpiDirection, setKpiDirection] = useState<"higher" | "lower">("higher");\n  const [costCenterName, setCostCenterName] = useState("");\n  const [costCenterOwner, setCostCenterOwner] = useState("");\n  const [costCenterBudget, setCostCenterBudget] = useState("10000");\n  const [costCenterSpend, setCostCenterSpend] = useState("0");\n  const [costCenterPeriod, setCostCenterPeriod] = useState(`${new Date().getFullYear()}-Q4`);
+  const [kpiDirection, setKpiDirection] = useState<"higher" | "lower">("higher");
+  const [costCenterName, setCostCenterName] = useState("");
+  const [costCenterOwner, setCostCenterOwner] = useState("");
+  const [costCenterBudget, setCostCenterBudget] = useState("10000");
+  const [costCenterSpend, setCostCenterSpend] = useState("0");
+  const [costCenterPeriod, setCostCenterPeriod] = useState(`${new Date().getFullYear()}-Q4`);
+  const [costCenterPeriodFilter, setCostCenterPeriodFilter] = useState("all");
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -105,6 +113,9 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   const activeProjects = data.projects.filter((x) => x.status === "active").length;
   const highRisks = data.risks.filter((x) => x.status !== "closed" && riskScore(x) >= 15).length;
   const kpiOnTrack = data.kpis.filter((x) => kpiPerformance(x).onTarget).length;
+  const costCenterPeriods = [...new Set(data.costCenters.map((x) => x.period))].sort((a, b) => b.localeCompare(a));
+  const visibleCostCenters = data.costCenters.filter((x) => costCenterPeriodFilter === "all" || x.period === costCenterPeriodFilter);
+  const updateCostCenter = (id: string, changes: Partial<CostCenterBudget>) => setData((current) => ({ ...current, costCenters: current.costCenters.map((row) => row.id === id ? { ...row, ...changes } : row) }));
 
   function addOpportunity(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -137,7 +148,16 @@ export function OperationsWorkspace({ language }: { language: Language }) {
     setData((current) => ({ ...current, kpis: [item, ...current.kpis] }));
     setKpiName(""); setKpiActual("0"); setKpiTarget("0"); setKpiDirection("higher");
   }
-  function addCostCenter(event: React.FormEvent<HTMLFormElement>) {\n    event.preventDefault();\n    const budget = Number(costCenterBudget); const actualSpend = Number(costCenterSpend);\n    if (!costCenterName.trim() || !costCenterOwner.trim() || !Number.isFinite(budget) || !Number.isFinite(actualSpend) || budget < 0 || actualSpend < 0 || !/^\\d{4}-(Q[1-4]|FY)$/.test(costCenterPeriod)) return;\n    const item: CostCenterBudget = { id: makeId(), name: costCenterName.trim(), owner: costCenterOwner.trim(), budget, actualSpend, period: costCenterPeriod };\n    setData((current) => ({ ...current, costCenters: [item, ...current.costCenters] }));\n    setCostCenterName(""); setCostCenterOwner(""); setCostCenterBudget("10000"); setCostCenterSpend("0");\n  }\n\n  function remove<K extends keyof OperationsState>(key: K, id: string) {
+  function addCostCenter(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const budget = Number(costCenterBudget); const actualSpend = Number(costCenterSpend);
+    if (!costCenterName.trim() || !costCenterOwner.trim() || !Number.isFinite(budget) || !Number.isFinite(actualSpend) || budget < 0 || actualSpend < 0 || !/^\d{4}-(Q[1-4]|FY)$/.test(costCenterPeriod)) return;
+    const item: CostCenterBudget = { id: makeId(), name: costCenterName.trim(), owner: costCenterOwner.trim(), budget, actualSpend, period: costCenterPeriod };
+    setData((current) => ({ ...current, costCenters: [item, ...current.costCenters] }));
+    setCostCenterName(""); setCostCenterOwner(""); setCostCenterBudget("10000"); setCostCenterSpend("0");
+  }
+
+  function remove<K extends keyof OperationsState>(key: K, id: string) {
     setData((current) => ({ ...current, [key]: current[key].filter((item) => item.id !== id) }));
   }
 
@@ -145,7 +165,8 @@ export function OperationsWorkspace({ language }: { language: Language }) {
     { id: "sales", label: "Sales pipeline", count: data.opportunities.length },
     { id: "projects", label: "Projects", count: data.projects.length },
     { id: "risks", label: "Risk register", count: data.risks.length },
-    { id: "kpis", label: "KPI scorecard", count: data.kpis.length },\n    { id: "cost-centers", label: "Cost centres", count: data.costCenters.length },
+    { id: "kpis", label: "KPI scorecard", count: data.kpis.length },
+    { id: "cost-centers", label: "Cost centres", count: data.costCenters.length },
   ];
 
   return (
@@ -217,15 +238,18 @@ export function OperationsWorkspace({ language }: { language: Language }) {
             <label>{t("Budget period")}<select value={costCenterPeriod} onChange={(e) => setCostCenterPeriod(e.target.value)}><option value={`${new Date().getFullYear()}-Q1`}>{t("Q1")}</option><option value={`${new Date().getFullYear()}-Q2`}>{t("Q2")}</option><option value={`${new Date().getFullYear()}-Q3`}>{t("Q3")}</option><option value={`${new Date().getFullYear()}-Q4`}>{t("Q4")}</option><option value={`${new Date().getFullYear()}-FY`}>{t("Full year")}</option></select></label>
             <button className="primary-button" type="submit">{t("Add cost centre")}</button>
           </form>
-          <div className="operations-metrics">
-            <article className="metric-card"><span className="metric-label">{t("Total allocated")}</span><strong>{money(data.costCenters.reduce((sum, x) => sum + x.budget, 0), language)}</strong><small>{t("Across listed cost centres")}</small></article>
-            <article className="metric-card"><span className="metric-label">{t("Actual spend")}</span><strong>{money(data.costCenters.reduce((sum, x) => sum + x.actualSpend, 0), language)}</strong><small>{t("Recorded spend")}</small></article>
-            <article className="metric-card"><span className="metric-label">{t("Over-budget centres")}</span><strong>{data.costCenters.filter((x) => costCenterPerformance(x).overBudget).length}</strong><small>{t("Spend exceeds allocation")}</small></article>
+          <div className="operations-section-heading">
+            <label className="operations-filter-label">{t("Filter by period")}<select value={costCenterPeriodFilter} onChange={(e) => setCostCenterPeriodFilter(e.target.value)}><option value="all">{t("All periods")}</option>{costCenterPeriods.map((period) => <option key={period} value={period}>{period}</option>)}</select></label>
           </div>
-          <div className="operations-table-wrap"><table className="operations-table"><thead><tr><th>{t("Cost centre")}</th><th>{t("Owner")}</th><th>{t("Period")}</th><th>{t("Budget")}</th><th>{t("Actual spend")}</th><th>{t("Remaining")}</th><th>{t("Utilisation")}</th><th /></tr></thead><tbody>
-            {data.costCenters.map((x) => { const performance = costCenterPerformance(x); return <tr key={x.id}><td><strong>{x.name}</strong></td><td>{x.owner}</td><td>{x.period}</td><td>{money(x.budget, language)}</td><td>{money(x.actualSpend, language)}</td><td className={performance.overBudget ? "operations-negative" : ""}>{money(performance.remaining, language)}</td><td><span className={performance.overBudget ? "operations-negative" : ""}>{performance.utilizationPercent.toLocaleString(language === "es" ? "es-ES" : "en-IE")}%</span></td><td><button className="operations-delete" onClick={() => remove("costCenters", x.id)} aria-label={t("Delete record")}>×</button></td></tr>; })}
-          </tbody></table>{data.costCenters.length === 0 && <div className="operations-empty">{t("No cost centres yet. Add a department budget to start monitoring spend.")}</div>}</div>
-          <p className="operations-note">{t("Enter actual spend manually. This module does not yet import transactions from banks or accounting systems. Budgets are not consolidated automatically across periods.")}</p>
+          <div className="operations-metrics">
+            <article className="metric-card"><span className="metric-label">{t("Total allocated")}</span><strong>{money(visibleCostCenters.reduce((sum, x) => sum + x.budget, 0), language)}</strong><small>{t("Across listed cost centres")}</small></article>
+            <article className="metric-card"><span className="metric-label">{t("Actual spend")}</span><strong>{money(visibleCostCenters.reduce((sum, x) => sum + x.actualSpend, 0), language)}</strong><small>{t("Recorded spend")}</small></article>
+            <article className="metric-card"><span className="metric-label">{t("Over-budget centres")}</span><strong>{visibleCostCenters.filter((x) => costCenterPerformance(x).overBudget).length}</strong><small>{t("Spend exceeds allocation")}</small></article>
+          </div>
+          <div className="operations-table-wrap"><table className="operations-table"><thead><tr><th>{t("Cost centre")}</th><th>{t("Owner")}</th><th>{t("Period")}</th><th>{t("Budget (€)")}</th><th>{t("Actual spend (€)")}</th><th>{t("Remaining")}</th><th>{t("Utilisation")}</th><th /></tr></thead><tbody>
+            {visibleCostCenters.map((x) => { const performance = costCenterPerformance(x); return <tr key={x.id}><td><strong>{x.name}</strong></td><td>{x.owner}</td><td>{x.period}</td><td><input aria-label={t("Budget (€)")} type="number" min="0" step="0.01" value={x.budget} onChange={(e) => { const value = Number(e.target.value); if (Number.isFinite(value) && value >= 0) updateCostCenter(x.id, { budget: value }); }} /></td><td><input aria-label={t("Actual spend (€)")} type="number" min="0" step="0.01" value={x.actualSpend} onChange={(e) => { const value = Number(e.target.value); if (Number.isFinite(value) && value >= 0) updateCostCenter(x.id, { actualSpend: value }); }} /></td><td className={performance.overBudget ? "operations-negative" : ""}>{money(performance.remaining, language)}</td><td><span className={performance.overBudget ? "operations-negative" : ""}>{performance.utilizationPercent.toLocaleString(language === "es" ? "es-ES" : "en-IE")}%</span></td><td><button className="operations-delete" onClick={() => remove("costCenters", x.id)} aria-label={t("Delete record")}>×</button></td></tr>; })}
+          </tbody></table>{visibleCostCenters.length === 0 && <div className="operations-empty">{t("No cost centres in this period. Add a department budget or choose another period.")}</div>}</div>
+          <p className="operations-note">{t("Edit budget and actual spend directly in the table. Values are manual and are not imported from banks or accounting systems. Full-year and quarterly budgets are kept separate to avoid double counting.")}</p>
         </>}
         {section === "kpis" && <>
           <div className="operations-section-heading"><div><div className="panel-kicker">{t("PERFORMANCE MANAGEMENT")}</div><h2>{t("KPI scorecard")}</h2><p>{t("Compare actual results with targets. Define the unit and direction before interpreting performance.")}</p></div></div>
