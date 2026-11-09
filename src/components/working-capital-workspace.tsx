@@ -151,8 +151,22 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
         return;
       }
       if (!window.confirm(t("Restoring this backup replaces the current invoice register and quarterly cash forecast in this browser. Continue?"))) return;
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(result.data.workingCapitalInvoices));
-      window.localStorage.setItem(CASH_FORECAST_STORAGE_KEY, JSON.stringify(result.data.quarterlyCashForecast));
+      const previousInvoices = window.localStorage.getItem(STORAGE_KEY);
+      const previousForecast = window.localStorage.getItem(CASH_FORECAST_STORAGE_KEY);
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(result.data.workingCapitalInvoices));
+        window.localStorage.setItem(CASH_FORECAST_STORAGE_KEY, JSON.stringify(result.data.quarterlyCashForecast));
+      } catch (storageError) {
+        try {
+          if (previousInvoices === null) window.localStorage.removeItem(STORAGE_KEY);
+          else window.localStorage.setItem(STORAGE_KEY, previousInvoices);
+          if (previousForecast === null) window.localStorage.removeItem(CASH_FORECAST_STORAGE_KEY);
+          else window.localStorage.setItem(CASH_FORECAST_STORAGE_KEY, previousForecast);
+        } catch {
+          // Best-effort rollback if the browser blocks all storage writes.
+        }
+        throw storageError;
+      }
       setInvoices(result.data.workingCapitalInvoices);
       window.dispatchEvent(new Event("enterpriseos:working-capital-updated"));
       window.dispatchEvent(new Event("enterpriseos:cash-forecast-updated"));
