@@ -346,7 +346,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
           subtitle: t("Illustrative assumptions · Review before using for decisions"),
           headers: [t("Assumption"), t("Value"), t("Unit")],
           widths: [40, 22, 18],
-          percentLabels: [t("COGS as % of revenue"), t("Assumed tax rate"), t("Scenario revenue adjustment"), t("Scenario COGS adjustment")],
+          percentLabels: [t("COGS as % of revenue"), t("Assumed tax rate"), t("Scenario revenue adjustment")],
           rows: [
             [t("Annual revenue budget"), assumptions.annualRevenueBudget, "EUR"],
             [t("COGS as % of revenue"), assumptions.costOfGoodsSoldPercent / 100, "%"],
@@ -355,7 +355,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
             [t("Annual interest expense"), assumptions.annualInterestExpense, "EUR"],
             [t("Assumed tax rate"), assumptions.taxRatePercent / 100, "%"],
             [t("Scenario revenue adjustment"), result.scenario.revenueGrowthPercent / 100, "%"],
-            [t("Scenario COGS adjustment"), result.scenario.cogsRateAdjustmentPp / 100, "percentage points"],
+            [t("Scenario COGS adjustment"), result.scenario.cogsRateAdjustmentPp, "percentage points"],
           ],
         },
       ],
