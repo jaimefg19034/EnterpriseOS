@@ -12,6 +12,7 @@ import {
 } from "@/domain/planning";
 import { formatCurrency, formatPercent } from "@/domain/financials";
 import { translate, type Language } from "@/i18n/translations";
+import { downloadExcelWorkbook } from "@/lib/excel-export";
 
 const INITIAL_ASSUMPTIONS: PlanningAssumptions = {
   annualRevenueBudget: 2_976_000,
@@ -219,54 +220,74 @@ export function PlanningWorkspace({ language }: { language: Language }) {
     setScenario("base");
   }
 
-  function exportPlanningCsv() {
-    const rows = [
-      ["EnterpriseOS — FY 2026 budget and scenario plan"],
-      ["Scenario", result.scenario.label],
-      ["Currency", "EUR"],
-      ["Actual revenue months", String(actualMonths)],
-      [],
-      ["Month", "Revenue budget", "Actual revenue", "Forecast revenue", "Variance", "Status"],
-      ...result.monthlyRows.map((row) => [
-        t(row.month),
-        row.budgetRevenue.toFixed(2),
-        row.actualRevenue === null ? "" : row.actualRevenue.toFixed(2),
-        row.forecastRevenue === null ? "" : row.forecastRevenue.toFixed(2),
-        row.revenueVariance === null ? "" : row.revenueVariance.toFixed(2),
-        t(row.status),
-      ]),
-      [],
-      ["Full-year budget revenue", result.budgetRevenue.toFixed(2)],
-      ["Actual revenue to date", result.actualRevenueToDate.toFixed(2)],
-      ["Remaining forecast revenue", result.remainingForecastRevenue.toFixed(2)],
-      ["Projected full-year revenue", result.projectedRevenue.toFixed(2)],
-      ["Projected EBITDA", result.projectedEbitda.toFixed(2)],
-      ["Projected EBITDA margin", result.projectedEbitdaMarginPercent.toFixed(2) + "%"],
-      ["Projected net income", result.projectedNetIncome.toFixed(2)],
-      [],
-      ["Important", "Profitability is modelled using annual cost assumptions. Historical COGS and operating expenses are not actuals."],
-      ["Seasonality", "Illustrative monthly weights; replace with company-specific seasonality before relying on the plan."],
-    ];
-    const localizedRows = rows.map((row) => row.map((cell) => typeof cell === "string" ? t(cell) : cell));
-    const csv = localizedRows
-      .map((row) =>
-        row
-          .map((cell) => {
-            const value = String(cell ?? "");
-            return `"${value.replaceAll('"', '""')}"`;
-          })
-          .join(","),
-      )
-      .join("\r\n");
-    const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "enterpriseos-budget-scenarios-fy2026.csv";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+  async function exportPlanningCsv() {
+    await downloadExcelWorkbook({
+      filename: "enterpriseos-budget-scenarios-fy2026.xlsx",
+      sheets: [
+        {
+          name: t("Monthly Plan"),
+          title: t("EnterpriseOS — Budget & Scenarios"),
+          subtitle: `FY 2026 · EUR · ${t("Scenario")}: ${t(result.scenario.label)} · ${actualMonths} ${t("actual revenue months")}`,
+          headers: [t("Month"), t("Revenue budget"), t("Actual revenue"), t("Forecast revenue"), t("Variance"), t("Status")],
+          widths: [16, 22, 22, 22, 20, 18],
+          currencyColumns: [2, 3, 4, 5],
+          totalLabels: [t("FULL YEAR TOTAL")],
+          rows: [
+            ...result.monthlyRows.map((row) => [
+              t(row.month),
+              row.budgetRevenue,
+              row.actualRevenue,
+              row.forecastRevenue,
+              row.revenueVariance,
+              t(row.status),
+            ]),
+            [t("FULL YEAR TOTAL"), result.budgetRevenue, result.actualRevenueToDate, result.remainingForecastRevenue, result.revenueVariance, ""],
+          ],
+        },
+        {
+          name: t("FY Summary"),
+          title: t("EnterpriseOS — Full-year Summary"),
+          subtitle: `FY 2026 · EUR · ${t("Scenario")}: ${t(result.scenario.label)}`,
+          headers: [t("Metric"), t("Value"), t("Basis")],
+          widths: [36, 22, 48],
+          currencyColumns: [2],
+          percentLabels: [t("Projected EBITDA margin")],
+          totalLabels: [t("Projected full-year revenue"), t("Projected EBITDA"), t("Projected net income")],
+          rows: [
+            [t("Full-year budget revenue"), result.budgetRevenue, t("Annual budget")],
+            [t("Actual revenue to date"), result.actualRevenueToDate, t("Entered actual revenue")],
+            [t("Remaining forecast revenue"), result.remainingForecastRevenue, t("Scenario forecast")],
+            [t("Projected full-year revenue"), result.projectedRevenue, t("Actuals plus forecast")],
+            [t("Revenue variance"), result.revenueVariance, t("Projected revenue less budget")],
+            [t("Projected cost of goods sold"), result.projectedCostOfGoodsSold, `${result.costOfGoodsSoldPercent.toFixed(1)}% ${t("of revenue")}`],
+            [t("Projected gross profit"), result.projectedGrossProfit, t("Revenue less COGS")],
+            [t("Projected operating expenses"), result.projectedOperatingExpenses, t("Annual operating cost assumption")],
+            [t("Projected EBITDA"), result.projectedEbitda, t("Gross profit less operating expenses")],
+            [t("Projected EBITDA margin"), result.projectedEbitdaMarginPercent / 100, t("EBITDA / projected revenue")],
+            [t("Projected EBIT"), result.projectedEbit, t("EBITDA less D&A")],
+            [t("Projected net income"), result.projectedNetIncome, t("After interest and assumed tax")],
+          ],
+        },
+        {
+          name: t("Assumptions"),
+          title: t("EnterpriseOS — Planning Assumptions"),
+          subtitle: t("Illustrative assumptions · Review before using for decisions"),
+          headers: [t("Assumption"), t("Value"), t("Unit")],
+          widths: [40, 22, 18],
+          percentLabels: [t("COGS as % of revenue"), t("Assumed tax rate")],
+          rows: [
+            [t("Annual revenue budget"), assumptions.annualRevenueBudget, "EUR"],
+            [t("COGS as % of revenue"), assumptions.costOfGoodsSoldPercent / 100, "%"],
+            [t("Annual operating expenses"), assumptions.annualOperatingExpenses, "EUR"],
+            [t("Annual D&A"), assumptions.annualDepreciationAndAmortisation, "EUR"],
+            [t("Annual interest expense"), assumptions.annualInterestExpense, "EUR"],
+            [t("Assumed tax rate"), assumptions.taxRatePercent / 100, "%"],
+            [t("Scenario revenue adjustment"), result.scenario.revenueGrowthPercent / 100, "%"],
+            [t("Scenario COGS adjustment"), result.scenario.cogsRateAdjustmentPp / 100, "percentage points"],
+          ],
+        },
+      ],
+    });
   }
 
   return (
