@@ -6,11 +6,18 @@ export type ReportingPeriodBounds = {
   totalDays: number;
 };
 
+function createUTCDate(year: number, monthIndex: number, day: number): Date {
+  const date = new Date(0);
+  date.setUTCHours(0, 0, 0, 0);
+  date.setUTCFullYear(year, monthIndex, day);
+  return date;
+}
+
 /** Parses a strict YYYY-MM-DD date as a UTC calendar date (never local time). */
 export function parseISODateUTC(value: string): Date | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
   const [year, month, day] = value.split("-").map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
+  const date = createUTCDate(year, month - 1, day);
   if (
     date.getUTCFullYear() !== year ||
     date.getUTCMonth() !== month - 1 ||
@@ -50,10 +57,10 @@ export function getReportingPeriodBounds(
   if (period !== "FY" && (!Number.isInteger(quarterIndex) || quarterIndex < 0 || quarterIndex > 3)) return null;
 
   const startMonthIndex = fiscalYearStartMonth - 1 + quarterIndex * 3;
-  const start = new Date(Date.UTC(year, startMonthIndex, 1));
+  const start = createUTCDate(year, startMonthIndex, 1);
   const end = period === "FY"
-    ? new Date(Date.UTC(year, fiscalYearStartMonth - 1 + 12, 0))
-    : new Date(Date.UTC(year, startMonthIndex + 3, 0));
+    ? createUTCDate(year, fiscalYearStartMonth - 1 + 12, 0)
+    : createUTCDate(year, startMonthIndex + 3, 0);
   const totalDays = Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1;
 
   return {
