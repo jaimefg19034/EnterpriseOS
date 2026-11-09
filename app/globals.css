@@ -400,3 +400,163 @@ button:focus-visible, input:focus-visible {
   .chart-summary { gap: 5px; }
   .chart-summary strong { font-size: 11px; }
 }
+
+
+/* Budget and scenario planning */
+.planning-heading { margin-bottom: 18px; }
+.planning-scenario-panel {
+  display: grid; grid-template-columns: minmax(220px, .95fr) minmax(390px, 1.3fr);
+  gap: 15px 22px; align-items: center; padding: 18px 20px; margin-bottom: 15px;
+  background: linear-gradient(120deg, #fff 0%, #fbfcff 70%, #f6f8ff 100%);
+}
+.planning-scenario-intro h2 { margin: 6px 0 4px; color: #26364d; font: 750 15px/1.35 "Manrope", sans-serif; }
+.planning-scenario-intro p { max-width: 440px; margin: 0; color: #8793a5; font-size: 9px; line-height: 1.55; }
+.scenario-options { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
+.scenario-option {
+  min-width: 0; padding: 11px 12px; text-align: left; border: 1px solid #e7ebf3;
+  border-radius: 9px; background: #fff; transition: .16s ease;
+}
+.scenario-option:hover { transform: translateY(-1px); border-color: #cbd5f2; }
+.scenario-option.selected { border-color: #879ce7; background: linear-gradient(145deg, #f6f8ff, #eef2ff); box-shadow: 0 0 0 2px rgba(95,121,217,.08); }
+.scenario-option-top { display: flex; align-items: center; justify-content: space-between; gap: 5px; }
+.scenario-option strong { color: #46536a; font-size: 10px; }
+.scenario-option small { display: block; margin-top: 6px; color: #929daf; font-size: 8px; }
+.scenario-option.upside.selected { border-color: #7cc8ac; background: linear-gradient(145deg, #f5fcf8, #edf8f3); }
+.scenario-option.downside.selected { border-color: #e5b87c; background: linear-gradient(145deg, #fffaf3, #fff5e8); }
+.scenario-selected-dot { width: 7px; height: 7px; border-radius: 50%; background: #617bd5; box-shadow: 0 0 0 3px rgba(97,123,213,.12); }
+.scenario-option.upside .scenario-selected-dot { background: #269875; box-shadow: 0 0 0 3px rgba(38,152,117,.12); }
+.scenario-option.downside .scenario-selected-dot { background: #c68b3f; box-shadow: 0 0 0 3px rgba(198,139,63,.14); }
+.scenario-description {
+  grid-column: 1 / -1; display: flex; align-items: center; gap: 9px; padding-top: 11px;
+  border-top: 1px solid #edf0f5; color: #7f8ba0; font-size: 9px; line-height: 1.45;
+}
+.scenario-description-icon { width: 23px; height: 23px; display: grid; place-items: center; flex: 0 0 auto; color: #617bd6; border-radius: 6px; background: #eff2ff; font: 800 10px "Manrope", sans-serif; }
+.planning-metrics-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 15px; }
+.planning-metric {
+  min-width: 0; padding: 15px 16px 13px; border: 1px solid #e8edf4; border-radius: 10px;
+  background: linear-gradient(145deg, #fff, #fcfdff); box-shadow: 0 5px 18px rgba(31,49,80,.035);
+}
+.planning-metric-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #8490a3; font-size: 9px; font-weight: 650; }
+.planning-metric-mark { width: 7px; height: 7px; border-radius: 50%; background: #6c83dc; }
+.planning-metric-mark.green { background: #2a9d7e; }
+.planning-metric-mark.violet { background: #8c77d9; }
+.planning-metric-mark.amber { background: #d39a4b; }
+.planning-metric > strong { display: block; margin-top: 10px; overflow: hidden; color: #223149; text-overflow: ellipsis; white-space: nowrap; font: 800 22px/1.25 "Manrope",sans-serif; letter-spacing: -.7px; font-variant-numeric: tabular-nums; }
+.planning-metric > small { display: block; margin-top: 6px; overflow: hidden; color: #98a3b2; text-overflow: ellipsis; white-space: nowrap; font-size: 8px; }
+.planning-main-grid { display: grid; grid-template-columns: minmax(310px, .88fr) minmax(430px, 1.12fr); gap: 14px; align-items: stretch; }
+.planning-assumptions-panel, .planning-performance-panel { padding: 17px 17px 14px; }
+.planning-assumption-list { margin-top: 11px; }
+.planning-assumption-field {
+  display: grid; grid-template-columns: 20px minmax(0,1fr) minmax(105px,128px);
+  gap: 7px; align-items: center; padding: 10px 0; border-top: 1px solid #f0f2f6;
+}
+.planning-field-number { color: #aeb8c6; font: 700 8px "Manrope",sans-serif; }
+.planning-field-label { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
+.planning-field-label strong { color: #4a5870; font-size: 9px; font-weight: 650; }
+.planning-field-label small { color: #9aa5b4; font-size: 7px; line-height: 1.35; }
+.planning-input-wrap {
+  height: 31px; display: flex; align-items: center; gap: 4px; padding: 0 7px;
+  border: 1px solid #e5eaf2; border-radius: 6px; background: #fbfcfe; color: #9ba6b5; font-size: 9px;
+}
+.planning-input-wrap:focus-within { border-color: #9aaaf0; background: #fff; box-shadow: 0 0 0 3px rgba(97,123,221,.08); }
+.planning-input-wrap input { width: 100%; min-width: 0; padding: 0; color: #34435c; border: 0; outline: 0; background: transparent; text-align: right; font-size: 9px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.planning-input-wrap input:focus-visible { outline: 0; }
+.planning-assumption-note { display: flex; align-items: flex-start; gap: 7px; margin-top: 9px; padding: 9px; border-radius: 7px; background: #f7f8fb; color: #8a96a7; }
+.planning-assumption-note span { color: #93a1b8; font-size: 11px; }
+.planning-assumption-note p { margin: 0; font-size: 8px; line-height: 1.5; }
+.planning-chart-wrap { margin-top: 15px; }
+.planning-chart-legend { display: flex; align-items: center; flex-wrap: wrap; gap: 13px; color: #7d899e; font-size: 8px; }
+.planning-chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.plan-legend-dot { width: 7px; height: 7px; display: inline-block; border-radius: 50%; }
+.plan-legend-dot.budget { background: #9caac7; }
+.plan-legend-dot.performance { background: #5579df; }
+.planning-chart-unit { margin-left: auto; color: #a1abba; }
+.planning-chart { width: 100%; height: 200px; margin-top: 5px; overflow: visible; }
+.plan-budget-line { fill: none; stroke: #a7b2c8; stroke-width: 2; stroke-dasharray: 5 5; }
+.plan-performance-line { fill: none; stroke: #5d7cde; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.plan-budget-point { fill: #fff; stroke: #a2aec5; stroke-width: 1.8; }
+.plan-performance-point { fill: #fff; stroke: #5878dc; stroke-width: 2; }
+.forecast-divider { stroke: #d5dcea; stroke-width: 1; stroke-dasharray: 3 4; }
+.forecast-label { fill: #9aa6b7; font-size: 8px; font-weight: 800; letter-spacing: .7px; }
+.planning-chart-summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; padding-top: 12px; border-top: 1px solid #eff2f6; }
+.planning-chart-summary > div { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.planning-chart-summary span { color: #929daf; font-size: 8px; }
+.planning-chart-summary strong { overflow: hidden; color: #344158; text-overflow: ellipsis; white-space: nowrap; font: 750 12px "Manrope",sans-serif; font-variant-numeric: tabular-nums; }
+.monthly-plan-panel { margin-top: 14px; padding: 17px 18px 13px; }
+.monthly-table-scroll { width: 100%; margin-top: 14px; overflow-x: auto; }
+.monthly-plan-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 9px; white-space: nowrap; }
+.monthly-plan-table th { padding: 10px 11px; color: #8995a8; background: #f7f8fb; text-align: right; font-size: 7px; font-weight: 800; letter-spacing: .7px; }
+.monthly-plan-table th:first-child { border-radius: 6px 0 0 6px; text-align: left; }
+.monthly-plan-table th:last-child { border-radius: 0 6px 6px 0; text-align: left; }
+.monthly-plan-table td { padding: 8px 11px; color: #617087; border-bottom: 1px solid #f0f2f6; text-align: right; font-variant-numeric: tabular-nums; }
+.monthly-plan-table td:first-child, .monthly-plan-table td:last-child { text-align: left; }
+.month-cell { color: #435169 !important; font-weight: 700; }
+.monthly-plan-table tfoot td { padding-top: 12px; padding-bottom: 12px; color: #35445c; border-top: 1px solid #dfe6f2; border-bottom: 0; background: #f8faff; font-weight: 750; }
+.monthly-plan-table tfoot td:first-child { border-radius: 0 0 0 6px; }
+.monthly-plan-table tfoot td:last-child { border-radius: 0 0 6px 0; }
+.actual-revenue-input { display: inline-flex; align-items: center; gap: 4px; height: 27px; padding: 0 6px; border: 1px solid #e7ebf2; border-radius: 5px; background: #fff; color: #a0aaba; }
+.actual-revenue-input:focus-within { border-color: #9aaaf0; box-shadow: 0 0 0 2px rgba(97,123,221,.08); }
+.actual-revenue-input input { width: 92px; padding: 0; color: #45546b; border: 0; outline: 0; background: transparent; text-align: right; font-size: 9px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.actual-revenue-input input:focus-visible { outline: 0; }
+.forecast-value { color: #526fcf; font-weight: 750; }
+.variance-value { font-size: 9px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.variance-value.positive { color: #258f72; }
+.variance-value.negative { color: #bb6a63; }
+.variance-muted { color: #a5afbd; }
+.month-status { display: inline-flex; align-items: center; gap: 5px; color: #7a879b; font-size: 8px; }
+.month-status i { width: 6px; height: 6px; border-radius: 50%; background: #2d9a79; }
+.month-status.forecast { color: #6b7dbe; }
+.month-status.forecast i { background: #7790e0; }
+.planning-profit-panel { display: grid; grid-template-columns: minmax(230px,.7fr) minmax(400px,1.3fr); gap: 25px; margin-top: 14px; padding: 18px 20px; }
+.planning-profit-heading h2 { margin: 6px 0 5px; color: #2b394f; font: 750 15px "Manrope",sans-serif; }
+.planning-profit-heading p { max-width: 310px; margin: 0; color: #8b97a9; font-size: 9px; line-height: 1.6; }
+.planning-profit-table { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 22px; }
+.planning-profit-table > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 31px; padding: 0 7px; border-bottom: 1px solid #f0f2f6; color: #78859a; font-size: 8px; }
+.planning-profit-table strong { color: #435169; font-size: 9px; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.planning-profit-table .profit-subtotal { background: #f8f9fc; color: #4d5c72; font-weight: 700; }
+.planning-profit-table .profit-ebitda { background: #f0faf6; color: #288a6c; font-weight: 750; }
+.planning-profit-table .profit-ebitda strong { color: #228665; }
+.planning-profit-table .profit-net { margin-top: 4px; border: 1px solid #e0e8ff; border-radius: 5px; background: #f4f6ff; color: #405db8; font-weight: 800; }
+.planning-profit-table .profit-net strong { color: #405db8; font-size: 11px; }
+.planning-disclaimer { display: flex; align-items: flex-start; gap: 9px; margin-top: 14px; padding: 12px 14px; border: 1px solid #e9edf4; border-radius: 9px; background: rgba(255,255,255,.82); color: #8491a4; }
+.planning-disclaimer > span { color: #8495b3; font-size: 12px; }
+.planning-disclaimer p { margin: 0; font-size: 8px; line-height: 1.65; }
+.planning-disclaimer strong { color: #59677d; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+@media (max-width: 1180px) {
+  .planning-main-grid { grid-template-columns: minmax(290px,.85fr) minmax(360px,1.15fr); }
+  .planning-metrics-grid { gap: 9px; }
+  .planning-metric { padding: 13px; }
+  .planning-metric > strong { font-size: 19px; }
+  .planning-profit-panel { grid-template-columns: minmax(190px,.6fr) minmax(360px,1.4fr); gap: 15px; }
+}
+@media (max-width: 940px) {
+  .planning-scenario-panel { grid-template-columns: 1fr; }
+  .scenario-description { grid-column: auto; }
+  .planning-main-grid { grid-template-columns: 1fr; }
+  .planning-profit-panel { grid-template-columns: 1fr; }
+  .planning-profit-table { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 720px) {
+  .planning-heading .heading-actions { justify-content: flex-start; flex-wrap: wrap; }
+  .planning-scenario-panel { padding: 15px; }
+  .scenario-options { gap: 6px; }
+  .scenario-option { padding: 9px 8px; }
+  .scenario-option strong { font-size: 9px; }
+  .scenario-option small { font-size: 7px; }
+  .planning-metrics-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+  .planning-metric { padding: 12px; }
+  .planning-metric > strong { font-size: 18px; }
+  .planning-metric > small { font-size: 7px; }
+  .planning-assumptions-panel, .planning-performance-panel { padding: 15px 12px 12px; }
+  .planning-assumption-field { grid-template-columns: 17px minmax(0,1fr) minmax(100px,120px); gap: 5px; }
+  .planning-field-label strong { font-size: 8px; }
+  .planning-field-label small { font-size: 7px; }
+  .planning-chart { height: 170px; }
+  .monthly-plan-panel { padding: 15px 12px 11px; }
+  .monthly-plan-table { min-width: 700px; }
+  .planning-profit-panel { padding: 15px 13px; }
+  .planning-profit-table { grid-template-columns: 1fr; }
+  .planning-profit-table > div { min-height: 30px; }
+}
