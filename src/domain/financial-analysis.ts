@@ -1,5 +1,5 @@
 import type { FinancialResults } from "./financials";
-import type { ThreeStatementResults } from "./three-statements";
+import { OPENING_BALANCE_SHEET, type ThreeStatementResults } from "./three-statements";
 
 export type FinancialRatio = {
   key: string;
@@ -24,7 +24,7 @@ export function calculateFinancialRatios(
 ): FinancialRatioGroup[] {
   const bs = model.balanceSheet;
   const cf = model.cashFlow;
-  const openingEquity = bs.openingAssets - 30_000 - 80_000;
+  const openingEquity = OPENING_BALANCE_SHEET.shareCapital + OPENING_BALANCE_SHEET.retainedEarnings;
   const averageAssets = (bs.openingAssets + bs.totalAssets) / 2;
   const averageEquity = (openingEquity + bs.totalEquity) / 2;
   const safeRatio = (numerator: number, denominator: number): number | null =>
