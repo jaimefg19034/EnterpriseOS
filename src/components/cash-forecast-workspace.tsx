@@ -80,8 +80,8 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
   const t = (value: string) => translate(value, language);
   const [weeks, setWeeks] = useState<CashForecastWeekInput[]>(() => createEmptyCashForecast(13));
   const results = useMemo(() => calculateCashForecast(openingCash, weeks), [openingCash, weeks]);
-  const start = mondayOf(new Date());
-  const dates = useMemo(() => Array.from({ length: 13 }, (_, index) => addDays(start, index * 7)), [start.toDateString()]);
+  const start = useMemo(() => mondayOf(new Date()), []);
+  const dates = useMemo(() => Array.from({ length: 13 }, (_, index) => addDays(start, index * 7)), [start]);
   const finalCash = results.at(-1)?.closingCash ?? openingCash;
   const lowestCash = Math.min(openingCash, ...results.map((week) => week.closingCash));
   const firstNegative = results.findIndex((week) => week.closingCash < 0);
