@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { calculateInvoiceAgeing, normaliseInvoice, summarizeInvoices, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
+import { createEmptyCashForecast } from "@/domain/cash-forecast";
+import { createLocalFinanceBackup, parseLocalFinanceBackup } from "@/domain/cash-working-capital-backup";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
 import { translate, type Language } from "@/i18n/translations";
 
 const STORAGE_KEY = "enterpriseos:working-capital:v1";
+const CASH_FORECAST_STORAGE_KEY = "enterpriseos:cash-forecast:v1";
 const todayISO = () => {
   const date = new Date();
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -23,6 +26,8 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   const [dueDate, setDueDate] = useState(todayISO);
   const [amount, setAmount] = useState("");
   const [paidAmount, setPaidAmount] = useState("0");
+  const [backupMessage, setBackupMessage] = useState("");
+  const backupInputRef = useRef<HTMLInputElement>(null);
   const today = useMemo(() => todayISO(), []);
   const visible = useMemo(() => invoices.filter((item) => item.direction === direction), [invoices, direction]);
   const aged = useMemo(() => calculateInvoiceAgeing(visible, today).sort((a, b) => a.invoice.dueDate.localeCompare(b.invoice.dueDate)), [visible, today]);
@@ -94,6 +99,71 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
     });
   }
 
+  function readCashForecastForBackup() {
+    try {
+      const raw = window.localStorage.getItem(CASH_FORECAST_STORAGE_KEY);
+      if (!raw) return createEmptyCashForecast(13);
+      const parsed: unknown = JSON.parse(raw);
+      if (!Array.isArray(parsed) || parsed.length !== 13) return createEmptyCashForecast(13);
+      return parsed.map((item) => {
+        const record = item && typeof item === "object" ? item as Record<string, unknown> : {};
+        const amount = (key: "collections" | "operatingPayments" | "capitalExpenditure" | "debtService") => {
+          const value = record[key];
+          return typeof value === "number" && Number.isFinite(value) ? Math.max(0, value) : 0;
+        };
+        return {
+          collections: amount("collections"),
+          operatingPayments: amount("operatingPayments"),
+          capitalExpenditure: amount("capitalExpenditure"),
+          debtService: amount("debtService"),
+        };
+      });
+    } catch {
+      return createEmptyCashForecast(13);
+    }
+  }
+
+  function downloadLocalBackup() {
+    const backup = createLocalFinanceBackup(invoices, readCashForecastForBackup());
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `enterpriseos-finance-backup-${today}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setBackupMessage(t("A local backup file has been prepared. Store it somewhere private and secure."));
+  }
+
+  async function restoreLocalBackup(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      if (file.size > 5 * 1024 * 1024) {
+        setBackupMessage(t("The backup file is too large. Maximum size is 5 MB."));
+        return;
+      }
+      const result = parseLocalFinanceBackup(await file.text());
+      if (!result.ok) {
+        setBackupMessage(t(result.error));
+        return;
+      }
+      if (!window.confirm(t("Restoring this backup replaces the current invoice register and quarterly cash forecast in this browser. Continue?"))) return;
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(result.data.workingCapitalInvoices));
+      window.localStorage.setItem(CASH_FORECAST_STORAGE_KEY, JSON.stringify(result.data.quarterlyCashForecast));
+      setInvoices(result.data.workingCapitalInvoices);
+      window.dispatchEvent(new Event("enterpriseos:working-capital-updated"));
+      window.dispatchEvent(new Event("enterpriseos:cash-forecast-updated"));
+      setBackupMessage(t("Backup restored successfully. Your current browser data has been replaced."));
+    } catch {
+      setBackupMessage(t("The backup could not be restored. No data has been changed."));
+    } finally {
+      event.target.value = "";
+    }
+  }
+
   const buckets = [
     ["notDue", "Not due"],
     ["1to30", "1–30 days"],
@@ -106,8 +176,14 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
     <section className="working-capital-workspace" aria-labelledby="working-capital-title">
       <div className="working-capital-heading">
         <div><span className="panel-kicker">{t("WORKING CAPITAL")}</span><h2 id="working-capital-title">{t("Receivables & payables")}</h2><p>{t("Track invoice balances, overdue exposure and upcoming cash commitments.")}</p></div>
-        <button className="secondary-button" type="button" onClick={exportRegister}>{t("Export register")}</button>
+        <div className="working-capital-actions">
+          <button className="secondary-button" type="button" onClick={exportRegister}>{t("Export register")}</button>
+          <button className="secondary-button" type="button" onClick={downloadLocalBackup}>{t("Download data backup")}</button>
+          <button className="secondary-button" type="button" onClick={() => backupInputRef.current?.click()}>{t("Restore backup")}</button>
+          <input ref={backupInputRef} className="sr-only" type="file" accept=".json,application/json" onChange={restoreLocalBackup} />
+        </div>
       </div>
+      {backupMessage && <p className="working-capital-backup-message" role="status">{backupMessage}</p>}
       <div className="working-capital-tabs" role="tablist" aria-label={t("Invoice type")}>
         <button type="button" role="tab" aria-selected={direction === "receivable"} className={direction === "receivable" ? "active" : ""} onClick={() => setDirection("receivable")}>{t("Receivables")}</button>
         <button type="button" role="tab" aria-selected={direction === "payable"} className={direction === "payable" ? "active" : ""} onClick={() => setDirection("payable")}>{t("Payables")}</button>
