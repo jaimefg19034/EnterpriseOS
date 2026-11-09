@@ -1,6 +1,6 @@
 import ExcelJS from "exceljs";
 
-export type ExcelValue = string | number | null;
+export type ExcelValue = string | number | Date | null;
 
 export type ExcelSheetInput = {
   name: string;
@@ -10,6 +10,7 @@ export type ExcelSheetInput = {
   rows: ExcelValue[][];
   widths?: number[];
   currencyColumns?: number[];
+  dateColumns?: number[];
   currencyLabels?: string[];
   percentColumns?: number[];
   percentLabels?: string[];
@@ -96,6 +97,10 @@ export async function buildExcelWorkbook(input: ExcelWorkbookInput): Promise<Exc
           horizontal: typeof value === "number" ? "right" : "left",
         };
         cell.border = { bottom: { style: "hair", color: { argb: BORDER } } };
+
+        if (value instanceof Date && definition.dateColumns?.includes(columnIndex + 1)) {
+          cell.numFmt = "dd-mmm-yyyy";
+        }
 
         if (typeof value === "number") {
           const rowLabel = String(values[0] ?? "");
