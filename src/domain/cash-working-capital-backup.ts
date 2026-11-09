@@ -1,5 +1,6 @@
 import type { CashForecastWeekInput } from "./cash-forecast";
 import { normaliseInvoice, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "./working-capital";
+import { parseSavedPlanningState, type SavedPlanningState } from "./planning-storage";
 
 export const LOCAL_FINANCE_BACKUP_VERSION = 1;
 
@@ -9,6 +10,7 @@ export type LocalFinanceBackup = {
   exportedAt: string;
   workingCapitalInvoices: WorkingCapitalInvoice[];
   quarterlyCashForecast: CashForecastWeekInput[];
+  planningState?: SavedPlanningState;
 };
 
 export type LocalFinanceBackupResult =
@@ -19,6 +21,7 @@ export function createLocalFinanceBackup(
   invoices: WorkingCapitalInvoice[],
   weeks: CashForecastWeekInput[],
   exportedAt = new Date().toISOString(),
+  planningState?: SavedPlanningState | null,
 ): LocalFinanceBackup {
   return {
     product: "EnterpriseOS",
@@ -26,6 +29,7 @@ export function createLocalFinanceBackup(
     exportedAt,
     workingCapitalInvoices: invoices.map(normaliseInvoice),
     quarterlyCashForecast: weeks.map(sanitiseWeek),
+    ...(planningState ? { planningState } : {}),
   };
 }
 
@@ -50,6 +54,12 @@ export function parseLocalFinanceBackup(raw: string): LocalFinanceBackupResult {
   if (parsed.quarterlyCashForecast.some((item) => !isValidWeek(item))) {
     return { ok: false, error: "The cash forecast contains an invalid week. No data has been changed." };
   }
+  const planningState = parsed.planningState === undefined
+    ? null
+    : parseSavedPlanningState(JSON.stringify(parsed.planningState));
+  if (parsed.planningState !== undefined && !planningState) {
+    return { ok: false, error: "The saved planning model is invalid. No data has been changed." };
+  }
 
   const invoices = parsed.workingCapitalInvoices.map((item) => normaliseInvoice(item as WorkingCapitalInvoice));
   const weeks = parsed.quarterlyCashForecast.map((item) => sanitiseWeek(item as CashForecastWeekInput));
@@ -67,6 +77,7 @@ export function parseLocalFinanceBackup(raw: string): LocalFinanceBackupResult {
       exportedAt: typeof parsed.exportedAt === "string" ? parsed.exportedAt : "",
       workingCapitalInvoices: invoices,
       quarterlyCashForecast: weeks,
+      ...(planningState ? { planningState } : {}),
     },
   };
 }
