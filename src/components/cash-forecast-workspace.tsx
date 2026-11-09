@@ -84,12 +84,13 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
   const [storageReady, setStorageReady] = useState(false);
 
   useEffect(() => {
+    let restored: CashForecastWeekInput[] | null = null;
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed: unknown = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length === 13) {
-          const restored = parsed.map((item): CashForecastWeekInput => {
+          restored = parsed.map((item): CashForecastWeekInput => {
             const record = item && typeof item === "object" ? item as Record<string, unknown> : {};
             const amount = (key: keyof CashForecastWeekInput) => {
               const value = record[key];
@@ -102,14 +103,15 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
               debtService: amount("debtService"),
             };
           });
-          window.setTimeout(() => setWeeks(restored), 0);
         }
       }
     } catch {
       // Storage can be disabled by browser privacy settings; the worksheet remains usable in memory.
-    } finally {
-      setStorageReady(true);
     }
+    window.setTimeout(() => {
+      if (restored) setWeeks(restored);
+      setStorageReady(true);
+    }, 0);
   }, []);
 
   useEffect(() => {
