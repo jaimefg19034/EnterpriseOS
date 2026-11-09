@@ -4,6 +4,18 @@ import { calculateInvoiceAgeing, findDuplicateInvoice, normaliseInvoice, parseIn
 const invoice = (overrides: Partial<WorkingCapitalInvoice> = {}): WorkingCapitalInvoice => ({
   id: "inv-1", direction: "receivable", counterparty: "Acme", reference: "INV-1",
   issueDate: "2026-10-01", dueDate: "2026-10-01", amount: 1000, paidAmount: 200, ...overrides,
+
+  it("uses strict shared calendar validation for early years and year zero", () => {
+    expect(validateWorkingCapitalInvoice(invoice({
+      issueDate: "0000-01-01",
+      dueDate: "0000-01-02",
+    })).valid).toBe(false);
+    expect(validateWorkingCapitalInvoice(invoice({
+      issueDate: "0099-12-30",
+      dueDate: "0099-12-31",
+    })).valid).toBe(true);
+  });
+
 });
 
 describe("working capital invoice validation", () => {
