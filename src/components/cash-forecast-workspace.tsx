@@ -72,14 +72,15 @@ function CashBalanceChart({ values, openingCash, language, stressValues }: {
   language: Language;
   stressValues?: number[];
 }) {
-  const all = [openingCash, ...values];
+  const all = [openingCash, ...values, ...(stressValues ?? [])];
   const min = Math.min(0, ...all);
   const max = Math.max(1, ...all);
   const range = Math.max(1, max - min);
-  const x = (index: number) => 24 + (index / Math.max(1, all.length - 1)) * 672;
+  const x = (index: number) => 24 + (index / Math.max(1, values.length)) * 672;
   const y = (value: number) => 145 - ((value - min) / range) * 118;
-  const points = all.map((value, index) => `${x(index)},${y(value)}`).join(" ");
-  const stressPoints = stressValues ? [openingCash, ...stressValues].map((value, index) => `${x(index)},${y(value)}`).join(" ") : "";\n  const zeroY = y(0);
+  const points = [openingCash, ...values].map((value, index) => `${x(index)},${y(value)}`).join(" ");
+  const stressPoints = stressValues ? [openingCash, ...stressValues].map((value, index) => `${x(index)},${y(value)}`).join(" ") : "";
+  const zeroY = y(0);
   return (
     <section className="panel cash-forecast-chart-card">
       <div className="cash-forecast-chart-head">
@@ -93,7 +94,8 @@ function CashBalanceChart({ values, openingCash, language, stressValues }: {
           const yy = y(value);
           return <g key={tick}><line x1="24" y1={yy} x2="696" y2={yy} stroke="#edf1f6" /><text x="20" y={yy - 5} textAnchor="end" fill="#8995a7" fontSize="9">{Math.round(value / 1000)}k</text></g>;
         })}
-        <polyline points={points} fill="none" stroke="#5872c7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />\n        {stressValues && <polyline points={stressPoints} fill="none" stroke="#d28b45" strokeWidth="2.5" strokeDasharray="6 5" strokeLinecap="round" strokeLinejoin="round" />}
+        <polyline points={points} fill="none" stroke="#5872c7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        {stressValues && <polyline points={stressPoints} fill="none" stroke="#d28b45" strokeWidth="2.5" strokeDasharray="6 5" strokeLinecap="round" strokeLinejoin="round" />}
         {all.map((value, index) => <circle key={index} cx={x(index)} cy={y(value)} r={index === all.length - 1 ? 4.5 : 2.7} fill={value < 0 ? "#c96e70" : "#5872c7"} />)}
         <text x="24" y="169" fill="#7c899c" fontSize="9">{translate("Opening", language)}</text>
         <text x="696" y="169" textAnchor="end" fill="#7c899c" fontSize="9">{translate("Week 13", language)}</text>
@@ -108,7 +110,9 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
   const [weeks, setWeeks] = useState<CashForecastWeekInput[]>(() => createEmptyCashForecast(13));
   const [storageReady, setStorageReady] = useState(false);
   const [invoices, setInvoices] = useState<WorkingCapitalInvoice[]>([]);
-  const [includeInvoices, setIncludeInvoices] = useState(false);\n  const [collectionReduction, setCollectionReduction] = useState(15);\n  const [paymentIncrease, setPaymentIncrease] = useState(10);
+  const [includeInvoices, setIncludeInvoices] = useState(false);
+  const [collectionReduction, setCollectionReduction] = useState(15);
+  const [paymentIncrease, setPaymentIncrease] = useState(10);
 
   useEffect(() => {
     let restored: CashForecastWeekInput[] | null = null;
@@ -216,7 +220,9 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
   );
   const finalCash = results.at(-1)?.closingCash ?? openingCash;
   const lowestCash = Math.min(openingCash, ...results.map((week) => week.closingCash));
-  const firstNegative = results.findIndex((week) => week.closingCash < 0);\n  const stress = useMemo(() => calculateCashStressScenario(openingCash, forecastWeeks, collectionReduction, paymentIncrease), [openingCash, forecastWeeks, collectionReduction, paymentIncrease]);\n  const stressDifference = stress.finalCash - finalCash;
+  const firstNegative = results.findIndex((week) => week.closingCash < 0);
+  const stress = useMemo(() => calculateCashStressScenario(openingCash, forecastWeeks, collectionReduction, paymentIncrease), [openingCash, forecastWeeks, collectionReduction, paymentIncrease]);
+  const stressDifference = stress.finalCash - finalCash;
 
   function updateWeek(index: number, key: keyof CashForecastWeekInput, raw: string) {
     const value = raw === "" ? 0 : Number(raw);
@@ -337,7 +343,21 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
         <article className="panel"><span>{t("Lowest projected cash")}</span><strong className={lowestCash < 0 ? "negative" : ""}>{formatMoney(lowestCash, language)}</strong><small>{firstNegative >= 0 ? t("First negative balance: Week") + ` ${firstNegative + 1}` : t("No negative balance in the entered forecast")}</small></article>
       </div>
 
-      <CashBalanceChart values={results.map((week) => week.closingCash)} openingCash={openingCash} language={language} stressValues={stress.weeks.map((week) => week.closingCash)} />\n\n      <section className="panel cash-forecast-invoice-panel" aria-labelledby="cash-stress-title">\n        <div className="cash-forecast-invoice-head"><div><span className="panel-kicker">{t("SCENARIO ANALYSIS")}</span><h3 id="cash-stress-title">{t("Downside liquidity stress test")}</h3><p>{t("Test what happens if customers pay later or operating costs rise. This is a sensitivity overlay, not a prediction.")}</p></div></div>\n        <div className="operations-form">\n          <label>{t("Collection reduction")} (%)<input type="number" min="0" max="100" step="1" value={collectionReduction} onChange={(event) => setCollectionReduction(Math.min(100, Math.max(0, Number(event.target.value) || 0)))} /></label>\n          <label>{t("Operating payment increase")} (%)<input type="number" min="0" max="500" step="1" value={paymentIncrease} onChange={(event) => setPaymentIncrease(Math.min(500, Math.max(0, Number(event.target.value) || 0)))} /></label>\n        </div>\n        <div className="cash-forecast-invoice-summary">\n          <div><span>{t("Downside closing cash")}</span><strong className={stress.finalCash < 0 ? "negative" : ""}>{formatMoney(stress.finalCash, language)}</strong><small>{t("At the end of the quarter")}</small></div>\n          <div><span>{t("Lowest downside cash")}</span><strong className={stress.lowestCash < 0 ? "negative" : ""}>{formatMoney(stress.lowestCash, language)}</strong><small>{stress.firstNegativeWeek >= 0 ? `${t("First negative balance: Week")} ${stress.firstNegativeWeek + 1}` : t("No negative balance in the downside case")}</small></div>\n          <div><span>{t("Change versus base case")}</span><strong className={stressDifference < 0 ? "negative" : ""}>{formatMoney(stressDifference, language)}</strong><small>{t("Difference in quarter-end cash")}</small></div>\n        </div>\n        <p className="cash-forecast-invoice-note">{t("The stress test reduces all forecast collections by the selected percentage and increases operating payments by the selected percentage. Capital expenditure and debt service stay unchanged. It does not alter your saved base forecast.")}</p>\n      </section>
+      <CashBalanceChart values={results.map((week) => week.closingCash)} openingCash={openingCash} language={language} stressValues={stress.weeks.map((week) => week.closingCash)} />
+
+      <section className="panel cash-forecast-invoice-panel" aria-labelledby="cash-stress-title">
+        <div className="cash-forecast-invoice-head"><div><span className="panel-kicker">{t("SCENARIO ANALYSIS")}</span><h3 id="cash-stress-title">{t("Downside liquidity stress test")}</h3><p>{t("Test what happens if customers pay later or operating costs rise. This is a sensitivity overlay, not a prediction.")}</p></div></div>
+        <div className="operations-form">
+          <label>{t("Collection reduction")} (%)<input type="number" min="0" max="100" step="1" value={collectionReduction} onChange={(event) => setCollectionReduction(Math.min(100, Math.max(0, Number(event.target.value) || 0)))} /></label>
+          <label>{t("Operating payment increase")} (%)<input type="number" min="0" max="500" step="1" value={paymentIncrease} onChange={(event) => setPaymentIncrease(Math.min(500, Math.max(0, Number(event.target.value) || 0)))} /></label>
+        </div>
+        <div className="cash-forecast-invoice-summary">
+          <div><span>{t("Downside closing cash")}</span><strong className={stress.finalCash < 0 ? "negative" : ""}>{formatMoney(stress.finalCash, language)}</strong><small>{t("At the end of the quarter")}</small></div>
+          <div><span>{t("Lowest downside cash")}</span><strong className={stress.lowestCash < 0 ? "negative" : ""}>{formatMoney(stress.lowestCash, language)}</strong><small>{stress.firstNegativeWeek >= 0 ? `${t("First negative balance: Week")} ${stress.firstNegativeWeek + 1}` : t("No negative balance in the downside case")}</small></div>
+          <div><span>{t("Change versus base case")}</span><strong className={stressDifference < 0 ? "negative" : ""}>{formatMoney(stressDifference, language)}</strong><small>{t("Difference in quarter-end cash")}</small></div>
+        </div>
+        <p className="cash-forecast-invoice-note">{t("The stress test reduces all forecast collections by the selected percentage and increases operating payments by the selected percentage. Capital expenditure and debt service stay unchanged. It does not alter your saved base forecast.")}</p>
+      </section>
 
       <div className="panel cash-forecast-table-card">
         <div className="cash-forecast-table-heading">
