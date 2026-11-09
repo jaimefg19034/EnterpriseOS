@@ -142,6 +142,8 @@ Append a short entry after each completed work session:
 - **Known limitations:**
 - **Next session:**
 
-**Session 1 completed (9 Nov 2026):** current modules, persistence boundaries and major product limitations were recorded in [the feature inventory](feature-inventory.md). The current app is broader than the original MVP, so the next priority is a workflow and financial-data-flow map before expanding functionality.
+**Session 1 completed (9 Nov 2026):** current modules, persistence boundaries and major product limitations were recorded in [the feature inventory](feature-inventory.md).
 
-The next planned session is **Session 2: map the end-to-end finance workflow**. Do not skip the audit and jump straight into more modules: the product is now broad enough that correctness and coherence matter more than adding another menu item.
+**Session 2 completed (9 Nov 2026):** the current and target monthly finance workflows were mapped in [the core finance workflow](core-finance-workflow.md). The map makes explicit that the current operations, P&L, invoice and cash modules are not yet one reconciled system of record.
+
+The next planned session is **Session 3: audit the management P&L calculation definitions**. We will compare every formula and sign convention in code, tests, UI labels and exports before expanding the model.

@@ -2,7 +2,7 @@ name: Retry failed Pages deployment
 
 on:
   workflow_run:
-    workflows: ["Deploy static site to GitHub Pages"]
+    workflows: ["Deploy static site to GitHub Pages", "Quality checks"]
     types: [completed]
 
 permissions:
@@ -17,12 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Retry the failed deployment once
+      - name: Retry the failed workflow once
         uses: actions/github-script@v7
         with:
           script: |
             const run = context.payload.workflow_run;
-            core.warning(`GitHub Pages deployment ${run.id} failed. Starting its one permitted retry (attempt ${run.run_attempt + 1}).`);
+            core.warning(`${run.name} run ${run.id} failed. Starting its one permitted retry (attempt ${run.run_attempt + 1}).`);
             await github.rest.actions.reRunWorkflow({
               owner: context.repo.owner,
               repo: context.repo.repo,
