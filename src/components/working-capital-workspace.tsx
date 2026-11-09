@@ -29,12 +29,13 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   const summary = useMemo(() => summarizeInvoices(aged, today), [aged, today]);
 
   useEffect(() => {
+    let restored: WorkingCapitalInvoice[] | null = null;
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed: unknown = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-          const safe = parsed.filter((item): item is WorkingCapitalInvoice =>
+          restored = parsed.filter((item): item is WorkingCapitalInvoice =>
             item && typeof item === "object" &&
             (item.direction === "receivable" || item.direction === "payable") &&
             typeof item.counterparty === "string" && typeof item.reference === "string" &&
@@ -42,14 +43,15 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
             typeof item.amount === "number" && typeof item.paidAmount === "number" &&
             typeof item.id === "string"
           ).map(normaliseInvoice);
-          window.setTimeout(() => setInvoices(safe), 0);
         }
       }
     } catch {
       // Local persistence is optional; the register remains usable for this session.
-    } finally {
-      setReady(true);
     }
+    window.setTimeout(() => {
+      if (restored) setInvoices(restored);
+      setReady(true);
+    }, 0);
   }, []);
 
   useEffect(() => {
