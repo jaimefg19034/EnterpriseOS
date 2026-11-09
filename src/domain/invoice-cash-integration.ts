@@ -1,4 +1,4 @@
-import type { WorkingCapitalInvoice } from "@/domain/working-capital";
+import type { WorkingCapitalInvoice } from "./working-capital";
 
 export type InvoiceCashWeek = {
   receivableCollections: number;
@@ -18,6 +18,7 @@ export function allocateInvoicesToCashWeeks(
   invoices: WorkingCapitalInvoice[],
   firstWeekStart: string,
   weekCount = 13,
+  asOfDate = firstWeekStart,
 ): InvoiceCashWeek[] {
   const weeks = Array.from({ length: Math.max(0, Math.floor(weekCount)) }, (): InvoiceCashWeek => ({
     receivableCollections: 0,
@@ -29,6 +30,7 @@ export function allocateInvoicesToCashWeeks(
   }));
   const startDay = dateOrdinal(firstWeekStart);
   if (startDay === null || weeks.length === 0) return weeks;
+  const todayDay = dateOrdinal(asOfDate) ?? startDay;
 
   for (const invoice of invoices) {
     const amount = Number.isFinite(invoice.amount) ? Math.max(0, invoice.amount) : 0;
@@ -38,18 +40,19 @@ export function allocateInvoicesToCashWeeks(
     if (outstanding <= 0 || dueDay === null) continue;
 
     const difference = dueDay - startDay;
-    const weekIndex = difference < 0 ? 0 : Math.floor(difference / 7);
+    const overdue = dueDay < todayDay;
+    const weekIndex = difference < 0 || overdue ? 0 : Math.floor(difference / 7);
     const target = weeks[weekIndex];
     if (!target) continue;
 
     if (invoice.direction === "receivable") {
       target.receivableCollections = roundMoney(target.receivableCollections + outstanding);
       target.receivableCount += 1;
-      if (difference < 0) target.overdueReceivables = roundMoney(target.overdueReceivables + outstanding);
+      if (overdue) target.overdueReceivables = roundMoney(target.overdueReceivables + outstanding);
     } else if (invoice.direction === "payable") {
       target.payablePayments = roundMoney(target.payablePayments + outstanding);
       target.payableCount += 1;
-      if (difference < 0) target.overduePayables = roundMoney(target.overduePayables + outstanding);
+      if (overdue) target.overduePayables = roundMoney(target.overduePayables + outstanding);
     }
   }
 
