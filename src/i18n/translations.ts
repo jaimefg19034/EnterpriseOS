@@ -689,7 +689,7 @@ const spanish: Record<string, string> = {
   "Browser storage is unavailable. Changes remain in this session.": "El almacenamiento del navegador no está disponible. Los cambios solo permanecerán en esta sesión.",
   "Changes saved in this browser.": "Cambios guardados en este navegador.",
   "Operations records are stored only in this browser. They are not synced, shared with a team or connected to CRM, HR, project or accounting platforms. Export a CSV backup before clearing browser data. Do not enter confidential company information.": "Los registros de operaciones se guardan únicamente en este navegador. No se sincronizan, comparten con un equipo ni se conectan a plataformas CRM, RR. HH., proyectos o contabilidad. Exporta una copia CSV antes de borrar los datos del navegador. No introduzcas información empresarial confidencial.",
-  "Delete record": "Eliminar registro",
+
 };
 
 export function translate(value: string, language: Language): string {
