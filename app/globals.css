@@ -918,3 +918,29 @@ button:focus-visible, input:focus-visible {
   .content-area .planning-field-label small,
   .content-area .three-statement-input-row small { font-size: 9px; }
 }
+
+
+/* Financial health analysis */
+.financial-ratios-section { margin: 24px 0 22px; }
+.financial-ratios-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; margin: 0 0 14px; }
+.financial-ratios-heading h2 { margin: 5px 0 4px; color: #26354b; font: 800 18px/1.3 "Manrope",sans-serif; letter-spacing: -.35px; }
+.financial-ratios-heading p { max-width: 610px; margin: 0; color: #5d6b80; font-size: 12px; line-height: 1.6; }
+.financial-ratios-period { flex: 0 0 auto; padding: 7px 10px; border: 1px solid #e6ebf3; border-radius: 8px; color: #617087; background: #fff; font-size: 10px; font-weight: 700; }
+.financial-ratios-groups { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 13px; }
+.financial-ratio-group { min-width: 0; padding: 16px 17px; }
+.financial-ratio-group-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 11px; border-bottom: 1px solid #edf0f5; }
+.financial-ratio-group-head h3 { margin: 0; color: #2d3b52; font: 750 13px/1.35 "Manrope",sans-serif; }
+.financial-ratio-group-head > span { color: #8290a5; font-size: 8px; font-weight: 800; letter-spacing: .9px; }
+.financial-ratio-list { display: grid; }
+.financial-ratio-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 57px; padding: 9px 0; border-bottom: 1px solid #f0f2f6; }
+.financial-ratio-item:last-child { border-bottom: 0; }
+.financial-ratio-copy { display: grid; gap: 4px; min-width: 0; }
+.financial-ratio-copy strong { color: #3b4960; font-size: 11px; font-weight: 700; }
+.financial-ratio-copy small { color: #718097; font-size: 10px; line-height: 1.45; }
+.financial-ratio-value { flex: 0 0 auto; color: #263a67; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.financial-ratio-value.unavailable { color: #8290a5; font-size: 11px; font-weight: 650; }
+.financial-ratios-note { margin: 11px 2px 0; color: #68778d; font-size: 10px; line-height: 1.65; }
+@media (max-width: 760px) {
+  .financial-ratios-groups { grid-template-columns: minmax(0,1fr); }
+  .financial-ratios-heading { align-items: flex-start; flex-direction: column; gap: 9px; }
+}
