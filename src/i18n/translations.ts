@@ -476,6 +476,7 @@ const spanish: Record<string, string> = {
   "Quarterly cash flow forecast": "Previsión trimestral de flujo de caja",
   "SCENARIO ANALYSIS": "ANÁLISIS DE ESCENARIOS",
   "Downside liquidity stress test": "Prueba de tensión de liquidez",
+  "Solid line: base case · dashed line: downside scenario": "Línea continua: escenario base · línea discontinua: escenario adverso",
   "Test what happens if customers pay later or operating costs rise. This is a sensitivity overlay, not a prediction.": "Comprueba qué ocurre si los clientes pagan más tarde o aumentan los costes operativos. Es un análisis de sensibilidad, no una predicción.",
   "Collection reduction": "Reducción de cobros",
   "Operating payment increase": "Aumento de pagos operativos",
