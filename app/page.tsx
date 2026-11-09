@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PlanningWorkspace } from "@/components/planning-workspace";
+import { translate, type Language } from "@/i18n/translations";
 import {
   calculateFinancials,
   formatCurrency,
@@ -192,7 +193,8 @@ function Icon({
   }
 }
 
-function TrendChart() {
+function TrendChart({ language }: { language: Language }) {
+  const t = (value: string) => translate(value, language);
   const max = 270;
   const points = TREND.map((point, index) => ({
     x: 30 + index * 102,
@@ -206,9 +208,9 @@ function TrendChart() {
   return (
     <div className="chart-wrap">
       <div className="chart-legend">
-        <span><i className="legend-dot revenue-dot" /> Revenue</span>
-        <span><i className="legend-dot ebitda-dot" /> EBITDA</span>
-        <span className="chart-unit">EUR · thousands</span>
+        <span><i className="legend-dot revenue-dot" /> {t("Revenue")}</span>
+        <span><i className="legend-dot ebitda-dot" /> {t("EBITDA")}</span>
+        <span className="chart-unit">{t("EUR · thousands")}</span>
       </div>
       <svg
         className="trend-chart"
@@ -229,7 +231,7 @@ function TrendChart() {
         <polyline points={revenueLine} className="revenue-line" />
         <polyline points={ebitdaLine} className="ebitda-line" />
         {points.map((point, index) => (
-          <g key={TREND[index].month}>
+          <g key={t(TREND[index].month)}>
             <circle cx={point.x} cy={point.revenueY} r="3.5" className="revenue-point" />
             <text x={point.x} y="211" textAnchor="middle" className="chart-month">
               {TREND[index].month}
@@ -243,6 +245,7 @@ function TrendChart() {
 
 function MetricCard({
   label,
+  language,
   value,
   change,
   tone = "blue",
@@ -253,7 +256,9 @@ function MetricCard({
   change: string;
   tone?: "blue" | "green" | "violet" | "amber";
   icon: string;
+  language: Language;
 }) {
+  const t = (value: string) => translate(value, language);
   return (
     <article className="metric-card">
       <div className="metric-topline">
@@ -263,7 +268,7 @@ function MetricCard({
       <div className="metric-value">{value}</div>
       <div className="metric-foot">
         <span className="positive-change"><Icon name="trend" size={13} /> {change}</span>
-        <span>vs. prior period</span>
+        <span>{t("vs. prior period")}</span>
       </div>
     </article>
   );
@@ -271,6 +276,18 @@ function MetricCard({
 
 export default function Home() {
   const [view, setView] = useState<View>("overview");
+  const [language, setLanguage] = useState<Language>("en");
+  const t = (value: string) => translate(value, language);
+
+  useEffect(() => {
+    const savedLanguage = window.localStorage.getItem("enterpriseos-language");
+    if (savedLanguage === "en" || savedLanguage === "es") setLanguage(savedLanguage);
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("enterpriseos-language", language);
+    document.documentElement.lang = language;
+  }, [language]);
   const [inputs, setInputs] = useState<FinancialInputs>(DEMO_INPUTS);
   const results = useMemo(() => calculateFinancials(inputs), [inputs]);
 
@@ -308,7 +325,8 @@ export default function Home() {
       [],
       ["Note", "Illustrative management model. Not statutory accounts or tax advice."],
     ];
-    const csv = rows
+    const localizedRows = rows.map((row) => row.map((cell) => typeof cell === "string" ? t(cell) : cell));
+    const csv = localizedRows
       .map((row) =>
         row
           .map((cell) => {
@@ -330,33 +348,33 @@ export default function Home() {
   }
 
   const navItems: { id: View; label: string; icon: string }[] = [
-    { id: "overview", label: "Overview", icon: "grid" },
-    { id: "model", label: "Financial model", icon: "chart" },
-    { id: "planning", label: "Budget & scenarios", icon: "trend" },
-    { id: "reports", label: "Reports", icon: "file" },
+    { id: "overview", label: t("Overview"), icon: "grid" },
+    { id: "model", label: t("Financial model"), icon: "chart" },
+    { id: "planning", label: t("Budget & scenarios"), icon: "trend" },
+    { id: "reports", label: t("Reports"), icon: "file" },
   ];
 
   return (
     <main className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark"><span>e</span></div>
+          <div className="brand-mark"><span>{t("e")}</span></div>
           <div>
-            <div className="brand-name">enterprise<span>os</span></div>
-            <div className="brand-caption">FINANCIAL WORKSPACE</div>
+            <div className="brand-name">{t("enterprise")}<span>{t("os")}</span></div>
+            <div className="brand-caption">{t("FINANCIAL WORKSPACE")}</div>
           </div>
         </div>
 
         <div className="workspace-switcher">
-          <div className="workspace-avatar">AC</div>
+          <div className="workspace-avatar">{t("AC")}</div>
           <div className="workspace-copy">
-            <strong>Aster & Co.</strong>
-            <span>Demo workspace</span>
+            <strong>{t("Aster & Co.")}</strong>
+            <span>{t("Demo workspace")}</span>
           </div>
           <span className="switch-chevron">⌄</span>
         </div>
 
-        <div className="nav-label">WORKSPACE</div>
+        <div className="nav-label">{t("WORKSPACE")}</div>
         <nav className="primary-nav" aria-label="Main navigation">
           {navItems.map((item) => (
             <button
@@ -373,32 +391,32 @@ export default function Home() {
         </nav>
 
         <div className="sidebar-divider" />
-        <div className="nav-label">TOOLS</div>
+        <div className="nav-label">{t("TOOLS")}</div>
         <div className="tool-link">
           <span className="tool-icon"><Icon name="sparkle" size={17} /></span>
-          <span>AI assistant</span>
-          <span className="soon-label">SOON</span>
+          <span>{t("AI assistant")}</span>
+          <span className="soon-label">{t("SOON")}</span>
         </div>
         <div className="tool-link">
           <span className="tool-icon"><Icon name="wallet" size={17} /></span>
-          <span>Data connections</span>
-          <span className="soon-label">SOON</span>
+          <span>{t("Data connections")}</span>
+          <span className="soon-label">{t("SOON")}</span>
         </div>
 
         <div className="sidebar-spacer" />
         <div className="sidebar-help">
           <div className="help-symbol"><Icon name="info" size={17} /></div>
           <div>
-            <strong>Need a hand?</strong>
-            <span>Explore the model guide</span>
+            <strong>{t("Need a hand?")}</strong>
+            <span>{t("Explore the model guide")}</span>
           </div>
           <Icon name="arrow" size={15} />
         </div>
         <div className="sidebar-user">
-          <div className="user-avatar">FT</div>
+          <div className="user-avatar">{t("FT")}</div>
           <div className="user-copy">
-            <strong>Finance team</strong>
-            <span>Demo account</span>
+            <strong>{t("Finance team")}</strong>
+            <span>{t("Demo account")}</span>
           </div>
           <span className="user-menu">···</span>
         </div>
@@ -407,19 +425,23 @@ export default function Home() {
       <section className="main-column">
         <header className="topbar">
           <div className="breadcrumb">
-            <span>Workspace</span><span className="breadcrumb-separator">/</span>
-            <strong>{view === "overview" ? "Overview" : view === "model" ? "Financial model" : view === "planning" ? "Budget & scenarios" : "Reports"}</strong>
+            <span>{t("Workspace")}</span><span className="breadcrumb-separator">/</span>
+            <strong>{view === "overview" ? t("Overview") : view === "model" ? t("Financial model") : view === "planning" ? t("Budget & scenarios") : t("Reports")}</strong>
           </div>
           <div className="topbar-actions">
-            <span className="period-pill"><Icon name="clock" size={14} /> FY 2026</span>
+            <div className="language-switch" role="group" aria-label={t("Language")}>
+              <button type="button" className={language === "en" ? "selected" : ""} onClick={() => setLanguage("en")} aria-pressed={language === "en"}>EN</button>
+              <button type="button" className={language === "es" ? "selected" : ""} onClick={() => setLanguage("es")} aria-pressed={language === "es"}>ES</button>
+            </div>
+            <span className="period-pill"><Icon name="clock" size={14} /> {t("FY 2026")}</span>
             <span className="topbar-divider" />
             <button className="icon-button" aria-label="Workspace information" title="Demo workspace">
               <Icon name="info" size={17} />
             </button>
             <button className="export-button" onClick={exportCsv}>
-              <Icon name="download" size={16} /> <span>Export CSV</span>
+              <Icon name="download" size={16} /> <span>{t("Export CSV")}</span>
             </button>
-            <div className="topbar-avatar">FT</div>
+            <div className="topbar-avatar">{t("FT")}</div>
           </div>
         </header>
 
@@ -428,12 +450,12 @@ export default function Home() {
             <>
               <div className="page-heading">
                 <div>
-                  <div className="eyebrow">MONDAY, 9 NOVEMBER 2026 <span className="eyebrow-dot" /> FINANCIAL OVERVIEW</div>
-                  <h1>Good morning, team <span className="heading-wave">✳</span></h1>
-                  <p>Here&apos;s how Aster &amp; Co. is performing across the current reporting period.</p>
+                  <div className="eyebrow">{t("MONDAY, 9 NOVEMBER 2026")} <span className="eyebrow-dot" /> {t("FINANCIAL OVERVIEW")}</div>
+                  <h1>{t("Good morning, team")} <span className="heading-wave">✳</span></h1>
+                  <p>{t("Here's how Aster & Co. is performing across the current reporting period.")}</p>
                 </div>
                 <div className="heading-actions">
-                  <span className="demo-badge"><i /> SAMPLE DATA</span>
+                  <span className="demo-badge"><i /> {t("SAMPLE DATA")}</span>
                   <button className="secondary-button" onClick={() => setInputs(DEMO_INPUTS)}>
                     <Icon name="refresh" size={15} /> Reset demo
                   </button>
@@ -441,84 +463,84 @@ export default function Home() {
               </div>
 
               <div className="metrics-grid">
-                <MetricCard label="Total revenue" value={formatCurrency(results.revenue, true)} change="+7.4%" tone="blue" icon="wallet" />
-                <MetricCard label="EBITDA" value={formatCurrency(results.ebitda, true)} change="+11.2%" tone="green" icon="trend" />
-                <MetricCard label="EBITDA margin" value={formatPercent(results.ebitdaMarginPercent)} change="+1.8 pp" tone="violet" icon="chart" />
-                <MetricCard label="Net income" value={formatCurrency(results.netIncome, true)} change="+5.6%" tone="amber" icon="building" />
+                <MetricCard label={t("Total revenue")} value={formatCurrency(results.revenue, true)} change="+7.4%" tone="blue" icon="wallet" language={language} />
+                <MetricCard label={t("EBITDA")} value={formatCurrency(results.ebitda, true)} change="+11.2%" tone="green" icon="trend" language={language} />
+                <MetricCard label={t("EBITDA margin")} value={formatPercent(results.ebitdaMarginPercent)} change="+1.8 pp" tone="violet" icon="chart" language={language} />
+                <MetricCard label={t("Net income")} value={formatCurrency(results.netIncome, true)} change="+5.6%" tone="amber" icon="building" language={language} />
               </div>
 
               <div className="dashboard-grid">
                 <section className="panel performance-panel">
                   <div className="panel-header">
                     <div>
-                      <div className="panel-kicker">PERFORMANCE</div>
-                      <h2>Revenue &amp; profitability</h2>
-                      <p>Six-month operating performance</p>
+                      <div className="panel-kicker">{t("PERFORMANCE")}</div>
+                      <h2>{t("Revenue & profitability")}</h2>
+                      <p>{t("Six-month operating performance")}</p>
                     </div>
-                    <button className="text-action" onClick={() => setView("model")}>View model <Icon name="arrow" size={14} /></button>
+                    <button className="text-action" onClick={() => setView("model")}>{t("View model")} <Icon name="arrow" size={14} /></button>
                   </div>
-                  <TrendChart />
+                  <TrendChart language={language} />
                   <div className="chart-summary">
-                    <div><span>Latest revenue</span><strong>{formatCurrency(results.revenue)}</strong></div>
-                    <div><span>Latest EBITDA</span><strong>{formatCurrency(results.ebitda)}</strong></div>
-                    <div><span>Net margin</span><strong>{formatPercent(results.netMarginPercent)}</strong></div>
+                    <div><span>{t("Latest revenue")}</span><strong>{formatCurrency(results.revenue)}</strong></div>
+                    <div><span>{t("Latest EBITDA")}</span><strong>{formatCurrency(results.ebitda)}</strong></div>
+                    <div><span>{t("Net margin")}</span><strong>{formatPercent(results.netMarginPercent)}</strong></div>
                   </div>
                 </section>
 
                 <section className="panel breakdown-panel">
                   <div className="panel-header">
                     <div>
-                      <div className="panel-kicker">AT A GLANCE</div>
-                      <h2>Profit breakdown</h2>
-                      <p>Current period · EUR</p>
+                      <div className="panel-kicker">{t("AT A GLANCE")}</div>
+                      <h2>{t("Profit breakdown")}</h2>
+                      <p>{t("Current period · EUR")}</p>
                     </div>
-                    <span className="tiny-status"><i /> LIVE MODEL</span>
+                    <span className="tiny-status"><i /> {t("LIVE MODEL")}</span>
                   </div>
                   <div className="breakdown-list">
-                    <div className="breakdown-row"><span>Gross profit</span><strong>{formatCurrency(results.grossProfit)}</strong></div>
+                    <div className="breakdown-row"><span>{t("Gross profit")}</span><strong>{formatCurrency(results.grossProfit)}</strong></div>
                     <div className="breakdown-track"><i style={{ width: `${Math.min(100, Math.max(0, results.grossMarginPercent))}%` }} /></div>
-                    <div className="breakdown-row"><span>EBITDA</span><strong>{formatCurrency(results.ebitda)}</strong></div>
+                    <div className="breakdown-row"><span>{t("EBITDA")}</span><strong>{formatCurrency(results.ebitda)}</strong></div>
                     <div className="breakdown-track green-track"><i style={{ width: `${Math.min(100, Math.max(0, results.ebitdaMarginPercent))}%` }} /></div>
-                    <div className="breakdown-row"><span>EBIT</span><strong>{formatCurrency(results.ebit)}</strong></div>
+                    <div className="breakdown-row"><span>{t("EBIT")}</span><strong>{formatCurrency(results.ebit)}</strong></div>
                     <div className="breakdown-track violet-track"><i style={{ width: `${Math.min(100, Math.max(0, results.ebitMarginPercent))}%` }} /></div>
-                    <div className="breakdown-row"><span>Net income</span><strong className={results.netIncome < 0 ? "negative-value" : ""}>{formatCurrency(results.netIncome)}</strong></div>
+                    <div className="breakdown-row"><span>{t("Net income")}</span><strong className={results.netIncome < 0 ? "negative-value" : ""}>{formatCurrency(results.netIncome)}</strong></div>
                     <div className="breakdown-track amber-track"><i style={{ width: `${Math.min(100, Math.max(0, results.netMarginPercent))}%` }} /></div>
                   </div>
-                  <div className="breakdown-note"><Icon name="info" size={14} /> Margins are calculated against reported revenue.</div>
+                  <div className="breakdown-note"><Icon name="info" size={14} /> {t("Margins are calculated against reported revenue.")}</div>
                 </section>
               </div>
 
               <section className="panel quick-model-panel">
                 <div className="quick-model-copy">
-                  <div className="panel-kicker">INTERACTIVE WORKSPACE</div>
-                  <h2>Your numbers, always connected.</h2>
-                  <p>Update six operating assumptions and see every key P&amp;L metric recalculate instantly. No formulas to maintain.</p>
+                  <div className="panel-kicker">{t("INTERACTIVE WORKSPACE")}</div>
+                  <h2>{t("Your numbers, always connected.")}</h2>
+                  <p>{t("Update six operating assumptions and see every key P&L metric recalculate instantly. No formulas to maintain.")}</p>
                 </div>
-                <button className="primary-button" onClick={() => setView("model")}>Open financial model <Icon name="arrow" size={16} /></button>
+                <button className="primary-button" onClick={() => setView("model")}>{t("Open financial model")} <Icon name="arrow" size={16} /></button>
                 <div className="quick-model-decoration"><span>∑</span></div>
               </section>
 
               <div className="bottom-grid">
                 <section className="panel activity-panel">
                   <div className="panel-header">
-                    <div><div className="panel-kicker">WORKSPACE ACTIVITY</div><h2>Recent updates</h2></div>
-                    <span className="activity-period">This period</span>
+                    <div><div className="panel-kicker">{t("WORKSPACE ACTIVITY")}</div><h2>{t("Recent updates")}</h2></div>
+                    <span className="activity-period">{t("This period")}</span>
                   </div>
                   <div className="activity-row">
                     <span className="activity-icon blue"><Icon name="check" size={15} /></span>
-                    <div><strong>Management P&amp;L recalculated</strong><span>Live model · Just now</span></div>
-                    <span className="activity-tag">UPDATED</span>
+                    <div><strong>{t("Management P&L recalculated")}</strong><span>{t("Live model · Just now")}</span></div>
+                    <span className="activity-tag">{t("UPDATED")}</span>
                   </div>
                   <div className="activity-row">
                     <span className="activity-icon violet"><Icon name="file" size={15} /></span>
-                    <div><strong>FY 2026 reporting period selected</strong><span>Workspace settings · Demo</span></div>
-                    <span className="activity-tag">SYSTEM</span>
+                    <div><strong>{t("FY 2026 reporting period selected")}</strong><span>{t("Workspace settings · Demo")}</span></div>
+                    <span className="activity-tag">{t("SYSTEM")}</span>
                   </div>
                 </section>
                 <section className="panel integrity-panel">
                   <div className="integrity-icon"><Icon name="check" size={19} /></div>
-                  <div><strong>Model is calculating</strong><p>All displayed figures are derived from the current assumptions. Sample data only.</p></div>
-                  <span className="integrity-status">READY</span>
+                  <div><strong>{t("Model is calculating")}</strong><p>{t("All displayed figures are derived from the current assumptions. Sample data only.")}</p></div>
+                  <span className="integrity-status">{t("READY")}</span>
                 </section>
               </div>
             </>
@@ -528,36 +550,36 @@ export default function Home() {
             <>
               <div className="page-heading">
                 <div>
-                  <div className="eyebrow">WORKSPACE <span className="eyebrow-dot" /> FINANCIAL MODELLING</div>
-                  <h1>Management P&amp;L</h1>
-                  <p>Change the operating assumptions. The statement and performance metrics update instantly.</p>
+                  <div className="eyebrow">{t("WORKSPACE")} <span className="eyebrow-dot" /> {t("FINANCIAL MODELLING")}</div>
+                  <h1>{t("Management P&L")}</h1>
+                  <p>{t("Change the operating assumptions. The statement and performance metrics update instantly.")}</p>
                 </div>
                 <div className="heading-actions">
-                  <span className="demo-badge"><i /> SAMPLE DATA</span>
-                  <button className="secondary-button" onClick={() => setInputs(DEMO_INPUTS)}><Icon name="refresh" size={15} /> Reset inputs</button>
+                  <span className="demo-badge"><i /> {t("SAMPLE DATA")}</span>
+                  <button className="secondary-button" onClick={() => setInputs(DEMO_INPUTS)}><Icon name="refresh" size={15} /> {t("Reset inputs")}</button>
                 </div>
               </div>
 
               <div className="model-meta-row">
-                <div className="model-title"><span className="model-file-icon"><Icon name="file" size={17} /></span><div><strong>Management P&amp;L model</strong><span>FY 2026 · EUR · Annual view</span></div></div>
-                <div className="calculation-status"><span className="status-pulse" /> Calculations up to date</div>
+                <div className="model-title"><span className="model-file-icon"><Icon name="file" size={17} /></span><div><strong>{t("Management P&L model")}</strong><span>{t("FY 2026 · EUR · Annual view")}</span></div></div>
+                <div className="calculation-status"><span className="status-pulse" /> {t("Calculations up to date")}</div>
               </div>
 
               <div className="model-layout">
                 <section className="panel assumptions-panel">
                   <div className="panel-header">
-                    <div><div className="panel-kicker">MODEL INPUTS</div><h2>Operating assumptions</h2><p>Enter values for the reporting period.</p></div>
-                    <span className="input-count">06 INPUTS</span>
+                    <div><div className="panel-kicker">{t("MODEL INPUTS")}</div><h2>{t("Operating assumptions")}</h2><p>{t("Enter values for the reporting period.")}</p></div>
+                    <span className="input-count">{t("06 INPUTS")}</span>
                   </div>
                   <div className="assumption-fields">
                     {INPUT_FIELDS.map((field, index) => (
                       <label className="assumption-field" key={field.key}>
                         <span className="field-number">{String(index + 1).padStart(2, "0")}</span>
-                        <span className="field-main"><strong>{field.label}</strong><small>{field.description}</small></span>
+                        <span className="field-main"><strong>{t(field.label)}</strong><small>{t(field.description)}</small></span>
                         <span className="input-wrap">
                           <span className="input-prefix">{field.suffix ? "" : "€"}</span>
                           <input
-                            aria-label={field.label}
+                            aria-label={t(field.label)}
                             type="number"
                             min="0"
                             max={field.key === "taxRatePercent" ? 100 : undefined}
@@ -570,78 +592,78 @@ export default function Home() {
                       </label>
                     ))}
                   </div>
-                  <div className="assumptions-footnote"><Icon name="info" size={14} /> Expenses are entered as positive values. D&amp;A is excluded from operating expenses.</div>
+                  <div className="assumptions-footnote"><Icon name="info" size={14} /> {t("Expenses are entered as positive values. D&A is excluded from operating expenses.")}</div>
                 </section>
 
                 <section className="panel statement-panel">
                   <div className="panel-header">
-                    <div><div className="panel-kicker">CALCULATED OUTPUT</div><h2>Income statement</h2><p>Amounts in EUR</p></div>
-                    <span className="live-badge"><i /> LIVE</span>
+                    <div><div className="panel-kicker">{t("CALCULATED OUTPUT")}</div><h2>{t("Income statement")}</h2><p>{t("Amounts in EUR")}</p></div>
+                    <span className="live-badge"><i /> {t("LIVE")}</span>
                   </div>
                   <div className="statement-table">
-                    <div className="statement-head"><span>LINE ITEM</span><span>FY 2026</span></div>
-                    <div className="statement-row"><span>Revenue</span><strong>{formatCurrency(results.revenue)}</strong></div>
-                    <div className="statement-row muted-row"><span>Cost of goods sold</span><span>({formatCurrency(results.costOfGoodsSold)})</span></div>
-                    <div className="statement-row subtotal"><span>Gross profit</span><strong>{formatCurrency(results.grossProfit)}</strong></div>
-                    <div className="statement-margin"><span>Gross margin</span><span>{formatPercent(results.grossMarginPercent)}</span></div>
-                    <div className="statement-row muted-row"><span>Operating expenses</span><span>({formatCurrency(results.operatingExpenses)})</span></div>
-                    <div className="statement-row key-row"><span>EBITDA</span><strong>{formatCurrency(results.ebitda)}</strong></div>
-                    <div className="statement-margin"><span>EBITDA margin</span><span>{formatPercent(results.ebitdaMarginPercent)}</span></div>
-                    <div className="statement-row muted-row"><span>Depreciation &amp; amortisation</span><span>({formatCurrency(results.depreciationAndAmortisation)})</span></div>
-                    <div className="statement-row subtotal"><span>EBIT</span><strong>{formatCurrency(results.ebit)}</strong></div>
-                    <div className="statement-margin"><span>EBIT margin</span><span>{formatPercent(results.ebitMarginPercent)}</span></div>
-                    <div className="statement-row muted-row"><span>Interest expense</span><span>({formatCurrency(results.interestExpense)})</span></div>
-                    <div className="statement-row subtotal"><span>Profit before tax</span><strong>{formatCurrency(results.profitBeforeTax)}</strong></div>
-                    <div className="statement-row muted-row"><span>Income tax</span><span>({formatCurrency(results.incomeTax)})</span></div>
-                    <div className="statement-row final-row"><span>Net income</span><strong className={results.netIncome < 0 ? "negative-value" : ""}>{formatCurrency(results.netIncome)}</strong></div>
-                    <div className="statement-margin final-margin"><span>Net margin</span><span>{formatPercent(results.netMarginPercent)}</span></div>
+                    <div className="statement-head"><span>{t("LINE ITEM")}</span><span>{t("FY 2026")}</span></div>
+                    <div className="statement-row"><span>{t("Revenue")}</span><strong>{formatCurrency(results.revenue)}</strong></div>
+                    <div className="statement-row muted-row"><span>{t("Cost of goods sold")}</span><span>({formatCurrency(results.costOfGoodsSold)})</span></div>
+                    <div className="statement-row subtotal"><span>{t("Gross profit")}</span><strong>{formatCurrency(results.grossProfit)}</strong></div>
+                    <div className="statement-margin"><span>{t("Gross margin")}</span><span>{formatPercent(results.grossMarginPercent)}</span></div>
+                    <div className="statement-row muted-row"><span>{t("Operating expenses")}</span><span>({formatCurrency(results.operatingExpenses)})</span></div>
+                    <div className="statement-row key-row"><span>{t("EBITDA")}</span><strong>{formatCurrency(results.ebitda)}</strong></div>
+                    <div className="statement-margin"><span>{t("EBITDA margin")}</span><span>{formatPercent(results.ebitdaMarginPercent)}</span></div>
+                    <div className="statement-row muted-row"><span>{t("Depreciation & amortisation")}</span><span>({formatCurrency(results.depreciationAndAmortisation)})</span></div>
+                    <div className="statement-row subtotal"><span>{t("EBIT")}</span><strong>{formatCurrency(results.ebit)}</strong></div>
+                    <div className="statement-margin"><span>{t("EBIT margin")}</span><span>{formatPercent(results.ebitMarginPercent)}</span></div>
+                    <div className="statement-row muted-row"><span>{t("Interest expense")}</span><span>({formatCurrency(results.interestExpense)})</span></div>
+                    <div className="statement-row subtotal"><span>{t("Profit before tax")}</span><strong>{formatCurrency(results.profitBeforeTax)}</strong></div>
+                    <div className="statement-row muted-row"><span>{t("Income tax")}</span><span>({formatCurrency(results.incomeTax)})</span></div>
+                    <div className="statement-row final-row"><span>{t("Net income")}</span><strong className={results.netIncome < 0 ? "negative-value" : ""}>{formatCurrency(results.netIncome)}</strong></div>
+                    <div className="statement-margin final-margin"><span>{t("Net margin")}</span><span>{formatPercent(results.netMarginPercent)}</span></div>
                   </div>
-                  <button className="statement-export" onClick={exportCsv}><Icon name="download" size={15} /> Download statement (CSV)</button>
+                  <button className="statement-export" onClick={exportCsv}><Icon name="download" size={15} /> {t("Download statement (CSV)")}</button>
                 </section>
               </div>
 
               <div className="formula-note">
-                <div className="formula-note-icon">ƒx</div>
-                <div><strong>Transparent calculations</strong><p>EBITDA = Revenue − COGS − Operating expenses. EBIT = EBITDA − D&amp;A. Net income = Profit before tax − income tax. Tax is applied only to positive pre-tax profit.</p></div>
+                <div className="formula-note-icon">{t("ƒx")}</div>
+                <div><strong>{t("Transparent calculations")}</strong><p>{t("EBITDA = Revenue − COGS − Operating expenses. EBIT = EBITDA − D&A. Net income = Profit before tax − income tax. Tax is applied only to positive pre-tax profit.")}</p></div>
               </div>
             </>
           )}
 
-          {view === "planning" && <PlanningWorkspace />}
+          {view === "planning" && <PlanningWorkspace language={language} />}
 
           {view === "reports" && (
             <>
               <div className="page-heading">
                 <div>
-                  <div className="eyebrow">WORKSPACE <span className="eyebrow-dot" /> REPORTING</div>
-                  <h1>Reports &amp; exports</h1>
-                  <p>Download a structured view of the current management model.</p>
+                  <div className="eyebrow">{t("WORKSPACE")} <span className="eyebrow-dot" /> {t("REPORTING")}</div>
+                  <h1>{t("Reports & exports")}</h1>
+                  <p>{t("Download a structured view of the current management model.")}</p>
                 </div>
-                <div className="heading-actions"><span className="demo-badge"><i /> SAMPLE DATA</span></div>
+                <div className="heading-actions"><span className="demo-badge"><i /> {t("SAMPLE DATA")}</span></div>
               </div>
               <section className="panel report-feature">
                 <div className="report-feature-icon"><Icon name="file" size={23} /></div>
                 <div className="report-feature-copy">
-                  <div className="panel-kicker">AVAILABLE REPORT</div>
-                  <h2>Management profit &amp; loss</h2>
-                  <p>A detailed P&amp;L statement with formulas, margins and model assumptions for FY 2026.</p>
-                  <div className="report-tags"><span>CSV format</span><span>EUR currency</span><span>Live values</span></div>
+                  <div className="panel-kicker">{t("AVAILABLE REPORT")}</div>
+                  <h2>{t("Management profit & loss")}</h2>
+                  <p>{t("A detailed P&L statement with formulas, margins and model assumptions for FY 2026.")}</p>
+                  <div className="report-tags"><span>{t("CSV format")}</span><span>{t("EUR currency")}</span><span>{t("Live values")}</span></div>
                 </div>
-                <button className="primary-button" onClick={exportCsv}><Icon name="download" size={16} /> Export report</button>
+                <button className="primary-button" onClick={exportCsv}><Icon name="download" size={16} /> {t("Export report")}</button>
               </section>
               <div className="report-summary-grid">
-                <MetricCard label="Revenue" value={formatCurrency(results.revenue, true)} change="Current model" tone="blue" icon="wallet" />
+                <MetricCard label="Revenue" value={formatCurrency(results.revenue, true)} change={t("Current model")} tone="blue" icon="wallet" />
                 <MetricCard label="EBITDA" value={formatCurrency(results.ebitda, true)} change="Current model" tone="green" icon="trend" />
                 <MetricCard label="Net income" value={formatCurrency(results.netIncome, true)} change="Current model" tone="amber" icon="building" />
               </div>
-              <div className="report-disclaimer"><Icon name="info" size={17} /><p><strong>Illustrative data only.</strong> This MVP does not produce statutory accounts, audited statements or tax filings. Review calculations and accounting policies with a qualified professional before relying on outputs.</p></div>
+              <div className="report-disclaimer"><Icon name="info" size={17} /><p><strong>{t("Illustrative data only.")}</strong> {t("This MVP does not produce statutory accounts, audited statements or tax filings. Review calculations and accounting policies with a qualified professional before relying on outputs.")}</p></div>
             </>
           )}
 
           <footer className="page-footer">
-            <span>© 2026 EnterpriseOS</span>
-            <span><i /> All systems operational</span>
-            <span>Built for clearer business decisions.</span>
+            <span>{t("© 2026 EnterpriseOS")}</span>
+            <span><i /> {t("All systems operational")}</span>
+            <span>{t("Built for clearer business decisions.")}</span>
           </footer>
         </div>
       </section>
