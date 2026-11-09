@@ -170,7 +170,7 @@ function parseCsvRows(source: string, delimiter: string): string[][] | null {
     else if (char === '"') quoted = !quoted;
     else if (!quoted && char === delimiter) { row.push(cell); cell = ""; }
     else if (!quoted && (char === "\n" || char === "\r")) {
-      if (char === "\\r" && source[i + 1] === "\n") i += 1;
+      if (char === "\r" && source[i + 1] === "\n") i += 1;
       row.push(cell); rows.push(row); row = []; cell = "";
     } else cell += char;
   }
