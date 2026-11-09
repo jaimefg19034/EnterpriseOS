@@ -138,7 +138,7 @@ export function costCenterRunRate(
   expenses: ExpenseRecord[],
   asOfDate: string,
 ): CostCenterRunRate {
-  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(asOfDate)) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(asOfDate)) {
     return { recordedSpend: 0, projectedSpend: null, elapsedPercent: 0, projectedOverBudget: false };
   }
   const [yearText, period] = center.period.split("-");
