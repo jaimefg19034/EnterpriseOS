@@ -13,7 +13,7 @@
 | Budget & scenarios | Monthly revenue plan, actual revenue inputs, Base/Upside/Downside cases, profitability projection, budget-vs-actual and run-rate indicators | Pure planning calculations; saved planning state in localStorage | Developed prototype |
 | Three statements | P&L, balance sheet and indirect cash flow; working-capital assumptions; financial ratios; balance check; Excel export | Pure three-statement and analysis modules; opening balance sheet is illustrative | Integrated model prototype, not a ledger |
 | Cash forecast | Quarterly cash view with weekly internal schedule, invoice-linked receipts/payments, manual movements kept separate, downside liquidity stress test and Excel export | Browser-local storage plus pure invoice allocation and forecast functions | Useful planning tool; not bank-reconciled |
-| Working capital | Receivables/payables invoice register, due dates, outstanding balances, ageing, CSV import and backup integration | Browser-local storage; validated invoice records | Local single-browser register |
+| Working capital | Receivables/payables invoice register, due dates, outstanding balances, ageing, dated partial-payment ledger, CSV import, payment-history Excel export and backup integration | Browser-local storage; validated invoice and payment records; historic aggregate paid balances remain undated | Local single-browser register; no bank reconciliation or automatic payment matching |
 | Operations | Sales pipeline, projects, risks, KPIs, cost-centre budgets, expense register, budget pressure/run-rate and management reporting | Domain calculations and operations state in localStorage | Broad prototype; no shared company database |
 | Reports & exports | Structured Excel outputs for financial model, planning and three statements; operational CSV export | Exported values from current client-side state | Reporting prototype; no audit-grade reporting pack |
 
@@ -26,7 +26,7 @@
 | Three-statement assumptions | React component state | Not a durable company record |
 | Planning inputs and monthly actuals | Browser localStorage | Not synced or backed up automatically |
 | Operations records | Browser localStorage | Single browser profile; no user/tenant isolation |
-| Invoices and cash forecast | Browser localStorage | No bank or accounting reconciliation |
+| Invoices, dated payment movements and cash forecast | Browser localStorage | Historic paid balances imported as aggregates have no transaction dates; no bank or accounting reconciliation |
 | Finance backup | Downloadable local backup with validation and restore | User must store the file safely; no managed backup service |
 | Exports | Generated in the browser | Values are snapshots, not a live linked ledger |
 
@@ -35,7 +35,7 @@
 - The main workspaces cover a coherent set of SME finance and operating tasks.
 - Financial calculation logic is separated into domain modules and has unit tests.
 - The P&L, three statements, working capital and cash forecast are connected through explicit calculation functions.
-- Planning, operations and invoice/cash data have validation and local backup/restore support.
+- Planning, operations and invoice/cash data have validation and local backup/restore support; invoice payment movements survive backup/restore and are separately exported to Excel.
 - Excel exports are structured and styled rather than raw data dumps.
 - English and Spanish are supported.
 - Lint, typecheck, unit tests and production build run in GitHub Actions before release.
