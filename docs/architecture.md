@@ -14,6 +14,8 @@ The MVP proves two connected finance workflows:
 3. Stress-test the remaining forecast months using base, upside and downside scenarios.
 4. Review a modelled full-year profitability projection and export the plan as CSV.
 5. Link the management P&L to a cash flow statement and balance sheet, with explicit working-capital and financing drivers.
+6. Maintain an invoice register for receivables and payables, including paid-to-date amounts, outstanding balances and ageing.
+7. Project invoice cash movements into a quarterly direct-method forecast by due date, with an explicit opt-in and separate manual inputs.
 
 The app is deliberately not a general-purpose spreadsheet. No customer financial data is persisted in this first iteration.
 
@@ -29,6 +31,8 @@ The app is deliberately not a general-purpose spreadsheet. No customer financial
 - CSV export with values and formula descriptions.
 - Integrated P&L, indirect cash flow and closing balance sheet.
 - DSO/DIO/DPO working-capital drivers and capital allocation assumptions.
+- Receivables/payables register with ageing and due-date based quarterly cash projections.
+- User-controlled invoice integration with a manual-vs-linked cash movement audit trail.
 - Opening/closing balance sheet reconciliation and overdraft classification.
 - English/Spanish interface with remembered local language preference.
 - Clear demo-data and non-statutory-accounting disclosures.
@@ -89,7 +93,7 @@ buildPlanningResult() — pure domain function
       +----> CSV export
 ```
 
-The calculation modules clamp invalid/negative assumptions and cap percentage/day drivers to documented ranges. The three-statement model keeps the opening demonstration balance sheet balanced, rolls retained earnings by net income less dividends, rolls net PP&E by CapEx less D&A, and classifies negative closing cash as an overdraft liability. The modules do not persist data or call a third-party API.
+The calculation modules clamp invalid/negative assumptions and cap percentage/day drivers to documented ranges. The three-statement model keeps the opening demonstration balance sheet balanced, rolls retained earnings by net income less dividends, rolls net PP&E by CapEx less D&A, and classifies negative closing cash as an overdraft liability. The model calculation modules do not call third-party APIs. The invoice register and quarterly cash worksheet use browser localStorage only. The working-capital workspace emits a same-tab update event after saving; the cash forecast reloads the invoice register and calls the pure invoice-allocation function to build a 13-week preview. Invoice balances are grouped by due-date week; amounts already overdue as of the current date are placed in Week 1. The forecast applies these amounts only when the user enables the invoice-inclusion toggle. Manual inputs are never overwritten, and the export includes a separate invoice cash schedule for auditability.
 
 ## 4. Financial calculation contract
 
@@ -122,7 +126,7 @@ Current MVP:
 - Use illustrative sample data only.
 - No secrets, API keys or customer financial records in Git.
 - No browser-side privileged credentials.
-- No persistence means no multi-tenant data exposure in the first version.
+- No company database or multi-tenant sharing; browser-local records are not backed up or synced.
 
 Before a customer pilot:
 1. Add server-side authentication using a maintained SSR integration and cookie-based sessions.
