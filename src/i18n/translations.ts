@@ -826,6 +826,18 @@ const spanish: Record<string, string> = {
   "Historical paid balance (undated)": "Saldo pagado histórico (sin fecha)",
   "Legacy paid balance without transaction date": "Saldo pagado anterior sin fecha de movimiento",
   "Invoice payment movements · User-entered records": "Movimientos de pago de facturas · Datos introducidos por el usuario",
+  "Unitemized spend baseline (€)": "Base de gasto no desglosado (€)",
+  "Unitemized baseline (€)": "Base no desglosada (€)",
+  "Unitemized baseline": "Base no desglosada",
+  "Unitemized baseline plus dated expenses": "Base no desglosada más gastos fechados",
+  "Enter only spend not itemised in the expense register. Registered expenses are added separately; never enter the same cost in both places.": "Introduce únicamente los gastos que no estén detallados en el registro. Los gastos registrados se suman por separado; no introduzcas el mismo coste en ambos sitios.",
+  "Actual spend equals the unitemized baseline plus dated expenses assigned to this cost centre within its period. Do not include an expense in both places. Values are not imported from banks or accounting systems. Full-year and quarterly budgets are kept separate; choose one period to compare totals.": "El gasto real equivale a la base no desglosada más los gastos fechados asignados a este centro de coste dentro de su periodo. No incluyas un gasto en ambos sitios. Los datos no se importan de bancos ni de programas contables. Los presupuestos anuales y trimestrales se mantienen separados; elige un periodo para comparar totales.",
+  "Select one period to view comparable totals.": "Selecciona un único periodo para ver totales comparables.",
+  "Selected period only": "Solo el periodo seleccionado",
+  "Across listed period records": "En los registros de los periodos mostrados",
+  "A period-end estimate that adds the unitemized baseline to the run-rate of dated expenses recorded so far.": "Una estimación al cierre del periodo que suma la base no desglosada al ritmo de gasto de los movimientos fechados hasta la fecha.",
+  "No cost centre period matches the selected expense date. Change the date or create a matching cost centre.": "Ningún periodo de centro de coste coincide con la fecha del gasto seleccionada. Cambia la fecha o crea un centro de coste con un periodo compatible.",
+
 };
 
 
