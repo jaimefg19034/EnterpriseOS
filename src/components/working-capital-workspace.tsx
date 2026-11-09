@@ -23,7 +23,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   const [dueDate, setDueDate] = useState(todayISO);
   const [amount, setAmount] = useState("");
   const [paidAmount, setPaidAmount] = useState("0");
-  const today = useMemo(todayISO, []);
+  const today = useMemo(() => todayISO(), []);
   const visible = useMemo(() => invoices.filter((item) => item.direction === direction), [invoices, direction]);
   const aged = useMemo(() => calculateInvoiceAgeing(visible, today).sort((a, b) => a.invoice.dueDate.localeCompare(b.invoice.dueDate)), [visible, today]);
   const summary = useMemo(() => summarizeInvoices(aged, today), [aged, today]);
