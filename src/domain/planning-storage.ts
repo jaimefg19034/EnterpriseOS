@@ -1,4 +1,4 @@
-import { MONTHS, SCENARIOS, type ActualRevenueByMonth, type MonthName, type PlanningAssumptions, type ScenarioKey } from "./planning";
+import { MONTHS, type ActualRevenueByMonth, type MonthName, type PlanningAssumptions, type ScenarioKey } from "./planning";
 
 export const PLANNING_STORAGE_KEY = "enterpriseos:planning:v1";
 
