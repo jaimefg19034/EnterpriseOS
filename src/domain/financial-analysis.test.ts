@@ -23,6 +23,9 @@ describe("calculateFinancialRatios", () => {
     expect(find("Cash conversion cycle")?.value).toBe(60);
     expect(find("Free cash flow margin")?.value).not.toBeNull();
     expect(find("Interest coverage")?.value).toBe(12.1);
+    expect(find("Operating break-even revenue")?.value).toBeGreaterThan(0);
+    expect(find("Margin of safety")?.value).toBeGreaterThan(0);
+    expect(find("Return on assets (ROA)")?.value).toBeGreaterThan(0);
   });
 
   it("returns null rather than misleading zeroes for undefined ratios", () => {
