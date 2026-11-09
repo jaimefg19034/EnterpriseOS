@@ -77,7 +77,7 @@ export function createInitialPlanningState(
 
 /** Adds a clean fiscal year, carrying forward assumptions but never inventing actual revenue. */
 export function addPlanningYear(state: SavedPlanningState, year: number): SavedPlanningState | null {
-  if (!isValidPlanningYear(year) || state.years[String(year)]) return null;
+  if (!isValidPlanningYear(year) || state.years[String(year)] || Object.keys(state.years).length >= 100) return null;
   const template = state.years[String(state.selectedYear)];
   if (!template) return null;
   return {
