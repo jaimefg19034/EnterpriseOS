@@ -13,6 +13,7 @@ The MVP proves two connected finance workflows:
 2. Compare monthly revenue actuals with a seasonally allocated annual budget.
 3. Stress-test the remaining forecast months using base, upside and downside scenarios.
 4. Review a modelled full-year profitability projection and export the plan as CSV.
+5. Link the management P&L to a cash flow statement and balance sheet, with explicit working-capital and financing drivers.
 
 The app is deliberately not a general-purpose spreadsheet. No customer financial data is persisted in this first iteration.
 
@@ -26,6 +27,10 @@ The app is deliberately not a general-purpose spreadsheet. No customer financial
 - Scenario-adjusted revenue forecast for remaining months.
 - Full-year modelled EBITDA, EBIT and net income.
 - CSV export with values and formula descriptions.
+- Integrated P&L, indirect cash flow and closing balance sheet.
+- DSO/DIO/DPO working-capital drivers and capital allocation assumptions.
+- Opening/closing balance sheet reconciliation and overdraft classification.
+- English/Spanish interface with remembered local language preference.
 - Clear demo-data and non-statutory-accounting disclosures.
 - Automated type, lint and production-build checks before each release.
 
@@ -61,7 +66,7 @@ User edits an input
 React component state (demo data in browser memory)
       |
       v
-calculateFinancials() / buildPlanningResult() — pure domain functions
+calculateFinancials() / buildPlanningResult() / calculateThreeStatements() — pure domain functions
       |
       +----> KPI cards / chart summaries
       |
@@ -84,7 +89,7 @@ buildPlanningResult() — pure domain function
       +----> CSV export
 ```
 
-The calculation module clamps invalid/negative expense inputs and caps the assumed tax rate at 100%. It does not persist data or call a third-party API.
+The calculation modules clamp invalid/negative assumptions and cap percentage/day drivers to documented ranges. The three-statement model keeps the opening demonstration balance sheet balanced, rolls retained earnings by net income less dividends, rolls net PP&E by CapEx less D&A, and classifies negative closing cash as an overdraft liability. The modules do not persist data or call a third-party API.
 
 ## 4. Financial calculation contract
 
@@ -96,7 +101,7 @@ Expenses are entered as positive amounts. D&A is excluded from operating expense
 - Profit before tax = EBIT − interest expense
 - Income tax = max(0, profit before tax × tax rate)
 - Net income = profit before tax − income tax
-- Each margin = corresponding profit / revenue
+- Each margin = corresponding profit / revenue\n\nThree-statement links:\n- Closing receivables = revenue / 365 × DSO.\n- Closing inventory = COGS / 365 × DIO.\n- Closing payables = COGS / 365 × DPO.\n- Cash from operations = net income + D&A − Δreceivables − Δinventory + Δpayables.\n- Cash from investing = −CapEx.\n- Cash from financing = new borrowings − debt repayment − dividends.\n- Closing cash = opening cash + net cash movement; negative cash is presented as an overdraft liability.\n- Closing net PP&E = opening net PP&E + CapEx − D&A.\n- Closing retained earnings = opening retained earnings + net income − dividends.
 
 This is a simplified management model. Real accounting policies, lease treatment, exceptional items, capitalisation, tax losses, deferred tax and jurisdiction-specific rules require further modelling and professional review.
 
@@ -128,6 +133,9 @@ Supabase's current Next.js SSR guidance uses cookie-backed sessions and separate
 - CSV export and visible limitations.
 
 ### Phase 1 — correctness and usability (in progress)
+- Integrated management P&L, indirect cash flow and closing balance sheet with balance reconciliation.
+- Working-capital cycle and capital allocation assumptions (DSO, DIO, DPO, CapEx, debt, dividends).
+- English and Spanish UI and localized financial statement export.
 - Unit tests cover management P&L, monthly budget allocation, scenarios, zero revenue and invalid assumptions.
 - Add deeper model input validation and number formatting tests.
 - Add accessible labels, keyboard flows and mobile QA.
