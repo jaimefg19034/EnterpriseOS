@@ -546,6 +546,9 @@ const spanish: Record<string, string> = {
   "61to90": "61–90 días",
   "over90": "Más de 90 días",
   "Review the three statements, liquidity, leverage, break-even, returns and the quarterly cash forecast.": "Revisa los tres estados financieros, ratios, capital circulante, facturas de clientes y proveedores y la previsión trimestral de caja.",
+  "EnterpriseOS — Quarterly cash forecast": "EnterpriseOS — Previsión trimestral de caja",
+  "13 WEEKS · 1 QUARTER": "13 SEMANAS · 1 TRIMESTRE",
+  "Ageing bucket": "Tramo de antigüedad",
 };
 
 export function translate(value: string, language: Language): string {
