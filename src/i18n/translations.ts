@@ -867,6 +867,12 @@ const spanish: Record<string, string> = {
   "EnterpriseOS — Model Drivers": "EnterpriseOS — Parámetros del modelo",
   "FY 2026 · Illustrative management indicators · Compare with sector peers and prior periods": "Ejercicio 2026 · Indicadores de gestión ilustrativos · Comparar con el sector y periodos anteriores",
 
+  "Assumption": "Supuesto",
+  "EBITDA less D&A": "EBITDA menos depreciación y amortización",
+  "Receivable invoices": "Facturas de clientes",
+  "Payable invoices": "Facturas de proveedores",
+  "Balance": "Saldo",
+
 };
 
 
