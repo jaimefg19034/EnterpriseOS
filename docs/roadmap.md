@@ -142,4 +142,6 @@ Append a short entry after each completed work session:
 - **Known limitations:**
 - **Next session:**
 
-The next planned session is **Session 1: freeze the current feature inventory and known limitations**. Do not skip the audit and jump straight into more modules: the product is now broad enough that correctness and coherence matter more than adding another menu item.
+**Session 1 completed (9 Nov 2026):** current modules, persistence boundaries and major product limitations were recorded in [the feature inventory](feature-inventory.md). The current app is broader than the original MVP, so the next priority is a workflow and financial-data-flow map before expanding functionality.
+
+The next planned session is **Session 2: map the end-to-end finance workflow**. Do not skip the audit and jump straight into more modules: the product is now broad enough that correctness and coherence matter more than adding another menu item.

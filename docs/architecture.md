@@ -67,7 +67,7 @@ Avoid microservices, queues and a general formula engine at the MVP stage. They 
 User edits an input
       |
       v
-React component state (demo data in browser memory)
+React component state (demo model inputs; reset on reload)
       |
       v
 calculateFinancials() / buildPlanningResult() / calculateThreeStatements() — pure domain functions
@@ -76,24 +76,24 @@ calculateFinancials() / buildPlanningResult() / calculateThreeStatements() — p
       |
       +----> Management P&L rows
       |
-      +----> CSV export
+      +----> Excel workbook export
 
 Budget & scenarios:
 
 User edits assumptions / monthly revenue actuals / scenario
       |
       v
-React component state (sample data in browser memory)
+React component state plus browser-local persistence for saved planning inputs and actuals
       |
       v
 buildPlanningResult() — pure domain function
       |
       +----> monthly budget vs actual / forecast
       +----> annual profitability projection
-      +----> CSV export
+      +----> Excel workbook export
 ```
 
-The calculation modules clamp invalid/negative assumptions and cap percentage/day drivers to documented ranges. The three-statement model keeps the opening demonstration balance sheet balanced, rolls retained earnings by net income less dividends, rolls net PP&E by CapEx less D&A, and classifies negative closing cash as an overdraft liability. The model calculation modules do not call third-party APIs. The invoice register and quarterly cash worksheet use browser localStorage only. The working-capital workspace emits a same-tab update event after saving; the cash forecast reloads the invoice register and calls the pure invoice-allocation function to build a 13-week preview. Invoice balances are grouped by due-date week; amounts already overdue as of the current date are placed in Week 1. The forecast applies these amounts only when the user enables the invoice-inclusion toggle. Manual inputs are never overwritten, and the export includes a separate invoice cash schedule for auditability.
+The calculation modules validate and clamp selected invalid/negative assumptions and cap percentage/day drivers to documented ranges. The three-statement model keeps the opening demonstration balance sheet balanced, rolls retained earnings by net income less dividends, rolls net PP&E by CapEx less D&A, and classifies negative closing cash as an overdraft liability. The model calculation modules do not call third-party APIs. Planning inputs/actuals, operations records, the invoice register and the quarterly cash worksheet use browser localStorage only; the core P&L and three-statement assumptions are currently session state. There is no server-side database, authentication, multi-user sync or company-level data isolation. The working-capital workspace emits a same-tab update event after saving; the cash forecast reloads the invoice register and calls the pure invoice-allocation function to build a 13-week preview. Invoice balances are grouped by due-date week; amounts already overdue as of the current date are placed in Week 1. The forecast applies these amounts only when the user enables the invoice-inclusion toggle. Manual inputs are never overwritten, and the export includes a separate invoice cash schedule for auditability.
 
 ## 4. Financial calculation contract
 
