@@ -27,6 +27,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   const [amount, setAmount] = useState("");
   const [paidAmount, setPaidAmount] = useState("0");
   const [backupMessage, setBackupMessage] = useState("");
+  const [invoiceFormError, setInvoiceFormError] = useState("");
   const backupInputRef = useRef<HTMLInputElement>(null);
   const today = useMemo(() => todayISO(), []);
   const visible = useMemo(() => invoices.filter((item) => item.direction === direction), [invoices, direction]);
@@ -65,12 +66,17 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
     event.preventDefault();
     const gross = Number(amount);
     const paid = Number(paidAmount);
-    if (!counterparty.trim() || !reference.trim() || !issueDate || !dueDate || !Number.isFinite(gross) || gross <= 0 || !Number.isFinite(paid) || paid < 0 || paid > gross) return;
-    const invoice: WorkingCapitalInvoice = normaliseInvoice({
+    const candidate: WorkingCapitalInvoice = {
       id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `invoice-${Date.now()}`,
       direction, counterparty, reference, issueDate, dueDate, amount: gross, paidAmount: paid,
-    });
-    setInvoices((current) => [...current, invoice]);
+    };
+    const validation = validateWorkingCapitalInvoice(candidate);
+    if (!validation.valid) {
+      setInvoiceFormError(t(validation.error));
+      return;
+    }
+    setInvoices((current) => [...current, validation.invoice]);
+    setInvoiceFormError("");
     setCounterparty(""); setReference(""); setAmount(""); setPaidAmount("0");
   }
 
@@ -208,6 +214,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
         <div className="working-capital-subhead"><h3>{t("Ageing analysis")}</h3><span>{t("Outstanding balance by due date")}</span></div>
         <div className="working-capital-buckets">{buckets.map(([key, label]) => <div key={key}><span>{t(label)}</span><strong>{money(summary.buckets[key], language)}</strong><i><b style={{ width: `${summary.outstanding > 0 ? summary.buckets[key] / summary.outstanding * 100 : 0}%` }} /></i></div>)}</div>
       </div>
+      {invoiceFormError && <p className="working-capital-backup-message" role="alert">{invoiceFormError}</p>}
       <form className="working-capital-form panel" onSubmit={addInvoice}>
         <div className="working-capital-subhead"><h3>{t("Add invoice")}</h3><span>{t("Manual entry · No sample invoices")}</span></div>
         <div className="working-capital-form-grid">
