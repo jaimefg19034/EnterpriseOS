@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { calculateInvoiceAgeing, findDuplicateInvoice, normaliseInvoice, parseInvoiceCsv, summarizeInvoices, validateWorkingCapitalInvoice, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
+import { addInvoicePayment, calculateInvoiceAgeing, findDuplicateInvoice, parseInvoiceCsv, summarizeInvoices, validateWorkingCapitalInvoice, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { createEmptyCashForecast } from "@/domain/cash-forecast";
 import { createLocalFinanceBackup, parseLocalFinanceBackup } from "@/domain/cash-working-capital-backup";
 import { parseSavedPlanningState, PLANNING_STORAGE_KEY } from "@/domain/planning-storage";
@@ -28,6 +28,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   const [dueDate, setDueDate] = useState(todayISO);
   const [amount, setAmount] = useState("");
   const [paidAmount, setPaidAmount] = useState("0");
+  const [paymentErrors, setPaymentErrors] = useState<Record<string, string>>({});
   const [backupMessage, setBackupMessage] = useState("");
   const [invoiceFormError, setInvoiceFormError] = useState("");
   const [csvPreview, setCsvPreview] = useState<WorkingCapitalInvoice[]>([]);
@@ -73,7 +74,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
     const paid = Number(paidAmount);
     const candidate: WorkingCapitalInvoice = {
       id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `invoice-${Date.now()}`,
-      direction, counterparty, reference, issueDate, dueDate, amount: gross, paidAmount: paid,
+      direction, counterparty, reference, issueDate, dueDate, amount: gross, paidAmount: paid, payments: [],
     };
     const validation = validateWorkingCapitalInvoice(candidate);
     if (!validation.valid) {
@@ -138,10 +139,26 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
     setCsvImportMessage(t("Invoices imported successfully."));
   }
 
-  function updatePaid(id: string, raw: string) {
-    const parsed = raw === "" ? 0 : Number(raw);
-    if (!Number.isFinite(parsed)) return;
-    setInvoices((current) => current.map((item) => item.id === id ? normaliseInvoice({ ...item, paidAmount: parsed }) : item));
+  function registerPayment(event: FormEvent<HTMLFormElement>, invoice: WorkingCapitalInvoice) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const amount = Number(form.get("paymentAmount"));
+    const date = String(form.get("paymentDate") ?? "");
+    const note = String(form.get("paymentNote") ?? "").trim();
+    const payment = {
+      id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `payment-${Date.now()}`,
+      date,
+      amount,
+      ...(note ? { note } : {}),
+    };
+    const result = addInvoicePayment(invoice, payment);
+    if (!result.valid) {
+      setPaymentErrors((current) => ({ ...current, [invoice.id]: t(result.error) }));
+      return;
+    }
+    setInvoices((current) => current.map((item) => item.id === invoice.id ? result.invoice : item));
+    setPaymentErrors((current) => ({ ...current, [invoice.id]: "" }));
+    event.currentTarget.reset();
   }
 
   async function exportRegister() {
@@ -321,7 +338,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
         <div className="working-capital-subhead"><h3>{t("Invoice register")}</h3><span>{aged.length} {t("records")}</span></div>
         {aged.length === 0 ? <div className="working-capital-empty">{t("No invoices yet. Add your first record above; the register starts empty to avoid invented financial data.")}</div> : (
           <div className="working-capital-table-scroll"><table><thead><tr><th>{t("Counterparty")}</th><th>{t("Reference")}</th><th>{t("Due date")}</th><th>{t("Amount")}</th><th>{t("Paid")}</th><th>{t("Outstanding")}</th><th>{t("Ageing")}</th><th /></tr></thead><tbody>
-            {aged.map((row) => <tr key={row.invoice.id}><td>{row.invoice.counterparty}</td><td>{row.invoice.reference}</td><td>{row.invoice.dueDate}</td><td>{money(row.invoice.amount, language)}</td><td><input aria-label={t("Paid amount")} type="number" min="0" max={row.invoice.amount} step="0.01" value={row.invoice.paidAmount} onChange={(e) => updatePaid(row.invoice.id, e.target.value)} /></td><td className="working-capital-outstanding">{money(row.outstanding, language)}</td><td><span className={row.overdueDays > 0 ? "working-capital-overdue" : "working-capital-current"}>{t(buckets.find(([key]) => key === row.bucket)?.[1] ?? "Not due")}</span></td><td><button type="button" className="working-capital-delete" aria-label={t("Delete invoice")} onClick={() => setInvoices((current) => current.filter((item) => item.id !== row.invoice.id))}>×</button></td></tr>)}
+            {aged.map((row) => <tr key={row.invoice.id}><td>{row.invoice.counterparty}</td><td>{row.invoice.reference}</td><td>{row.invoice.dueDate}</td><td>{money(row.invoice.amount, language)}</td><td>{money(row.invoice.paidAmount, language)}</td><td className="working-capital-outstanding">{money(row.outstanding, language)}</td><td><span className={row.overdueDays > 0 ? "working-capital-overdue" : "working-capital-current"}>{t(buckets.find(([key]) => key === row.bucket)?.[1] ?? "Not due")}</span></td><td><button type="button" className="working-capital-delete" aria-label={t("Delete invoice")} onClick={() => setInvoices((current) => current.filter((item) => item.id !== row.invoice.id))}>×</button></td><td><details><summary>{t("Payments")} ({row.invoice.payments?.length ?? 0})</summary><div className="working-capital-payment-history"><p>{t("Recorded payments")}: {money((row.invoice.payments ?? []).reduce((total, payment) => total + payment.amount, 0), language)}</p>{(row.invoice.payments ?? []).map((payment) => <p key={payment.id}>{payment.date} · {money(payment.amount, language)}{payment.note ? ` · ${payment.note}` : ""}</p>)}{row.outstanding > 0 && <form onSubmit={(event) => registerPayment(event, row.invoice)}><label><span>{t("Payment date")}</span><input name="paymentDate" type="date" defaultValue={todayISO()} required /></label><label><span>{t("Payment amount")}</span><input name="paymentAmount" type="number" min="0.01" max={row.outstanding} step="0.01" required /></label><label><span>{t("Note (optional)")}</span><input name="paymentNote" maxLength={200} /></label><button type="submit" className="secondary-button">{t("Register payment")}</button></form>}{paymentErrors[row.invoice.id] && <p role="alert">{paymentErrors[row.invoice.id]}</p>}</div></details></td></tr>)}
           </tbody></table></div>
         )}
       </div>
