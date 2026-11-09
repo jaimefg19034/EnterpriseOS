@@ -573,6 +573,19 @@ const spanish: Record<string, string> = {
   "Review the three statements, liquidity, leverage, break-even, returns and the quarterly cash forecast.": "Revisa los tres estados financieros, ratios, capital circulante, facturas de clientes y proveedores y la previsión trimestral de caja.",
   "EnterpriseOS — Quarterly cash forecast": "EnterpriseOS — Previsión trimestral de caja",
   "Ageing bucket": "Tramo de antigüedad",
+  "Download data backup": "Descargar copia de seguridad",
+  "Restore backup": "Restaurar copia",
+  "A local backup file has been prepared. Store it somewhere private and secure.": "Se ha preparado una copia de seguridad local. Guárdala en un lugar privado y seguro.",
+  "The backup file is too large. Maximum size is 5 MB.": "El archivo de copia de seguridad es demasiado grande. El tamaño máximo es de 5 MB.",
+  "The file is not valid JSON.": "El archivo no es un JSON válido.",
+  "This file is not a supported EnterpriseOS backup.": "Este archivo no es una copia de seguridad compatible con EnterpriseOS.",
+  "The backup must contain an invoice register and exactly 13 forecast weeks.": "La copia debe contener un registro de facturas y exactamente 13 semanas de previsión.",
+  "The invoice register contains an invalid record. No data has been changed.": "El registro de facturas contiene un registro no válido. No se ha modificado ningún dato.",
+  "The cash forecast contains an invalid week. No data has been changed.": "La previsión de caja contiene una semana no válida. No se ha modificado ningún dato.",
+  "The backup contains duplicate invoice IDs.": "La copia contiene identificadores de factura duplicados.",
+  "Restoring this backup replaces the current invoice register and quarterly cash forecast in this browser. Continue?": "Restaurar esta copia sustituirá el registro de facturas y la previsión trimestral actuales de este navegador. ¿Continuar?",
+  "Backup restored successfully. Your current browser data has been replaced.": "Copia restaurada correctamente. Se han sustituido los datos actuales de este navegador.",
+  "The backup could not be restored. No data has been changed.": "No se ha podido restaurar la copia. No se ha modificado ningún dato.",
 };
 
 export function translate(value: string, language: Language): string {
