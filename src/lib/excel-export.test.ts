@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import ExcelJS from "exceljs";
 import { buildExcelWorkbook } from "@/lib/excel-export";
 
 describe("Excel workbook export", () => {
@@ -41,7 +42,7 @@ describe("Excel workbook export", () => {
     });
 
     const buffer = await workbook.xlsx.writeBuffer();
-    const reopened = new (await import("exceljs")).default.Workbook();
+    const reopened = new ExcelJS.Workbook();
     await reopened.xlsx.load(buffer);
     expect(reopened.getWorksheet("Summary")?.getCell("B5").value).toBe(1000);
   });
