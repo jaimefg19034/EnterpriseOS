@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { calculateInvoiceAgeing, normaliseInvoice, summarizeInvoices, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
 import { translate, type Language } from "@/i18n/translations";
@@ -25,7 +25,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   const [paidAmount, setPaidAmount] = useState("0");
   const today = useMemo(todayISO, []);
   const visible = useMemo(() => invoices.filter((item) => item.direction === direction), [invoices, direction]);
-  const aged = useMemo(() => calculateInvoiceAgeing(visible, today), [visible, today]);
+  const aged = useMemo(() => calculateInvoiceAgeing(visible, today).sort((a, b) => a.invoice.dueDate.localeCompare(b.invoice.dueDate)), [visible, today]);
   const summary = useMemo(() => summarizeInvoices(aged, today), [aged, today]);
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
     try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(invoices)); } catch { /* Optional browser storage. */ }
   }, [invoices, ready]);
 
-  function addInvoice(event: React.FormEvent<HTMLFormElement>) {
+  function addInvoice(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const gross = Number(amount);
     const paid = Number(paidAmount);
