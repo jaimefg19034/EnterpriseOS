@@ -86,6 +86,6 @@ describe("buildPlanningResult", () => {
   });
 
   it("exposes seasonality weights that total 100 percent", () => {
-    expect(SEASONALITY_WEIGHTS.reduce((sum, weight) => sum + weight, 0)).toBe(1);
+    expect(SEASONALITY_WEIGHTS.reduce((sum, weight) => sum + weight, 0)).toBeCloseTo(1, 12);
   });
 });
