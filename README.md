@@ -116,3 +116,14 @@ Before onboarding customers, implement server-side authentication, tenant isolat
 ## Product principle
 
 Build a reliable, narrow financial workflow that customers repeatedly use. Do not expand into a generic spreadsheet until customer evidence justifies it.
+
+
+## Excel reporting
+
+EnterpriseOS exports native `.xlsx` workbooks rather than CSV files. Exports use styled worksheets with frozen headers, readable column widths, filters, EUR number formats, negative-value formatting, highlighted totals, and print-friendly page setup.
+
+- Management P&L: one structured income-statement worksheet.
+- Budget & scenarios: monthly plan, full-year summary, and assumptions worksheets.
+- Three statements: separate income statement, balance sheet, cash flow, and model-driver worksheets.
+
+All exported values reflect the current in-memory model state and selected language. The current MVP exports calculated values (not live Excel formulas); review illustrative assumptions before relying on any report.
