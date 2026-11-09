@@ -168,10 +168,15 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   function addExpense(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const amount = Number(expenseAmount);
-    if (!expenseDescription.trim() || !expenseSupplier.trim() || !expenseCategory.trim() || !data.costCenters.some((x) => x.id === expenseCostCenterId) || !Number.isFinite(amount) || amount <= 0 || !/^\\d{4}-\\d{2}-\\d{2}$/.test(expenseDate)) return;
+    if (!expenseDescription.trim() || !expenseSupplier.trim() || !expenseCategory.trim() || !data.costCenters.some((x) => x.id === expenseCostCenterId) || !Number.isFinite(amount) || amount <= 0 || !/^\d{4}-\d{2}-\d{2}$/.test(expenseDate)) return;
     const item: ExpenseRecord = { id: makeId(), date: expenseDate, description: expenseDescription.trim(), supplier: expenseSupplier.trim(), category: expenseCategory.trim(), costCenterId: expenseCostCenterId, amount, status: expenseStatus };
     setData((current) => ({ ...current, expenses: [item, ...current.expenses] }));
     setExpenseDescription(""); setExpenseSupplier(""); setExpenseAmount("0"); setExpenseStatus("unpaid");
+  }
+
+  function removeCostCenter(id: string) {
+    setData((current) => ({ ...current, costCenters: current.costCenters.filter((item) => item.id !== id), expenses: current.expenses.filter((item) => item.costCenterId !== id) }));
+    if (expenseCostCenterId === id) setExpenseCostCenterId("");
   }
 
   function remove<K extends keyof OperationsState>(key: K, id: string) {
@@ -252,7 +257,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
             <label>{t("Department / cost centre")}<input required maxLength={100} value={costCenterName} onChange={(e) => setCostCenterName(e.target.value)} placeholder={t("e.g. Marketing")} /></label>
             <label>{t("Budget owner")}<input required maxLength={100} value={costCenterOwner} onChange={(e) => setCostCenterOwner(e.target.value)} /></label>
             <label>{t("Budget (€)")}<input required type="number" min="0" step="0.01" value={costCenterBudget} onChange={(e) => setCostCenterBudget(e.target.value)} /></label>
-            <label>{t("Actual spend (€)")}<input required type="number" min="0" step="0.01" value={costCenterSpend} onChange={(e) => setCostCenterSpend(e.target.value)} /></label>
+            <label>{t("Manual spend baseline (€)")}<input required type="number" min="0" step="0.01" value={costCenterSpend} onChange={(e) => setCostCenterSpend(e.target.value)} /></label>
             <label>{t("Budget period")}<select value={costCenterPeriod} onChange={(e) => setCostCenterPeriod(e.target.value)}><option value={`${new Date().getFullYear()}-Q1`}>{t("Q1")}</option><option value={`${new Date().getFullYear()}-Q2`}>{t("Q2")}</option><option value={`${new Date().getFullYear()}-Q3`}>{t("Q3")}</option><option value={`${new Date().getFullYear()}-Q4`}>{t("Q4")}</option><option value={`${new Date().getFullYear()}-FY`}>{t("Full year")}</option></select></label>
             <button className="primary-button" type="submit">{t("Add cost centre")}</button>
           </form>
@@ -265,7 +270,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
             <article className="metric-card"><span className="metric-label">{t("Over-budget centres")}</span><strong>{visibleCostCenters.filter((x) => costCenterPerformance({ ...x, actualSpend: costCenterActualSpend(x, data.expenses) }).overBudget).length}</strong><small>{t("Spend exceeds allocation")}</small></article>
           </div>
           <div className="operations-table-wrap"><table className="operations-table"><thead><tr><th>{t("Cost centre")}</th><th>{t("Owner")}</th><th>{t("Period")}</th><th>{t("Budget (€)")}</th><th>{t("Actual spend (€)")}</th><th>{t("Remaining")}</th><th>{t("Utilisation")}</th><th /></tr></thead><tbody>
-            {visibleCostCenters.map((x) => { const actualSpend = costCenterActualSpend(x, data.expenses); const performance = costCenterPerformance({ ...x, actualSpend }); return <tr key={x.id}><td><strong>{x.name}</strong></td><td>{x.owner}</td><td>{x.period}</td><td><input aria-label={t("Budget (€)")} type="number" min="0" step="0.01" value={x.budget} onChange={(e) => { const value = Number(e.target.value); if (Number.isFinite(value) && value >= 0) updateCostCenter(x.id, { budget: value }); }} /></td><td><strong>{money(actualSpend, language)}</strong><small className="operations-subline">{t("Includes manual baseline and registered expenses")}</small></td><td className={performance.overBudget ? "operations-negative" : ""}>{money(performance.remaining, language)}</td><td><span className={performance.overBudget ? "operations-negative" : ""}>{performance.utilizationPercent.toLocaleString(language === "es" ? "es-ES" : "en-IE")}%</span></td><td><button className="operations-delete" onClick={() => remove("costCenters", x.id)} aria-label={t("Delete record")}>×</button></td></tr>; })}
+            {visibleCostCenters.map((x) => { const actualSpend = costCenterActualSpend(x, data.expenses); const performance = costCenterPerformance({ ...x, actualSpend }); return <tr key={x.id}><td><strong>{x.name}</strong></td><td>{x.owner}</td><td>{x.period}</td><td><input aria-label={t("Budget (€)")} type="number" min="0" step="0.01" value={x.budget} onChange={(e) => { const value = Number(e.target.value); if (Number.isFinite(value) && value >= 0) updateCostCenter(x.id, { budget: value }); }} /></td><td><strong>{money(actualSpend, language)}</strong><small className="operations-subline">{t("Includes manual baseline and registered expenses")}</small></td><td className={performance.overBudget ? "operations-negative" : ""}>{money(performance.remaining, language)}</td><td><span className={performance.overBudget ? "operations-negative" : ""}>{performance.utilizationPercent.toLocaleString(language === "es" ? "es-ES" : "en-IE")}%</span></td><td><button className="operations-delete" onClick={() => removeCostCenter(x.id)} aria-label={t("Delete record")}>×</button></td></tr>; })}
           </tbody></table>{visibleCostCenters.length === 0 && <div className="operations-empty">{t("No cost centres in this period. Add a department budget or choose another period.")}</div>}</div>
           <p className="operations-note">{t("Edit budget and actual spend directly in the table. Values are manual and are not imported from banks or accounting systems. Full-year and quarterly budgets are kept separate to avoid double counting.")}</p>
         </>}
@@ -276,7 +281,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
             <label>{t("Description")}<input required maxLength={160} value={expenseDescription} onChange={(e) => setExpenseDescription(e.target.value)} /></label>
             <label>{t("Supplier")}<input required maxLength={120} value={expenseSupplier} onChange={(e) => setExpenseSupplier(e.target.value)} /></label>
             <label>{t("Category")}<input required maxLength={80} value={expenseCategory} onChange={(e) => setExpenseCategory(e.target.value)} /></label>
-            <label>{t("Cost centre")}<select required value={expenseCostCenterId || data.costCenters[0].id} onChange={(e) => setExpenseCostCenterId(e.target.value)}>{data.costCenters.map((x) => <option key={x.id} value={x.id}>{x.name} · {x.period}</option>)}</select></label>
+            <label>{t("Cost centre")}<select required value={data.costCenters.some((x) => x.id === expenseCostCenterId) ? expenseCostCenterId : data.costCenters[0].id} onChange={(e) => setExpenseCostCenterId(e.target.value)}>{data.costCenters.map((x) => <option key={x.id} value={x.id}>{x.name} · {x.period}</option>)}</select></label>
             <label>{t("Amount (€)")}<input required type="number" min="0.01" step="0.01" value={expenseAmount} onChange={(e) => setExpenseAmount(e.target.value)} /></label>
             <label>{t("Payment status")}<select value={expenseStatus} onChange={(e) => setExpenseStatus(e.target.value as "paid" | "unpaid")}><option value="unpaid">{t("Unpaid")}</option><option value="paid">{t("Paid")}</option></select></label>
             <button className="primary-button" type="submit">{t("Add expense")}</button>

@@ -67,8 +67,9 @@ export function validateOperationsState(value: unknown): value is OperationsStat
     if (!isRecord(row) || !validId(row.id) || !validText(row.name, 100) || !validText(row.owner, 100) || !validMoney(row.budget) || !validMoney(row.actualSpend) || !/^\d{4}-(Q[1-4]|FY)$/.test(String(row.period))) return false;
     ids.push(row.id);
   }
+  const costCenterIds = new Set((costCenters as unknown[]).filter(isRecord).map((row) => row.id));
   for (const row of expenses as unknown[]) {
-    if (!isRecord(row) || !validId(row.id) || !validDate(row.date) || !validText(row.description, 160) || !validText(row.supplier, 120) || !validText(row.category, 80) || !validId(row.costCenterId) || !validMoney(row.amount) || row.amount <= 0 || !["paid", "unpaid"].includes(String(row.status))) return false;
+    if (!isRecord(row) || !validId(row.id) || !validDate(row.date) || !validText(row.description, 160) || !validText(row.supplier, 120) || !validText(row.category, 80) || !validId(row.costCenterId) || !costCenterIds.has(row.costCenterId) || !validMoney(row.amount) || row.amount <= 0 || !["paid", "unpaid"].includes(String(row.status))) return false;
     ids.push(row.id);
   }
   return new Set(ids).size === ids.length;

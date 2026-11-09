@@ -24,7 +24,7 @@ describe("operations workspace domain", () => {
     expect(parseOperationsState(JSON.stringify({ ...state, risks: [{ ...state.risks[0], id: "o1" }] }))).toBeNull();
   });
   it("loads legacy operations data without cost centres", () => {
-    const { costCenters: _ignored, ...legacy } = state;
+    const { costCenters: _ignored, expenses: _ignoredExpenses, ...legacy } = state;
     expect(parseOperationsState(JSON.stringify(legacy))).toMatchObject({ costCenters: [], expenses: [] });
   });
   it("calculates probability-weighted pipeline without lost deals", () => {
@@ -38,8 +38,13 @@ describe("operations workspace domain", () => {
   });
   it("calculates cost-centre headroom, utilisation and overspend", () => {
     expect(costCenterActualSpend(state.costCenters[0], state.expenses)).toBe(11200);
+    expect(costCenterActualSpend({ ...state.costCenters[0], period: "2026-FY" }, state.expenses)).toBe(11500);
     expect(costCenterPerformance({ ...state.costCenters[0], actualSpend: costCenterActualSpend(state.costCenters[0], state.expenses) })).toEqual({ remaining: -1200, utilizationPercent: 112, overBudget: true });
     expect(costCenterPerformance({ ...state.costCenters[0], budget: 0, actualSpend: 0 })).toMatchObject({ utilizationPercent: 0, overBudget: false });
+  });
+  it("rejects expenses linked to a missing cost centre", () => {
+    const invalid = { ...state, expenses: [{ ...state.expenses[0], costCenterId: "missing" }] };
+    expect(parseOperationsState(JSON.stringify(invalid))).toBeNull();
   });
   it("scores risk and reports remaining project budget", () => {
     expect(riskScore(state.risks[0])).toBe(20);
