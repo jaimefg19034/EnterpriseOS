@@ -215,7 +215,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
   const actualRevenue = selectedPlan.actualRevenue;
   const scenario = selectedPlan.scenario;
   const availableYears = Object.keys(savedState.years).map(Number).sort((a, b) => a - b);
-  const canAddYear = isValidPlanningYear(Number(newYear)) && !savedState.years[newYear];
+  const canAddYear = isValidPlanningYear(Number(newYear)) && !savedState.years[String(Number(newYear))];
 
   useEffect(() => {
     let restored: ReturnType<typeof parseSavedPlanningState> = null;
@@ -291,7 +291,6 @@ export function PlanningWorkspace({ language }: { language: Language }) {
   const actualMonths = result.monthlyRows.filter(
     (row) => row.status === "Actual",
   ).length;
-  const lastActualMonth = result.monthlyRows.filter((row) => row.status === "Actual").at(-1)?.month;
 
   function updateAssumption(
     key: keyof PlanningAssumptions,
@@ -431,10 +430,10 @@ export function PlanningWorkspace({ language }: { language: Language }) {
       <div className="page-heading planning-heading">
         <div>
           <div className="eyebrow">
-            {t("FINANCIAL PLANNING")} <span className="eyebrow-dot" /> FY {selectedYear} · {lastActualMonth ? `${t("THROUGH")} ${t(lastActualMonth)}` : t("NO ACTUALS ENTERED")}
+            {t("FINANCIAL PLANNING")} <span className="eyebrow-dot" /> FY {selectedYear} · {actualMonths > 0 ? `${actualMonths} ${t("ACTUAL MONTHS ENTERED")}` : t("NO ACTUALS ENTERED")}
           </div>
           <h1>{t("Budget & scenarios")}</h1>
-          <p>{t("Track revenue against budget and stress-test the remaining two months under different operating assumptions.")}</p>
+          <p>{t("Track revenue against budget and stress-test the remaining forecast under different operating assumptions.")}</p>
         </div>
         <div className="heading-actions">
           <span className="demo-badge"><i /> {t("ILLUSTRATIVE MODEL")}</span>
