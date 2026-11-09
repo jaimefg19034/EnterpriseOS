@@ -348,7 +348,11 @@ const spanish: Record<string, string> = {
   "Debt repayment applied": "Amortización de deuda aplicada",
   "Dividends": "Dividendos",
   "Note": "Nota",
-  "Illustrative management model, not statutory accounts or financial advice.": "Modelo de gestión ilustrativo; no son cuentas oficiales ni asesoramiento financiero."
+  "Illustrative management model, not statutory accounts or financial advice.": "Modelo de gestión ilustrativo; no son cuentas oficiales ni asesoramiento financiero.",
+  "Net working capital": "Capital circulante neto",
+  "Receivables plus inventory less payables": "Clientes más existencias menos proveedores",
+  "Current ratio": "Ratio corriente",
+  "Current assets divided by current liabilities": "Activo corriente dividido entre pasivo corriente"
 
 };
 
