@@ -72,12 +72,15 @@ export function OperationsWorkspace({ language }: { language: Language }) {
 
   useEffect(() => {
     if (!loaded) return;
-    try {
-      window.localStorage.setItem(OPERATIONS_STORAGE_KEY, JSON.stringify(data));
-      setStorageMessage("Changes saved in this browser.");
-    } catch {
-      setStorageMessage("Browser storage is unavailable. Changes remain in this session.");
-    }
+    const timer = window.setTimeout(() => {
+      try {
+        window.localStorage.setItem(OPERATIONS_STORAGE_KEY, JSON.stringify(data));
+        setStorageMessage("Changes saved in this browser.");
+      } catch {
+        setStorageMessage("Browser storage is unavailable. Changes remain in this session.");
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [data, loaded]);
 
   const openPipeline = useMemo(() => weightedPipeline(data.opportunities.filter((x) => !["won", "lost"].includes(x.stage))), [data.opportunities]);
