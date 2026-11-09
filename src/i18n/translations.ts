@@ -849,6 +849,12 @@ const spanish: Record<string, string> = {
   "Total paid amount": "Importe total pagado",
   "Includes dated and undated paid balances": "Incluye saldos pagados con y sin fecha individual",
 
+  "EnterpriseOS — Liquidity summary": "EnterpriseOS — Resumen de liquidez",
+  "EnterpriseOS — Ageing summary": "EnterpriseOS — Resumen de antigüedad",
+  "Quarterly cash forecast": "Previsión trimestral de caja",
+  "EnterpriseOS — Quarterly cash forecast": "EnterpriseOS — Previsión trimestral de caja",
+  "EnterpriseOS — Downside cash scenario": "EnterpriseOS — Escenario adverso de caja",
+
 };
 
 
