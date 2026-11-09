@@ -184,33 +184,39 @@ export function PlanningWorkspace({ language }: { language: Language }) {
   const [storageMessage, setStorageMessage] = useState("");
 
   useEffect(() => {
+    let restored: ReturnType<typeof parseSavedPlanningState> = null;
+    let message = "";
     try {
       const raw = window.localStorage.getItem(PLANNING_STORAGE_KEY);
       if (raw) {
-        const saved = parseSavedPlanningState(raw);
-        if (saved) {
-          setAssumptions(saved.assumptions);
-          setActualRevenue(saved.actualRevenue);
-          setScenario(saved.scenario);
-          setStorageMessage("Saved plan restored from this browser.");
-        } else {
-          setStorageMessage("A saved plan could not be read. The sample plan is loaded instead.");
-        }
+        restored = parseSavedPlanningState(raw);
+        message = restored
+          ? "Saved plan restored from this browser."
+          : "A saved plan could not be read. The sample plan is loaded instead.";
       }
     } catch {
-      setStorageMessage("Browser storage is unavailable. Changes will remain in this session only.");
+      message = "Browser storage is unavailable. Changes will remain in this session only.";
     }
-    setStorageReady(true);
+    window.setTimeout(() => {
+      if (restored) {
+        setAssumptions(restored.assumptions);
+        setActualRevenue(restored.actualRevenue);
+        setScenario(restored.scenario);
+      }
+      if (message) setStorageMessage(message);
+      setStorageReady(true);
+    }, 0);
   }, []);
 
   useEffect(() => {
     if (!storageReady) return;
+    let message = "Plan saved automatically in this browser.";
     try {
       window.localStorage.setItem(PLANNING_STORAGE_KEY, serialisePlanningState(assumptions, actualRevenue, scenario));
-      setStorageMessage("Plan saved automatically in this browser.");
     } catch {
-      setStorageMessage("Browser storage is unavailable. Changes will remain in this session only.");
+      message = "Browser storage is unavailable. Changes will remain in this session only.";
     }
+    window.setTimeout(() => setStorageMessage(message), 0);
   }, [assumptions, actualRevenue, scenario, storageReady]);
 
   const result = useMemo(
