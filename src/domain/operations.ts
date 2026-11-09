@@ -140,8 +140,8 @@ export type CostCenterRunRate = {
 
 /**
  * Projects current-period spend at the observed daily rate.
- * Only dated expense records are extrapolated; the manual baseline is excluded
- * because it has no date and cannot safely be annualised.
+ * Dated expense records are extrapolated at their observed daily rate.
+ * The unitemized manual baseline is carried as fixed known spend, never annualised.
  */
 export function costCenterRunRate(
   center: CostCenterBudget,
