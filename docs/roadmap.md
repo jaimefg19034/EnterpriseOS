@@ -37,7 +37,7 @@ The ambition is not to build every enterprise feature. We will earn complexity t
 
 **Dedicated design and UX phase (gated, not calendar-led):** after the core functionality and priority workflows are implemented and validated, reserve a focused product-wide pass for visual identity, design system, layout hierarchy, typography, data visualisation, tables, responsive behaviour, accessibility, interaction feedback and motion. This is deliberately not part of the current foundation work; it begins only when the functional structure is stable enough that we are not repeatedly redesigning unfinished workflows. It must improve clarity and usability, not add decoration for its own sake.
 
-Dates are planning targets, not promises. A stage does not advance just because its calendar window has ended. If an exit gate fails, we fix the gap before adding scope.
+Dates are planning targets, not promises. A stage does not advance just because its calendar window has ended. If an exit gate fails, we fix the gap before adding scope. We can extend any session or stage when a workflow needs deeper analysis, testing or redesign; session counts are planning aids, never speed targets.
 
 ## Current priority order
 
@@ -69,7 +69,7 @@ Dates are planning targets, not promises. A stage does not advance just because 
 
 ## First 20 working sessions
 
-These are the initial sequence, not 20 tasks to rush through in one sitting. Each session ends with a commit or a documented reason not to merge.
+These are the initial sequence, not 20 tasks to rush through in one sitting. Each session ends with a commit or a documented reason not to merge. A session may be split into several focused work blocks if the scope or quality checks require it.
 
 | Session | Deliverable | Acceptance check |
 |---:|---|---|
@@ -152,4 +152,6 @@ Append a short entry after each completed work session:
 
 **Session 4 completed (9 Nov 2026, commit `360485c`):** added multi-scenario reconciliation tests covering operating losses, zero revenue, working-capital movements, large CapEx, new borrowing, debt repayment and dividends. Added a direct indirect-cash-flow reconciliation test. Quality checks, production build and both GitHub Pages deployment workflows completed successfully for this commit.
 
-The next planned session is **Session 5: build a financial-model test matrix**. We will make the edge-case coverage explicit and systematic before moving to period handling.
+**Session 5 completed (9 Nov 2026, commit `6b07eb7`):** added a table-driven financial-model test matrix covering zero revenue/activity, high growth and positive margins, operating losses without tax benefits, and the 100% tax-rate boundary. All returned values are checked for finiteness and key P&L identities are asserted. Lint, typecheck, unit tests, production build, custom static deployment and the GitHub Pages deployment workflow all completed successfully.
+
+The next planned session is **Session 6: audit reporting-period handling**. We will inspect month, quarter and financial-year boundaries, year transitions and leap-year behaviour, then add tests before changing any shared period logic.
