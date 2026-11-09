@@ -31,10 +31,10 @@ export function calculateFinancialRatios(
     Number.isFinite(numerator) && Number.isFinite(denominator) && denominator > 0
       ? Math.round((numerator / denominator) * 100) / 100
       : null;
-  const safePercent = (numerator: number, denominator: number): number | null => {
-    const value = safeRatio(numerator, denominator);
-    return value === null ? null : Math.round(value * 10_000) / 100;
-  };
+  const safePercent = (numerator: number, denominator: number): number | null =>
+    Number.isFinite(numerator) && Number.isFinite(denominator) && denominator > 0
+      ? Math.round((numerator / denominator) * 10_000) / 100
+      : null;
 
   return [
     {
