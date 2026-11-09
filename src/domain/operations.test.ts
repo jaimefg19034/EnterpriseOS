@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { costCenterActualSpend, costCenterPerformance, kpiPerformance, parseOperationsState, projectBudgetVariance, riskScore, weightedPipeline, type OperationsState } from "./operations";
+import { costCenterActualSpend, costCenterPerformance, costCenterRunRate, kpiPerformance, parseOperationsState, projectBudgetVariance, riskScore, weightedPipeline, type OperationsState } from "./operations";
 const state: OperationsState = {
   opportunities: [
     { id: "o1", company: "Northstar", contact: "Alex", value: 10000, stage: "proposal", expectedClose: "2026-12-01" },
@@ -41,6 +41,19 @@ describe("operations workspace domain", () => {
     expect(costCenterActualSpend({ ...state.costCenters[0], period: "2026-FY" }, state.expenses)).toBe(11500);
     expect(costCenterPerformance({ ...state.costCenters[0], actualSpend: costCenterActualSpend(state.costCenters[0], state.expenses) })).toEqual({ remaining: -1200, utilizationPercent: 112, overBudget: true });
     expect(costCenterPerformance({ ...state.costCenters[0], budget: 0, actualSpend: 0 })).toMatchObject({ utilizationPercent: 0, overBudget: false });
+  });
+  it("projects current-period spend using dated expenses only", () => {
+    const center = state.costCenters[0];
+    const projection = costCenterRunRate(center, state.expenses, "2026-11-15");
+    expect(projection.recordedSpend).toBe(10200);
+    expect(projection.elapsedPercent).toBeGreaterThan(0);
+    expect(projection.projectedSpend).toBeGreaterThan(10200);
+    expect(projection.projectedOverBudget).toBe(true);
+  });
+  it("does not extrapolate outside the budget period or without dated spend", () => {
+    const center = state.costCenters[0];
+    expect(costCenterRunRate(center, state.expenses, "2026-09-30").projectedSpend).toBeNull();
+    expect(costCenterRunRate(center, [], "2026-11-15").projectedSpend).toBeNull();
   });
   it("rejects expenses linked to a missing cost centre", () => {
     const invalid = { ...state, expenses: [{ ...state.expenses[0], costCenterId: "missing" }] };

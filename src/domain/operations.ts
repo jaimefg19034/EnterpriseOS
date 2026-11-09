@@ -119,3 +119,54 @@ export function costCenterActualSpend(item: CostCenterBudget, expenses: ExpenseR
   }, 0);
   return Math.round((item.actualSpend + recorded) * 100) / 100;
 }
+
+
+export type CostCenterRunRate = {
+  recordedSpend: number;
+  projectedSpend: number | null;
+  elapsedPercent: number;
+  projectedOverBudget: boolean;
+};
+
+/**
+ * Projects current-period spend at the observed daily rate.
+ * Only dated expense records are extrapolated; the manual baseline is excluded
+ * because it has no date and cannot safely be annualised.
+ */
+export function costCenterRunRate(
+  center: CostCenterBudget,
+  expenses: ExpenseRecord[],
+  asOfDate: string,
+): CostCenterRunRate {
+  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(asOfDate)) {
+    return { recordedSpend: 0, projectedSpend: null, elapsedPercent: 0, projectedOverBudget: false };
+  }
+  const [yearText, period] = center.period.split("-");
+  const year = Number(yearText);
+  const quarter = period === "FY" ? 0 : Number(period.slice(1));
+  const startMonth = quarter === 0 ? 1 : (quarter - 1) * 3 + 1;
+  const endMonth = quarter === 0 ? 12 : startMonth + 2;
+  const start = new Date(Date.UTC(year, startMonth - 1, 1));
+  const end = new Date(Date.UTC(year, endMonth, 0));
+  const asOf = new Date(`${asOfDate}T00:00:00.000Z`);
+  if (asOf < start || asOf > end || Number.isNaN(asOf.getTime())) {
+    return { recordedSpend: 0, projectedSpend: null, elapsedPercent: 0, projectedOverBudget: false };
+  }
+  const recordedSpend = Math.round(expenses.reduce((total, expense) => {
+    if (expense.costCenterId !== center.id || expense.date.slice(0, 4) !== yearText) return total;
+    const date = new Date(`${expense.date}T00:00:00.000Z`);
+    return date >= start && date <= asOf ? total + expense.amount : total;
+  }, 0) * 100) / 100;
+  const totalDays = Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1;
+  const elapsedDays = Math.round((asOf.getTime() - start.getTime()) / 86_400_000) + 1;
+  const elapsedPercent = Math.round((elapsedDays / totalDays) * 1000) / 10;
+  const projectedSpend = recordedSpend > 0
+    ? Math.round((recordedSpend / (elapsedDays / totalDays) + Number.EPSILON) * 100) / 100
+    : null;
+  return {
+    recordedSpend,
+    projectedSpend,
+    elapsedPercent,
+    projectedOverBudget: projectedSpend !== null && projectedSpend > center.budget,
+  };
+}

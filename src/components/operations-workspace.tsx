@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { translate, type Language } from "@/i18n/translations";
-import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, costCenterActualSpend, costCenterPerformance, kpiPerformance, projectBudgetVariance, riskScore, weightedPipeline, type BusinessKpi, type CostCenterBudget, type ExpenseRecord, type BusinessRisk, type Opportunity, type OpportunityStage, type OperationsState, type Project, type ProjectStatus } from "@/domain/operations";
+import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, costCenterActualSpend, costCenterPerformance, costCenterRunRate, kpiPerformance, projectBudgetVariance, riskScore, weightedPipeline, type BusinessKpi, type CostCenterBudget, type ExpenseRecord, type BusinessRisk, type Opportunity, type OpportunityStage, type OperationsState, type Project, type ProjectStatus } from "@/domain/operations";
 
 type Section = "sales" | "projects" | "risks" | "kpis" | "cost-centers" | "expenses" | "reports";
 const makeId = () => typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `ops-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -129,6 +129,11 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   const overBudgetCenters = data.costCenters.map((center) => ({ ...center, actualSpend: costCenterActualSpend(center, data.expenses) })).filter((center) => center.actualSpend > center.budget);
   const openHighRisks = data.risks.filter((risk) => risk.status !== "closed" && riskScore(risk) >= 15);
   const projectsOverBudget = data.projects.filter((project) => project.spent > project.budget && project.status !== "completed");
+  const runRateWatch = data.costCenters.map((center) => ({
+    center,
+    runRate: costCenterRunRate(center, data.expenses, today()),
+  })).filter((item) => item.runRate.projectedOverBudget);
+
   const updateCostCenter = (id: string, changes: Partial<CostCenterBudget>) => setData((current) => ({ ...current, costCenters: current.costCenters.map((row) => row.id === id ? { ...row, ...changes } : row) }));
 
   function addOpportunity(event: React.FormEvent<HTMLFormElement>) {
@@ -298,6 +303,11 @@ export function OperationsWorkspace({ language }: { language: Language }) {
             {projectsOverBudget.map((project) => <article className="operations-risk-card" key={`project-${project.id}`}><div className="operations-risk-top"><span className="high">{t("Project overrun")}</span><strong>{money(project.spent - project.budget, language)}</strong></div><h3>{project.name}</h3><p>{t("Spent")}: {money(project.spent, language)} / {money(project.budget, language)}</p><p>{t("Owner")}: {project.owner}</p></article>)}
             {openHighRisks.map((risk) => <article className="operations-risk-card" key={`risk-${risk.id}`}><div className="operations-risk-top"><span className="critical">{t("High-priority risk")} · {riskScore(risk)}/25</span></div><h3>{risk.title}</h3><p>{t("Owner")}: {risk.owner}</p><p>{t("Status")}: {t(risk.status === "open" ? "Open" : "Mitigating")}</p></article>)}
             {overBudgetCenters.length + projectsOverBudget.length + openHighRisks.length === 0 && <div className="operations-empty">{t("No high-priority alerts based on the records currently entered.")}</div>}
+          </div>
+          <div className="operations-section-heading"><div><h2>{t("Projected budget pressure")}</h2><p>{t("A run-rate estimate for the current budget period, based only on dated expenses recorded so far.")}</p></div></div>
+          <div className="operations-risk-grid">
+            {runRateWatch.map(({ center, runRate }) => <article className="operations-risk-card" key={`run-rate-${center.id}`}><div className="operations-risk-top"><span className="high">{t("Projected over budget")}</span><strong>{money((runRate.projectedSpend ?? 0) - center.budget, language)}</strong></div><h3>{center.name}</h3><p>{t("Recorded expenses to date")}: {money(runRate.recordedSpend, language)}</p><p>{t("Estimated period-end spend")}: {money(runRate.projectedSpend ?? 0, language)} / {money(center.budget, language)}</p><p>{t("Budget period elapsed")}: {runRate.elapsedPercent.toLocaleString(language === "es" ? "es-ES" : "en-IE", { maximumFractionDigits: 1 })}%</p></article>)}
+            {runRateWatch.length === 0 && <div className="operations-empty">{t("No current-period run-rate overrun is indicated by the dated expenses entered.")}</div>}
           </div>
           <div className="operations-section-heading"><div><h2>{t("Cost-centre budget performance")}</h2><p>{t("Each budget period is shown separately. Full-year and quarterly figures are not added together.")}</p></div></div>
           <div className="operations-table-wrap"><table className="operations-table"><thead><tr><th>{t("Cost centre")}</th><th>{t("Period")}</th><th>{t("Budget")}</th><th>{t("Actual spend")}</th><th>{t("Variance")}</th><th>{t("Utilisation")}</th></tr></thead><tbody>
