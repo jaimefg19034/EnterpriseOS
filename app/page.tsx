@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { PlanningWorkspace } from "@/components/planning-workspace";
 import {
   calculateFinancials,
   formatCurrency,
@@ -8,7 +9,7 @@ import {
   type FinancialInputs,
 } from "@/domain/financials";
 
-type View = "overview" | "model" | "reports";
+type View = "overview" | "model" | "planning" | "reports";
 type InputKey = keyof FinancialInputs;
 
 const DEMO_INPUTS: FinancialInputs = {
@@ -331,6 +332,7 @@ export default function Home() {
   const navItems: { id: View; label: string; icon: string }[] = [
     { id: "overview", label: "Overview", icon: "grid" },
     { id: "model", label: "Financial model", icon: "chart" },
+    { id: "planning", label: "Budget & scenarios", icon: "trend" },
     { id: "reports", label: "Reports", icon: "file" },
   ];
 
@@ -406,7 +408,7 @@ export default function Home() {
         <header className="topbar">
           <div className="breadcrumb">
             <span>Workspace</span><span className="breadcrumb-separator">/</span>
-            <strong>{view === "overview" ? "Overview" : view === "model" ? "Financial model" : "Reports"}</strong>
+            <strong>{view === "overview" ? "Overview" : view === "model" ? "Financial model" : view === "planning" ? "Budget & scenarios" : "Reports"}</strong>
           </div>
           <div className="topbar-actions">
             <span className="period-pill"><Icon name="clock" size={14} /> FY 2026</span>
@@ -604,6 +606,8 @@ export default function Home() {
               </div>
             </>
           )}
+
+          {view === "planning" && <PlanningWorkspace />}
 
           {view === "reports" && (
             <>
