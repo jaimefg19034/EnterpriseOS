@@ -59,6 +59,12 @@ describe("working capital invoice validation", () => {
     expect(addInvoicePayment(first.invoice, { id: "payment-3", date: "2026-11-06", amount: 701 }).valid).toBe(false);
   });
 
+  it("rejects payment amounts that round to zero cents", () => {
+    expect(addInvoicePayment(invoice({ paidAmount: 0 }), {
+      id: "tiny", date: "2026-11-05", amount: 0.001,
+    }).valid).toBe(false);
+  });
+
   it("rejects payment history that exceeds the recorded paid balance", () => {
     expect(validateWorkingCapitalInvoice(invoice({
       paidAmount: 100,
