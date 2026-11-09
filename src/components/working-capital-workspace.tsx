@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { addInvoicePayment, calculateInvoiceAgeing, findDuplicateInvoice, parseInvoiceCsv, summarizeInvoices, validateWorkingCapitalInvoice, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
+import { parseISODateUTC } from "@/domain/reporting-periods";
 import { createEmptyCashForecast } from "@/domain/cash-forecast";
 import { createLocalFinanceBackup, parseLocalFinanceBackup } from "@/domain/cash-working-capital-backup";
 import { parseSavedPlanningState, PLANNING_STORAGE_KEY } from "@/domain/planning-storage";
@@ -15,6 +16,7 @@ const todayISO = () => {
   const date = new Date();
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 };
+const excelDate = (value: string) => parseISODateUTC(value) ?? value;
 const money = (value: number, language: Language) => new Intl.NumberFormat(language === "es" ? "es-ES" : "en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(value);
 
 export function WorkingCapitalWorkspace({ language }: { language: Language }) {
@@ -171,8 +173,9 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
           subtitle: t("Open invoice register · EUR · User-entered records"),
           headers: [t("Counterparty"), t("Invoice reference"), t("Issue date"), t("Due date"), t("Invoice amount"), t("Paid amount"), t("Outstanding"), t("Ageing bucket")],
           widths: [26, 20, 16, 16, 18, 18, 18, 18],
+          dateColumns: [3, 4],
           currencyColumns: [5, 6, 7],
-          rows: aged.map((row) => [row.invoice.counterparty, row.invoice.reference, row.invoice.issueDate, row.invoice.dueDate, row.invoice.amount, row.invoice.paidAmount, row.outstanding, t(row.bucket)]),
+          rows: aged.map((row) => [row.invoice.counterparty, row.invoice.reference, excelDate(row.invoice.issueDate), excelDate(row.invoice.dueDate), row.invoice.amount, row.invoice.paidAmount, row.outstanding, t(row.bucket)]),
         },
         {
           name: t("Payment movements"),
@@ -180,13 +183,14 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
           subtitle: t("Invoice payment movements · User-entered records"),
           headers: [t("Movement date"), t("Movement type"), t("Counterparty"), t("Invoice reference"), t("Payment amount"), t("Payment note")],
           widths: [18, 30, 26, 20, 20, 40],
+          dateColumns: [1],
           currencyColumns: [5],
           rows: aged.flatMap(({ invoice }) => {
             const recorded = invoice.payments ?? [];
             const recordedTotal = recorded.reduce((total, payment) => total + payment.amount, 0);
             const legacyBalance = Math.max(0, Math.round((invoice.paidAmount - recordedTotal + Number.EPSILON) * 100) / 100);
             return [
-              ...recorded.map((payment) => [payment.date, t("Payment"), invoice.counterparty, invoice.reference, payment.amount, payment.note ?? ""]),
+              ...recorded.map((payment) => [excelDate(payment.date), t("Payment"), invoice.counterparty, invoice.reference, payment.amount, payment.note ?? ""]),
               ...(legacyBalance > 0 ? [[
                 "—",
                 t("Historical paid balance (undated)"),
