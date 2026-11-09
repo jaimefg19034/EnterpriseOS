@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { calculateInvoiceAgeing, findDuplicateInvoice, normaliseInvoice, summarizeInvoices, validateWorkingCapitalInvoice, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
+import { calculateInvoiceAgeing, findDuplicateInvoice, normaliseInvoice, parseInvoiceCsv, summarizeInvoices, validateWorkingCapitalInvoice, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { createEmptyCashForecast } from "@/domain/cash-forecast";
 import { createLocalFinanceBackup, parseLocalFinanceBackup } from "@/domain/cash-working-capital-backup";
 import { parseSavedPlanningState, PLANNING_STORAGE_KEY } from "@/domain/planning-storage";
@@ -30,6 +30,9 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   const [paidAmount, setPaidAmount] = useState("0");
   const [backupMessage, setBackupMessage] = useState("");
   const [invoiceFormError, setInvoiceFormError] = useState("");
+  const [csvPreview, setCsvPreview] = useState<WorkingCapitalInvoice[]>([]);
+  const [csvImportMessage, setCsvImportMessage] = useState("");
+  const csvInputRef = useRef<HTMLInputElement>(null);
   const backupInputRef = useRef<HTMLInputElement>(null);
   const today = useMemo(() => todayISO(), []);
   const visible = useMemo(() => invoices.filter((item) => item.direction === direction), [invoices, direction]);
@@ -85,6 +88,54 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
     setInvoices((current) => [...current, validation.invoice]);
     setInvoiceFormError("");
     setCounterparty(""); setReference(""); setAmount(""); setPaidAmount("0");
+  }
+
+  async function prepareCsvImport(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setCsvPreview([]);
+    setCsvImportMessage("");
+    try {
+      if (file.size > 2 * 1024 * 1024) {
+        setCsvImportMessage(t("CSV file is too large. Maximum size is 2 MB."));
+        return;
+      }
+      const parsed = parseInvoiceCsv(await file.text());
+      if (!parsed.ok) {
+        setCsvImportMessage(t(parsed.error));
+        return;
+      }
+      for (const invoice of parsed.invoices) {
+        if (findDuplicateInvoice(invoice, invoices)) {
+          setCsvImportMessage(t("The CSV contains an invoice that already exists in this register. Nothing was imported."));
+          return;
+        }
+      }
+      setCsvPreview(parsed.invoices);
+      setCsvImportMessage(t("CSV preview ready. Review the records before importing."));
+    } catch {
+      setCsvImportMessage(t("The CSV file could not be read."));
+    } finally {
+      event.target.value = "";
+    }
+  }
+
+  function confirmCsvImport() {
+    const seen = [...invoices];
+    for (const invoice of csvPreview) {
+      if (findDuplicateInvoice(invoice, seen)) {
+        setCsvImportMessage(t("The CSV contains an invoice that already exists in this register. Nothing was imported."));
+        return;
+      }
+      seen.push(invoice);
+    }
+    const imported = csvPreview.map((invoice) => ({
+      ...invoice,
+      id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `invoice-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    }));
+    setInvoices((current) => [...current, ...imported]);
+    setCsvPreview([]);
+    setCsvImportMessage(t("Invoices imported successfully."));
   }
 
   function updatePaid(id: string, raw: string) {
@@ -221,6 +272,8 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
       <div className="working-capital-heading">
         <div><span className="panel-kicker">{t("WORKING CAPITAL")}</span><h2 id="working-capital-title">{t("Receivables & payables")}</h2><p>{t("Track invoice balances, overdue exposure and upcoming cash commitments.")}</p></div>
         <div className="working-capital-actions">
+          <button className="secondary-button" type="button" onClick={() => csvInputRef.current?.click()}>{t("Import CSV")}</button>
+          <input ref={csvInputRef} className="sr-only" type="file" accept=".csv,text/csv" onChange={prepareCsvImport} />
           <button className="secondary-button" type="button" onClick={exportRegister}>{t("Export register")}</button>
           <button className="secondary-button" type="button" onClick={downloadLocalBackup}>{t("Download data backup")}</button>
           <button className="secondary-button" type="button" onClick={() => backupInputRef.current?.click()}>{t("Restore backup")}</button>
@@ -228,6 +281,15 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
         </div>
       </div>
       {backupMessage && <p className="working-capital-backup-message" role="status">{backupMessage}</p>}
+      {csvImportMessage && <div className="working-capital-import-message" role="status">{csvImportMessage}</div>}
+      {csvPreview.length > 0 && <div className="working-capital-import-preview panel">
+        <div className="working-capital-subhead"><h3>{t("CSV import preview")}</h3><span>{csvPreview.length} {t("records ready")}</span></div>
+        <div className="working-capital-table-scroll"><table><thead><tr><th>{t("Type")}</th><th>{t("Counterparty")}</th><th>{t("Reference")}</th><th>{t("Due date")}</th><th>{t("Amount")}</th></tr></thead><tbody>
+          {csvPreview.slice(0, 8).map((invoice) => <tr key={invoice.id}><td>{t(invoice.direction === "receivable" ? "Receivable" : "Payable")}</td><td>{invoice.counterparty}</td><td>{invoice.reference}</td><td>{invoice.dueDate}</td><td>{money(invoice.amount, language)}</td></tr>)}
+        </tbody></table></div>
+        {csvPreview.length > 8 && <p>{t("Showing the first 8 records. All records will be imported.")}</p>}
+        <div className="working-capital-form-footer"><button className="secondary-button" type="button" onClick={() => { setCsvPreview([]); setCsvImportMessage(t("CSV import cancelled.")); }}>{t("Cancel")}</button><button className="primary-button" type="button" onClick={confirmCsvImport}>{t("Confirm import")}</button></div>
+      </div>}
       <div className="working-capital-tabs" role="tablist" aria-label={t("Invoice type")}>
         <button type="button" role="tab" aria-selected={direction === "receivable"} className={direction === "receivable" ? "active" : ""} onClick={() => setDirection("receivable")}>{t("Receivables")}</button>
         <button type="button" role="tab" aria-selected={direction === "payable"} className={direction === "payable" ? "active" : ""} onClick={() => setDirection("payable")}>{t("Payables")}</button>

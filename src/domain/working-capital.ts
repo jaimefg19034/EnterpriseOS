@@ -75,6 +75,110 @@ export function findDuplicateInvoice(
   );
 }
 
+export type InvoiceCsvParseResult =
+  | { ok: true; invoices: WorkingCapitalInvoice[] }
+  | { ok: false; error: string };
+
+export function parseInvoiceCsv(raw: string): InvoiceCsvParseResult {
+  const source = raw.replace(/^\\uFEFF/, "").trim();
+  if (!source) return { ok: false, error: "The CSV file is empty." };
+  const firstLine = source.split(/\\r?\\n/, 1)[0] ?? "";
+  const delimiter = countCsvDelimiter(firstLine, ";") > countCsvDelimiter(firstLine, ",") ? ";" : ",";
+  const rows = parseCsvRows(source, delimiter);
+  if (!rows || rows.length < 2) return { ok: false, error: "The CSV file must contain a header and at least one invoice." };
+  const normaliseHeader = (value: string) => value.trim().toLocaleLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+  const headers = rows[0].map(normaliseHeader);
+  const aliases: Record<string, string[]> = {
+    direction: ["direction", "tipo", "tipofactura", "tipooperacion"],
+    counterparty: ["counterparty", "customersupplier", "customer", "supplier", "cliente", "proveedor", "clienteproveedor"],
+    reference: ["reference", "invoicereference", "referencia", "numerofactura", "factura"],
+    issueDate: ["issuedate", "issued", "fechaemision", "fechaexpedicion"],
+    dueDate: ["duedate", "duedate", "vencimiento", "fechavencimiento"],
+    amount: ["amount", "invoiceamount", "importe", "importefactura", "total"],
+    paidAmount: ["paidamount", "paid", "importepagado", "pagado", "cobrado"],
+  };
+  const indexes: Record<string, number> = {};
+  for (const [field, names] of Object.entries(aliases)) {
+    indexes[field] = headers.findIndex((header) => names.includes(header));
+    if (indexes[field] < 0) return { ok: false, error: "Required CSV columns are missing. Use the EnterpriseOS invoice template." };
+  }
+  const invoices: WorkingCapitalInvoice[] = [];
+  for (let index = 1; index < rows.length; index += 1) {
+    const cells = rows[index];
+    if (cells.every((cell) => !cell.trim())) continue;
+    if (cells.length !== headers.length) return { ok: false, error: `CSV row ${index + 1} has a different number of columns.` };
+    const read = (field: string) => cells[indexes[field]]?.trim() ?? "";
+    const directionText = normaliseHeader(read("direction"));
+    const direction: InvoiceDirection | null = ["receivable", "receivableinvoice", "cobrar", "cliente", "porcobrar"].includes(directionText)
+      ? "receivable"
+      : ["payable", "payableinvoice", "pagar", "proveedor", "porpagar"].includes(directionText)
+        ? "payable" : null;
+    const parseAmount = (value: string) => {
+      const cleaned = value.replace(/[€$£\\s]/g, "");
+      const comma = cleaned.lastIndexOf(",");
+      const dot = cleaned.lastIndexOf(".");
+      const decimal = comma > dot ? "," : ".";
+      const normalised = decimal === ","
+        ? cleaned.replace(/\\./g, "").replace(",", ".")
+        : cleaned.replace(/,/g, "");
+      return Number(normalised);
+    };
+    const parseDate = (value: string) => {
+      const trimmed = value.trim();
+      if (isValidISODate(trimmed)) return trimmed;
+      const match = /^(\\d{1,2})[\\/.](\\d{1,2})[\\/.](\\d{4})$/.exec(trimmed);
+      return match ? `${match[3]}-${match[2].padStart(2, "0")}-${match[1].padStart(2, "0")}` : trimmed;
+    };
+    if (!direction) return { ok: false, error: `CSV row ${index + 1} has an invalid direction. Use receivable/payable or cobrar/pagar.` };
+    const candidate: WorkingCapitalInvoice = {
+      id: `csv-row-${index + 1}`,
+      direction,
+      counterparty: read("counterparty"),
+      reference: read("reference"),
+      issueDate: parseDate(read("issueDate")),
+      dueDate: parseDate(read("dueDate")),
+      amount: parseAmount(read("amount")),
+      paidAmount: parseAmount(read("paidAmount")),
+    };
+    const validation = validateWorkingCapitalInvoice(candidate);
+    if (!validation.valid) return { ok: false, error: `CSV row ${index + 1}: ${validation.error}` };
+    if (findDuplicateInvoice(validation.invoice, invoices)) return { ok: false, error: `CSV row ${index + 1} duplicates an invoice earlier in the file.` };
+    invoices.push(validation.invoice);
+  }
+  return invoices.length ? { ok: true, invoices } : { ok: false, error: "No invoice records were found in the CSV file." };
+}
+
+function countCsvDelimiter(line: string, delimiter: string): number {
+  let quoted = false;
+  let count = 0;
+  for (let i = 0; i < line.length; i += 1) {
+    if (line[i] === '"' && line[i + 1] === '"') { i += 1; continue; }
+    if (line[i] === '"') quoted = !quoted;
+    else if (!quoted && line[i] === delimiter) count += 1;
+  }
+  return count;
+}
+
+function parseCsvRows(source: string, delimiter: string): string[][] | null {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = "";
+  let quoted = false;
+  for (let i = 0; i < source.length; i += 1) {
+    const char = source[i];
+    if (char === '"' && quoted && source[i + 1] === '"') { cell += '"'; i += 1; }
+    else if (char === '"') quoted = !quoted;
+    else if (!quoted && char === delimiter) { row.push(cell); cell = ""; }
+    else if (!quoted && (char === "\\n" || char === "\\r")) {
+      if (char === "\\r" && source[i + 1] === "\\n") i += 1;
+      row.push(cell); rows.push(row); row = []; cell = "";
+    } else cell += char;
+  }
+  if (quoted) return null;
+  row.push(cell); rows.push(row);
+  return rows;
+}
+
 export function isValidISODate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const [year, month, day] = value.split("-").map(Number);

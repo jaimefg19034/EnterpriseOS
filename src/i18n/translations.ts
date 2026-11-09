@@ -689,7 +689,33 @@ const spanish: Record<string, string> = {
   "An invoice with this direction, customer or supplier and reference already exists.": "Ya existe una factura con este tipo, cliente o proveedor y referencia.",
   "Browser storage could not be read. Check storage permissions and try again.": "No se pudo leer el almacenamiento del navegador. Comprueba los permisos e inténtalo de nuevo.",
   "The operations workspace is invalid. No data has been changed.": "El espacio de operaciones no es válido. No se ha modificado ningún dato.",
+  "Import CSV": "Importar CSV",
+  "CSV import preview": "Vista previa de importación CSV",
+  "records ready": "registros preparados",
+  "CSV file is too large. Maximum size is 2 MB.": "El archivo CSV es demasiado grande. El máximo es 2 MB.",
+  "CSV preview ready. Review the records before importing.": "Vista previa lista. Revisa los registros antes de importarlos.",
+  "The CSV file could not be read.": "No se ha podido leer el archivo CSV.",
+  "The CSV contains an invoice that already exists in this register. Nothing was imported.": "El CSV contiene una factura que ya existe en el registro. No se ha importado nada.",
+  "Invoices imported successfully.": "Facturas importadas correctamente.",
+  "Showing the first 8 records. All records will be imported.": "Se muestran los primeros 8 registros. Se importarán todos.",
+  "CSV import cancelled.": "Importación CSV cancelada.",
+  "Confirm import": "Confirmar importación",
+  "Cancel": "Cancelar",
+  "Type": "Tipo",
+  "Receivable": "Por cobrar",
+  "Payable": "Por pagar",
+  "CSV file is empty.": "El archivo CSV está vacío.",
+  "The CSV file must contain a header and at least one invoice.": "El CSV debe contener una cabecera y al menos una factura.",
+  "Required CSV columns are missing. Use the EnterpriseOS invoice template.": "Faltan columnas obligatorias. Utiliza la plantilla de facturas de EnterpriseOS.",
+  "CSV row": "Fila CSV",
+  "CSV row 1": "Fila CSV 1",
+  "No invoice records were found in the CSV file.": "No se han encontrado facturas en el archivo CSV.",
+  "An invoice with this direction, customer or supplier and reference already exists.": "Ya existe una factura con este tipo, cliente o proveedor y referencia.",
+  "The operations workspace is invalid. No data has been changed.": "El espacio de operaciones no es válido. No se ha modificado ningún dato.",
+  "Restoring this backup replaces the finance and operations data included in the file in this browser. Continue?": "Restaurar esta copia sustituirá los datos financieros y operativos incluidos en el archivo en este navegador. ¿Continuar?",
+  "Browser storage could not be read. Check storage permissions and try again.": "No se pudo leer el almacenamiento del navegador. Comprueba los permisos e inténtalo de nuevo."
 };
+
 
 export function translate(value: string, language: Language): string {
   return language === "es" ? spanish[value] ?? value : value;
