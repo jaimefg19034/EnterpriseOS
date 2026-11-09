@@ -1,9 +1,29 @@
 import { describe, expect, it } from "vitest";
-import { calculateInvoiceAgeing, summarizeInvoices, type WorkingCapitalInvoice } from "./working-capital";
+import { calculateInvoiceAgeing, normaliseInvoice, summarizeInvoices, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "./working-capital";
 
 const invoice = (overrides: Partial<WorkingCapitalInvoice> = {}): WorkingCapitalInvoice => ({
   id: "inv-1", direction: "receivable", counterparty: "Acme", reference: "INV-1",
   issueDate: "2026-10-01", dueDate: "2026-10-01", amount: 1000, paidAmount: 200, ...overrides,
+});
+
+describe("working capital invoice validation", () => {
+  it("rejects impossible dates, reversed dates and invalid payment balances", () => {
+    expect(validateWorkingCapitalInvoice(invoice({ dueDate: "2026-02-30" })).valid).toBe(false);
+    expect(validateWorkingCapitalInvoice(invoice({ issueDate: "2026-11-10", dueDate: "2026-11-09" })).valid).toBe(false);
+    expect(validateWorkingCapitalInvoice(invoice({ paidAmount: 1001 })).valid).toBe(false);
+    expect(validateWorkingCapitalInvoice(invoice({ amount: 0 })).valid).toBe(false);
+  });
+
+  it("requires a counterparty and a reference", () => {
+    expect(validateWorkingCapitalInvoice(invoice({ counterparty: " " })).valid).toBe(false);
+    expect(validateWorkingCapitalInvoice(invoice({ reference: "" })).valid).toBe(false);
+  });
+
+  it("rounds invoice and paid balances to cents", () => {
+    const clean = normaliseInvoice(invoice({ amount: 10.105, paidAmount: 2.105 }));
+    expect(clean.amount).toBe(10.11);
+    expect(clean.paidAmount).toBe(2.11);
+  });
 });
 
 describe("working capital invoice ageing", () => {
