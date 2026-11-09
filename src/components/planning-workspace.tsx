@@ -323,7 +323,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
         <PlanningMetric
           label={t("Projected FY revenue")}
           value={formatCurrency(result.projectedRevenue, true)}
-          detail={`${revenueVariancePercent >= 0 ? "+" : ""}${formatPercent(revenueVariancePercent)} vs. annual budget`}
+          detail={`${revenueVariancePercent >= 0 ? "+" : ""}${formatPercent(revenueVariancePercent)} ${t("vs. annual budget")}`}
           tone="blue"
         />
         <PlanningMetric
