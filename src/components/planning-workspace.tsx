@@ -367,8 +367,15 @@ export function PlanningWorkspace({ language }: { language: Language }) {
         </div>
       </div>
       <p className="planning-storage-status" role="status">{t(storageMessage || "Preparing local plan storage…")}</p>
+      <nav className="planning-section-nav" aria-label={t("Planning sections")}>
+        <a href="#planning-overview">{t("Planning overview")}</a>
+        <a href="#planning-assumptions">{t("Annual assumptions")}</a>
+        <a href="#planning-performance">{t("Budget vs. actual & forecast")}</a>
+        <a href="#planning-monthly">{t("Revenue plan by month")}</a>
+        <a href="#planning-profitability">{t("Projected income statement")}</a>
+      </nav>
 
-      <section className="planning-scenario-panel panel">
+      <section id="planning-overview" className="planning-scenario-panel panel">
         <div className="planning-scenario-intro">
           <div className="panel-kicker">{t("SCENARIO SELECTOR")}</div>
           <h2>{t("What happens if assumptions change?")}</h2>
@@ -427,7 +434,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
       </div>
 
       <div className="planning-main-grid">
-        <section className="panel planning-assumptions-panel">
+        <section id="planning-assumptions" className="panel planning-assumptions-panel">
           <div className="panel-header">
             <div>
               <div className="panel-kicker">{t("MODEL DRIVERS")}</div>
@@ -466,7 +473,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
           </div>
         </section>
 
-        <section className="panel planning-performance-panel">
+        <section id="planning-performance" className="panel planning-performance-panel">
           <div className="panel-header">
             <div>
               <div className="panel-kicker">{t("REVENUE PERFORMANCE")}</div>
@@ -484,7 +491,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
         </section>
       </div>
 
-      <section className="panel monthly-plan-panel">
+      <section id="planning-monthly" className="panel monthly-plan-panel">
         <div className="panel-header">
           <div>
             <div className="panel-kicker">{t("MONTHLY DETAIL")}</div>
@@ -565,7 +572,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
         </div>
       </section>
 
-      <section className="planning-profit-panel panel">
+      <section id="planning-profitability" className="planning-profit-panel panel">
         <div className="planning-profit-heading">
           <div className="panel-kicker">{t("FULL-YEAR PROFITABILITY MODEL")}</div>
           <h2>{t("Projected income statement")}</h2>
