@@ -1,6 +1,14 @@
 export type Language = "en" | "es";
 
 const spanish: Record<string, string> = {
+  "Close": "Cerrar",
+  "WORKSPACE INFORMATION": "INFORMACIÓN DEL ESPACIO DE TRABAJO",
+  "Reporting period": "Periodo de información",
+  "Currency": "Moneda",
+  "Data status": "Estado de los datos",
+  "Illustrative sample data": "Datos de ejemplo ilustrativos",
+  "This is a local demonstration workspace. Changes are not saved to a company database yet.": "Este es un espacio de demostración local. Los cambios todavía no se guardan en una base de datos empresarial.",
+  "Got it": "Entendido",
   "Revenue": "Ingresos",
   "EBITDA": "EBITDA",
   "EUR · thousands": "EUR · miles",
