@@ -1,5 +1,5 @@
 import type { CashForecastWeekInput } from "./cash-forecast";
-import { normaliseInvoice, type WorkingCapitalInvoice } from "./working-capital";
+import { normaliseInvoice, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "./working-capital";
 
 export const LOCAL_FINANCE_BACKUP_VERSION = 1;
 
@@ -44,7 +44,7 @@ export function parseLocalFinanceBackup(raw: string): LocalFinanceBackupResult {
   if (!Array.isArray(parsed.workingCapitalInvoices) || !Array.isArray(parsed.quarterlyCashForecast) || parsed.quarterlyCashForecast.length !== 13) {
     return { ok: false, error: "The backup must contain an invoice register and exactly 13 forecast weeks." };
   }
-  if (parsed.workingCapitalInvoices.some((item) => !isValidInvoice(item))) {
+  if (parsed.workingCapitalInvoices.some((item) => !validateWorkingCapitalInvoice(item).valid)) {
     return { ok: false, error: "The invoice register contains an invalid record. No data has been changed." };
   }
   if (parsed.quarterlyCashForecast.some((item) => !isValidWeek(item))) {
@@ -71,19 +71,6 @@ export function parseLocalFinanceBackup(raw: string): LocalFinanceBackupResult {
   };
 }
 
-function isValidInvoice(value: unknown): value is WorkingCapitalInvoice {
-  if (!isRecord(value)) return false;
-  if (typeof value.id !== "string" || !value.id.trim() ||
-      (value.direction !== "receivable" && value.direction !== "payable") ||
-      typeof value.counterparty !== "string" || typeof value.reference !== "string" ||
-      typeof value.issueDate !== "string" || typeof value.dueDate !== "string" ||
-      !isIsoDate(value.issueDate) || !isIsoDate(value.dueDate) || value.dueDate < value.issueDate ||
-      typeof value.amount !== "number" || !Number.isFinite(value.amount) || value.amount <= 0 ||
-      typeof value.paidAmount !== "number" || !Number.isFinite(value.paidAmount) ||
-      value.paidAmount < 0 || value.paidAmount > value.amount) return false;
-  return true;
-}
-
 function isValidWeek(value: unknown): value is CashForecastWeekInput {
   return isRecord(value) &&
     isValidAmount(value.collections) &&
@@ -98,13 +85,6 @@ function isValidAmount(value: unknown): value is number {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
-function isIsoDate(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const [year, month, day] = value.split("-").map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
 }
 
 function sanitiseWeek(value: CashForecastWeekInput): CashForecastWeekInput {
