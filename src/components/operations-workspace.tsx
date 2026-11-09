@@ -2,11 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { translate, type Language } from "@/i18n/translations";
+import { isDateWithinReportingPeriodCode, isValidISODate } from "@/domain/reporting-periods";
 import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, costCenterActualSpend, costCenterPerformance, costCenterRunRate, kpiPerformance, projectBudgetVariance, riskScore, weightedPipeline, type BusinessKpi, type CostCenterBudget, type ExpenseRecord, type BusinessRisk, type Opportunity, type OpportunityStage, type OperationsState, type Project, type ProjectStatus } from "@/domain/operations";
 
 type Section = "sales" | "projects" | "risks" | "kpis" | "cost-centers" | "expenses" | "reports";
 const makeId = () => typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `ops-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 const money = (value: number, language: Language) => new Intl.NumberFormat(language === "es" ? "es-ES" : "en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(value);
 const stageLabels: Record<OpportunityStage, string> = { lead: "Lead", qualified: "Qualified", proposal: "Proposal", won: "Won", lost: "Lost" };
 const projectLabels: Record<ProjectStatus, string> = { planned: "Planned", active: "Active", onHold: "On hold", completed: "Completed" };
@@ -139,7 +146,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   function addOpportunity(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const value = Number(dealValue);
-    if (!company.trim() || !Number.isFinite(value) || value < 0 || !/^\d{4}-\d{2}-\d{2}$/.test(closeDate)) return;
+    if (!company.trim() || !Number.isFinite(value) || value < 0 || !isValidISODate(closeDate)) return;
     const item: Opportunity = { id: makeId(), company: company.trim(), contact: contact.trim(), value, stage: dealStage, expectedClose: closeDate };
     setData((current) => ({ ...current, opportunities: [item, ...current.opportunities] }));
     setCompany(""); setContact(""); setDealValue("10000"); setDealStage("lead");
@@ -147,7 +154,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   function addProject(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const budget = Number(projectBudget); const spent = Number(projectSpent);
-    if (!projectName.trim() || !projectOwner.trim() || !Number.isFinite(budget) || !Number.isFinite(spent) || budget < 0 || spent < 0 || !/^\d{4}-\d{2}-\d{2}$/.test(projectDue)) return;
+    if (!projectName.trim() || !projectOwner.trim() || !Number.isFinite(budget) || !Number.isFinite(spent) || budget < 0 || spent < 0 || !isValidISODate(projectDue)) return;
     const item: Project = { id: makeId(), name: projectName.trim(), owner: projectOwner.trim(), budget, spent, dueDate: projectDue, status: projectStatus };
     setData((current) => ({ ...current, projects: [item, ...current.projects] }));
     setProjectName(""); setProjectOwner(""); setProjectBudget("10000"); setProjectSpent("0"); setProjectStatus("planned");
@@ -180,9 +187,8 @@ export function OperationsWorkspace({ language }: { language: Language }) {
     event.preventDefault();
     const amount = Number(expenseAmount);
     const selectedCenter = data.costCenters.find((x) => x.id === expenseCostCenterId);
-    const expenseQuarter = `Q${Math.floor((Number(expenseDate.slice(5, 7)) - 1) / 3) + 1}`;
-    const periodMatches = selectedCenter && selectedCenter.period.startsWith(`${expenseDate.slice(0, 4)}-`) && (selectedCenter.period.endsWith("-FY") || selectedCenter.period.endsWith(`-${expenseQuarter}`));
-    if (!expenseDescription.trim() || !expenseSupplier.trim() || !expenseCategory.trim() || !selectedCenter || !periodMatches || !Number.isFinite(amount) || amount <= 0 || !/^\d{4}-\d{2}-\d{2}$/.test(expenseDate)) return;
+    const periodMatches = selectedCenter && isDateWithinReportingPeriodCode(expenseDate, selectedCenter.period);
+    if (!expenseDescription.trim() || !expenseSupplier.trim() || !expenseCategory.trim() || !selectedCenter || !periodMatches || !Number.isFinite(amount) || amount <= 0 || !isValidISODate(expenseDate)) return;
     const item: ExpenseRecord = { id: makeId(), date: expenseDate, description: expenseDescription.trim(), supplier: expenseSupplier.trim(), category: expenseCategory.trim(), costCenterId: expenseCostCenterId, amount, status: expenseStatus };
     setData((current) => ({ ...current, expenses: [item, ...current.expenses] }));
     setExpenseDescription(""); setExpenseSupplier(""); setExpenseAmount("0"); setExpenseStatus("unpaid");
