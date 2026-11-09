@@ -73,6 +73,23 @@ describe("working capital invoice ageing", () => {
     expect(rows[0].outstanding).toBe(800);
   });
 
+  it("calculates calendar-day ageing across daylight-saving transitions", () => {
+    const spring = calculateInvoiceAgeing([invoice({ dueDate: "2026-03-29" })], "2026-03-30")[0];
+    const autumn = calculateInvoiceAgeing([invoice({ dueDate: "2026-10-25" })], "2026-10-26")[0];
+    expect(spring.overdueDays).toBe(1);
+    expect(autumn.overdueDays).toBe(1);
+  });
+
+  it("counts upcoming due dates by calendar day across daylight-saving transitions", () => {
+    const rows = calculateInvoiceAgeing([
+      invoice({ dueDate: "2026-03-29", amount: 100, paidAmount: 0 }),
+      invoice({ id: "2", dueDate: "2026-04-05", amount: 200, paidAmount: 0 }),
+    ], "2026-03-29");
+    const summary = summarizeInvoices(rows, "2026-03-29");
+    expect(summary.dueNext7Days).toBe(300);
+    expect(summary.dueNext30Days).toBe(300);
+  });
+
   it("does not count fully paid invoices as overdue", () => {
     const [row] = calculateInvoiceAgeing([invoice({ paidAmount: 1000 })], "2026-11-09");
     expect(row.outstanding).toBe(0);
