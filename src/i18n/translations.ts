@@ -249,7 +249,6 @@ const spanish: Record<string, string> = {
   "−12% revenue": "−12 % de ingresos",
   "Budget and scenario plan": "Presupuesto y plan de escenarios",
   "Scenario": "Escenario",
-  "Currency": "Moneda",
   "Actual revenue months": "Meses con ingresos reales",
   "Month": "Mes",
   "Revenue budget": "Presupuesto de ingresos",
@@ -280,7 +279,6 @@ const spanish: Record<string, string> = {
   "Tax assumption:": "Hipótesis fiscal:",
   "EnterpriseOS — Management P&L": "EnterpriseOS — Cuenta de resultados de gestión",
   "EnterpriseOS — FY 2026 budget and scenario plan": "EnterpriseOS — Presupuesto y escenarios del ejercicio 2026",
-  "Reporting period": "Periodo de información",
   "FY 2026 · Demo data": "Ejercicio 2026 · Datos de demostración",
   "Line item": "Concepto",
   "Amount (EUR)": "Importe (EUR)",
@@ -401,7 +399,6 @@ const spanish: Record<string, string> = {
 
 
   "EnterpriseOS — Integrated three-statement model": "EnterpriseOS — Modelo integrado de tres estados financieros",
-  "FY 2026 · Illustrative": "Ejercicio 2026 · Ilustrativo",
   "Opening (EUR)": "Inicial (EUR)",
   "Closing (EUR)": "Final (EUR)",
   "Opening cash": "Efectivo inicial",
