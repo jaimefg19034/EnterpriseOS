@@ -166,6 +166,35 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
     };
   }, []);
 
+  useEffect(() => {
+    const refreshCashForecast = () => {
+      try {
+        const raw = window.localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const parsed: unknown = JSON.parse(raw);
+        if (!Array.isArray(parsed) || parsed.length !== 13) return;
+        const restored = parsed.map((item): CashForecastWeekInput => {
+          const record = item && typeof item === "object" ? item as Record<string, unknown> : {};
+          const amount = (key: keyof CashForecastWeekInput) => {
+            const value = record[key];
+            return typeof value === "number" && Number.isFinite(value) ? Math.max(0, value) : 0;
+          };
+          return {
+            collections: amount("collections"),
+            operatingPayments: amount("operatingPayments"),
+            capitalExpenditure: amount("capitalExpenditure"),
+            debtService: amount("debtService"),
+          };
+        });
+        setWeeks(restored);
+      } catch {
+        // A failed restore never clears the current in-memory worksheet.
+      }
+    };
+    window.addEventListener("enterpriseos:cash-forecast-updated", refreshCashForecast);
+    return () => window.removeEventListener("enterpriseos:cash-forecast-updated", refreshCashForecast);
+  }, []);
+
   const start = useMemo(() => mondayOf(new Date()), []);
   const asOfDate = useMemo(() => toISODate(new Date()), []);
   const dates = useMemo(() => Array.from({ length: 13 }, (_, index) => addDays(start, index * 7)), [start]);
