@@ -4,7 +4,7 @@ import { OPENING_BALANCE_SHEET, type ThreeStatementResults } from "./three-state
 export type FinancialRatio = {
   key: string;
   value: number | null;
-  unit: "multiple" | "days" | "percent";
+  unit: "multiple" | "days" | "percent" | "currency";
   description: string;
 };
 
@@ -59,6 +59,13 @@ export function calculateFinancialRatios(
         { key: "Cash conversion cycle", value: Math.round((model.drivers.daysSalesOutstanding + model.drivers.inventoryDays - model.drivers.payableDays) * 100) / 100, unit: "days", description: "DSO + inventory days − payable days" },
         { key: "Asset turnover", value: safeRatio(financials.revenue, averageAssets), unit: "multiple", description: "Revenue / average total assets" },
         { key: "Working capital / revenue", value: safePercent(bs.netWorkingCapital, financials.revenue), unit: "percent", description: "Net working capital / revenue" },
+      ],
+    },
+    {
+      key: "Break-even analysis",
+      ratios: [
+        { key: "Operating break-even revenue", value: financials.revenue > 0 && financials.grossProfit > 0 ? Math.round(((financials.operatingExpenses + financials.depreciationAndAmortisation) / (financials.grossProfit / financials.revenue)) * 100) / 100 : null, unit: "currency", description: "(Operating expenses + D&A) / gross margin" },
+        { key: "Margin of safety", value: financials.revenue > 0 && financials.grossProfit > 0 ? safePercent(financials.revenue - ((financials.operatingExpenses + financials.depreciationAndAmortisation) / (financials.grossProfit / financials.revenue)), financials.revenue) : null, unit: "percent", description: "(Revenue − break-even revenue) / revenue" },
       ],
     },
     {
