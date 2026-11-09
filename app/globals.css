@@ -443,9 +443,9 @@ button:focus-visible, input:focus-visible {
 .planning-metric-mark.amber { background: #d39a4b; }
 .planning-metric > strong { display: block; margin-top: 10px; overflow: hidden; color: #223149; text-overflow: ellipsis; white-space: nowrap; font: 800 22px/1.25 "Manrope",sans-serif; letter-spacing: -.7px; font-variant-numeric: tabular-nums; }
 .planning-metric > small { display: block; margin-top: 6px; overflow: hidden; color: #98a3b2; text-overflow: ellipsis; white-space: nowrap; font-size: 8px; }
-.planning-main-grid { display: grid; grid-template-columns: minmax(310px, .88fr) minmax(430px, 1.12fr); gap: 14px; align-items: stretch; }
+.planning-main-grid { display: grid; grid-template-columns: minmax(0,1fr); gap: 16px; align-items: stretch; }
 .planning-assumptions-panel, .planning-performance-panel { padding: 17px 17px 14px; }
-.planning-assumption-list { margin-top: 11px; }
+.planning-assumption-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 26px; margin-top: 11px; }
 .planning-assumption-field {
   display: grid; grid-template-columns: 20px minmax(0,1fr) minmax(105px,128px);
   gap: 7px; align-items: center; padding: 10px 0; border-top: 1px solid #f0f2f6;
@@ -461,7 +461,7 @@ button:focus-visible, input:focus-visible {
 .planning-input-wrap:focus-within { border-color: #9aaaf0; background: #fff; box-shadow: 0 0 0 3px rgba(97,123,221,.08); }
 .planning-input-wrap input { width: 100%; min-width: 0; padding: 0; color: #34435c; border: 0; outline: 0; background: transparent; text-align: right; font-size: 9px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .planning-input-wrap input:focus-visible { outline: 0; }
-.planning-assumption-note { display: flex; align-items: flex-start; gap: 7px; margin-top: 9px; padding: 9px; border-radius: 7px; background: #f7f8fb; color: #8a96a7; }
+.planning-assumption-note { grid-column: 1 / -1; display: flex; align-items: flex-start; gap: 7px; margin-top: 9px; padding: 9px; border-radius: 7px; background: #f7f8fb; color: #8a96a7; }
 .planning-assumption-note span { color: #93a1b8; font-size: 11px; }
 .planning-assumption-note p { margin: 0; font-size: 8px; line-height: 1.5; }
 .planning-chart-wrap { margin-top: 15px; }
@@ -507,9 +507,9 @@ button:focus-visible, input:focus-visible {
 .month-status i { width: 6px; height: 6px; border-radius: 50%; background: #2d9a79; }
 .month-status.forecast { color: #6b7dbe; }
 .month-status.forecast i { background: #7790e0; }
-.planning-profit-panel { display: grid; grid-template-columns: minmax(230px,.7fr) minmax(400px,1.3fr); gap: 25px; margin-top: 14px; padding: 18px 20px; }
+.planning-profit-panel { display: grid; grid-template-columns: minmax(0,1fr); gap: 15px; margin-top: 16px; padding: 20px 22px; }
 .planning-profit-heading h2 { margin: 6px 0 5px; color: #2b394f; font: 750 15px "Manrope",sans-serif; }
-.planning-profit-heading p { max-width: 310px; margin: 0; color: #8b97a9; font-size: 9px; line-height: 1.6; }
+.planning-profit-heading p { max-width: 760px; margin: 0; color: #8b97a9; font-size: 9px; line-height: 1.6; }
 .planning-profit-table { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 22px; }
 .planning-profit-table > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 31px; padding: 0 7px; border-bottom: 1px solid #f0f2f6; color: #78859a; font-size: 8px; }
 .planning-profit-table strong { color: #435169; font-size: 9px; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
@@ -525,11 +525,11 @@ button:focus-visible, input:focus-visible {
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
 @media (max-width: 1180px) {
-  .planning-main-grid { grid-template-columns: minmax(290px,.85fr) minmax(360px,1.15fr); }
+  .planning-main-grid { grid-template-columns: minmax(0,1fr); }
   .planning-metrics-grid { gap: 9px; }
   .planning-metric { padding: 13px; }
   .planning-metric > strong { font-size: 19px; }
-  .planning-profit-panel { grid-template-columns: minmax(190px,.6fr) minmax(360px,1.4fr); gap: 15px; }
+  .planning-profit-panel { grid-template-columns: minmax(0,1fr); gap: 14px; }
 }
 @media (max-width: 940px) {
   .planning-scenario-panel { grid-template-columns: 1fr; }
@@ -550,6 +550,7 @@ button:focus-visible, input:focus-visible {
   .planning-metric > strong { font-size: 18px; }
   .planning-metric > small { font-size: 7px; }
   .planning-assumptions-panel, .planning-performance-panel { padding: 15px 12px 12px; }
+  .planning-assumption-list { grid-template-columns: minmax(0,1fr); }
   .planning-assumption-field { grid-template-columns: 17px minmax(0,1fr) minmax(100px,120px); gap: 5px; }
   .planning-field-label strong { font-size: 8px; }
   .planning-field-label small { font-size: 7px; }
@@ -1278,38 +1279,47 @@ button:focus-visible, input:focus-visible {
 /* In-page navigation for long planning workspaces */
 .planning-section-nav {
   position: sticky;
-  top: 10px;
+  top: 12px;
   z-index: 12;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   overflow-x: auto;
-  padding: 8px;
-  margin: 14px 0 18px;
-  border: 1px solid rgba(142, 160, 190, .18);
+  padding: 7px;
+  margin: 13px 0 20px;
+  border: 1px solid #e6ebf3;
   border-radius: 12px;
-  background: rgba(13, 22, 39, .92);
-  backdrop-filter: blur(14px);
-  scrollbar-width: thin;
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 9px 24px rgba(30,45,75,.075);
+  backdrop-filter: blur(16px);
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
 }
+.planning-section-nav::-webkit-scrollbar { display: none; }
 .planning-section-nav a {
+  display: inline-flex;
   flex: 0 0 auto;
-  padding: 8px 11px;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
   border-radius: 8px;
-  color: #aebbd0;
+  color: #68768d;
   text-decoration: none;
-  font-size: 11px;
-  font-weight: 650;
-  transition: background .18s ease, color .18s ease;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 700;
+  transition: background .18s ease, color .18s ease, border-color .18s ease;
 }
 .planning-section-nav a:hover,
 .planning-section-nav a:focus-visible {
-  color: #fff;
-  background: rgba(112, 143, 220, .18);
+  color: #405fc1;
+  border-color: #e2e8fb;
+  background: #f3f6ff;
   outline: none;
 }
-.planning-workspace [id^="planning-"] { scroll-margin-top: 88px; }
+.planning-workspace [id^="planning-"] { scroll-margin-top: 94px; }
 @media (max-width: 700px) {
-  .planning-section-nav { top: 4px; margin-inline: -2px; }
-  .planning-section-nav a { padding: 8px 9px; font-size: 10px; }
+  .planning-section-nav { top: 8px; margin-inline: -2px; }
+  .planning-section-nav a { min-height: 34px; padding: 7px 9px; font-size: 9px; }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import {
   buildPlanningResult,
   makeDemoActualRevenue,
@@ -170,6 +170,20 @@ function PlanningMetric({
       <small>{detail}</small>
     </article>
   );
+}
+
+function navigateToPlanningSection(event: MouseEvent<HTMLAnchorElement>) {
+  const href = event.currentTarget.getAttribute("href");
+  if (!href?.startsWith("#")) return;
+  const target = document.getElementById(href.slice(1));
+  if (!target) return;
+
+  event.preventDefault();
+  const navigation = document.querySelector<HTMLElement>(".planning-section-nav");
+  const stickyOffset = (navigation?.offsetHeight ?? 44) + 30;
+  const targetTop = window.scrollY + target.getBoundingClientRect().top - stickyOffset;
+  if (window.location.hash !== href) window.history.pushState(null, "", href);
+  window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
 }
 
 export function PlanningWorkspace({ language }: { language: Language }) {
@@ -368,11 +382,11 @@ export function PlanningWorkspace({ language }: { language: Language }) {
       </div>
       <p className="planning-storage-status" role="status">{t(storageMessage || "Preparing local plan storage…")}</p>
       <nav className="planning-section-nav" aria-label={t("Planning sections")}>
-        <a href="#planning-overview">{t("Planning overview")}</a>
-        <a href="#planning-assumptions">{t("Annual assumptions")}</a>
-        <a href="#planning-performance">{t("Budget vs. actual & forecast")}</a>
-        <a href="#planning-monthly">{t("Revenue plan by month")}</a>
-        <a href="#planning-profitability">{t("Projected income statement")}</a>
+        <a href="#planning-overview" onClick={navigateToPlanningSection}>{t("Planning overview")}</a>
+        <a href="#planning-assumptions" onClick={navigateToPlanningSection}>{t("Annual assumptions")}</a>
+        <a href="#planning-performance" onClick={navigateToPlanningSection}>{t("Budget vs. actual & forecast")}</a>
+        <a href="#planning-monthly" onClick={navigateToPlanningSection}>{t("Revenue plan by month")}</a>
+        <a href="#planning-profitability" onClick={navigateToPlanningSection}>{t("Projected income statement")}</a>
       </nav>
 
       <section id="planning-overview" className="planning-scenario-panel panel">
