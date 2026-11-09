@@ -3,7 +3,9 @@ import {
   getReportingPeriodBounds,
   inclusiveDaysBetween,
   isDateWithinReportingPeriod,
+  isDateWithinReportingPeriodCode,
   isValidISODate,
+  isValidReportingPeriodCode,
 } from "./reporting-periods";
 
 describe("shared reporting-period boundaries", () => {
@@ -48,6 +50,13 @@ describe("shared reporting-period boundaries", () => {
     expect(isValidISODate("2024-02-29")).toBe(true);
     expect(isValidISODate("2025-02-29")).toBe(false);
     expect(isValidISODate("2026-04-31")).toBe(false);
+    expect(isValidISODate("0000-01-01")).toBe(false);
+    expect(isValidReportingPeriodCode("2026-Q4")).toBe(true);
+    expect(isValidReportingPeriodCode("2026-Q5")).toBe(false);
+    expect(isValidReportingPeriodCode("0000-FY")).toBe(false);
+    expect(isDateWithinReportingPeriodCode("2026-10-01", "2026-Q4")).toBe(true);
+    expect(isDateWithinReportingPeriodCode("2026-09-30", "2026-Q4")).toBe(false);
+    expect(isDateWithinReportingPeriodCode("2027-01-15", "2026-FY", 4)).toBe(true);
     expect(isValidISODate("2026-2-01")).toBe(false);
     expect(getReportingPeriodBounds(2026, "Q5" as "Q1")).toBeNull();
     expect(getReportingPeriodBounds(2026, "FY", 13)).toBeNull();
