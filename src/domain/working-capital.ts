@@ -2,6 +2,13 @@ import { isValidISODate, parseISODateUTC } from "./reporting-periods";
 
 export type InvoiceDirection = "receivable" | "payable";
 
+export type InvoicePayment = {
+  id: string;
+  date: string;
+  amount: number;
+  note?: string;
+};
+
 export type WorkingCapitalInvoice = {
   id: string;
   direction: InvoiceDirection;
@@ -11,6 +18,8 @@ export type WorkingCapitalInvoice = {
   dueDate: string;
   amount: number;
   paidAmount: number;
+  /** Dated payments recorded from the point the payment ledger was introduced. */
+  payments?: InvoicePayment[];
 };
 
 export type AgeingBucket = "notDue" | "1to30" | "31to60" | "61to90" | "over90";
@@ -61,6 +70,15 @@ export function validateWorkingCapitalInvoice(value: unknown): InvoiceValidation
   }
   if (typeof item.paidAmount !== "number" || !Number.isFinite(item.paidAmount) || item.paidAmount < 0 || item.paidAmount > item.amount) {
     return { valid: false, error: "Paid amount must be between zero and the invoice amount." };
+  }
+  if (item.payments !== undefined && (!Array.isArray(item.payments) || item.payments.some((payment) => !isValidInvoicePayment(payment)))) {
+    return { valid: false, error: "Invoice payment history contains an invalid record." };
+  }
+  const paymentTotal = Array.isArray(item.payments)
+    ? item.payments.reduce((total, payment) => total + (payment as InvoicePayment).amount, 0)
+    : 0;
+  if (paymentTotal - item.paidAmount > 0.005) {
+    return { valid: false, error: "Recorded payments cannot exceed the invoice paid amount." };
   }
   return { valid: true, invoice: normaliseInvoice(item as unknown as WorkingCapitalInvoice) };
 }
@@ -229,7 +247,52 @@ export function summarizeInvoices(items: InvoiceAgeing[], today: string): Invoic
 export function normaliseInvoice(value: WorkingCapitalInvoice): WorkingCapitalInvoice {
   const amount = roundCurrency(Number.isFinite(value.amount) ? Math.max(0, value.amount) : 0);
   const paidAmount = roundCurrency(Number.isFinite(value.paidAmount) ? Math.min(amount, Math.max(0, value.paidAmount)) : 0);
-  return { ...value, counterparty: value.counterparty.trim(), reference: value.reference.trim(), amount, paidAmount };
+  const payments = Array.isArray(value.payments) ? value.payments.map((payment) => ({
+    id: payment.id,
+    date: payment.date,
+    amount: roundCurrency(payment.amount),
+    ...(payment.note?.trim() ? { note: payment.note.trim() } : {}),
+  })) : [];
+  return { ...value, counterparty: value.counterparty.trim(), reference: value.reference.trim(), amount, paidAmount, payments };
+}
+
+export type InvoicePaymentResult =
+  | { valid: true; invoice: WorkingCapitalInvoice }
+  | { valid: false; error: string };
+
+export function addInvoicePayment(
+  invoice: WorkingCapitalInvoice,
+  payment: InvoicePayment,
+): InvoicePaymentResult {
+  if (!isValidInvoicePayment(payment)) {
+    return { valid: false, error: "Payment date, amount or reference is invalid." };
+  }
+  if ((invoice.payments ?? []).some((existing) => existing.id === payment.id)) {
+    return { valid: false, error: "This payment has already been recorded." };
+  }
+  const cleanInvoice = normaliseInvoice(invoice);
+  const remaining = roundCurrency(cleanInvoice.amount - cleanInvoice.paidAmount);
+  if (payment.amount - remaining > 0.005) {
+    return { valid: false, error: "Payment exceeds the invoice outstanding balance." };
+  }
+  return {
+    valid: true,
+    invoice: normaliseInvoice({
+      ...cleanInvoice,
+      paidAmount: cleanInvoice.paidAmount + payment.amount,
+      payments: [...(cleanInvoice.payments ?? []), payment],
+    }),
+  };
+}
+
+function isValidInvoicePayment(value: unknown): value is InvoicePayment {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const payment = value as Record<string, unknown>;
+  return typeof payment.id === "string" && payment.id.trim().length > 0 && payment.id.length <= 100 &&
+    typeof payment.date === "string" && isValidISODate(payment.date) &&
+    typeof payment.amount === "number" && Number.isFinite(payment.amount) && payment.amount > 0 &&
+    payment.amount <= 1_000_000_000_000 &&
+    (payment.note === undefined || (typeof payment.note === "string" && payment.note.length <= 200));
 }
 
 function roundCurrency(value: number): number {
