@@ -310,6 +310,7 @@ export function ThreeStatementsWorkspace({
           subtitle: t("FY 2026 · Operating and financing assumptions"),
           headers: [t("Driver"), t("Value"), t("Unit")],
           widths: [38, 20, 20],
+          currencyLabels: [t("Capital expenditure"), t("Debt repayment applied"), t("New borrowings"), t("Dividends")],
           rows: [
             [t("Days sales outstanding"), model.drivers.daysSalesOutstanding, t("days")],
             [t("Inventory days"), model.drivers.inventoryDays, t("days")],
