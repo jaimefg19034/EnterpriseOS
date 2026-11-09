@@ -733,7 +733,6 @@ const spanish: Record<string, string> = {
   "No high-priority alerts based on the records currently entered.": "No hay alertas prioritarias según los datos introducidos actualmente.",
   "Cost-centre budget performance": "Rendimiento presupuestario por centro de coste",
   "Each budget period is shown separately. Full-year and quarterly figures are not added together.": "Cada periodo presupuestario se muestra por separado. No se suman cifras anuales y trimestrales.",
-  "Variance": "Desviación",
   "Add cost-centre budgets to see departmental performance.": "Añade presupuestos por centro de coste para consultar el rendimiento departamental.",
   "Spend by category": "Gasto por categoría",
   "Based on expense records; no external accounting transactions are included.": "Basado en los gastos registrados; no incluye movimientos contables externos.",
