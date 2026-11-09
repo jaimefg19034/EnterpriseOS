@@ -12,6 +12,20 @@ const invoice = (overrides: Partial<WorkingCapitalInvoice> = {}): WorkingCapital
   amount: 1000,
   paidAmount: 200,
   ...overrides,
+  it("reduces the forecast by dated payments without forecasting those payments again", () => {
+    const partiallyPaid = invoice({ amount: 1000, paidAmount: 500, payments: [
+      { id: "p-1", date: "2026-11-08", amount: 300 },
+    ] });
+    const fullyPaid = invoice({ id: "paid", amount: 500, paidAmount: 500, payments: [
+      { id: "p-2", date: "2026-11-08", amount: 500 },
+    ] });
+    const result = allocateInvoicesToCashWeeks([partiallyPaid, fullyPaid], "2026-11-09", 2);
+
+    expect(result[0].receivableCollections).toBe(500);
+    expect(result[0].receivableCount).toBe(1);
+    expect(result.reduce((total, week) => total + week.receivableCollections, 0)).toBe(500);
+  });
+
 });
 
 describe("invoice cash forecast integration", () => {
