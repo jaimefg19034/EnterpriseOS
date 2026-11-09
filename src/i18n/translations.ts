@@ -811,6 +811,14 @@ const spanish: Record<string, string> = {
   "No cost centres yet. Add a department budget to start monitoring spend.": "Todavía no hay centros de coste. Añade un presupuesto departamental para empezar a controlar el gasto.",
   "Enter actual spend manually. This module does not yet import transactions from banks or accounting systems. Budgets are not consolidated automatically across periods.": "Introduce el gasto real manualmente. Este módulo todavía no importa movimientos bancarios ni datos contables. Los presupuestos no se consolidan automáticamente entre periodos.",
   "Restoring this backup replaces the finance and operations data included in the file in this browser. Continue?": "Restaurar esta copia sustituirá los datos financieros y operativos incluidos en el archivo en este navegador. ¿Continuar?",
+  "Payment history": "Historial de pagos",
+  "Payments": "Pagos",
+  "Recorded payments": "Pagos registrados",
+  "Payment date": "Fecha del pago",
+  "Payment amount": "Importe del pago",
+  "Note (optional)": "Nota (opcional)",
+  "Register payment": "Registrar pago",
+  "Historical paid balances entered before payment tracking have no individual dates and are not included in this movement list.": "Los importes pagados históricos introducidos antes del seguimiento de pagos no tienen fechas individuales y no aparecen en esta lista de movimientos.",
 };
 
 
