@@ -3,7 +3,7 @@ import { normaliseInvoice, validateWorkingCapitalInvoice, type WorkingCapitalInv
 import { parseSavedPlanningState, type SavedPlanningState } from "./planning-storage";
 import { validateOperationsState, type OperationsState } from "./operations";
 
-export const LOCAL_FINANCE_BACKUP_VERSION = 1;
+export const LOCAL_FINANCE_BACKUP_VERSION = 2;
 
 export type LocalFinanceBackup = {
   product: "EnterpriseOS";
@@ -46,7 +46,7 @@ export function parseLocalFinanceBackup(raw: string): LocalFinanceBackupResult {
     return { ok: false, error: "The file is not valid JSON." };
   }
 
-  if (!isRecord(parsed) || parsed.product !== "EnterpriseOS" || parsed.schemaVersion !== LOCAL_FINANCE_BACKUP_VERSION) {
+  if (!isRecord(parsed) || parsed.product !== "EnterpriseOS" || (parsed.schemaVersion !== 1 && parsed.schemaVersion !== LOCAL_FINANCE_BACKUP_VERSION)) {
     return { ok: false, error: "This file is not a supported EnterpriseOS backup." };
   }
   if (!Array.isArray(parsed.workingCapitalInvoices) || !Array.isArray(parsed.quarterlyCashForecast) || parsed.quarterlyCashForecast.length !== 13) {
