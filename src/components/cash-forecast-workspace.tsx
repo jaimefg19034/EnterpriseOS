@@ -297,11 +297,15 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
         widths: [18, 22, 22, 22, 22, 20, 20],
         currencyColumns: [2, 3, 4, 5],
         dateColumns: [1],
-        rows: invoiceProjection.map((week, index) => [
-          dates[index].toLocaleDateString(language === "es" ? "es-ES" : "en-GB"),
-          week.receivableCollections, week.payablePayments, week.overdueReceivables,
-          week.overduePayables, week.receivableCount, week.payableCount,
-        ]),
+        totalLabels: [t("QUARTER TOTAL")],
+        rows: [
+          ...invoiceProjection.map((week, index) => [
+            excelDateOnly(dates[index]),
+            week.receivableCollections, week.payablePayments, week.overdueReceivables,
+            week.overduePayables, week.receivableCount, week.payableCount,
+          ]),
+          [t("QUARTER TOTAL"), invoiceTotals.receivables, invoiceTotals.payables, invoiceTotals.overdueReceivables, invoiceTotals.overduePayables, invoiceTotals.receivableCount, invoiceTotals.payableCount],
+        ],
       }, {
         name: t("Downside scenario"),
         title: t("EnterpriseOS — Downside cash scenario"),
