@@ -57,6 +57,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   useEffect(() => {
     if (!ready) return;
     try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(invoices)); } catch { /* Optional browser storage. */ }
+    window.dispatchEvent(new Event("enterpriseos:working-capital-updated"));
   }, [invoices, ready]);
 
   function addInvoice(event: FormEvent<HTMLFormElement>) {
@@ -141,7 +142,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
           </tbody></table></div>
         )}
       </div>
-      <p className="working-capital-disclaimer">{t("Records are stored only in this browser. They are not connected to accounting software or the quarterly cash forecast, and are not shared with other users.")}</p>
+      <p className="working-capital-disclaimer">{t("Records are stored only in this browser and are not connected to accounting software. You can preview open invoice balances in the quarterly cash forecast and choose whether to include them; no invoice is marked as paid automatically.")}</p>
     </section>
   );
 }
