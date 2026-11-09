@@ -1271,3 +1271,17 @@ button:focus-visible, input:focus-visible {
 .working-capital-import-preview { margin: 12px 0; padding: 14px; }
 .working-capital-import-preview .working-capital-form-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
 .working-capital-import-preview p { color: #8793a5; font-size: 9px; }
+
+
+.nav-group { display: grid; gap: 3px; }
+.nav-group-trigger {
+  min-height: 38px; width: 100%; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 11px; border: 1px solid transparent; border-radius: 8px; color: #8998b0;
+  background: transparent; text-align: left; font-size: 10px; font-weight: 800;
+  letter-spacing: .65px; text-transform: uppercase; transition: .18s ease;
+}
+.nav-group-trigger:hover, .nav-group-trigger.active { color: #dce5f5; background: rgba(255,255,255,.045); }
+.nav-group-chevron { display: inline-block; color: #8292aa; font-size: 15px; transition: transform .18s ease; }
+.nav-group-chevron.expanded { transform: rotate(180deg); }
+.nav-group-items { display: grid; gap: 3px; padding-left: 7px; border-left: 1px solid rgba(223,232,255,.10); margin-left: 11px; }
+.nav-item.nav-subitem { height: 39px; min-height: 39px; font-size: 11px; gap: 10px; }
