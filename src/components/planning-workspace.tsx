@@ -220,7 +220,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
     setScenario("base");
   }
 
-  async function exportPlanningCsv() {
+  async function exportPlanningExcel() {
     await downloadExcelWorkbook({
       filename: "enterpriseos-budget-scenarios-fy2026.xlsx",
       sheets: [
@@ -303,7 +303,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
         <div className="heading-actions">
           <span className="demo-badge"><i /> {t("SAMPLE DATA")}</span>
           <button className="secondary-button" onClick={resetDemo}>{t("Reset demo")}</button>
-          <button className="primary-button" onClick={exportPlanningCsv}>
+          <button className="primary-button" onClick={exportPlanningExcel}>
             <span aria-hidden="true">↓</span> {t("Export plan")}
           </button>
         </div>
