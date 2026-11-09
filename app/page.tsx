@@ -299,6 +299,7 @@ function MetricCard({
 export default function Home() {
   const [view, setView] = useState<View>("overview");
   const [showWorkspaceInfo, setShowWorkspaceInfo] = useState(false);
+  const [showHelpGuide, setShowHelpGuide] = useState(false);
   const language = useSyncExternalStore(
     subscribeToLanguage,
     getLanguageSnapshot,
@@ -416,7 +417,7 @@ export default function Home() {
         </div>
 
         <div className="sidebar-spacer" />
-        <button type="button" className="sidebar-help" onClick={() => setView("model")}>
+        <button type="button" className="sidebar-help" onClick={() => setShowHelpGuide(true)} aria-haspopup="dialog">
           <div className="help-symbol"><Icon name="info" size={17} /></div>
           <div>
             <strong>{t("Need a hand?")}</strong>
@@ -474,6 +475,29 @@ export default function Home() {
               </div>
               <p className="workspace-info-note">{t("This is a local demonstration workspace. Changes are not saved to a company database yet.")}</p>
               <button type="button" className="primary-button workspace-info-confirm" onClick={() => setShowWorkspaceInfo(false)}>{t("Got it")}</button>
+            </section>
+          </div>
+        )}
+
+        {showHelpGuide && (
+          <div className="workspace-info-backdrop help-guide-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowHelpGuide(false); }}>
+            <section className="workspace-info-dialog help-guide-dialog" role="dialog" aria-modal="true" aria-labelledby="help-guide-title">
+              <div className="workspace-info-topline">
+                <span className="workspace-info-icon"><Icon name="sparkle" size={19} /></span>
+                <button type="button" className="workspace-info-close" onClick={() => setShowHelpGuide(false)} aria-label={t("Close")}>×</button>
+              </div>
+              <div className="panel-kicker">{t("ENTERPRISEOS QUICK GUIDE")}</div>
+              <h2 id="help-guide-title">{t("A clearer view of your business.")}</h2>
+              <p>{t("Choose a workspace to understand what it shows and how to use it.")}</p>
+              <div className="help-guide-list">
+                <button type="button" onClick={() => { setView("overview"); setShowHelpGuide(false); }}><span className="help-guide-number">01</span><span><strong>{t("Overview")}</strong><small>{t("Monitor revenue, EBITDA, margins and the main performance trends.")}</small></span><Icon name="arrow" size={16} /></button>
+                <button type="button" onClick={() => { setView("model"); setShowHelpGuide(false); }}><span className="help-guide-number">02</span><span><strong>{t("Financial model")}</strong><small>{t("Edit the six operating assumptions and see the income statement recalculate.")}</small></span><Icon name="arrow" size={16} /></button>
+                <button type="button" onClick={() => { setView("planning"); setShowHelpGuide(false); }}><span className="help-guide-number">03</span><span><strong>{t("Budget & scenarios")}</strong><small>{t("Compare the plan with actuals and explore Base, Upside and Downside cases.")}</small></span><Icon name="arrow" size={16} /></button>
+                <button type="button" onClick={() => { setView("statements"); setShowHelpGuide(false); }}><span className="help-guide-number">04</span><span><strong>{t("3 statements")}</strong><small>{t("Review the income statement, balance sheet and cash flow together.")}</small></span><Icon name="arrow" size={16} /></button>
+                <button type="button" onClick={() => { setView("reports"); setShowHelpGuide(false); }}><span className="help-guide-number">05</span><span><strong>{t("Reports")}</strong><small>{t("Export the current model and planning outputs to Excel.")}</small></span><Icon name="arrow" size={16} /></button>
+              </div>
+              <p className="help-guide-footnote">{t("Tip: use the EN / ES switch in the top bar to change the interface language. This demo uses illustrative figures.")}</p>
+              <button type="button" className="primary-button workspace-info-confirm" onClick={() => setShowHelpGuide(false)}>{t("Close guide")}</button>
             </section>
           </div>
         )}
