@@ -335,7 +335,7 @@ export default function Home() {
         headers: [t("Line item"), t("Amount (EUR)"), t("Formula / basis")],
         widths: [34, 20, 48],
         currencyColumns: [2],
-        percentColumns: [],
+        percentLabels: [t("Gross margin"), t("EBITDA margin"), t("Net margin")],
         totalLabels: [t("Gross profit"), "EBITDA", "EBIT", t("Profit before tax"), t("Net income")],
         rows: [
           [t("Revenue"), results.revenue, t("Input")],
