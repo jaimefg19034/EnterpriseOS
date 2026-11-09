@@ -1,4 +1,4 @@
-import { getReportingPeriodBounds, inclusiveDaysBetween, isDateWithinReportingPeriod, isValidISODate } from "./reporting-periods";
+import { getReportingPeriodBounds, inclusiveDaysBetween, isDateWithinReportingPeriod, isValidISODate, isValidReportingPeriodCode } from "./reporting-periods";
 export type OpportunityStage = "lead" | "qualified" | "proposal" | "won" | "lost";
 export type Opportunity = { id: string; company: string; contact: string; value: number; stage: OpportunityStage; expectedClose: string };
 export type ProjectStatus = "planned" | "active" | "onHold" | "completed";
@@ -26,9 +26,7 @@ function validDate(value: unknown): value is string {
   return isValidISODate(value);
 }
 function validReportingPeriod(value: unknown): value is string {
-  if (typeof value !== "string" || !/^\d{4}-(Q[1-4]|FY)$/.test(value)) return false;
-  const [yearText, period] = value.split("-");
-  return getReportingPeriodBounds(Number(yearText), period as "FY" | "Q1" | "Q2" | "Q3" | "Q4") !== null;
+  return typeof value === "string" && isValidReportingPeriodCode(value);
 }
 function validId(value: unknown): value is string {
   return typeof value === "string" && value.length > 0 && value.length <= 100;
