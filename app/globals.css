@@ -1188,3 +1188,13 @@ button:focus-visible, input:focus-visible {
  .cash-forecast-invoice-summary { grid-template-columns:1fr; }
  .cash-forecast-invoice-row { grid-template-columns:1fr; gap:4px; }
 }
+
+
+/* Local finance backup controls */
+.working-capital-actions { display:flex; justify-content:flex-end; align-items:center; flex-wrap:wrap; gap:8px; }
+.working-capital-backup-message { margin:0; padding:10px 12px; border:1px solid #dfe7f2; border-radius:8px; color:#3e587d; background:#f7f9fd; font-size:10px; line-height:1.6; }
+@media (max-width:760px) {
+  .working-capital-heading { align-items:flex-start; flex-direction:column; }
+  .working-capital-actions { width:100%; justify-content:flex-start; }
+  .working-capital-actions button { flex:1 1 auto; }
+}
