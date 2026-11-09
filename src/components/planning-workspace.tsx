@@ -121,7 +121,7 @@ function PlanningChart({
         <polyline points={budgetLine} className="plan-budget-line" />
         <polyline points={performanceLine} className="plan-performance-line" />
         {points.map((point, index) => (
-          <g key={rows[index].month}>
+          <g key={t(rows[index].month)}>
             <circle cx={point.x} cy={point.budgetY} r="3" className="plan-budget-point" />
             <circle
               cx={point.x}
@@ -274,7 +274,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
       <div className="page-heading planning-heading">
         <div>
           <div className="eyebrow">
-            FINANCIAL PLANNING <span className="eyebrow-dot" /> FY 2026 · THROUGH OCTOBER
+            {t("FINANCIAL PLANNING")} <span className="eyebrow-dot" /> {t("FY 2026 · THROUGH OCTOBER")}
           </div>
           <h1>{t("Budget & scenarios")}</h1>
           <p>{t("Track revenue against budget and stress-test the remaining two months under different operating assumptions.")}</p>
@@ -283,7 +283,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
           <span className="demo-badge"><i /> {t("SAMPLE DATA")}</span>
           <button className="secondary-button" onClick={resetDemo}>{t("Reset demo")}</button>
           <button className="primary-button" onClick={exportPlanningCsv}>
-            <span aria-hidden="true">↓</span> Export plan
+            <span aria-hidden="true">↓</span> {t("Export plan")}
           </button>
         </div>
       </div>
@@ -329,19 +329,19 @@ export function PlanningWorkspace({ language }: { language: Language }) {
         <PlanningMetric
           label={t("Projected EBITDA")}
           value={formatCurrency(result.projectedEbitda, true)}
-          detail={`${result.ebitdaVariance >= 0 ? "+" : ""}${formatCurrency(result.ebitdaVariance, true)} vs. budget EBITDA`}
+          detail={`${result.ebitdaVariance >= 0 ? "+" : ""}${formatCurrency(result.ebitdaVariance, true)} {t("vs. budget EBITDA")}`}
           tone="green"
         />
         <PlanningMetric
           label={t("Projected EBITDA margin")}
           value={formatPercent(result.projectedEbitdaMarginPercent)}
-          detail={`COGS assumption: ${formatPercent(result.costOfGoodsSoldPercent)}`}
+          detail={`${t("COGS assumption:")} ${formatPercent(result.costOfGoodsSoldPercent)}`}
           tone="violet"
         />
         <PlanningMetric
           label={t("Projected net income")}
           value={formatCurrency(result.projectedNetIncome, true)}
-          detail={`Tax assumption: ${formatPercent(result.assumptions.taxRatePercent)}`}
+          detail={`${t("Tax assumption:")} ${formatPercent(result.assumptions.taxRatePercent)}`}
           tone="amber"
         />
       </div>
@@ -509,7 +509,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
       <div className="planning-disclaimer">
         <span aria-hidden="true">ⓘ</span>
         <p>
-          <strong>{t("Demo model — not company accounts.")}</strong> January–October revenue values are editable sample actuals. Historical COGS and operating expenses are not entered as actuals; annual EBITDA, EBIT and net income are modelled using the selected scenario assumptions. Replace the illustrative monthly seasonality with company-specific data before using this for decisions.
+          <strong>{t("Demo model — not company accounts.")}</strong> {t("January–October revenue values are editable sample actuals. Historical COGS and operating expenses are not entered as actuals; annual EBITDA, EBIT and net income are modelled using the selected scenario assumptions. Replace the illustrative monthly seasonality with company-specific data before using this for decisions.")}
         </p>
       </div>
     </div>
