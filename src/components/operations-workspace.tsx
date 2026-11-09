@@ -167,7 +167,10 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   function addExpense(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const amount = Number(expenseAmount);
-    if (!expenseDescription.trim() || !expenseSupplier.trim() || !expenseCategory.trim() || !data.costCenters.some((x) => x.id === expenseCostCenterId) || !Number.isFinite(amount) || amount <= 0 || !/^\d{4}-\d{2}-\d{2}$/.test(expenseDate)) return;
+    const selectedCenter = data.costCenters.find((x) => x.id === expenseCostCenterId);
+    const expenseQuarter = `Q${Math.floor((Number(expenseDate.slice(5, 7)) - 1) / 3) + 1}`;
+    const periodMatches = selectedCenter && selectedCenter.period.startsWith(`${expenseDate.slice(0, 4)}-`) && (selectedCenter.period.endsWith("-FY") || selectedCenter.period.endsWith(`-${expenseQuarter}`));
+    if (!expenseDescription.trim() || !expenseSupplier.trim() || !expenseCategory.trim() || !selectedCenter || !periodMatches || !Number.isFinite(amount) || amount <= 0 || !/^\d{4}-\d{2}-\d{2}$/.test(expenseDate)) return;
     const item: ExpenseRecord = { id: makeId(), date: expenseDate, description: expenseDescription.trim(), supplier: expenseSupplier.trim(), category: expenseCategory.trim(), costCenterId: expenseCostCenterId, amount, status: expenseStatus };
     setData((current) => ({ ...current, expenses: [item, ...current.expenses] }));
     setExpenseDescription(""); setExpenseSupplier(""); setExpenseAmount("0"); setExpenseStatus("unpaid");
@@ -288,7 +291,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
           <div className="operations-table-wrap"><table className="operations-table"><thead><tr><th>{t("Date")}</th><th>{t("Description")}</th><th>{t("Supplier")}</th><th>{t("Category")}</th><th>{t("Cost centre")}</th><th>{t("Amount (€)")}</th><th>{t("Payment status")}</th><th /></tr></thead><tbody>
             {data.expenses.map((x) => <tr key={x.id}><td>{x.date}</td><td><strong>{x.description}</strong></td><td>{x.supplier}</td><td>{x.category}</td><td>{data.costCenters.find((cc) => cc.id === x.costCenterId)?.name ?? t("Deleted cost centre")}</td><td>{money(x.amount, language)}</td><td><select aria-label={t("Payment status")} value={x.status} onChange={(e) => setData((current) => ({ ...current, expenses: current.expenses.map((row) => row.id === x.id ? { ...row, status: e.target.value as ExpenseRecord["status"] } : row) }))}><option value="unpaid">{t("Unpaid")}</option><option value="paid">{t("Paid")}</option></select></td><td><button className="operations-delete" onClick={() => remove("expenses", x.id)} aria-label={t("Delete record")}>×</button></td></tr>)}
           </tbody></table>{data.expenses.length === 0 && <div className="operations-empty">{t("No expenses yet. Add an expense to update the cost-centre actuals.")}</div>}</div>
-          <p className="operations-note">{t("Expenses are assigned to a cost centre and included in its actual spend when the date falls within the budget period. The payment status is a tracking field only; it does not change cash forecasts or mark invoices as paid.")}</p>
+          <p className="operations-note">{t("Choose a cost centre with a period matching the expense date. Full-year budgets accept expenses from any quarter. The payment status is a tracking field only; it does not change cash forecasts or mark invoices as paid.")}</p>
         </>}
         {section === "kpis" && <>
           <div className="operations-section-heading"><div><div className="panel-kicker">{t("PERFORMANCE MANAGEMENT")}</div><h2>{t("KPI scorecard")}</h2><p>{t("Compare actual results with targets. Define the unit and direction before interpreting performance.")}</p></div></div>
