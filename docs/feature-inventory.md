@@ -53,7 +53,7 @@
 - The P&L is a simplified management model, not a statutory accounting engine.
 - Historical cost and expense actuals are incomplete relative to the revenue actuals workflow.
 - The opening balance sheet is an illustrative baseline.
-- Forecast outputs and actuals need consistent period definitions, provenance and labels across every screen.
+- Forecast outputs and actuals need consistent period definitions, provenance and labels across every screen. Operations now uses shared month/quarter/FY date boundaries, but Budget & Scenarios remains a single FY2026 plan; adding multi-year planning requires a versioned storage migration that preserves existing FY2026 actuals and backup compatibility.
 - Excel import, source mapping and reconciliation need a deliberate design before supporting real customer files.
 
 ### High — product and operating readiness
