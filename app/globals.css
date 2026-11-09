@@ -625,7 +625,7 @@ button:focus-visible, input:focus-visible {
 .three-statements-warning { margin-bottom: 14px; padding: 12px 15px; color: #916b37; border: 1px solid #f1dfc3; border-radius: 9px; background: #fffaf2; }
 .three-statements-warning strong { font-size: 10px; }
 .three-statements-warning p { margin: 5px 0 0; font-size: 9px; line-height: 1.5; }
-.three-statements-stats { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 11px; margin-bottom: 14px; }
+.three-statements-stats { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 11px; margin-bottom: 14px; }
 .three-statement-stat {
   min-width: 0; padding: 14px 15px; border: 1px solid #e8edf4; border-radius: 10px;
   background: linear-gradient(145deg,#fff,#fcfdff); box-shadow: 0 5px 18px rgba(31,49,80,.035);
