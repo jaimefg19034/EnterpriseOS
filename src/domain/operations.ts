@@ -7,9 +7,10 @@ export type BusinessRisk = { id: string; title: string; owner: string; probabili
 export type KpiDirection = "higher" | "lower";
 export type BusinessKpi = { id: string; name: string; actual: number; target: number; unit: string; direction?: KpiDirection };
 export type CostCenterBudget = { id: string; name: string; owner: string; budget: number; actualSpend: number; period: string };
-export type OperationsState = { opportunities: Opportunity[]; projects: Project[]; risks: BusinessRisk[]; kpis: BusinessKpi[]; costCenters: CostCenterBudget[] };
+export type ExpenseRecord = { id: string; date: string; description: string; supplier: string; category: string; costCenterId: string; amount: number; status: "paid" | "unpaid" };
+export type OperationsState = { opportunities: Opportunity[]; projects: Project[]; risks: BusinessRisk[]; kpis: BusinessKpi[]; costCenters: CostCenterBudget[]; expenses: ExpenseRecord[] };
 export const OPERATIONS_STORAGE_KEY = "enterpriseos:operations:v1";
-export const EMPTY_OPERATIONS: OperationsState = { opportunities: [], projects: [], risks: [], kpis: [], costCenters: [] };
+export const EMPTY_OPERATIONS: OperationsState = { opportunities: [], projects: [], risks: [], kpis: [], costCenters: [], expenses: [] };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -31,8 +32,8 @@ function validId(value: unknown): value is string {
 }
 export function validateOperationsState(value: unknown): value is OperationsState {
   if (!isRecord(value)) return false;
-  const { opportunities, projects, risks, kpis, costCenters = [] } = value;
-  if (![opportunities, projects, risks, kpis, costCenters].every(Array.isArray)) return false;
+  const { opportunities, projects, risks, kpis, costCenters = [], expenses = [] } = value;
+  if (![opportunities, projects, risks, kpis, costCenters, expenses].every(Array.isArray)) return false;
   const ids: string[] = [];
   for (const row of opportunities as unknown[]) {
     if (!isRecord(row) || !validId(row.id) || !validText(row.company, 120) ||
@@ -66,13 +67,17 @@ export function validateOperationsState(value: unknown): value is OperationsStat
     if (!isRecord(row) || !validId(row.id) || !validText(row.name, 100) || !validText(row.owner, 100) || !validMoney(row.budget) || !validMoney(row.actualSpend) || !/^\d{4}-(Q[1-4]|FY)$/.test(String(row.period))) return false;
     ids.push(row.id);
   }
+  for (const row of expenses as unknown[]) {
+    if (!isRecord(row) || !validId(row.id) || !validDate(row.date) || !validText(row.description, 160) || !validText(row.supplier, 120) || !validText(row.category, 80) || !validId(row.costCenterId) || !validMoney(row.amount) || row.amount <= 0 || !["paid", "unpaid"].includes(String(row.status))) return false;
+    ids.push(row.id);
+  }
   return new Set(ids).size === ids.length;
 }
 export function parseOperationsState(raw: string | null): OperationsState | null {
   if (!raw) return null;
   try {
     const value: unknown = JSON.parse(raw);
-    return validateOperationsState(value) ? { ...value, costCenters: (value as OperationsState).costCenters ?? [] } : null;
+    return validateOperationsState(value) ? { ...value, costCenters: (value as OperationsState).costCenters ?? [], expenses: (value as OperationsState).expenses ?? [] } : null;
   } catch {
     return null;
   }
@@ -102,4 +107,14 @@ export function kpiPerformance(kpi: BusinessKpi): { ratio: number; onTarget: boo
 
 export function costCenterPerformance(item: CostCenterBudget): { remaining: number; utilizationPercent: number; overBudget: boolean } {
   return { remaining: Math.round((item.budget - item.actualSpend) * 100) / 100, utilizationPercent: item.budget > 0 ? Math.round((item.actualSpend / item.budget) * 1000) / 10 : item.actualSpend > 0 ? 100 : 0, overBudget: item.actualSpend > item.budget };
+}
+
+export function costCenterActualSpend(item: CostCenterBudget, expenses: ExpenseRecord[]): number {
+  const [year, period] = item.period.split("-");
+  const recorded = expenses.reduce((total, expense) => {
+    if (expense.costCenterId !== item.id || expense.date.slice(0, 4) !== year) return total;
+    const quarter = `Q${Math.floor((Number(expense.date.slice(5, 7)) - 1) / 3) + 1}`;
+    return period === "FY" || period === quarter ? total + expense.amount : total;
+  }, 0);
+  return Math.round((item.actualSpend + recorded) * 100) / 100;
 }

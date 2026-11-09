@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { translate, type Language } from "@/i18n/translations";
-import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, costCenterPerformance, kpiPerformance, projectBudgetVariance, riskScore, weightedPipeline, type BusinessKpi, type CostCenterBudget, type BusinessRisk, type Opportunity, type OpportunityStage, type OperationsState, type Project, type ProjectStatus } from "@/domain/operations";
+import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, costCenterActualSpend, costCenterPerformance, kpiPerformance, projectBudgetVariance, riskScore, weightedPipeline, type BusinessKpi, type CostCenterBudget, type ExpenseRecord, type BusinessRisk, type Opportunity, type OpportunityStage, type OperationsState, type Project, type ProjectStatus } from "@/domain/operations";
 
-type Section = "sales" | "projects" | "risks" | "kpis" | "cost-centers";
+type Section = "sales" | "projects" | "risks" | "kpis" | "cost-centers" | "expenses";
 const makeId = () => typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `ops-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 const today = () => new Date().toISOString().slice(0, 10);
 const money = (value: number, language: Language) => new Intl.NumberFormat(language === "es" ? "es-ES" : "en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(value);
@@ -22,7 +22,8 @@ function downloadCsv(state: OperationsState) {
   state.projects.forEach((x) => rows.push(["Project", x.name, x.owner, x.budget, x.status, `Spent: ${x.spent}; due: ${x.dueDate}`]));
   state.risks.forEach((x) => rows.push(["Risk", x.title, x.owner, riskScore(x), x.status, x.mitigation]));
   state.kpis.forEach((x) => rows.push(["KPI", x.name, x.unit, x.actual, `Target: ${x.target}`, x.direction ?? "higher"]));
-  state.costCenters.forEach((x) => rows.push(["Cost centre", x.name, x.owner, x.budget, `Actual spend: ${x.actualSpend}`, x.period]));
+  state.costCenters.forEach((x) => rows.push(["Cost centre", x.name, x.owner, x.budget, `Manual spend baseline: ${x.actualSpend}`, x.period]));
+  state.expenses.forEach((x) => rows.push(["Expense", x.description, x.supplier, x.amount, x.status, `${x.date}; ${x.category}; cost centre ${x.costCenterId}`]));
   const csv = rows.map((row) => row.map(safe).join(",")).join("\r
 ");
   const url = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }));
@@ -64,6 +65,13 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   const [costCenterSpend, setCostCenterSpend] = useState("0");
   const [costCenterPeriod, setCostCenterPeriod] = useState(`${new Date().getFullYear()}-Q4`);
   const [costCenterPeriodFilter, setCostCenterPeriodFilter] = useState("all");
+  const [expenseDate, setExpenseDate] = useState(today());
+  const [expenseDescription, setExpenseDescription] = useState("");
+  const [expenseSupplier, setExpenseSupplier] = useState("");
+  const [expenseCategory, setExpenseCategory] = useState("Operating");
+  const [expenseCostCenterId, setExpenseCostCenterId] = useState("");
+  const [expenseAmount, setExpenseAmount] = useState("0");
+  const [expenseStatus, setExpenseStatus] = useState<"paid" | "unpaid">("unpaid");
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -157,6 +165,15 @@ export function OperationsWorkspace({ language }: { language: Language }) {
     setCostCenterName(""); setCostCenterOwner(""); setCostCenterBudget("10000"); setCostCenterSpend("0");
   }
 
+  function addExpense(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const amount = Number(expenseAmount);
+    if (!expenseDescription.trim() || !expenseSupplier.trim() || !expenseCategory.trim() || !data.costCenters.some((x) => x.id === expenseCostCenterId) || !Number.isFinite(amount) || amount <= 0 || !/^\\d{4}-\\d{2}-\\d{2}$/.test(expenseDate)) return;
+    const item: ExpenseRecord = { id: makeId(), date: expenseDate, description: expenseDescription.trim(), supplier: expenseSupplier.trim(), category: expenseCategory.trim(), costCenterId: expenseCostCenterId, amount, status: expenseStatus };
+    setData((current) => ({ ...current, expenses: [item, ...current.expenses] }));
+    setExpenseDescription(""); setExpenseSupplier(""); setExpenseAmount("0"); setExpenseStatus("unpaid");
+  }
+
   function remove<K extends keyof OperationsState>(key: K, id: string) {
     setData((current) => ({ ...current, [key]: current[key].filter((item) => item.id !== id) }));
   }
@@ -167,6 +184,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
     { id: "risks", label: "Risk register", count: data.risks.length },
     { id: "kpis", label: "KPI scorecard", count: data.kpis.length },
     { id: "cost-centers", label: "Cost centres", count: data.costCenters.length },
+    { id: "expenses", label: "Expense register", count: data.expenses.length },
   ];
 
   return (
@@ -243,13 +261,30 @@ export function OperationsWorkspace({ language }: { language: Language }) {
           </div>
           <div className="operations-metrics">
             <article className="metric-card"><span className="metric-label">{t("Total allocated")}</span><strong>{money(visibleCostCenters.reduce((sum, x) => sum + x.budget, 0), language)}</strong><small>{t("Across listed cost centres")}</small></article>
-            <article className="metric-card"><span className="metric-label">{t("Actual spend")}</span><strong>{money(visibleCostCenters.reduce((sum, x) => sum + x.actualSpend, 0), language)}</strong><small>{t("Recorded spend")}</small></article>
-            <article className="metric-card"><span className="metric-label">{t("Over-budget centres")}</span><strong>{visibleCostCenters.filter((x) => costCenterPerformance(x).overBudget).length}</strong><small>{t("Spend exceeds allocation")}</small></article>
+            <article className="metric-card"><span className="metric-label">{t("Actual spend")}</span><strong>{money(visibleCostCenters.reduce((sum, x) => sum + costCenterActualSpend(x, data.expenses), 0), language)}</strong><small>{t("Recorded spend")}</small></article>
+            <article className="metric-card"><span className="metric-label">{t("Over-budget centres")}</span><strong>{visibleCostCenters.filter((x) => costCenterPerformance({ ...x, actualSpend: costCenterActualSpend(x, data.expenses) }).overBudget).length}</strong><small>{t("Spend exceeds allocation")}</small></article>
           </div>
           <div className="operations-table-wrap"><table className="operations-table"><thead><tr><th>{t("Cost centre")}</th><th>{t("Owner")}</th><th>{t("Period")}</th><th>{t("Budget (€)")}</th><th>{t("Actual spend (€)")}</th><th>{t("Remaining")}</th><th>{t("Utilisation")}</th><th /></tr></thead><tbody>
-            {visibleCostCenters.map((x) => { const performance = costCenterPerformance(x); return <tr key={x.id}><td><strong>{x.name}</strong></td><td>{x.owner}</td><td>{x.period}</td><td><input aria-label={t("Budget (€)")} type="number" min="0" step="0.01" value={x.budget} onChange={(e) => { const value = Number(e.target.value); if (Number.isFinite(value) && value >= 0) updateCostCenter(x.id, { budget: value }); }} /></td><td><input aria-label={t("Actual spend (€)")} type="number" min="0" step="0.01" value={x.actualSpend} onChange={(e) => { const value = Number(e.target.value); if (Number.isFinite(value) && value >= 0) updateCostCenter(x.id, { actualSpend: value }); }} /></td><td className={performance.overBudget ? "operations-negative" : ""}>{money(performance.remaining, language)}</td><td><span className={performance.overBudget ? "operations-negative" : ""}>{performance.utilizationPercent.toLocaleString(language === "es" ? "es-ES" : "en-IE")}%</span></td><td><button className="operations-delete" onClick={() => remove("costCenters", x.id)} aria-label={t("Delete record")}>×</button></td></tr>; })}
+            {visibleCostCenters.map((x) => { const actualSpend = costCenterActualSpend(x, data.expenses); const performance = costCenterPerformance({ ...x, actualSpend }); return <tr key={x.id}><td><strong>{x.name}</strong></td><td>{x.owner}</td><td>{x.period}</td><td><input aria-label={t("Budget (€)")} type="number" min="0" step="0.01" value={x.budget} onChange={(e) => { const value = Number(e.target.value); if (Number.isFinite(value) && value >= 0) updateCostCenter(x.id, { budget: value }); }} /></td><td><strong>{money(actualSpend, language)}</strong><small className="operations-subline">{t("Includes manual baseline and registered expenses")}</small></td><td className={performance.overBudget ? "operations-negative" : ""}>{money(performance.remaining, language)}</td><td><span className={performance.overBudget ? "operations-negative" : ""}>{performance.utilizationPercent.toLocaleString(language === "es" ? "es-ES" : "en-IE")}%</span></td><td><button className="operations-delete" onClick={() => remove("costCenters", x.id)} aria-label={t("Delete record")}>×</button></td></tr>; })}
           </tbody></table>{visibleCostCenters.length === 0 && <div className="operations-empty">{t("No cost centres in this period. Add a department budget or choose another period.")}</div>}</div>
           <p className="operations-note">{t("Edit budget and actual spend directly in the table. Values are manual and are not imported from banks or accounting systems. Full-year and quarterly budgets are kept separate to avoid double counting.")}</p>
+        </>}
+        {section === "expenses" && <>
+          <div className="operations-section-heading"><div><div className="panel-kicker">{t("SPEND MANAGEMENT")}</div><h2>{t("Expense register")}</h2><p>{t("Record department expenses and automatically roll them into the matching cost-centre budget.")}</p></div></div>
+          {data.costCenters.length > 0 ? <form className="operations-form" onSubmit={addExpense}>
+            <label>{t("Expense date")}<input type="date" required value={expenseDate} onChange={(e) => setExpenseDate(e.target.value)} /></label>
+            <label>{t("Description")}<input required maxLength={160} value={expenseDescription} onChange={(e) => setExpenseDescription(e.target.value)} /></label>
+            <label>{t("Supplier")}<input required maxLength={120} value={expenseSupplier} onChange={(e) => setExpenseSupplier(e.target.value)} /></label>
+            <label>{t("Category")}<input required maxLength={80} value={expenseCategory} onChange={(e) => setExpenseCategory(e.target.value)} /></label>
+            <label>{t("Cost centre")}<select required value={expenseCostCenterId || data.costCenters[0].id} onChange={(e) => setExpenseCostCenterId(e.target.value)}>{data.costCenters.map((x) => <option key={x.id} value={x.id}>{x.name} · {x.period}</option>)}</select></label>
+            <label>{t("Amount (€)")}<input required type="number" min="0.01" step="0.01" value={expenseAmount} onChange={(e) => setExpenseAmount(e.target.value)} /></label>
+            <label>{t("Payment status")}<select value={expenseStatus} onChange={(e) => setExpenseStatus(e.target.value as "paid" | "unpaid")}><option value="unpaid">{t("Unpaid")}</option><option value="paid">{t("Paid")}</option></select></label>
+            <button className="primary-button" type="submit">{t("Add expense")}</button>
+          </form> : <div className="operations-empty">{t("Create a cost centre before recording a department expense.")}</div>}
+          <div className="operations-table-wrap"><table className="operations-table"><thead><tr><th>{t("Date")}</th><th>{t("Description")}</th><th>{t("Supplier")}</th><th>{t("Category")}</th><th>{t("Cost centre")}</th><th>{t("Amount (€)")}</th><th>{t("Payment status")}</th><th /></tr></thead><tbody>
+            {data.expenses.map((x) => <tr key={x.id}><td>{x.date}</td><td><strong>{x.description}</strong></td><td>{x.supplier}</td><td>{x.category}</td><td>{data.costCenters.find((cc) => cc.id === x.costCenterId)?.name ?? t("Deleted cost centre")}</td><td>{money(x.amount, language)}</td><td><select aria-label={t("Payment status")} value={x.status} onChange={(e) => setData((current) => ({ ...current, expenses: current.expenses.map((row) => row.id === x.id ? { ...row, status: e.target.value as ExpenseRecord["status"] } : row) }))}><option value="unpaid">{t("Unpaid")}</option><option value="paid">{t("Paid")}</option></select></td><td><button className="operations-delete" onClick={() => remove("expenses", x.id)} aria-label={t("Delete record")}>×</button></td></tr>)}
+          </tbody></table>{data.expenses.length === 0 && <div className="operations-empty">{t("No expenses yet. Add an expense to update the cost-centre actuals.")}</div>}</div>
+          <p className="operations-note">{t("Expenses are assigned to a cost centre and included in its actual spend when the date falls within the budget period. The payment status is a tracking field only; it does not change cash forecasts or mark invoices as paid.")}</p>
         </>}
         {section === "kpis" && <>
           <div className="operations-section-heading"><div><div className="panel-kicker">{t("PERFORMANCE MANAGEMENT")}</div><h2>{t("KPI scorecard")}</h2><p>{t("Compare actual results with targets. Define the unit and direction before interpreting performance.")}</p></div></div>
