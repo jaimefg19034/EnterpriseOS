@@ -560,3 +560,43 @@ button:focus-visible, input:focus-visible {
   .planning-profit-table { grid-template-columns: 1fr; }
   .planning-profit-table > div { min-height: 30px; }
 }
+
+
+/* Compact language selector */
+.language-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid #e6eaf2;
+  border-radius: 8px;
+  background: #f7f8fb;
+}
+.language-switch button {
+  min-width: 29px;
+  height: 25px;
+  padding: 0 7px;
+  color: #8994a6;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  font: 750 9px "Manrope", sans-serif;
+  letter-spacing: .35px;
+  cursor: pointer;
+  transition: background .16s ease, color .16s ease, box-shadow .16s ease;
+}
+.language-switch button:hover { color: #405fc1; background: #eef1fb; }
+.language-switch button.selected {
+  color: #405fc1;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(29,45,75,.12);
+}
+.language-switch button:focus-visible {
+  outline: 2px solid #8095e5;
+  outline-offset: 2px;
+}
+@media (max-width: 720px) {
+  .topbar-actions { gap: 7px; }
+  .language-switch { gap: 1px; padding: 2px; }
+  .language-switch button { min-width: 26px; height: 23px; padding: 0 5px; }
+}
