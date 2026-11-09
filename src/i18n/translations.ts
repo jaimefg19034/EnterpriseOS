@@ -818,6 +818,14 @@ const spanish: Record<string, string> = {
   "Note (optional)": "Nota (opcional)",
   "Register payment": "Registrar pago",
   "Historical paid balances entered before payment tracking have no individual dates and are not included in this movement list.": "Los importes pagados históricos introducidos antes del seguimiento de pagos no tienen fechas individuales y no aparecen en esta lista de movimientos.",
+  "Payment movements": "Movimientos de pago",
+  "Movement date": "Fecha del movimiento",
+  "Movement type": "Tipo de movimiento",
+  "Payment": "Pago",
+  "Payment note": "Nota del pago",
+  "Historical paid balance (undated)": "Saldo pagado histórico (sin fecha)",
+  "Legacy paid balance without transaction date": "Saldo pagado anterior sin fecha de movimiento",
+  "Invoice payment movements · User-entered records": "Movimientos de pago de facturas · Datos introducidos por el usuario",
 };
 
 
