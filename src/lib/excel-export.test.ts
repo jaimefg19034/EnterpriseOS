@@ -69,6 +69,25 @@ describe("Excel workbook export", () => {
     expect(sheet?.getCell("C6").numFmt).toContain("€");
   });
 
+  it("writes date-only values as sortable Excel date cells", async () => {
+    const workbook = await buildExcelWorkbook({
+      filename: "dates.xlsx",
+      sheets: [{
+        name: "Schedule", title: "Schedule", subtitle: "Week start",
+        headers: ["Week starting", "Amount"], dateColumns: [1], currencyColumns: [2],
+        rows: [[new Date(Date.UTC(2026, 10, 9)), 250]],
+      }],
+    });
+    const sheet = workbook.getWorksheet("Schedule");
+    expect(sheet?.getCell("A5").value).toBeInstanceOf(Date);
+    expect((sheet?.getCell("A5").value as Date).toISOString()).toBe("2026-11-09T00:00:00.000Z");
+    expect(sheet?.getCell("A5").numFmt).toBe("dd-mmm-yyyy");
+    const buffer = await workbook.xlsx.writeBuffer();
+    const reopened = new ExcelJS.Workbook();
+    await reopened.xlsx.load(buffer);
+    expect((reopened.getWorksheet("Schedule")?.getCell("A5").value as Date).toISOString()).toBe("2026-11-09T00:00:00.000Z");
+  });
+
   it("serializes to a valid XLSX buffer that can be read back", async () => {
     const workbook = await buildExcelWorkbook({
       filename: "round-trip.xlsx",
