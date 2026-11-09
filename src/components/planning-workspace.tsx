@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import {
   buildPlanningResult,
   makeDemoActualRevenue,
-  MONTHS,
   SCENARIOS,
   type ActualRevenueByMonth,
   type MonthName,
@@ -484,7 +483,7 @@ export function PlanningWorkspace() {
         <div className="planning-profit-heading">
           <div className="panel-kicker">FULL-YEAR PROFITABILITY MODEL</div>
           <h2>Projected income statement</h2>
-          <p>Annual projection based on actual revenue entered to date and the selected scenario's cost assumptions.</p>
+          <p>Annual projection based on actual revenue entered to date and the selected scenario&apos;s cost assumptions.</p>
         </div>
         <div className="planning-profit-table">
           <div><span>Projected revenue</span><strong>{formatCurrency(result.projectedRevenue)}</strong></div>
