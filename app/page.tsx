@@ -298,6 +298,7 @@ function MetricCard({
 
 export default function Home() {
   const [view, setView] = useState<View>("overview");
+  const [showWorkspaceInfo, setShowWorkspaceInfo] = useState(false);
   const language = useSyncExternalStore(
     subscribeToLanguage,
     getLanguageSnapshot,
@@ -446,7 +447,7 @@ export default function Home() {
             </div>
             <span className="period-pill"><Icon name="clock" size={14} /> {t("FY 2026")}</span>
             <span className="topbar-divider" />
-            <button className="icon-button" aria-label={t("Workspace information")} title={t("Demo workspace")}>
+            <button type="button" className="icon-button" aria-label={t("Workspace information")} title={t("Demo workspace")} onClick={() => setShowWorkspaceInfo(true)}>
               <Icon name="info" size={17} />
             </button>
             <button className="export-button" onClick={exportExcel}>
@@ -455,6 +456,27 @@ export default function Home() {
             <div className="topbar-avatar">{t("FT")}</div>
           </div>
         </header>
+
+        {showWorkspaceInfo && (
+          <div className="workspace-info-backdrop">
+            <section className="workspace-info-dialog" role="dialog" aria-modal="true" aria-labelledby="workspace-info-title">
+              <div className="workspace-info-topline">
+                <span className="workspace-info-icon"><Icon name="building" size={19} /></span>
+                <button type="button" className="workspace-info-close" onClick={() => setShowWorkspaceInfo(false)} aria-label={t("Close")}>×</button>
+              </div>
+              <div className="panel-kicker">{t("WORKSPACE INFORMATION")}</div>
+              <h2 id="workspace-info-title">{t("Aster & Co.")}</h2>
+              <p>{t("Demo workspace")}</p>
+              <div className="workspace-info-details">
+                <div><span>{t("Reporting period")}</span><strong>{t("FY 2026")}</strong></div>
+                <div><span>{t("Currency")}</span><strong>EUR (€)</strong></div>
+                <div><span>{t("Data status")}</span><strong>{t("Illustrative sample data")}</strong></div>
+              </div>
+              <p className="workspace-info-note">{t("This is a local demonstration workspace. Changes are not saved to a company database yet.")}</p>
+              <button type="button" className="primary-button workspace-info-confirm" onClick={() => setShowWorkspaceInfo(false)}>{t("Got it")}</button>
+            </section>
+          </div>
+        )}
 
         <div className="content-area">
           {view === "overview" && (
