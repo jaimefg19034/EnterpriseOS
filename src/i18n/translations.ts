@@ -855,6 +855,18 @@ const spanish: Record<string, string> = {
   "EnterpriseOS — Quarterly cash forecast": "EnterpriseOS — Previsión trimestral de caja",
   "EnterpriseOS — Downside cash scenario": "EnterpriseOS — Escenario adverso de caja",
 
+  "Direct-method forecast · EUR · Manual estimates plus separately identified invoice schedule": "Previsión por método directo · EUR · Estimaciones manuales y calendario de facturas identificado por separado",
+  "EnterpriseOS — Invoice cash schedule": "EnterpriseOS — Calendario de caja de facturas",
+  "Open invoice balances by due date · Preview only unless enabled in the cash forecast": "Saldos de facturas abiertas por vencimiento · Solo vista previa hasta activarlo en la previsión de caja",
+  "EnterpriseOS — Budget & Scenarios": "EnterpriseOS — Presupuestos y escenarios",
+  "EnterpriseOS — Full-year Summary": "EnterpriseOS — Resumen anual",
+  "EnterpriseOS — Planning Assumptions": "EnterpriseOS — Supuestos de planificación",
+  "EnterpriseOS — Income Statement": "EnterpriseOS — Cuenta de resultados",
+  "EnterpriseOS — Balance Sheet": "EnterpriseOS — Balance de situación",
+  "EnterpriseOS — Cash Flow Statement": "EnterpriseOS — Estado de flujos de efectivo",
+  "EnterpriseOS — Model Drivers": "EnterpriseOS — Parámetros del modelo",
+  "FY 2026 · Illustrative management indicators · Compare with sector peers and prior periods": "Ejercicio 2026 · Indicadores de gestión ilustrativos · Comparar con el sector y periodos anteriores",
+
 };
 
 
