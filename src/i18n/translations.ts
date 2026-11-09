@@ -203,7 +203,7 @@ const spanish: Record<string, string> = {
   "Important": "Importante",
   "Profitability is modelled using annual cost assumptions. Historical COGS and operating expenses are not actuals.": "La rentabilidad se calcula usando hipótesis de costes anuales. Los costes de ventas y gastos operativos históricos no son datos reales.",
   "Seasonality": "Estacionalidad",
-  "Illustrative monthly weights; replace with company-specific seasonality before relying on the plan.": "Pesos mensuales ilustrativos; sustitúyelos por la estacionalidad específica de la empresa antes de utilizar el plan como referencia."
+  "Illustrative monthly weights; replace with company-specific seasonality before relying on the plan.": "Pesos mensuales ilustrativos; sustitúyelos por la estacionalidad específica de la empresa antes de utilizar el plan como referencia.",
 
   "Reset demo": "Restablecer demo",
   "Export plan": "Exportar plan",
