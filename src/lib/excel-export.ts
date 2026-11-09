@@ -10,6 +10,7 @@ export type ExcelSheetInput = {
   rows: ExcelValue[][];
   widths?: number[];
   currencyColumns?: number[];
+  currencyLabels?: string[];
   percentColumns?: number[];
   percentLabels?: string[];
   totalLabels?: string[];
@@ -100,7 +101,7 @@ export async function downloadExcelWorkbook(input: ExcelWorkbookInput): Promise<
           const rowLabel = String(values[0] ?? "");
           if (definition.percentLabels?.includes(rowLabel) || definition.percentColumns?.includes(columnIndex + 1)) {
             cell.numFmt = '0.0%;[Red](0.0%);–';
-          } else if (definition.currencyColumns?.includes(columnIndex + 1)) {
+          } else if ((definition.currencyColumns?.includes(columnIndex + 1) || definition.currencyLabels?.includes(rowLabel))) {
             cell.numFmt = '€#,##0.00;[Red](€#,##0.00);–';
           } else {
             cell.numFmt = '#,##0.00;[Red](#,##0.00);–';
