@@ -377,14 +377,14 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="workspace-switcher">
+        <button type="button" className="workspace-switcher" onClick={() => setShowWorkspaceInfo(true)} aria-label={t("Open workspace information")}>
           <div className="workspace-avatar">{t("AC")}</div>
           <div className="workspace-copy">
             <strong>{t("Aster & Co.")}</strong>
             <span>{t("Demo workspace")}</span>
           </div>
           <span className="switch-chevron">⌄</span>
-        </div>
+        </button>
 
         <div className="nav-label">{t("WORKSPACE")}</div>
         <nav className="primary-nav" aria-label={t("Main navigation")}>
@@ -416,14 +416,14 @@ export default function Home() {
         </div>
 
         <div className="sidebar-spacer" />
-        <div className="sidebar-help">
+        <button type="button" className="sidebar-help" onClick={() => setView("model")}>
           <div className="help-symbol"><Icon name="info" size={17} /></div>
           <div>
             <strong>{t("Need a hand?")}</strong>
             <span>{t("Explore the model guide")}</span>
           </div>
           <Icon name="arrow" size={15} />
-        </div>
+        </button>
         <div className="sidebar-user">
           <div className="user-avatar">{t("FT")}</div>
           <div className="user-copy">
