@@ -540,6 +540,12 @@ const spanish: Record<string, string> = {
   "Delete invoice": "Eliminar factura",
   "Records are stored only in this browser. They are not connected to accounting software or the quarterly cash forecast, and are not shared with other users.": "Los registros se guardan únicamente en este navegador. No están conectados a un programa contable ni a la previsión trimestral de caja, y no se comparten con otros usuarios.",
   "Open invoice register · EUR · User-entered records": "Registro de facturas abiertas · EUR · Datos introducidos por el usuario",
+  "notDue": "No vencido",
+  "1to30": "1–30 días",
+  "31to60": "31–60 días",
+  "61to90": "61–90 días",
+  "over90": "Más de 90 días",
+  "Review the three statements, liquidity, leverage, break-even, returns and the quarterly cash forecast.": "Revisa los tres estados financieros, ratios, capital circulante, facturas de clientes y proveedores y la previsión trimestral de caja.",
 };
 
 export function translate(value: string, language: Language): string {
