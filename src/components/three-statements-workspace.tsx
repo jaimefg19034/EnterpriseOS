@@ -279,7 +279,8 @@ export function ThreeStatementsWorkspace({
       [],
       ["Note", "Illustrative management model, not statutory accounts or financial advice."],
     ];
-    const csv = rows
+    const localizedRows = rows.map((row) => row.map((cell) => typeof cell === "string" ? t(cell) : cell));
+    const csv = localizedRows
       .map((row) =>
         row
           .map((cell) => {
