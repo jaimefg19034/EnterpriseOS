@@ -78,6 +78,15 @@ describe("operations workspace domain", () => {
     const center = { ...state.costCenters[0], period: "2024-FY" };
     expect(costCenterRunRate(center, state.expenses, "2024-02-30").projectedSpend).toBeNull();
   });
+  it("rejects cost-centre periods with invalid quarters or unsupported years", () => {
+    for (const period of ["2026-Q5", "0000-FY", "9999-FY", "2026-q1", "2026-13"]) {
+      const invalid = {
+        ...state,
+        costCenters: [{ ...state.costCenters[0], period }],
+      };
+      expect(parseOperationsState(JSON.stringify(invalid))).toBeNull();
+    }
+  });
   it("rejects expenses linked to a missing cost centre", () => {
     const invalid = { ...state, expenses: [{ ...state.expenses[0], costCenterId: "missing" }] };
     expect(parseOperationsState(JSON.stringify(invalid))).toBeNull();
