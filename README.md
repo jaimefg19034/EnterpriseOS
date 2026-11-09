@@ -20,6 +20,10 @@ The first release focuses on a dependable management P&L model and a lightweight
 - Compare monthly revenue actuals against a seasonal budget.
 - Model base, upside and downside scenarios for the remaining forecast months.
 - Review a full-year modelled EBITDA and net income projection.
+- Link the management P&L to a cash flow statement and a balance sheet.
+- Model working-capital days (DSO, DIO and DPO), capital expenditure, debt movements and dividends.
+- Reconcile opening and closing balance sheets and flag negative cash as an overdraft.
+- Switch the workspace between English and Spanish; export financial statements in the selected language.
 
 ### Explicitly out of scope for the first release
 
@@ -66,8 +70,12 @@ src/
   domain/
     financials.ts
     planning.ts
+    three-statements.ts
   components/
     planning-workspace.tsx
+    three-statements-workspace.tsx
+  i18n/
+    translations.ts
 docs/
   architecture.md
 ```
@@ -84,6 +92,20 @@ All values are entered as currency amounts for the selected reporting period. Ra
 - Net income = Profit before tax − Income tax
 
 This is a management model, not statutory accounting or tax advice. Actual accounting treatment varies by jurisdiction and company.
+
+### Integrated three-statement model
+
+The three-statement workspace connects the existing P&L to an indirect cash flow and closing balance sheet:
+
+- Cash from operations = net income + D&A − change in receivables − change in inventory + change in payables.
+- Cash from investing = − capital expenditure.
+- Cash from financing = new borrowings − debt repayments − dividends.
+- Closing cash = opening cash + net change in cash. A negative amount is classified as a bank overdraft liability.
+- Closing receivables, inventory and payables are estimated using DSO, DIO and DPO respectively.
+- Closing PP&E = opening net PP&E + capital expenditure − D&A.
+- Retained earnings = opening retained earnings + net income − dividends.
+
+The opening balance sheet is an illustrative, balanced demonstration baseline. Working-capital and financing assumptions are editable; it is not yet a full accounting ledger. Lease accounting, disposals, FX, deferred tax, acquisitions, minority interests, statutory adjustments and historical monthly movements are outside scope. The interface shows a balance check and exports opening/closing balances alongside the cash flow.
 
 ## Security posture
 
