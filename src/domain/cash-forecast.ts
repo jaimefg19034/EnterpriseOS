@@ -42,3 +42,39 @@ export function createEmptyCashForecast(weekCount = 13): CashForecastWeekInput[]
     debtService: 0,
   }));
 }
+
+
+export type CashStressResult = {
+  weeks: CashForecastWeekResult[];
+  finalCash: number;
+  lowestCash: number;
+  firstNegativeWeek: number;
+};
+
+/**
+ * Applies a simple downside sensitivity to the entered forecast.
+ * Collection delays reduce forecast collections; payment pressure increases
+ * operating payments. CapEx and debt service are left unchanged.
+ */
+export function calculateCashStressScenario(
+  openingCash: number,
+  weeks: CashForecastWeekInput[],
+  collectionReductionPercent: number,
+  operatingPaymentIncreasePercent: number,
+): CashStressResult {
+  const collectionReduction = Math.min(100, Math.max(0, Number.isFinite(collectionReductionPercent) ? collectionReductionPercent : 0)) / 100;
+  const paymentIncrease = Math.min(500, Math.max(0, Number.isFinite(operatingPaymentIncreasePercent) ? operatingPaymentIncreasePercent : 0)) / 100;
+  const stressedInputs = weeks.map((week) => ({
+    collections: Math.max(0, Number.isFinite(week.collections) ? week.collections : 0) * (1 - collectionReduction),
+    operatingPayments: Math.max(0, Number.isFinite(week.operatingPayments) ? week.operatingPayments : 0) * (1 + paymentIncrease),
+    capitalExpenditure: week.capitalExpenditure,
+    debtService: week.debtService,
+  }));
+  const results = calculateCashForecast(openingCash, stressedInputs);
+  return {
+    weeks: results,
+    finalCash: results.at(-1)?.closingCash ?? openingCash,
+    lowestCash: Math.min(openingCash, ...results.map((week) => week.closingCash)),
+    firstNegativeWeek: results.findIndex((week) => week.closingCash < 0),
+  };
+}
