@@ -266,6 +266,14 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
           week.receivableCollections, week.payablePayments, week.overdueReceivables,
           week.overduePayables, week.receivableCount, week.payableCount,
         ]),
+      }, {
+        name: t("Downside scenario"),
+        title: t("EnterpriseOS — Downside cash scenario"),
+        subtitle: `${t("Collection reduction")}: ${collectionReduction}% · ${t("Operating payment increase")}: ${paymentIncrease}%`,
+        headers: [t("Week"), t("Base closing cash"), t("Downside closing cash"), t("Downside net movement")],
+        widths: [14, 24, 24, 24],
+        currencyColumns: [2, 3, 4],
+        rows: stress.weeks.map((week, index) => [index + 1, results[index].closingCash, week.closingCash, week.netCashMovement]),
       }],
     });
   }
