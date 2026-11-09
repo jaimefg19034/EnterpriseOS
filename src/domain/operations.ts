@@ -25,6 +25,11 @@ function validMoney(value: unknown): value is number {
 function validDate(value: unknown): value is string {
   return isValidISODate(value);
 }
+function validReportingPeriod(value: unknown): value is string {
+  if (typeof value !== "string" || !/^\d{4}-(Q[1-4]|FY)$/.test(value)) return false;
+  const [yearText, period] = value.split("-");
+  return getReportingPeriodBounds(Number(yearText), period as "FY" | "Q1" | "Q2" | "Q3" | "Q4") !== null;
+}
 function validId(value: unknown): value is string {
   return typeof value === "string" && value.length > 0 && value.length <= 100;
 }
@@ -62,7 +67,7 @@ export function validateOperationsState(value: unknown): value is OperationsStat
     ids.push(row.id);
   }
   for (const row of costCenters as unknown[]) {
-    if (!isRecord(row) || !validId(row.id) || !validText(row.name, 100) || !validText(row.owner, 100) || !validMoney(row.budget) || !validMoney(row.actualSpend) || !/^\d{4}-(Q[1-4]|FY)$/.test(String(row.period))) return false;
+    if (!isRecord(row) || !validId(row.id) || !validText(row.name, 100) || !validText(row.owner, 100) || !validMoney(row.budget) || !validMoney(row.actualSpend) || !validReportingPeriod(row.period)) return false;
     ids.push(row.id);
   }
   const costCenterIds = new Set((costCenters as unknown[]).filter(isRecord).map((row) => row.id));
