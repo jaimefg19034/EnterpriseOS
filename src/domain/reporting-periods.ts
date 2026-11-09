@@ -88,7 +88,7 @@ export function inclusiveDaysBetween(start: string, end: string): number {
 
 /** Validates a YYYY-Qn or YYYY-FY period code. */
 export function isValidReportingPeriodCode(periodCode: string, fiscalYearStartMonth = 1): boolean {
-  const match = /^(\\d{4})-(FY|Q[1-4])$/.exec(periodCode);
+  const match = /^(\d{4})-(FY|Q[1-4])$/.exec(periodCode);
   return match !== null && getReportingPeriodBounds(
     Number(match[1]),
     match[2] as ReportingPeriodCode,
