@@ -11,7 +11,7 @@ const state: OperationsState = {
   costCenters: [{ id: "c1", name: "Marketing", owner: "Taylor", budget: 10000, actualSpend: 1000, period: "2026-Q4" }],
   expenses: [
     { id: "e1", date: "2026-10-15", description: "Campaign", supplier: "Media Co", category: "Marketing", costCenterId: "c1", amount: 10200, status: "unpaid" },
-    { id: "e2", date: "2026-07-15", description: "Summer ads", supplier: "Ads Co", category: "Marketing", costCenterId: "c1", amount: 300, status: "paid" },
+    { id: "e2", date: "2026-10-20", description: "Autumn ads", supplier: "Ads Co", category: "Marketing", costCenterId: "c1", amount: 300, status: "paid" },
   ],
 };
 describe("operations workspace domain", () => {
@@ -37,15 +37,28 @@ describe("operations workspace domain", () => {
     expect(kpiPerformance({ ...state.kpis[0], actual: 0, target: 0, direction: "lower" }).onTarget).toBe(true);
   });
   it("calculates cost-centre headroom, utilisation and overspend", () => {
-    expect(costCenterActualSpend(state.costCenters[0], state.expenses)).toBe(11200);
+    expect(costCenterActualSpend(state.costCenters[0], state.expenses)).toBe(11500);
     expect(costCenterActualSpend({ ...state.costCenters[0], period: "2026-FY" }, state.expenses)).toBe(11500);
     expect(costCenterPerformance({ ...state.costCenters[0], actualSpend: costCenterActualSpend(state.costCenters[0], state.expenses) })).toEqual({ remaining: -1200, utilizationPercent: 112, overBudget: true });
     expect(costCenterPerformance({ ...state.costCenters[0], budget: 0, actualSpend: 0 })).toMatchObject({ utilizationPercent: 0, overBudget: false });
   });
+  it("adds the unitemized baseline once to dated expenses and ignores payment status", () => {
+    const center = { ...state.costCenters[0], actualSpend: 125 };
+    const records = [
+      { ...state.expenses[0], amount: 100, status: "unpaid" as const },
+      { ...state.expenses[0], id: "paid-2", amount: 50, status: "paid" as const },
+      { ...state.expenses[0], id: "other-center", costCenterId: "other", amount: 900 },
+    ];
+    expect(costCenterActualSpend(center, records)).toBe(275);
+    expect(costCenterActualSpend({ ...center, actualSpend: 0 }, records)).toBe(150);
+  });
+
   it("projects current-period spend using dated expenses only", () => {
     const center = state.costCenters[0];
     const projection = costCenterRunRate(center, state.expenses, "2026-11-15");
-    expect(projection.recordedSpend).toBe(10200);
+    expect(projection.manualBaseline).toBe(1000);
+    expect(projection.recordedSpend).toBe(10500);
+    expect(projection.projectedSpend).toBeGreaterThan(21500);
     expect(projection.elapsedPercent).toBeGreaterThan(0);
     expect(projection.projectedSpend).toBeGreaterThan(10200);
     expect(projection.projectedOverBudget).toBe(true);
@@ -64,14 +77,16 @@ describe("operations workspace domain", () => {
     ];
     expect(costCenterActualSpend(leapCenter, leapExpenses)).toBe(1290);
     const leapRunRate = costCenterRunRate(leapCenter, leapExpenses, "2024-03-31");
+    expect(leapRunRate.manualBaseline).toBe(1000);
     expect(leapRunRate.recordedSpend).toBe(290);
     expect(leapRunRate.elapsedPercent).toBe(100);
-    expect(leapRunRate.projectedSpend).toBe(290);
+    expect(leapRunRate.projectedSpend).toBe(1290);
 
     const yearCenter = { ...leapCenter, period: "2024-FY" };
     const yearRunRate = costCenterRunRate(yearCenter, leapExpenses, "2024-12-31");
     expect(yearRunRate.elapsedPercent).toBe(100);
     expect(yearRunRate.recordedSpend).toBe(690);
+    expect(yearRunRate.projectedSpend).toBe(1690);
   });
 
   it("does not project from an impossible as-of date", () => {
@@ -86,6 +101,10 @@ describe("operations workspace domain", () => {
       };
       expect(parseOperationsState(JSON.stringify(invalid))).toBeNull();
     }
+  });
+  it("rejects expenses dated outside their linked cost-centre period", () => {
+    const invalid = { ...state, expenses: [{ ...state.expenses[0], date: "2026-07-15" }] };
+    expect(parseOperationsState(JSON.stringify(invalid))).toBeNull();
   });
   it("rejects expenses linked to a missing cost centre", () => {
     const invalid = { ...state, expenses: [{ ...state.expenses[0], costCenterId: "missing" }] };
