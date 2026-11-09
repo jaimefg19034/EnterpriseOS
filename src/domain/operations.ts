@@ -1,3 +1,4 @@
+import { getReportingPeriodBounds, inclusiveDaysBetween, isDateWithinReportingPeriod, isValidISODate, parseISODateUTC } from "./reporting-periods";
 export type OpportunityStage = "lead" | "qualified" | "proposal" | "won" | "lost";
 export type Opportunity = { id: string; company: string; contact: string; value: number; stage: OpportunityStage; expectedClose: string };
 export type ProjectStatus = "planned" | "active" | "onHold" | "completed";
@@ -22,10 +23,7 @@ function validMoney(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1_000_000_000_000;
 }
 function validDate(value: unknown): value is string {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const [y, m, d] = value.split("-").map(Number);
-  const date = new Date(Date.UTC(y, m - 1, d));
-  return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
+  return isValidISODate(value);
 }
 function validId(value: unknown): value is string {
   return typeof value === "string" && value.length > 0 && value.length <= 100;
@@ -111,11 +109,12 @@ export function costCenterPerformance(item: CostCenterBudget): { remaining: numb
 }
 
 export function costCenterActualSpend(item: CostCenterBudget, expenses: ExpenseRecord[]): number {
-  const [year, period] = item.period.split("-");
+  const [yearText, period] = item.period.split("-");
+  const bounds = getReportingPeriodBounds(Number(yearText), period as "FY" | "Q1" | "Q2" | "Q3" | "Q4");
+  if (!bounds) return Math.round(item.actualSpend * 100) / 100;
   const recorded = expenses.reduce((total, expense) => {
-    if (expense.costCenterId !== item.id || expense.date.slice(0, 4) !== year) return total;
-    const quarter = `Q${Math.floor((Number(expense.date.slice(5, 7)) - 1) / 3) + 1}`;
-    return period === "FY" || period === quarter ? total + expense.amount : total;
+    if (expense.costCenterId !== item.id || !isDateWithinReportingPeriod(expense.date, bounds)) return total;
+    return total + expense.amount;
   }, 0);
   return Math.round((item.actualSpend + recorded) * 100) / 100;
 }
@@ -138,31 +137,23 @@ export function costCenterRunRate(
   expenses: ExpenseRecord[],
   asOfDate: string,
 ): CostCenterRunRate {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(asOfDate)) {
-    return { recordedSpend: 0, projectedSpend: null, elapsedPercent: 0, projectedOverBudget: false };
-  }
+  const empty: CostCenterRunRate = { recordedSpend: 0, projectedSpend: null, elapsedPercent: 0, projectedOverBudget: false };
+  if (!isValidISODate(asOfDate)) return empty;
+
   const [yearText, period] = center.period.split("-");
-  const year = Number(yearText);
-  const quarter = period === "FY" ? 0 : Number(period.slice(1));
-  const startMonth = quarter === 0 ? 1 : (quarter - 1) * 3 + 1;
-  const endMonth = quarter === 0 ? 12 : startMonth + 2;
-  const start = new Date(Date.UTC(year, startMonth - 1, 1));
-  const end = new Date(Date.UTC(year, endMonth, 0));
-  const asOf = new Date(`${asOfDate}T00:00:00.000Z`);
-  if (asOf < start || asOf > end || Number.isNaN(asOf.getTime())) {
-    return { recordedSpend: 0, projectedSpend: null, elapsedPercent: 0, projectedOverBudget: false };
-  }
+  const bounds = getReportingPeriodBounds(Number(yearText), period as "FY" | "Q1" | "Q2" | "Q3" | "Q4");
+  if (!bounds || !isDateWithinReportingPeriod(asOfDate, bounds)) return empty;
+
   const recordedSpend = Math.round(expenses.reduce((total, expense) => {
-    if (expense.costCenterId !== center.id || expense.date.slice(0, 4) !== yearText) return total;
-    const date = new Date(`${expense.date}T00:00:00.000Z`);
-    return date >= start && date <= asOf ? total + expense.amount : total;
+    if (expense.costCenterId !== center.id || !isDateWithinReportingPeriod(expense.date, { ...bounds, end: asOfDate })) return total;
+    return total + expense.amount;
   }, 0) * 100) / 100;
-  const totalDays = Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1;
-  const elapsedDays = Math.round((asOf.getTime() - start.getTime()) / 86_400_000) + 1;
-  const elapsedPercent = Math.round((elapsedDays / totalDays) * 1000) / 10;
+  const elapsedDays = inclusiveDaysBetween(bounds.start, asOfDate);
+  const elapsedPercent = Math.round((elapsedDays / bounds.totalDays) * 1000) / 10;
   const projectedSpend = recordedSpend > 0
-    ? Math.round((recordedSpend / (elapsedDays / totalDays) + Number.EPSILON) * 100) / 100
+    ? Math.round((recordedSpend / (elapsedDays / bounds.totalDays) + Number.EPSILON) * 100) / 100
     : null;
+
   return {
     recordedSpend,
     projectedSpend,
