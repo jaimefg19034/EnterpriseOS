@@ -9,6 +9,7 @@ import {
 } from "@/domain/three-statements";
 import { type FinancialResults } from "@/domain/financials";
 import { translate, type Language } from "@/i18n/translations";
+import { calculateFinancialRatios } from "@/domain/financial-analysis";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
 
 type StatementTab = "income" | "balance" | "cash";
@@ -193,6 +194,10 @@ export function ThreeStatementsWorkspace({
     () => calculateThreeStatements(financials, assumptions),
     [financials, assumptions],
   );
+  const ratioGroups = useMemo(
+    () => calculateFinancialRatios(financials, model),
+    [financials, model],
+  );
 
   function updateAssumption(key: keyof ThreeStatementAssumptions, raw: string) {
     const value = raw === "" ? 0 : Number(raw);
@@ -375,6 +380,37 @@ export function ThreeStatementsWorkspace({
         <StatCard label={t("Current ratio")} value={ratio(bs.currentRatio, language)} detail={t("Current assets divided by current liabilities")} tone="green" />
       </div>
 
+      <section className="financial-ratios-section" aria-labelledby="financial-ratios-title">
+        <div className="financial-ratios-heading">
+          <div>
+            <span className="panel-kicker">{t("MANAGEMENT ANALYSIS")}</span>
+            <h2 id="financial-ratios-title">{t("Financial health & key ratios")}</h2>
+            <p>{t("Turn the three statements into practical indicators of liquidity, debt, operating efficiency and returns.")}</p>
+          </div>
+          <span className="financial-ratios-period">{t("FY 2026 · Illustrative")}</span>
+        </div>
+        <div className="financial-ratios-groups">
+          {ratioGroups.map((group) => (
+            <section className="panel financial-ratio-group" key={group.key}>
+              <div className="financial-ratio-group-head"><h3>{t(group.key)}</h3><span>{t("KEY METRICS")}</span></div>
+              <div className="financial-ratio-list">
+                {group.ratios.map((item) => {
+                  const formatted = item.value === null
+                    ? t("Not available")
+                    : new Intl.NumberFormat(language === "es" ? "es-ES" : "en-GB", { minimumFractionDigits: item.unit === "days" ? 0 : 2, maximumFractionDigits: item.unit === "days" ? 1 : 2 }).format(item.value) + (item.unit === "percent" ? "%" : item.unit === "days" ? " " + t("days") : "x");
+                  return (
+                    <article className="financial-ratio-item" key={item.key}>
+                      <div className="financial-ratio-copy"><strong>{t(item.key)}</strong><small>{t(item.description)}</small></div>
+                      <span className={item.value === null ? "financial-ratio-value unavailable" : "financial-ratio-value"}>{formatted}</span>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
+        </div>
+        <p className="financial-ratios-note">{t("Ratios are calculated from illustrative FY 2026 model figures and closing balances. They are analytical indicators, not universal pass/fail thresholds; compare them with prior periods, budget and companies in the same sector.")}</p>
+      </section>
       <div className="three-statements-workspace-grid">
         <section className="panel three-statements-drivers">
           <div className="panel-header">
