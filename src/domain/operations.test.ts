@@ -55,6 +55,29 @@ describe("operations workspace domain", () => {
     expect(costCenterRunRate(center, state.expenses, "2026-09-30").projectedSpend).toBeNull();
     expect(costCenterRunRate(center, [], "2026-11-15").projectedSpend).toBeNull();
   });
+
+  it("handles leap-day expenses and inclusive quarter/year run-rate bounds", () => {
+    const leapCenter = { ...state.costCenters[0], period: "2024-Q1", budget: 1000 };
+    const leapExpenses = [
+      { ...state.expenses[0], id: "leap-1", date: "2024-02-29", amount: 290 },
+      { ...state.expenses[0], id: "leap-2", date: "2024-04-01", amount: 400 },
+    ];
+    expect(costCenterActualSpend(leapCenter, leapExpenses)).toBe(1290);
+    const leapRunRate = costCenterRunRate(leapCenter, leapExpenses, "2024-03-31");
+    expect(leapRunRate.recordedSpend).toBe(290);
+    expect(leapRunRate.elapsedPercent).toBe(100);
+    expect(leapRunRate.projectedSpend).toBe(290);
+
+    const yearCenter = { ...leapCenter, period: "2024-FY" };
+    const yearRunRate = costCenterRunRate(yearCenter, leapExpenses, "2024-12-31");
+    expect(yearRunRate.elapsedPercent).toBe(100);
+    expect(yearRunRate.recordedSpend).toBe(690);
+  });
+
+  it("does not project from an impossible as-of date", () => {
+    const center = { ...state.costCenters[0], period: "2024-FY" };
+    expect(costCenterRunRate(center, state.expenses, "2024-02-30").projectedSpend).toBeNull();
+  });
   it("rejects expenses linked to a missing cost centre", () => {
     const invalid = { ...state, expenses: [{ ...state.expenses[0], costCenterId: "missing" }] };
     expect(parseOperationsState(JSON.stringify(invalid))).toBeNull();
