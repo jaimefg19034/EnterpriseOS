@@ -182,7 +182,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   function addCostCenter(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const budget = Number(costCenterBudget); const actualSpend = Number(costCenterSpend);
-    if (!costCenterName.trim() || !costCenterOwner.trim() || !Number.isFinite(budget) || !Number.isFinite(actualSpend) || budget < 0 || actualSpend < 0 || !/^\d{4}-(Q[1-4]|FY)$/.test(costCenterPeriod)) return;
+    if (!costCenterName.trim() || !costCenterOwner.trim() || !Number.isFinite(budget) || !Number.isFinite(actualSpend) || budget < 0 || actualSpend < 0 || !isValidReportingPeriodCode(costCenterPeriod)) return;
     const item: CostCenterBudget = { id: makeId(), name: costCenterName.trim(), owner: costCenterOwner.trim(), budget, actualSpend, period: costCenterPeriod };
     setData((current) => ({ ...current, costCenters: [item, ...current.costCenters] }));
     setCostCenterName(""); setCostCenterOwner(""); setCostCenterBudget("10000"); setCostCenterSpend("0");
