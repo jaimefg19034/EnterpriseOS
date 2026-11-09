@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { PlanningWorkspace } from "@/components/planning-workspace";
 import { ThreeStatementsWorkspace } from "@/components/three-statements-workspace";
 import { translate, type Language } from "@/i18n/translations";
+import { downloadExcelWorkbook } from "@/lib/excel-export";
 import {
   calculateFinancials,
   formatCurrency,
@@ -324,50 +325,36 @@ export default function Home() {
     }));
   }
 
-  function exportCsv() {
-    const rows = [
-      ["EnterpriseOS — Management P&L"],
-      ["Reporting period", "FY 2026 · Demo data"],
-      ["Currency", "EUR"],
-      [],
-      ["Line item", "Amount (EUR)", "Formula / basis"],
-      ["Revenue", results.revenue.toFixed(2), "Input"],
-      ["Cost of goods sold", results.costOfGoodsSold.toFixed(2), "Input"],
-      ["Gross profit", results.grossProfit.toFixed(2), "Revenue - COGS"],
-      ["Gross margin", results.grossMarginPercent.toFixed(2) + "%", "Gross profit / Revenue"],
-      ["Operating expenses", results.operatingExpenses.toFixed(2), "Input, excluding D&A"],
-      ["EBITDA", results.ebitda.toFixed(2), "Gross profit - Operating expenses"],
-      ["EBITDA margin", results.ebitdaMarginPercent.toFixed(2) + "%", "EBITDA / Revenue"],
-      ["Depreciation & amortisation", results.depreciationAndAmortisation.toFixed(2), "Input"],
-      ["EBIT", results.ebit.toFixed(2), "EBITDA - D&A"],
-      ["Interest expense", results.interestExpense.toFixed(2), "Input"],
-      ["Profit before tax", results.profitBeforeTax.toFixed(2), "EBIT - Interest"],
-      ["Income tax", results.incomeTax.toFixed(2), "Positive PBT × tax rate"],
-      ["Net income", results.netIncome.toFixed(2), "PBT - Income tax"],
-      ["Net margin", results.netMarginPercent.toFixed(2) + "%", "Net income / Revenue"],
-      [],
-      ["Note", "Illustrative management model. Not statutory accounts or tax advice."],
-    ];
-    const localizedRows = rows.map((row) => row.map((cell) => typeof cell === "string" ? t(cell) : cell));
-    const csv = localizedRows
-      .map((row) =>
-        row
-          .map((cell) => {
-            const value = String(cell ?? "");
-            return `"${value.replaceAll('"', '""')}"`;
-          })
-          .join(","),
-      )
-      .join("\r\n");
-    const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "enterpriseos-management-pnl.csv";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+  async function exportCsv() {
+    await downloadExcelWorkbook({
+      filename: "enterpriseos-management-pnl-fy2026.xlsx",
+      sheets: [{
+        name: t("Income Statement"),
+        title: t("EnterpriseOS — Management P&L"),
+        subtitle: t("FY 2026 · EUR · Illustrative management report"),
+        headers: [t("Line item"), t("Amount (EUR)"), t("Formula / basis")],
+        widths: [34, 20, 48],
+        currencyColumns: [2],
+        percentColumns: [],
+        totalLabels: [t("Gross profit"), "EBITDA", "EBIT", t("Profit before tax"), t("Net income")],
+        rows: [
+          [t("Revenue"), results.revenue, t("Input")],
+          [t("Cost of goods sold"), -results.costOfGoodsSold, t("Input")],
+          [t("Gross profit"), results.grossProfit, t("Revenue - COGS")],
+          [t("Gross margin"), results.grossMarginPercent / 100, t("Gross profit / Revenue")],
+          [t("Operating expenses"), -results.operatingExpenses, t("Input, excluding D&A")],
+          ["EBITDA", results.ebitda, t("Gross profit - Operating expenses")],
+          [t("EBITDA margin"), results.ebitdaMarginPercent / 100, t("EBITDA / Revenue")],
+          [t("Depreciation & amortisation"), -results.depreciationAndAmortisation, t("Input")],
+          ["EBIT", results.ebit, t("EBITDA - D&A")],
+          [t("Interest expense"), -results.interestExpense, t("Input")],
+          [t("Profit before tax"), results.profitBeforeTax, t("EBIT - Interest")],
+          [t("Income tax"), -results.incomeTax, t("Positive PBT × tax rate")],
+          [t("Net income"), results.netIncome, t("PBT - Income tax")],
+          [t("Net margin"), results.netMarginPercent / 100, t("Net income / Revenue")],
+        ],
+      }],
+    });
   }
 
   const navItems: { id: View; label: string; icon: string }[] = [
@@ -642,7 +629,7 @@ export default function Home() {
                     <div className="statement-row final-row"><span>{t("Net income")}</span><strong className={results.netIncome < 0 ? "negative-value" : ""}>{formatCurrency(results.netIncome)}</strong></div>
                     <div className="statement-margin final-margin"><span>{t("Net margin")}</span><span>{formatPercent(results.netMarginPercent)}</span></div>
                   </div>
-                  <button className="statement-export" onClick={exportCsv}><Icon name="download" size={15} /> {t("Download statement (CSV)")}</button>
+                  <button className="statement-export" onClick={exportCsv}><Icon name="download" size={15} /> {t("Download statement (Excel)")}</button>
                 </section>
               </div>
 
@@ -673,7 +660,7 @@ export default function Home() {
                   <div className="panel-kicker">{t("AVAILABLE REPORT")}</div>
                   <h2>{t("Management profit & loss")}</h2>
                   <p>{t("A detailed P&L statement with formulas, margins and model assumptions for FY 2026.")}</p>
-                  <div className="report-tags"><span>{t("CSV format")}</span><span>{t("EUR currency")}</span><span>{t("Live values")}</span></div>
+                  <div className="report-tags"><span>{t("Excel workbook")}</span><span>{t("EUR currency")}</span><span>{t("Live values")}</span></div>
                 </div>
                 <button className="primary-button" onClick={exportCsv}><Icon name="download" size={16} /> {t("Export report")}</button>
               </section>
