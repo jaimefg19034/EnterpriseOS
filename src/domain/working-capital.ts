@@ -189,18 +189,54 @@ function parseCsvRows(source: string, delimiter: string): string[][] | null {
   let row: string[] = [];
   let cell = "";
   let quoted = false;
+  let quoteClosed = false;
+
+  const finishCell = () => {
+    row.push(cell);
+    cell = "";
+    quoteClosed = false;
+  };
+  const finishRow = () => {
+    finishCell();
+    rows.push(row);
+    row = [];
+  };
+
   for (let i = 0; i < source.length; i += 1) {
     const char = source[i];
-    if (char === '"' && quoted && source[i + 1] === '"') { cell += '"'; i += 1; }
-    else if (char === '"') quoted = !quoted;
-    else if (!quoted && char === delimiter) { row.push(cell); cell = ""; }
-    else if (!quoted && (char === "\n" || char === "\r")) {
+
+    if (quoted) {
+      if (char === '"' && source[i + 1] === '"') {
+        cell += '"';
+        i += 1;
+      } else if (char === '"') {
+        quoted = false;
+        quoteClosed = true;
+      } else {
+        cell += char;
+      }
+      continue;
+    }
+
+    if (quoteClosed && char !== delimiter && char !== "\n" && char !== "\r") {
+      return null;
+    }
+    if (char === '"') {
+      if (cell.length > 0 || quoteClosed) return null;
+      quoted = true;
+    } else if (char === delimiter) {
+      finishCell();
+    } else if (char === "\n" || char === "\r") {
       if (char === "\r" && source[i + 1] === "\n") i += 1;
-      row.push(cell); rows.push(row); row = []; cell = "";
-    } else cell += char;
+      finishRow();
+    } else {
+      if (quoteClosed) return null;
+      cell += char;
+    }
   }
+
   if (quoted) return null;
-  row.push(cell); rows.push(row);
+  finishRow();
   return rows;
 }
 
