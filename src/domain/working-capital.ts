@@ -75,6 +75,9 @@ export function validateWorkingCapitalInvoice(value: unknown): InvoiceValidation
     return { valid: false, error: "Invoice payment history contains an invalid record." };
   }
   const paymentRows = Array.isArray(item.payments) ? item.payments as InvoicePayment[] : [];
+  if (paymentRows.some((payment) => payment.date < (item.issueDate as string))) {
+    return { valid: false, error: "Payment date cannot be before the invoice issue date." };
+  }
   if (new Set(paymentRows.map((payment) => payment.id.trim())).size !== paymentRows.length) {
     return { valid: false, error: "Invoice payment history contains duplicate payment IDs." };
   }
