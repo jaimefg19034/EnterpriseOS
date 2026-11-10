@@ -75,7 +75,7 @@ export function validateWorkingCapitalInvoice(value: unknown): InvoiceValidation
     return { valid: false, error: "Invoice payment history contains an invalid record." };
   }
   const paymentRows = Array.isArray(item.payments) ? item.payments as InvoicePayment[] : [];
-  if (new Set(paymentRows.map((payment) => payment.id)).size !== paymentRows.length) {
+  if (new Set(paymentRows.map((payment) => payment.id.trim())).size !== paymentRows.length) {
     return { valid: false, error: "Invoice payment history contains duplicate payment IDs." };
   }
   const paymentTotal = roundCurrency(paymentRows.reduce((total, payment) => total + roundCurrency(payment.amount), 0));
@@ -250,7 +250,7 @@ export function normaliseInvoice(value: WorkingCapitalInvoice): WorkingCapitalIn
   const amount = roundCurrency(Number.isFinite(value.amount) ? Math.max(0, value.amount) : 0);
   const paidAmount = roundCurrency(Number.isFinite(value.paidAmount) ? Math.min(amount, Math.max(0, value.paidAmount)) : 0);
   const payments = Array.isArray(value.payments) ? value.payments.map((payment) => ({
-    id: payment.id,
+    id: payment.id.trim(),
     date: payment.date,
     amount: roundCurrency(payment.amount),
     ...(payment.note?.trim() ? { note: payment.note.trim() } : {}),
@@ -269,12 +269,16 @@ export function addInvoicePayment(
   if (!isValidInvoicePayment(payment)) {
     return { valid: false, error: "Payment date, amount or reference is invalid." };
   }
-  if ((invoice.payments ?? []).some((existing) => existing.id === payment.id)) {
+  if ((invoice.payments ?? []).some((existing) => existing.id.trim() === payment.id.trim())) {
     return { valid: false, error: "This payment has already been recorded." };
   }
   const cleanInvoice = normaliseInvoice(invoice);
+  if (payment.date < cleanInvoice.issueDate) {
+    return { valid: false, error: "Payment date cannot be before the invoice issue date." };
+  }
   const cleanPayment = {
     ...payment,
+    id: payment.id.trim(),
     amount: roundCurrency(payment.amount),
     ...(payment.note?.trim() ? { note: payment.note.trim() } : {}),
   };

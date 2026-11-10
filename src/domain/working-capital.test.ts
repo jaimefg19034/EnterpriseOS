@@ -74,6 +74,23 @@ describe("working capital invoice validation", () => {
     }).valid).toBe(false);
   });
 
+  it("rejects payments dated before the invoice and normalises payment IDs", () => {
+    const source = invoice({ issueDate: "2026-11-10", paidAmount: 0 });
+    expect(addInvoicePayment(source, {
+      id: "early", date: "2026-11-09", amount: 10,
+    })).toMatchObject({ valid: false });
+    expect(validateWorkingCapitalInvoice({
+      ...source,
+      paidAmount: 10,
+      payments: [{ id: "early", date: "2026-11-09", amount: 10 }],
+    })).toMatchObject({ valid: false });
+    const added = addInvoicePayment(source, {
+      id: "  payment-trimmed  ", date: "2026-11-10", amount: 10,
+    });
+    expect(added.valid).toBe(true);
+    if (added.valid) expect(added.invoice.payments?.[0].id).toBe("payment-trimmed");
+  });
+
   it("rejects payment amounts that round to zero cents", () => {
     expect(addInvoicePayment(invoice({ paidAmount: 0 }), {
       id: "tiny", date: "2026-11-05", amount: 0.001,
