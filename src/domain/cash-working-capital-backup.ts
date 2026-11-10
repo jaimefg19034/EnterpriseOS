@@ -1,5 +1,5 @@
 import type { CashForecastWeekInput } from "./cash-forecast";
-import { normaliseInvoice, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "./working-capital";
+import { findDuplicateInvoice, normaliseInvoice, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "./working-capital";
 import { parseSavedPlanningState, type SavedPlanningState } from "./planning-storage";
 import { validateOperationsState, type OperationsState } from "./operations";
 
@@ -72,9 +72,14 @@ export function parseLocalFinanceBackup(raw: string): LocalFinanceBackupResult {
   const invoices = parsed.workingCapitalInvoices.map((item) => normaliseInvoice(item as WorkingCapitalInvoice));
   const weeks = parsed.quarterlyCashForecast.map((item) => sanitiseWeek(item as CashForecastWeekInput));
   const ids = new Set<string>();
+  const uniqueInvoices: WorkingCapitalInvoice[] = [];
   for (const invoice of invoices) {
     if (ids.has(invoice.id)) return { ok: false, error: "The backup contains duplicate invoice IDs." };
     ids.add(invoice.id);
+    if (findDuplicateInvoice(invoice, uniqueInvoices)) {
+      return { ok: false, error: "The backup contains duplicate invoices for the same customer or supplier and reference." };
+    }
+    uniqueInvoices.push(invoice);
   }
 
   return {
