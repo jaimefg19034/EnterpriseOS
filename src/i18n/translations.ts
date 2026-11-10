@@ -890,7 +890,6 @@ const spanish: Record<string, string> = {
   "Create a new fiscal year": "Crear un nuevo ejercicio fiscal",
   "Your assumptions will carry forward. Monthly actuals start empty.": "Se conservarán los supuestos actuales. Los datos reales mensuales empezarán vacíos.",
   "Fiscal year": "Ejercicio fiscal",
-  "Cancel": "Cancelar",
   "Create year": "Crear ejercicio",
   "Custom scenario": "Escenario personalizado",
   "Your own revenue assumption": "Tu propia hipótesis de ingresos",
@@ -900,13 +899,6 @@ const spanish: Record<string, string> = {
   "Custom revenue growth percentage": "Porcentaje de crecimiento personalizado de ingresos",
   "Custom revenue adjustment percentage": "Porcentaje de ajuste personalizado de ingresos",
   "Custom revenue adjustment": "Ajuste personalizado de ingresos",
-  "Scenario revenue adjustment": "Ajuste de ingresos del escenario",
-  "0% revenue change": "0 % de variación de ingresos",
-  "+12% revenue": "+12 % de ingresos",
-  "−12% revenue": "−12 % de ingresos",
-  "Base case": "Escenario base",
-  "Upside": "Optimista",
-  "Downside": "Pesimista",
 
 };
 
