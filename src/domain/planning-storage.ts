@@ -17,6 +17,7 @@ export type PlanningYearState = {
   assumptions: PlanningAssumptions;
   actualRevenue: ActualRevenueByMonth;
   scenario: ScenarioKey;
+  customRevenueGrowthPercent: number;
 };
 
 export type SavedPlanningState = {
@@ -48,6 +49,7 @@ export function createPlanningYearState(
   assumptions: PlanningAssumptions,
   actualRevenue: ActualRevenueByMonth,
   scenario: ScenarioKey,
+  customRevenueGrowthPercent = 0,
 ): PlanningYearState {
   return {
     assumptions: { ...assumptions },
@@ -56,6 +58,7 @@ export function createPlanningYearState(
       actualRevenue[month] ?? null,
     ])) as ActualRevenueByMonth,
     scenario,
+    customRevenueGrowthPercent: Math.min(30, Math.max(-30, Number.isFinite(customRevenueGrowthPercent) ? customRevenueGrowthPercent : 0)),
   };
 }
 
@@ -89,6 +92,7 @@ export function addPlanningYear(state: SavedPlanningState, year: number): SavedP
         assumptions: { ...template.assumptions },
         actualRevenue: createEmptyActualRevenue(),
         scenario: "base",
+        customRevenueGrowthPercent: 0,
       },
     },
   };
@@ -161,7 +165,9 @@ function parsePlanningYearState(value: unknown): PlanningYearState | null {
   )) return null;
   if ((assumptions.costOfGoodsSoldPercent as number) > 100 ||
       (assumptions.taxRatePercent as number) > 100) return null;
-  if (value.scenario !== "base" && value.scenario !== "upside" && value.scenario !== "downside") return null;
+  if (value.scenario !== "base" && value.scenario !== "upside" && value.scenario !== "downside" && value.scenario !== "custom") return null;
+  const customRevenueGrowthPercent = value.customRevenueGrowthPercent === undefined ? 0 : value.customRevenueGrowthPercent;
+  if (typeof customRevenueGrowthPercent !== "number" || !Number.isFinite(customRevenueGrowthPercent) || customRevenueGrowthPercent < -30 || customRevenueGrowthPercent > 30) return null;
 
   const actualRevenue: ActualRevenueByMonth = {};
   for (const month of MONTHS) {
@@ -174,6 +180,7 @@ function parsePlanningYearState(value: unknown): PlanningYearState | null {
     assumptions: Object.fromEntries(ASSUMPTION_KEYS.map((key) => [key, assumptions[key]])) as unknown as PlanningAssumptions,
     actualRevenue,
     scenario: value.scenario,
+    customRevenueGrowthPercent,
   };
 }
 
