@@ -33,7 +33,19 @@ describe("multi-year planning local persistence", () => {
     expect(parsed?.years["2027"].actualRevenue.Nov).toBeNull();
     expect(parsed?.years["2027"].actualRevenue.Dec).toBeNull();
     expect(parsed?.years["2027"].scenario).toBe("base");
+    expect(parsed?.years["2027"].customRevenueGrowthPercent).toBe(0);
     expect(parsed?.savedAt).toBe("2026-11-09T13:00:00.000Z");
+  });
+
+  it("persists custom scenario percentage per fiscal year and migrates older records with zero", () => {
+    const initial = createInitialPlanningState(assumptions, {}, "custom");
+    const custom = { ...initial, years: { "2026": { ...initial.years["2026"], customRevenueGrowthPercent: 8.5 } } };
+    const parsed = parseSavedPlanningState(serialisePlanningState(custom));
+    expect(parsed?.years["2026"].scenario).toBe("custom");
+    expect(parsed?.years["2026"].customRevenueGrowthPercent).toBe(8.5);
+    const old = JSON.parse(serialisePlanningState(initial));
+    delete old.years["2026"].customRevenueGrowthPercent;
+    expect(parseSavedPlanningState(JSON.stringify(old))?.years["2026"].customRevenueGrowthPercent).toBe(0);
   });
 
   it("migrates the legacy flat FY2026 record without changing any actuals", () => {
