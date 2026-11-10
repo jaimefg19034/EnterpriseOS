@@ -59,6 +59,22 @@ describe("buildPlanningResult", () => {
     expect(downside.projectedEbitda).toBeLessThan(base.projectedEbitda);
   });
 
+  it("applies a custom revenue adjustment only to forecast months and leaves cost assumptions unchanged", () => {
+    const actuals = makeDemoActualRevenue(assumptions.annualRevenueBudget);
+    const base = buildPlanningResult(assumptions, actuals, "base");
+    const custom = buildPlanningResult(assumptions, actuals, "custom", 7.5);
+    expect(custom.monthlyRows.slice(0, 10).map((row) => row.actualRevenue)).toEqual(base.monthlyRows.slice(0, 10).map((row) => row.actualRevenue));
+    expect(custom.remainingForecastRevenue).toBeCloseTo(base.remainingForecastRevenue * 1.075, 2);
+    expect(custom.costOfGoodsSoldPercent).toBe(assumptions.costOfGoodsSoldPercent);
+    expect(custom.projectedOperatingExpenses).toBe(assumptions.annualOperatingExpenses);
+    expect(custom.scenario.revenueGrowthPercent).toBe(7.5);
+  });
+
+  it("clamps custom revenue adjustments to the supported range", () => {
+    expect(buildPlanningResult(assumptions, {}, "custom", 90).scenario.revenueGrowthPercent).toBe(30);
+    expect(buildPlanningResult(assumptions, {}, "custom", -90).scenario.revenueGrowthPercent).toBe(-30);
+  });
+
   it("does not calculate a margin when forecast revenue is zero", () => {
     const zeroAssumptions = { ...assumptions, annualRevenueBudget: 0 };
     const result = buildPlanningResult(
