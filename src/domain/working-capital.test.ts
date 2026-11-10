@@ -137,6 +137,21 @@ describe("invoice CSV import", () => {
     expect(result.invoices[0]).toMatchObject({ direction: "receivable", counterparty: "Acme", amount: 1250.5, paidAmount: 250.5, issueDate: "2026-11-01" });
   });
 
+  it("handles escaped quotes in quoted fields and rejects invalid quote placement", () => {
+    const valid = parseInvoiceCsv(
+      'direction,counterparty,reference,issueDate,dueDate,amount,paidAmount\nreceivable,"Acme, \"\"North\"\" Ltd",INV-1,2026-11-01,2026-11-20,100,0',
+    );
+    expect(valid.ok).toBe(true);
+    if (valid.ok) expect(valid.invoices[0].counterparty).toBe('Acme, "North" Ltd');
+
+    expect(parseInvoiceCsv(
+      'direction,counterparty,reference,issueDate,dueDate,amount,paidAmount\nreceivable,Acme "North",INV-1,2026-11-01,2026-11-20,100,0',
+    ).ok).toBe(false);
+    expect(parseInvoiceCsv(
+      'direction,counterparty,reference,issueDate,dueDate,amount,paidAmount\nreceivable,"Acme"Ltd,INV-1,2026-11-01,2026-11-20,100,0',
+    ).ok).toBe(false);
+  });
+
   it("rejects missing columns, malformed quoting and invalid rows without partial import", () => {
     expect(parseInvoiceCsv("company,amount\nAcme,10").ok).toBe(false);
     expect(parseInvoiceCsv('direction,counterparty,reference,issueDate,dueDate,amount,paidAmount\nreceivable,"Acme,INV-1,2026-11-01,2026-11-02,10,0').ok).toBe(false);
