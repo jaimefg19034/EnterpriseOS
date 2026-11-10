@@ -1356,3 +1356,15 @@ button:focus-visible, input:focus-visible {
 .scenario-option.custom.selected { border-color: #9caceb; background: #f3f5ff; }
 @media (max-width: 1050px) { .planning-heading { align-items: flex-start; flex-direction: column; } .planning-heading-controls { width: 100%; justify-items: stretch; } .planning-year-card { align-self: flex-start; flex-wrap: wrap; } .planning-toolbar { justify-content: flex-start; } }
 @media (max-width: 680px) { .planning-year-card { width: 100%; gap: 10px; } .planning-year-card-copy { padding-right: 9px; } .planning-add-year-button { margin-left: auto; } .planning-new-year-panel { grid-template-columns: 1fr 1fr; gap: 12px; } .planning-new-year-panel > div:first-child { grid-column: 1 / -1; } .planning-new-year-actions { grid-column: 1 / -1; justify-content: flex-end; } .custom-scenario-controls { grid-template-columns: 1fr minmax(100px, 125px); } .custom-scenario-copy { grid-column: 1 / -1; } .custom-scenario-slider { grid-column: 1 / -1; grid-row: 2; } }
+
+
+/* Four-scenario layout refinements */
+.scenario-options { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 1050px) {
+  .planning-scenario-panel { grid-template-columns: minmax(0, 1fr); }
+  .scenario-options { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 680px) {
+  .scenario-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .scenario-option { padding: 10px; }
+}

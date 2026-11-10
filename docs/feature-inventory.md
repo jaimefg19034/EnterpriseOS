@@ -10,7 +10,7 @@
 |---|---|---|---|
 | Overview | Revenue, EBITDA, margins, net income, trend visualisation and quick navigation | Derived from the illustrative management P&L inputs | Demo dashboard |
 | Financial model | Editable management P&L assumptions; gross profit, EBITDA, EBIT, pre-tax profit, tax and net income; Excel export | Pure calculation module; current inputs are session state | Useful model prototype; limited historical actuals |
-| Budget & scenarios | Monthly revenue plan, actual revenue inputs, Base/Upside/Downside cases, profitability projection, budget-vs-actual and run-rate indicators | Pure planning calculations; saved planning state in localStorage | Developed prototype |
+| Budget & scenarios | Year-aware monthly revenue plan, actual revenue inputs, Base/Upside/Downside/Custom cases, per-year assumptions and scenario settings, profitability projection, budget-vs-actual and run-rate indicators, Excel export | Pure planning calculations; migrated multi-year planning state in browser localStorage | Developed prototype; browser-local only |
 | Three statements | P&L, balance sheet and indirect cash flow; working-capital assumptions; financial ratios; balance check; Excel export | Pure three-statement and analysis modules; opening balance sheet is illustrative | Integrated model prototype, not a ledger |
 | Cash forecast | Quarterly cash view with weekly internal schedule, invoice-linked receipts/payments, manual movements kept separate, downside liquidity stress test and Excel export | Browser-local storage plus pure invoice allocation and forecast functions | Useful planning tool; not bank-reconciled |
 | Working capital | Receivables/payables invoice register, due dates, outstanding balances, ageing, dated partial-payment ledger, CSV import, payment-history Excel export and backup integration | Browser-local storage; validated invoice and payment records; historic aggregate paid balances remain undated | Local single-browser register; no bank reconciliation or automatic payment matching |
@@ -24,7 +24,7 @@
 | Language preference | Browser localStorage | Device/browser-specific |
 | Main P&L assumptions | React session state | Reload returns to demo defaults |
 | Three-statement assumptions | React component state | Not a durable company record |
-| Planning inputs and monthly actuals | Browser localStorage | Not synced or backed up automatically |
+| Planning inputs, monthly actuals and per-year scenario settings | Browser localStorage; legacy FY2026 state migrates to the multi-year format | Not synced to a company database; user must retain local/browser backups |
 | Operations records | Browser localStorage | Single browser profile; no user/tenant isolation |
 | Invoices, dated payment movements and cash forecast | Browser localStorage | Historic paid balances imported as aggregates have no transaction dates; no bank or accounting reconciliation |
 | Finance backup | Downloadable local backup with validation and restore | User must store the file safely; no managed backup service |
@@ -55,7 +55,7 @@
 - The P&L is a simplified management model, not a statutory accounting engine.
 - Historical cost and expense actuals are incomplete relative to the revenue actuals workflow. The manual unitemized baseline has no source-level detail, so the app cannot automatically detect whether a user has also entered the same transaction in the expense register.
 - The opening balance sheet is an illustrative baseline.
-- Forecast outputs and actuals need consistent period definitions, provenance and labels across every screen. Operations now uses shared month/quarter/FY date boundaries, but Budget & Scenarios remains a single FY2026 plan; adding multi-year planning requires a versioned storage migration that preserves existing FY2026 actuals and backup compatibility.
+- Forecast outputs and actuals need consistent period definitions, provenance and labels across every screen. Operations uses shared month/quarter/FY date boundaries. Budget & Scenarios now supports multiple fiscal years and migrates the legacy FY2026 state, but remains browser-local and needs deeper reconciliation, period-close and backup/restore testing before real-company use.
 - Excel import, source mapping and reconciliation need a deliberate design before supporting real customer files.
 
 ### High — product and operating readiness
