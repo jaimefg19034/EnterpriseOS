@@ -87,6 +87,24 @@ describe("working capital invoice validation", () => {
     })).valid).toBe(false);
   });
 
+  it("rejects duplicate payment IDs and totals that exceed the paid balance after cent rounding", () => {
+    expect(validateWorkingCapitalInvoice(invoice({
+      paidAmount: 100,
+      payments: [
+        { id: "same", date: "2026-11-05", amount: 50 },
+        { id: "same", date: "2026-11-06", amount: 50 },
+      ],
+    })).valid).toBe(false);
+    expect(validateWorkingCapitalInvoice(invoice({
+      paidAmount: 100,
+      payments: [{ id: "rounding-over", date: "2026-11-05", amount: 100.005 }],
+    })).valid).toBe(false);
+    expect(validateWorkingCapitalInvoice(invoice({
+      paidAmount: 100,
+      payments: [{ id: "rounding-equal", date: "2026-11-05", amount: 99.999 }],
+    })).valid).toBe(true);
+  });
+
   it("rounds invoice and paid balances to cents", () => {
     const clean = normaliseInvoice(invoice({ amount: 10.105, paidAmount: 2.105 }));
     expect(clean.amount).toBe(10.11);

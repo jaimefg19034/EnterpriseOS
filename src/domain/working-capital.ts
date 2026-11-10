@@ -74,10 +74,12 @@ export function validateWorkingCapitalInvoice(value: unknown): InvoiceValidation
   if (item.payments !== undefined && (!Array.isArray(item.payments) || item.payments.some((payment) => !isValidInvoicePayment(payment)))) {
     return { valid: false, error: "Invoice payment history contains an invalid record." };
   }
-  const paymentTotal = Array.isArray(item.payments)
-    ? item.payments.reduce((total, payment) => total + (payment as InvoicePayment).amount, 0)
-    : 0;
-  if (paymentTotal - item.paidAmount > 0.005) {
+  const paymentRows = Array.isArray(item.payments) ? item.payments as InvoicePayment[] : [];
+  if (new Set(paymentRows.map((payment) => payment.id)).size !== paymentRows.length) {
+    return { valid: false, error: "Invoice payment history contains duplicate payment IDs." };
+  }
+  const paymentTotal = roundCurrency(paymentRows.reduce((total, payment) => total + roundCurrency(payment.amount), 0));
+  if (paymentTotal > roundCurrency(item.paidAmount)) {
     return { valid: false, error: "Recorded payments cannot exceed the invoice paid amount." };
   }
   return { valid: true, invoice: normaliseInvoice(item as unknown as WorkingCapitalInvoice) };
