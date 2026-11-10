@@ -7,7 +7,6 @@ import {
   SCENARIOS,
   type MonthName,
   type PlanningAssumptions,
-  type ScenarioKey,
 } from "@/domain/planning";
 import { formatCurrency, formatPercent } from "@/domain/financials";
 import { translate, type Language } from "@/i18n/translations";
@@ -208,12 +207,14 @@ export function PlanningWorkspace({ language }: { language: Language }) {
   const [storageMessage, setStorageMessage] = useState("");
   const [newYear, setNewYear] = useState("2027");
   const [yearMessage, setYearMessage] = useState("");
+  const [newYearPanelOpen, setNewYearPanelOpen] = useState(false);
 
   const selectedYear = savedState.selectedYear;
   const selectedPlan = savedState.years[String(selectedYear)] ?? savedState.years["2026"];
   const assumptions = selectedPlan.assumptions;
   const actualRevenue = selectedPlan.actualRevenue;
   const scenario = selectedPlan.scenario;
+  const customRevenueGrowthPercent = selectedPlan.customRevenueGrowthPercent;
   const availableYears = Object.keys(savedState.years).map(Number).sort((a, b) => a - b);
   const canAddYear = isValidPlanningYear(Number(newYear)) && !savedState.years[String(Number(newYear))];
 
@@ -281,8 +282,8 @@ export function PlanningWorkspace({ language }: { language: Language }) {
   }, [savedState, storageReady]);
 
   const result = useMemo(
-    () => buildPlanningResult(assumptions, actualRevenue, scenario),
-    [assumptions, actualRevenue, scenario],
+    () => buildPlanningResult(assumptions, actualRevenue, scenario, customRevenueGrowthPercent),
+    [assumptions, actualRevenue, scenario, customRevenueGrowthPercent],
   );
   const revenueVariancePercent =
     result.budgetRevenue > 0
@@ -331,6 +332,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
           ? makeDemoActualRevenue(INITIAL_ASSUMPTIONS.annualRevenueBudget)
           : createEmptyActualRevenue(),
         scenario: "base",
+        customRevenueGrowthPercent: 0,
       } } };
     });
   }
@@ -352,6 +354,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
     setSavedState(next);
     setNewYear(String(Math.min(2100, year + 1)));
     setYearMessage("");
+    setNewYearPanelOpen(false);
   }
 
   async function exportPlanningExcel() {
@@ -418,6 +421,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
             [t("Annual interest expense"), assumptions.annualInterestExpense, "EUR"],
             [t("Assumed tax rate"), assumptions.taxRatePercent / 100, "%"],
             [t("Scenario revenue adjustment"), result.scenario.revenueGrowthPercent / 100, "%"],
+          [t("Custom revenue adjustment"), customRevenueGrowthPercent / 100, "%"],
             [t("Scenario COGS adjustment"), result.scenario.cogsRateAdjustmentPp, "percentage points"],
           ],
         },
@@ -435,18 +439,37 @@ export function PlanningWorkspace({ language }: { language: Language }) {
           <h1>{t("Budget & scenarios")}</h1>
           <p>{t("Track revenue against budget and stress-test the remaining forecast under different operating assumptions.")}</p>
         </div>
-        <div className="heading-actions">
-          <span className="demo-badge"><i /> {t("ILLUSTRATIVE MODEL")}</span>
-          <label className="planning-year-control">{t("Planning year")}<select value={selectedYear} onChange={(event) => selectYear(event.target.value)}>{availableYears.map((year) => <option key={year} value={year}>{year}</option>)}</select></label>
-          <label className="planning-year-control">{t("New fiscal year")}<input type="number" min="1900" max="2100" step="1" value={newYear} onChange={(event) => setNewYear(event.target.value)} /></label>
-          <button type="button" className="secondary-button" onClick={addYear} disabled={!canAddYear}>{t("Add year")}</button>
-          <button className="secondary-button" onClick={resetDemo}>{t("Reset selected year")}</button>
-          <button className="primary-button" onClick={exportPlanningExcel}>
-            <span aria-hidden="true">↓</span> {t("Export plan")}
-          </button>
+        <div className="planning-heading-controls">
+          <div className="planning-year-card">
+            <div className="planning-year-card-copy"><span>{t("ACTIVE FISCAL YEAR")}</span><strong>FY {selectedYear}</strong></div>
+            <label className="planning-year-select"><span>{t("Change year")}</span>
+              <select value={selectedYear} onChange={(event) => selectYear(event.target.value)} aria-label={t("Planning year")}>
+                {availableYears.map((year) => <option key={year} value={year}>{year}</option>)}
+              </select>
+            </label>
+            <button type="button" className="planning-add-year-button" onClick={() => { setYearMessage(""); setNewYearPanelOpen((open) => !open); }}>
+              <span aria-hidden="true">＋</span> {t("New fiscal year")}
+            </button>
+          </div>
+          <div className="planning-toolbar">
+            <span className="demo-badge"><i /> {t("ILLUSTRATIVE MODEL")}</span>
+            <button type="button" className="secondary-button" onClick={resetDemo}>{t("Reset selected year")}</button>
+            <button type="button" className="primary-button" onClick={exportPlanningExcel}><span aria-hidden="true">↓</span> {t("Export plan")}</button>
+          </div>
         </div>
       </div>
-      <p className="planning-storage-status" role="status">{t(storageMessage || "Preparing local plan storage…")} {yearMessage && t(yearMessage)}</p>
+      {newYearPanelOpen && (
+        <section className="planning-new-year-panel" aria-label={t("Create fiscal year")}>
+          <div><span className="panel-kicker">{t("NEW PLANNING PERIOD")}</span><h2>{t("Create a new fiscal year")}</h2><p>{t("Your assumptions will carry forward. Monthly actuals start empty.")}</p></div>
+          <label><span>{t("Fiscal year")}</span><input type="number" min="1900" max="2100" step="1" value={newYear} onChange={(event) => setNewYear(event.target.value)} /></label>
+          <div className="planning-new-year-actions">
+            <button type="button" className="secondary-button" onClick={() => setNewYearPanelOpen(false)}>{t("Cancel")}</button>
+            <button type="button" className="primary-button" onClick={addYear} disabled={!canAddYear}>{t("Create year")}</button>
+          </div>
+          {yearMessage && <p className="planning-year-error" role="alert">{t(yearMessage)}</p>}
+        </section>
+      )}
+      <p className="planning-storage-status" role="status">{t(storageMessage || "Preparing local plan storage…")}</p>
       <nav className="planning-section-nav" aria-label={t("Planning sections")}>
         <a href="#planning-overview" onClick={navigateToPlanningSection}>{t("Planning overview")}</a>
         <a href="#planning-assumptions" onClick={navigateToPlanningSection}>{t("Annual assumptions")}</a>
@@ -462,28 +485,32 @@ export function PlanningWorkspace({ language }: { language: Language }) {
           <p>{t("Choose a scenario to update the revenue forecast and annual profitability model.")}</p>
         </div>
         <div className="scenario-options" role="group" aria-label={t("Forecast scenario")}>
-          {(Object.keys(SCENARIOS) as ScenarioKey[]).map((key) => {
-            const option = SCENARIOS[key];
-            return (
-              <button
-                key={key}
-                className={`scenario-option ${scenario === key ? "selected" : ""} ${key}`}
-                onClick={() => setSavedState((current) => { const yearKey = String(current.selectedYear); return { ...current, years: { ...current.years, [yearKey]: { ...current.years[yearKey], scenario: key } } }; })}
-                aria-pressed={scenario === key}
-              >
-                <span className="scenario-option-top">
-                  <strong>{t(option.label)}</strong>
-                  {scenario === key && <span className="scenario-selected-dot" />}
-                </span>
-                <small>{t(key === "base" ? "0% revenue change" : key === "upside" ? "+12% revenue" : "−12% revenue")}</small>
-              </button>
-            );
-          })}
+          {([
+            { key: "base" as const, label: SCENARIOS.base.label, detail: "0% revenue change" },
+            { key: "upside" as const, label: SCENARIOS.upside.label, detail: "+12% revenue" },
+            { key: "downside" as const, label: SCENARIOS.downside.label, detail: "−12% revenue" },
+            { key: "custom" as const, label: "Custom scenario", detail: "Your own revenue assumption" },
+          ]).map((option) => (
+            <button key={option.key} type="button" className={`scenario-option ${scenario === option.key ? "selected" : ""} ${option.key}`}
+              onClick={() => setSavedState((current) => { const yearKey = String(current.selectedYear); return { ...current, years: { ...current.years, [yearKey]: { ...current.years[yearKey], scenario: option.key } } }; })}
+              aria-pressed={scenario === option.key}>
+              <span className="scenario-option-top"><strong>{t(option.label)}</strong>{scenario === option.key && <span className="scenario-selected-dot" />}</span>
+              <small>{t(option.detail)}</small>
+            </button>
+          ))}
         </div>
-        <div className="scenario-description">
-          <span className="scenario-description-icon">{t("ƒx")}</span>
-          <span>{t(result.scenario.description)}</span>
-        </div>
+        {scenario === "custom" && (
+          <div className="custom-scenario-controls">
+            <div className="custom-scenario-copy"><strong>{t("Forecast revenue adjustment")}</strong><span>{t("Applied only to future months. Actual revenue and cost assumptions remain unchanged.")}</span></div>
+            <input className="custom-scenario-slider" type="range" min="-30" max="30" step="1" value={customRevenueGrowthPercent}
+              onChange={(event) => { const value = Number(event.target.value); setSavedState((current) => { const yearKey = String(current.selectedYear); return { ...current, years: { ...current.years, [yearKey]: { ...current.years[yearKey], customRevenueGrowthPercent: value } } }; }); }}
+              aria-label={t("Custom revenue growth percentage")} />
+            <label className="custom-scenario-number"><span>{t("Revenue change")}</span><span className="custom-scenario-number-input">
+              <input type="number" min="-30" max="30" step="0.5" value={customRevenueGrowthPercent} onChange={(event) => { const raw = event.target.value; if (raw === "") return; const value = Number(raw); if (!Number.isFinite(value)) return; setSavedState((current) => { const yearKey = String(current.selectedYear); return { ...current, years: { ...current.years, [yearKey]: { ...current.years[yearKey], customRevenueGrowthPercent: Math.min(30, Math.max(-30, value)) } } }; }); }} aria-label={t("Custom revenue adjustment percentage")} /><span>%</span>
+            </span></label>
+          </div>
+        )}
+        <div className="scenario-description"><span className="scenario-description-icon">{t("ƒx")}</span><span>{t(result.scenario.description)}</span></div>
       </section>
 
       <div className="planning-metrics-grid">
@@ -496,7 +523,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
         <PlanningMetric
           label={t("Projected EBITDA")}
           value={formatCurrency(result.projectedEbitda, true)}
-          detail={`${result.ebitdaVariance >= 0 ? "+" : ""}${formatCurrency(result.ebitdaVariance, true)} {t("vs. budget EBITDA")}`}
+          detail={`${result.ebitdaVariance >= 0 ? "+" : ""}${formatCurrency(result.ebitdaVariance, true)} ${t("vs. budget EBITDA")}`}
           tone="green"
         />
         <PlanningMetric
@@ -594,7 +621,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
             <tbody>
               {result.monthlyRows.map((row) => (
                 <tr key={row.month}>
-                  <td className="month-cell">{t(row.month)} 2026</td>
+                  <td className="month-cell">{t(row.month)} {selectedYear}</td>
                   <td>{formatCurrency(row.budgetRevenue)}</td>
                   <td>
                     {row.status === "Actual" ? (
