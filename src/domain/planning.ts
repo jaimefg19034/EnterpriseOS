@@ -4,7 +4,8 @@ export const MONTHS = [
 ] as const;
 
 export type MonthName = (typeof MONTHS)[number];
-export type ScenarioKey = "base" | "upside" | "downside";
+export type PresetScenarioKey = "base" | "upside" | "downside";
+export type ScenarioKey = PresetScenarioKey | "custom";
 
 export type PlanningAssumptions = {
   annualRevenueBudget: number;
@@ -61,7 +62,7 @@ export type PlanningResult = {
   ebitdaVariance: number;
 };
 
-export const SCENARIOS: Record<ScenarioKey, ScenarioDefinition> = {
+export const SCENARIOS: Record<PresetScenarioKey, ScenarioDefinition> = {
   base: {
     key: "base",
     label: "Base case",
@@ -131,6 +132,7 @@ export function buildPlanningResult(
   inputAssumptions: PlanningAssumptions,
   actualRevenueByMonth: ActualRevenueByMonth,
   scenarioKey: ScenarioKey,
+  customRevenueGrowthPercent = 0,
 ): PlanningResult {
   const assumptions: PlanningAssumptions = {
     annualRevenueBudget: finiteNonNegative(inputAssumptions.annualRevenueBudget),
@@ -142,7 +144,10 @@ export function buildPlanningResult(
     annualInterestExpense: finiteNonNegative(inputAssumptions.annualInterestExpense),
     taxRatePercent: clampPercent(inputAssumptions.taxRatePercent),
   };
-  const scenario = SCENARIOS[scenarioKey];
+  const safeCustomGrowth = Math.min(30, Math.max(-30, Number.isFinite(customRevenueGrowthPercent) ? customRevenueGrowthPercent : 0));
+  const scenario: ScenarioDefinition = scenarioKey === "custom"
+    ? { key: "custom", label: "Custom scenario", description: `Custom forecast: ${safeCustomGrowth >= 0 ? "+" : ""}${safeCustomGrowth}% revenue adjustment. Cost assumptions remain unchanged.`, revenueGrowthPercent: safeCustomGrowth, cogsRateAdjustmentPp: 0, operatingExpenseMultiplier: 1 }
+    : SCENARIOS[scenarioKey];
   const monthlyBudget = allocateAnnualAmount(
     assumptions.annualRevenueBudget,
     SEASONALITY_WEIGHTS,
