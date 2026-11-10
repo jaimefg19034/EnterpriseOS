@@ -26,6 +26,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   const [ready, setReady] = useState(false);
   const [storageWritable, setStorageWritable] = useState(true);
   const [storageWarning, setStorageWarning] = useState("");
+  const [savedInvoiceRecoveryData, setSavedInvoiceRecoveryData] = useState<string | null>(null);
   const [counterparty, setCounterparty] = useState("");
   const [reference, setReference] = useState("");
   const [issueDate, setIssueDate] = useState(todayISO);
@@ -47,8 +48,10 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   useEffect(() => {
     let restored: WorkingCapitalInvoice[] = [];
     let storageError = "";
+    let originalSavedData: string | null = null;
     try {
-      const result = parseStoredWorkingCapitalInvoices(window.localStorage.getItem(STORAGE_KEY));
+      originalSavedData = window.localStorage.getItem(STORAGE_KEY);
+      const result = parseStoredWorkingCapitalInvoices(originalSavedData);
       if (result.ok) restored = result.invoices;
       else storageError = result.error;
     } catch {
@@ -58,6 +61,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
       if (storageError) {
         setStorageWritable(false);
         setStorageWarning(t(storageError));
+        setSavedInvoiceRecoveryData(originalSavedData);
       } else {
         setInvoices(restored);
       }
@@ -259,6 +263,20 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
     }
   }
 
+  function downloadOriginalInvoiceData() {
+    if (savedInvoiceRecoveryData === null) return;
+    const blob = new Blob([savedInvoiceRecoveryData], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `enterpriseos-invoice-recovery-${today}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setBackupMessage(t("A copy of the original saved invoice data has been downloaded. Keep it safe before attempting recovery."));
+  }
+
   function downloadLocalBackup() {
     let planning = null;
     let operations = null;
@@ -325,6 +343,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
       setInvoices(result.data.workingCapitalInvoices);
       setStorageWritable(true);
       setStorageWarning("");
+      setSavedInvoiceRecoveryData(null);
       window.dispatchEvent(new Event("enterpriseos:working-capital-updated"));
       window.dispatchEvent(new Event("enterpriseos:cash-forecast-updated"));
       if (result.data.planningState) window.dispatchEvent(new Event("enterpriseos:planning-updated"));
@@ -353,6 +372,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
           <button className="secondary-button" type="button" onClick={() => csvInputRef.current?.click()}>{t("Import CSV")}</button>
           <input ref={csvInputRef} className="sr-only" type="file" accept=".csv,text/csv" onChange={prepareCsvImport} />
           <button className="secondary-button" type="button" onClick={exportRegister}>{t("Export register")}</button>
+          {savedInvoiceRecoveryData !== null && <button className="secondary-button" type="button" onClick={downloadOriginalInvoiceData}>{t("Download original invoice data")}</button>}
           <button className="secondary-button" type="button" onClick={downloadLocalBackup}>{t("Download data backup")}</button>
           <button className="secondary-button" type="button" onClick={() => backupInputRef.current?.click()}>{t("Restore backup")}</button>
           <input ref={backupInputRef} className="sr-only" type="file" accept=".json,application/json" onChange={restoreLocalBackup} />
