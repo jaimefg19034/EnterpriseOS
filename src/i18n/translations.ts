@@ -900,6 +900,13 @@ const spanish: Record<string, string> = {
   "Custom revenue adjustment percentage": "Porcentaje de ajuste personalizado de ingresos",
   "Custom revenue adjustment": "Ajuste personalizado de ingresos",
 
+  "Saved invoice data is not valid JSON. The original browser data has been preserved.": "Los datos de facturas guardados no contienen un JSON válido. Se han conservado los datos originales del navegador.",
+  "Saved invoice data has an invalid structure. The original browser data has been preserved.": "Los datos de facturas guardados tienen una estructura no válida. Se han conservado los datos originales del navegador.",
+  "Saved invoice data contains an invalid record. The original browser data has been preserved.": "Los datos de facturas guardados contienen un registro no válido. Se han conservado los datos originales del navegador.",
+  "Saved invoice data contains duplicate record IDs. The original browser data has been preserved.": "Los datos de facturas guardados contienen identificadores de registro duplicados. Se han conservado los datos originales del navegador.",
+  "Saved invoice data contains duplicate customer or supplier references. The original browser data has been preserved.": "Los datos de facturas guardados contienen referencias duplicadas de clientes o proveedores. Se han conservado los datos originales del navegador.",
+  "Saved invoice data could not be accessed. The original browser data has been preserved.": "No se ha podido acceder a los datos de facturas guardados. Se han conservado los datos originales del navegador.",
+
 };
 
 

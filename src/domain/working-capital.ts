@@ -100,6 +100,41 @@ export function findDuplicateInvoice(
   );
 }
 
+export type StoredInvoiceParseResult =
+  | { ok: true; invoices: WorkingCapitalInvoice[] }
+  | { ok: false; error: string };
+
+/** Reads the complete saved register without silently dropping malformed records. */
+export function parseStoredWorkingCapitalInvoices(raw: string | null): StoredInvoiceParseResult {
+  if (raw === null) return { ok: true, invoices: [] };
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return { ok: false, error: "Saved invoice data is not valid JSON. The original browser data has been preserved." };
+  }
+  if (!Array.isArray(parsed)) {
+    return { ok: false, error: "Saved invoice data has an invalid structure. The original browser data has been preserved." };
+  }
+  const invoices: WorkingCapitalInvoice[] = [];
+  const ids = new Set<string>();
+  for (const item of parsed) {
+    const result = validateWorkingCapitalInvoice(item);
+    if (!result.valid) {
+      return { ok: false, error: "Saved invoice data contains an invalid record. The original browser data has been preserved." };
+    }
+    if (ids.has(result.invoice.id)) {
+      return { ok: false, error: "Saved invoice data contains duplicate record IDs. The original browser data has been preserved." };
+    }
+    if (findDuplicateInvoice(result.invoice, invoices)) {
+      return { ok: false, error: "Saved invoice data contains duplicate customer or supplier references. The original browser data has been preserved." };
+    }
+    ids.add(result.invoice.id);
+    invoices.push(result.invoice);
+  }
+  return { ok: true, invoices };
+}
+
 export type InvoiceCsvParseResult =
   | { ok: true; invoices: WorkingCapitalInvoice[] }
   | { ok: false; error: string };

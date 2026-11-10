@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { addInvoicePayment, calculateInvoiceAgeing, findDuplicateInvoice, parseInvoiceCsv, summarizeInvoices, validateWorkingCapitalInvoice, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
+import { addInvoicePayment, calculateInvoiceAgeing, findDuplicateInvoice, parseInvoiceCsv, parseStoredWorkingCapitalInvoices, summarizeInvoices, validateWorkingCapitalInvoice, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { parseISODateUTC } from "@/domain/reporting-periods";
 import { createEmptyCashForecast } from "@/domain/cash-forecast";
 import { createLocalFinanceBackup, parseLocalFinanceBackup } from "@/domain/cash-working-capital-backup";
@@ -24,6 +24,8 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   const [direction, setDirection] = useState<InvoiceDirection>("receivable");
   const [invoices, setInvoices] = useState<WorkingCapitalInvoice[]>([]);
   const [ready, setReady] = useState(false);
+  const [storageWritable, setStorageWritable] = useState(true);
+  const [storageWarning, setStorageWarning] = useState("");
   const [counterparty, setCounterparty] = useState("");
   const [reference, setReference] = useState("");
   const [issueDate, setIssueDate] = useState(todayISO);
@@ -43,32 +45,31 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   const summary = useMemo(() => summarizeInvoices(aged, today), [aged, today]);
 
   useEffect(() => {
-    let restored: WorkingCapitalInvoice[] | null = null;
+    let restored: WorkingCapitalInvoice[] = [];
+    let storageError = "";
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed: unknown = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          restored = parsed
-            .map((item) => validateWorkingCapitalInvoice(item))
-            .filter((result) => result.valid)
-            .map((result) => result.invoice);
-        }
-      }
+      const result = parseStoredWorkingCapitalInvoices(window.localStorage.getItem(STORAGE_KEY));
+      if (result.ok) restored = result.invoices;
+      else storageError = result.error;
     } catch {
-      // Local persistence is optional; the register remains usable for this session.
+      storageError = "Saved invoice data could not be accessed. The original browser data has been preserved.";
     }
     window.setTimeout(() => {
-      if (restored) setInvoices(restored);
+      if (storageError) {
+        setStorageWritable(false);
+        setStorageWarning(t(storageError));
+      } else {
+        setInvoices(restored);
+      }
       setReady(true);
     }, 0);
   }, []);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || !storageWritable) return;
     try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(invoices)); } catch { /* Optional browser storage. */ }
     window.dispatchEvent(new Event("enterpriseos:working-capital-updated"));
-  }, [invoices, ready]);
+  }, [invoices, ready, storageWritable]);
 
   function addInvoice(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -322,6 +323,8 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
         throw storageError;
       }
       setInvoices(result.data.workingCapitalInvoices);
+      setStorageWritable(true);
+      setStorageWarning("");
       window.dispatchEvent(new Event("enterpriseos:working-capital-updated"));
       window.dispatchEvent(new Event("enterpriseos:cash-forecast-updated"));
       if (result.data.planningState) window.dispatchEvent(new Event("enterpriseos:planning-updated"));
@@ -355,6 +358,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
           <input ref={backupInputRef} className="sr-only" type="file" accept=".json,application/json" onChange={restoreLocalBackup} />
         </div>
       </div>
+      {storageWarning && <p className="working-capital-backup-message" role="alert">{storageWarning}</p>}
       {backupMessage && <p className="working-capital-backup-message" role="status">{backupMessage}</p>}
       {csvImportMessage && <div className="working-capital-import-message" role="status">{csvImportMessage}</div>}
       {csvPreview.length > 0 && <div className="working-capital-import-preview panel">

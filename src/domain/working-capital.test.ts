@@ -1,9 +1,33 @@
 import { describe, expect, it } from "vitest";
-import { addInvoicePayment, calculateInvoiceAgeing, findDuplicateInvoice, normaliseInvoice, parseInvoiceCsv, summarizeInvoices, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "./working-capital";
+import { addInvoicePayment, calculateInvoiceAgeing, findDuplicateInvoice, normaliseInvoice, parseInvoiceCsv, parseStoredWorkingCapitalInvoices, summarizeInvoices, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "./working-capital";
 
 const invoice = (overrides: Partial<WorkingCapitalInvoice> = {}): WorkingCapitalInvoice => ({
   id: "inv-1", direction: "receivable", counterparty: "Acme", reference: "INV-1",
   issueDate: "2026-10-01", dueDate: "2026-10-01", amount: 1000, paidAmount: 200, ...overrides,
+});
+
+describe("stored working capital invoice recovery", () => {
+  it("treats an absent register as an empty register", () => {
+    expect(parseStoredWorkingCapitalInvoices(null)).toEqual({ ok: true, invoices: [] });
+  });
+
+  it("rejects malformed or partially invalid saved data without returning a partial register", () => {
+    expect(parseStoredWorkingCapitalInvoices("{broken").ok).toBe(false);
+    expect(parseStoredWorkingCapitalInvoices(JSON.stringify([invoice(), { id: "bad" }]))).toMatchObject({ ok: false });
+    expect(parseStoredWorkingCapitalInvoices(JSON.stringify({ invoices: [] }))).toMatchObject({ ok: false });
+  });
+
+  it("rejects duplicate IDs and duplicate invoice identities in saved data", () => {
+    expect(parseStoredWorkingCapitalInvoices(JSON.stringify([invoice(), invoice()]))).toMatchObject({ ok: false });
+    expect(parseStoredWorkingCapitalInvoices(JSON.stringify([
+      invoice(), invoice({ id: "inv-2", counterparty: " acme ", reference: " inv-1 " }),
+    ]))).toMatchObject({ ok: false });
+  });
+
+  it("returns every valid saved invoice after normalisation", () => {
+    const result = parseStoredWorkingCapitalInvoices(JSON.stringify([invoice({ counterparty: " Acme " })]));
+    expect(result).toMatchObject({ ok: true, invoices: [{ counterparty: "Acme" }] });
+  });
 });
 
 describe("working capital invoice validation", () => {
