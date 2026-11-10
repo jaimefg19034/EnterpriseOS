@@ -83,6 +83,17 @@ describe("local finance backup", () => {
     expect(parseLocalFinanceBackup(JSON.stringify({ product: "Other", schemaVersion: 1 })).ok).toBe(false);
   });
 
+  it("rejects duplicate customer or supplier invoice references in a backup", () => {
+    const duplicateReference = createLocalFinanceBackup([
+      invoice(),
+      invoice({ id: "invoice-2", counterparty: " acme ltd ", reference: " inv-100 " }),
+    ], createEmptyCashForecast(13));
+    expect(parseLocalFinanceBackup(JSON.stringify(duplicateReference))).toMatchObject({
+      ok: false,
+      error: "The backup contains duplicate invoices for the same customer or supplier and reference.",
+    });
+  });
+
   it("rejects duplicate invoice IDs and impossible invoice dates", () => {
     const duplicate = createLocalFinanceBackup([invoice(), invoice()], createEmptyCashForecast());
     const invalidDate = createLocalFinanceBackup([invoice({ id: "bad", dueDate: "2026-02-30" })], createEmptyCashForecast());
