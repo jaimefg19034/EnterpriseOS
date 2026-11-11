@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateCashForecast, calculateCashStressScenario, createEmptyCashForecast } from "./cash-forecast";
+import { calculateCashForecast, calculateCashStressScenario, createEmptyCashForecast, parseStoredCashForecast } from "./cash-forecast";
 
 describe("13-week cash forecast", () => {
   it("rolls the opening balance forward using explicit weekly cash movements", () => {
@@ -16,6 +16,29 @@ describe("13-week cash forecast", () => {
     const result = calculateCashForecast(25000, createEmptyCashForecast(13));
     expect(result).toHaveLength(13);
     expect(result.every((week) => week.netCashMovement === 0 && week.closingCash === 25000)).toBe(true);
+  });
+
+  it("rejects malformed saved forecasts instead of silently replacing values", () => {
+    expect(parseStoredCashForecast("{broken").ok).toBe(false);
+    expect(parseStoredCashForecast(JSON.stringify(createEmptyCashForecast(12))).ok).toBe(false);
+    const invalid = createEmptyCashForecast(13);
+    invalid[4].collections = -1;
+    expect(parseStoredCashForecast(JSON.stringify(invalid)).ok).toBe(false);
+    const nonFinite = createEmptyCashForecast(13);
+    nonFinite[2].debtService = Number.NaN;
+    expect(parseStoredCashForecast(JSON.stringify(nonFinite)).ok).toBe(false);
+  });
+
+  it("restores a complete valid saved forecast and rounds currency to cents", () => {
+    const saved = createEmptyCashForecast(13);
+    saved[0].collections = 125.129;
+    const result = parseStoredCashForecast(JSON.stringify(saved));
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.weeks).toHaveLength(13);
+      expect(result.weeks[0].collections).toBe(125.13);
+    }
+    expect(parseStoredCashForecast(null)).toMatchObject({ ok: true, weeks: createEmptyCashForecast(13) });
   });
 
   it("sanitizes invalid and negative inputs", () => {

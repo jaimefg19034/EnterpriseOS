@@ -49,6 +49,9 @@ export function parseLocalFinanceBackup(raw: string): LocalFinanceBackupResult {
   if (!isRecord(parsed) || parsed.product !== "EnterpriseOS" || (parsed.schemaVersion !== 1 && parsed.schemaVersion !== 2 && parsed.schemaVersion !== LOCAL_FINANCE_BACKUP_VERSION)) {
     return { ok: false, error: "This file is not a supported EnterpriseOS backup." };
   }
+  if (typeof parsed.exportedAt !== "string" || !Number.isFinite(Date.parse(parsed.exportedAt))) {
+    return { ok: false, error: "The backup export date is invalid." };
+  }
   if (!Array.isArray(parsed.workingCapitalInvoices) || !Array.isArray(parsed.quarterlyCashForecast) || parsed.quarterlyCashForecast.length !== 13) {
     return { ok: false, error: "The backup must contain an invoice register and exactly 13 forecast weeks." };
   }
@@ -87,7 +90,7 @@ export function parseLocalFinanceBackup(raw: string): LocalFinanceBackupResult {
     data: {
       product: "EnterpriseOS",
       schemaVersion: LOCAL_FINANCE_BACKUP_VERSION,
-      exportedAt: typeof parsed.exportedAt === "string" ? parsed.exportedAt : "",
+      exportedAt: parsed.exportedAt,
       workingCapitalInvoices: invoices,
       quarterlyCashForecast: weeks,
       ...(planningState ? { planningState } : {}),

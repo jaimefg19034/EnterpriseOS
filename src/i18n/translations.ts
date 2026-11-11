@@ -620,6 +620,7 @@ const spanish: Record<string, string> = {
   "Restoring this backup replaces the current invoice register and quarterly cash forecast in this browser. Continue?": "Restaurar esta copia sustituirá el registro de facturas y la previsión trimestral actuales de este navegador. ¿Continuar?",
   "Backup restored successfully. Your current browser data has been replaced.": "Copia restaurada correctamente. Se han sustituido los datos actuales de este navegador.",
   "The backup could not be restored. No data has been changed.": "No se ha podido restaurar la copia. No se ha modificado ningún dato.",
+  "The saved cash forecast is invalid. The backup was not created to protect your data.": "El pronóstico de caja guardado no es válido. No se ha creado la copia para proteger tus datos.",
 
   "BUSINESS OPERATIONS": "OPERACIONES EMPRESARIALES",
   "LOCAL WORKSPACE": "ESPACIO DE TRABAJO LOCAL",

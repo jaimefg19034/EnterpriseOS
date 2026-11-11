@@ -34,6 +34,45 @@ export function calculateCashForecast(
   });
 }
 
+export type StoredCashForecastResult =
+  | { ok: true; weeks: CashForecastWeekInput[] }
+  | { ok: false; error: string };
+
+/** Reads a complete saved forecast without silently replacing malformed values with zero. */
+export function parseStoredCashForecast(raw: string | null): StoredCashForecastResult {
+  if (raw === null) return { ok: true, weeks: createEmptyCashForecast(13) };
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return { ok: false, error: "Saved cash forecast is not valid JSON." };
+  }
+  if (!Array.isArray(parsed) || parsed.length !== 13 || parsed.some((week) => !isValidStoredWeek(week))) {
+    return { ok: false, error: "Saved cash forecast contains invalid or incomplete data." };
+  }
+  return {
+    ok: true,
+    weeks: parsed.map((week) => ({
+      collections: roundForecastAmount(week.collections),
+      operatingPayments: roundForecastAmount(week.operatingPayments),
+      capitalExpenditure: roundForecastAmount(week.capitalExpenditure),
+      debtService: roundForecastAmount(week.debtService),
+    })),
+  };
+}
+
+function isValidStoredWeek(value: unknown): value is CashForecastWeekInput {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const week = value as Record<string, unknown>;
+  return ["collections", "operatingPayments", "capitalExpenditure", "debtService"].every((key) =>
+    typeof week[key] === "number" && Number.isFinite(week[key]) && (week[key] as number) >= 0,
+  );
+}
+
+function roundForecastAmount(value: number): number {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
 export function createEmptyCashForecast(weekCount = 13): CashForecastWeekInput[] {
   return Array.from({ length: Math.max(0, Math.floor(weekCount)) }, () => ({
     collections: 0,

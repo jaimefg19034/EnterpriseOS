@@ -156,6 +156,12 @@ describe("local finance backup", () => {
     expect(parseLocalFinanceBackup(JSON.stringify(backup)).ok).toBe(false);
   });
 
+  it("rejects a missing or invalid backup export timestamp", () => {
+    const backup = createLocalFinanceBackup([], createEmptyCashForecast(13));
+    expect(parseLocalFinanceBackup(JSON.stringify({ ...backup, exportedAt: "" })).ok).toBe(false);
+    expect(parseLocalFinanceBackup(JSON.stringify({ ...backup, exportedAt: "not-a-date" })).ok).toBe(false);
+  });
+
   it("rejects incomplete forecasts and negative cash inputs", () => {
     const tooShort = createLocalFinanceBackup([], createEmptyCashForecast(12));
     const invalidWeek = createLocalFinanceBackup([], createEmptyCashForecast());

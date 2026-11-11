@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { addInvoicePayment, calculateInvoiceAgeing, findDuplicateInvoice, parseInvoiceCsv, parseStoredWorkingCapitalInvoices, summarizeInvoices, validateWorkingCapitalInvoice, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { parseISODateUTC } from "@/domain/reporting-periods";
-import { createEmptyCashForecast } from "@/domain/cash-forecast";
+import { createEmptyCashForecast, parseStoredCashForecast } from "@/domain/cash-forecast";
 import { createLocalFinanceBackup, parseLocalFinanceBackup } from "@/domain/cash-working-capital-backup";
 import { LEGACY_PLANNING_STORAGE_KEY, parseSavedPlanningState, PLANNING_STORAGE_KEY } from "@/domain/planning-storage";
 import { OPERATIONS_STORAGE_KEY, parseOperationsState } from "@/domain/operations";
@@ -242,24 +242,15 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   function readCashForecastForBackup() {
     try {
       const raw = window.localStorage.getItem(CASH_FORECAST_STORAGE_KEY);
-      if (!raw) return createEmptyCashForecast(13);
-      const parsed: unknown = JSON.parse(raw);
-      if (!Array.isArray(parsed) || parsed.length !== 13) return createEmptyCashForecast(13);
-      return parsed.map((item) => {
-        const record = item && typeof item === "object" ? item as Record<string, unknown> : {};
-        const amount = (key: "collections" | "operatingPayments" | "capitalExpenditure" | "debtService") => {
-          const value = record[key];
-          return typeof value === "number" && Number.isFinite(value) ? Math.max(0, value) : 0;
-        };
-        return {
-          collections: amount("collections"),
-          operatingPayments: amount("operatingPayments"),
-          capitalExpenditure: amount("capitalExpenditure"),
-          debtService: amount("debtService"),
-        };
-      });
+      const result = parseStoredCashForecast(raw);
+      if (!result.ok) {
+        setBackupMessage(t("The saved cash forecast is invalid. The backup was not created to protect your data."));
+        return null;
+      }
+      return result.weeks;
     } catch {
-      return createEmptyCashForecast(13);
+      setBackupMessage(t("Browser storage could not be read. Check storage permissions and try again."));
+      return null;
     }
   }
 
@@ -289,7 +280,9 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
       setBackupMessage(t("Browser storage could not be read. Check storage permissions and try again."));
       return;
     }
-    const backup = createLocalFinanceBackup(invoices, readCashForecastForBackup(), undefined, planning, operations);
+    const forecast = readCashForecastForBackup();
+    if (!forecast) return;
+    const backup = createLocalFinanceBackup(invoices, forecast, undefined, planning, operations);
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
