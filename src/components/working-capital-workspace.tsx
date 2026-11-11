@@ -5,8 +5,8 @@ import { addInvoicePayment, calculateInvoiceAgeing, findDuplicateInvoice, parseI
 import { parseISODateUTC } from "@/domain/reporting-periods";
 import { createEmptyCashForecast, parseStoredCashForecast } from "@/domain/cash-forecast";
 import { createLocalFinanceBackup, parseLocalFinanceBackup, parseStoredFinanceBackupSections } from "@/domain/cash-working-capital-backup";
-import { LEGACY_PLANNING_STORAGE_KEY, parseSavedPlanningState, PLANNING_STORAGE_KEY } from "@/domain/planning-storage";
-import { OPERATIONS_STORAGE_KEY, parseOperationsState } from "@/domain/operations";
+import { LEGACY_PLANNING_STORAGE_KEY, PLANNING_STORAGE_KEY } from "@/domain/planning-storage";
+import { OPERATIONS_STORAGE_KEY } from "@/domain/operations";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
 import { translate, type Language } from "@/i18n/translations";
 
@@ -304,6 +304,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   async function restoreLocalBackup(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
+    let rollbackFailed = false;
     try {
       if (file.size > 5 * 1024 * 1024) {
         setBackupMessage(t("The backup file is too large. Maximum size is 5 MB."));
@@ -335,7 +336,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
           if (previousOperations === null) window.localStorage.removeItem(OPERATIONS_STORAGE_KEY);
           else window.localStorage.setItem(OPERATIONS_STORAGE_KEY, previousOperations);
         } catch {
-          // Best-effort rollback if the browser blocks all storage writes.
+          rollbackFailed = true;
         }
         throw storageError;
       }
@@ -349,7 +350,9 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
       if (result.data.operationsState) window.dispatchEvent(new Event("enterpriseos:operations-updated"));
       setBackupMessage(t("Backup restored successfully. Your current browser data has been replaced."));
     } catch {
-      setBackupMessage(t("The backup could not be restored. No data has been changed."));
+      setBackupMessage(t(rollbackFailed
+        ? "The restore failed and the previous data could not be fully recovered. Some browser data may have changed. Reload the page and download any recoverable data before continuing."
+        : "The backup could not be restored. No data has been changed."));
     } finally {
       event.target.value = "";
     }

@@ -910,6 +910,7 @@ const spanish: Record<string, string> = {
   "Saved invoice data contains duplicate customer or supplier references. The original browser data has been preserved.": "Los datos de facturas guardados contienen referencias duplicadas de clientes o proveedores. Se han conservado los datos originales del navegador.",
   "Saved invoice data could not be accessed. The original browser data has been preserved.": "No se ha podido acceder a los datos de facturas guardados. Se han conservado los datos originales del navegador.",
 
+  "The restore failed and the previous data could not be fully recovered. Some browser data may have changed. Reload the page and download any recoverable data before continuing.": "La restauración ha fallado y no se han podido recuperar por completo los datos anteriores. Es posible que algunos datos del navegador hayan cambiado. Recarga la página y descarga cualquier dato recuperable antes de continuar.",
   "Download original invoice data": "Descargar datos originales de facturas",
   "A copy of the original saved invoice data has been downloaded. Keep it safe before attempting recovery.": "Se ha descargado una copia de los datos originales de facturas. Guárdala en un lugar seguro antes de intentar recuperarlos.",
 };
