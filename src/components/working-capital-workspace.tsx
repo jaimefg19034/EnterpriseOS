@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent 
 import { addInvoicePayment, calculateInvoiceAgeing, findDuplicateInvoice, parseInvoiceCsv, parseStoredWorkingCapitalInvoices, summarizeInvoices, validateWorkingCapitalInvoice, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { parseISODateUTC } from "@/domain/reporting-periods";
 import { createEmptyCashForecast, parseStoredCashForecast } from "@/domain/cash-forecast";
-import { createLocalFinanceBackup, parseLocalFinanceBackup } from "@/domain/cash-working-capital-backup";
+import { createLocalFinanceBackup, parseLocalFinanceBackup, parseStoredFinanceBackupSections } from "@/domain/cash-working-capital-backup";
 import { LEGACY_PLANNING_STORAGE_KEY, parseSavedPlanningState, PLANNING_STORAGE_KEY } from "@/domain/planning-storage";
 import { OPERATIONS_STORAGE_KEY, parseOperationsState } from "@/domain/operations";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
@@ -269,17 +269,23 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   }
 
   function downloadLocalBackup() {
-    let planning = null;
-    let operations = null;
+    let rawPlanning: string | null;
+    let legacyPlanning: string | null;
+    let rawOperations: string | null;
     try {
-      const rawPlanning = window.localStorage.getItem(PLANNING_STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_PLANNING_STORAGE_KEY);
-      planning = rawPlanning ? parseSavedPlanningState(rawPlanning) : null;
-      const rawOperations = window.localStorage.getItem(OPERATIONS_STORAGE_KEY);
-      operations = rawOperations ? parseOperationsState(rawOperations) : null;
+      rawPlanning = window.localStorage.getItem(PLANNING_STORAGE_KEY);
+      legacyPlanning = rawPlanning === null ? window.localStorage.getItem(LEGACY_PLANNING_STORAGE_KEY) : null;
+      rawOperations = window.localStorage.getItem(OPERATIONS_STORAGE_KEY);
     } catch {
       setBackupMessage(t("Browser storage could not be read. Check storage permissions and try again."));
       return;
     }
+    const sections = parseStoredFinanceBackupSections(rawPlanning, legacyPlanning, rawOperations);
+    if (!sections.ok) {
+      setBackupMessage(t(sections.error));
+      return;
+    }
+    const { planningState: planning, operationsState: operations } = sections;
     const forecast = readCashForecastForBackup();
     if (!forecast) return;
     const backup = createLocalFinanceBackup(invoices, forecast, undefined, planning, operations);

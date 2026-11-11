@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createEmptyCashForecast } from "./cash-forecast";
-import { createLocalFinanceBackup, parseLocalFinanceBackup } from "./cash-working-capital-backup";
+import { createLocalFinanceBackup, parseLocalFinanceBackup, parseStoredFinanceBackupSections } from "./cash-working-capital-backup";
 import type { WorkingCapitalInvoice } from "./working-capital";
 import { addPlanningYear, createInitialPlanningState, parseSavedPlanningState, serialisePlanningState } from "./planning-storage";
 
@@ -30,6 +30,24 @@ describe("local finance backup", () => {
     const restored = parseLocalFinanceBackup(JSON.stringify(backup));
     expect(restored.ok).toBe(true);
     if (restored.ok) expect(restored.data.operationsState?.opportunities[0].company).toBe("Acme");
+  });
+
+  it("rejects corrupted saved planning and operations sections before backup", () => {
+    const validPlanning = JSON.stringify(createInitialPlanningState({
+      annualRevenueBudget: 2_976_000,
+      costOfGoodsSoldPercent: 39,
+      annualOperatingExpenses: 1_060_800,
+      annualDepreciationAndAmortisation: 150_000,
+      annualInterestExpense: 50_400,
+      taxRatePercent: 25,
+    }, {}, "base", "2026-11-11T10:00:00.000Z"));
+    expect(parseStoredFinanceBackupSections("{broken", null, null).ok).toBe(false);
+    expect(parseStoredFinanceBackupSections(null, null, "{broken").ok).toBe(false);
+    expect(parseStoredFinanceBackupSections(validPlanning, null, null).ok).toBe(true);
+    expect(parseStoredFinanceBackupSections(null, validPlanning, null).ok).toBe(true);
+    expect(parseStoredFinanceBackupSections(null, null, null)).toMatchObject({
+      ok: true, planningState: null, operationsState: null,
+    });
   });
 
   it("rejects corrupted operations data before restore", () => {

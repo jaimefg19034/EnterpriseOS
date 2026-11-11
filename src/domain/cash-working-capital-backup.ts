@@ -1,7 +1,7 @@
 import type { CashForecastWeekInput } from "./cash-forecast";
 import { findDuplicateInvoice, normaliseInvoice, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "./working-capital";
 import { parseSavedPlanningState, type SavedPlanningState } from "./planning-storage";
-import { validateOperationsState, type OperationsState } from "./operations";
+import { parseOperationsState, validateOperationsState, type OperationsState } from "./operations";
 
 export const LOCAL_FINANCE_BACKUP_VERSION = 3;
 
@@ -18,6 +18,28 @@ export type LocalFinanceBackup = {
 export type LocalFinanceBackupResult =
   | { ok: true; data: LocalFinanceBackup }
   | { ok: false; error: string };
+
+export type StoredFinanceBackupSectionsResult =
+  | { ok: true; planningState: SavedPlanningState | null; operationsState: OperationsState | null }
+  | { ok: false; error: string };
+
+/** Refuses to create an incomplete backup when saved optional sections are malformed. */
+export function parseStoredFinanceBackupSections(
+  planningRaw: string | null,
+  legacyPlanningRaw: string | null,
+  operationsRaw: string | null,
+): StoredFinanceBackupSectionsResult {
+  const rawPlanning = planningRaw ?? legacyPlanningRaw;
+  const planningState = rawPlanning ? parseSavedPlanningState(rawPlanning) : null;
+  if (rawPlanning && !planningState) {
+    return { ok: false, error: "Saved planning data is invalid. The backup was not created to protect your data." };
+  }
+  const operationsState = operationsRaw ? parseOperationsState(operationsRaw) : null;
+  if (operationsRaw && !operationsState) {
+    return { ok: false, error: "Saved operations data is invalid. The backup was not created to protect your data." };
+  }
+  return { ok: true, planningState, operationsState };
+}
 
 export function createLocalFinanceBackup(
   invoices: WorkingCapitalInvoice[],
