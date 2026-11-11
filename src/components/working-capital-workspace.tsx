@@ -77,6 +77,10 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
 
   function addInvoice(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!storageWritable) {
+      setInvoiceFormError(t("Invoice changes are unavailable until the saved register is recovered or restored from a backup."));
+      return;
+    }
     const gross = Number(amount);
     const paid = Number(paidAmount);
     const candidate: WorkingCapitalInvoice = {
@@ -99,6 +103,11 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   }
 
   async function prepareCsvImport(event: ChangeEvent<HTMLInputElement>) {
+    if (!storageWritable) {
+      setCsvImportMessage(t("Invoice changes are unavailable until the saved register is recovered or restored from a backup."));
+      event.target.value = "";
+      return;
+    }
     const file = event.target.files?.[0];
     if (!file) return;
     setCsvPreview([]);
@@ -129,6 +138,10 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   }
 
   function confirmCsvImport() {
+    if (!storageWritable) {
+      setCsvImportMessage(t("Invoice changes are unavailable until the saved register is recovered or restored from a backup."));
+      return;
+    }
     const seen = [...invoices];
     for (const invoice of csvPreview) {
       if (findDuplicateInvoice(invoice, seen)) {
@@ -148,6 +161,10 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
 
   function registerPayment(event: FormEvent<HTMLFormElement>, invoice: WorkingCapitalInvoice) {
     event.preventDefault();
+    if (!storageWritable) {
+      setPaymentErrors((current) => ({ ...current, [invoice.id]: t("Invoice changes are unavailable until the saved register is recovered or restored from a backup.") }));
+      return;
+    }
     const form = new FormData(event.currentTarget);
     const amount = Number(form.get("paymentAmount"));
     const date = String(form.get("paymentDate") ?? "");
@@ -169,6 +186,10 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   }
 
   async function exportRegister() {
+    if (!storageWritable) {
+      setBackupMessage(t("The saved invoice register is invalid or unavailable. Export was blocked to avoid presenting incomplete data."));
+      return;
+    }
     await downloadExcelWorkbook({
       filename: `enterpriseos-${direction === "receivable" ? "receivables" : "payables"}-aging.xlsx`,
       sheets: [
@@ -269,6 +290,10 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   }
 
   function downloadLocalBackup() {
+    if (!storageWritable) {
+      setBackupMessage(t("The saved invoice register is invalid or unavailable. The backup was not created to protect your data."));
+      return;
+    }
     let rawPlanning: string | null;
     let legacyPlanning: string | null;
     let rawOperations: string | null;
