@@ -5,11 +5,12 @@ import {
   calculateCashForecast,
   calculateCashStressScenario,
   createEmptyCashForecast,
+  parseStoredCashForecast,
   type CashForecastWeekInput,
 } from "@/domain/cash-forecast";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
 import { allocateInvoicesToCashWeeks } from "@/domain/invoice-cash-integration";
-import { validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "@/domain/working-capital";
+import { parseStoredWorkingCapitalInvoices, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { translate, type Language } from "@/i18n/translations";
 
 type CashForecastWorkspaceProps = {
@@ -25,18 +26,11 @@ function toISODate(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-function readStoredInvoices(): WorkingCapitalInvoice[] {
+function readStoredInvoices() {
   try {
-    const raw = window.localStorage.getItem(INVOICE_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-      .map((item) => validateWorkingCapitalInvoice(item))
-      .filter((result) => result.valid)
-      .map((result) => result.invoice);
+    return parseStoredWorkingCapitalInvoices(window.localStorage.getItem(INVOICE_STORAGE_KEY));
   } catch {
-    return [];
+    return { ok: false as const, error: "Saved invoice data could not be accessed. The original browser data has been preserved." };
   }
 }
 
@@ -113,53 +107,68 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
   const t = (value: string) => translate(value, language);
   const [weeks, setWeeks] = useState<CashForecastWeekInput[]>(() => createEmptyCashForecast(13));
   const [storageReady, setStorageReady] = useState(false);
+  const [forecastStorageWritable, setForecastStorageWritable] = useState(false);
+  const [forecastStorageError, setForecastStorageError] = useState("");
+  const [forecastRecoveryData, setForecastRecoveryData] = useState<string | null>(null);
   const [invoices, setInvoices] = useState<WorkingCapitalInvoice[]>([]);
+  const [invoiceStorageError, setInvoiceStorageError] = useState("");
+  const [invoiceRecoveryData, setInvoiceRecoveryData] = useState<string | null>(null);
   const [includeInvoices, setIncludeInvoices] = useState(false);
   const [collectionReduction, setCollectionReduction] = useState(15);
   const [paymentIncrease, setPaymentIncrease] = useState(10);
 
   useEffect(() => {
     let restored: CashForecastWeekInput[] | null = null;
+    let storageError = "";
+    let originalData: string | null = null;
     try {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed: unknown = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length === 13) {
-          restored = parsed.map((item): CashForecastWeekInput => {
-            const record = item && typeof item === "object" ? item as Record<string, unknown> : {};
-            const amount = (key: keyof CashForecastWeekInput) => {
-              const value = record[key];
-              return typeof value === "number" && Number.isFinite(value) ? Math.max(0, value) : 0;
-            };
-            return {
-              collections: amount("collections"),
-              operatingPayments: amount("operatingPayments"),
-              capitalExpenditure: amount("capitalExpenditure"),
-              debtService: amount("debtService"),
-            };
-          });
-        }
+      originalData = window.localStorage.getItem(STORAGE_KEY);
+      const result = parseStoredCashForecast(originalData);
+      if (result.ok) {
+        restored = result.weeks;
+      } else {
+        storageError = result.error;
       }
     } catch {
-      // Storage can be disabled by browser privacy settings; the worksheet remains usable in memory.
+      storageError = "Saved cash forecast could not be accessed. The original browser data has been preserved.";
     }
     window.setTimeout(() => {
-      if (restored) setWeeks(restored);
+      if (storageError) {
+        setForecastStorageWritable(false);
+        setForecastStorageError(t(storageError));
+        setForecastRecoveryData(originalData);
+      } else {
+        if (restored) setWeeks(restored);
+        setForecastStorageWritable(true);
+      }
       setStorageReady(true);
     }, 0);
   }, []);
 
   useEffect(() => {
-    if (!storageReady) return;
+    if (!storageReady || !forecastStorageWritable) return;
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(weeks));
     } catch {
       // Keep edits in the current session if local storage is unavailable or full.
     }
-  }, [weeks, storageReady]);
+  }, [weeks, storageReady, forecastStorageWritable]);
 
   useEffect(() => {
-    const refreshInvoices = () => setInvoices(readStoredInvoices());
+    const refreshInvoices = () => {
+      const result = readStoredInvoices();
+      if (result.ok) {
+        setInvoices(result.invoices);
+        setInvoiceStorageError("");
+        setInvoiceRecoveryData(null);
+      } else {
+        let original: string | null = null;
+        try { original = window.localStorage.getItem(INVOICE_STORAGE_KEY); } catch { /* Preserve the warning if storage is blocked. */ }
+        setInvoices([]);
+        setInvoiceStorageError(t(result.error));
+        setInvoiceRecoveryData(original);
+      }
+    };
     refreshInvoices();
     window.addEventListener(INVOICE_UPDATED_EVENT, refreshInvoices);
     window.addEventListener("storage", refreshInvoices);
@@ -173,25 +182,20 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
     const refreshCashForecast = () => {
       try {
         const raw = window.localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-        const parsed: unknown = JSON.parse(raw);
-        if (!Array.isArray(parsed) || parsed.length !== 13) return;
-        const restored = parsed.map((item): CashForecastWeekInput => {
-          const record = item && typeof item === "object" ? item as Record<string, unknown> : {};
-          const amount = (key: keyof CashForecastWeekInput) => {
-            const value = record[key];
-            return typeof value === "number" && Number.isFinite(value) ? Math.max(0, value) : 0;
-          };
-          return {
-            collections: amount("collections"),
-            operatingPayments: amount("operatingPayments"),
-            capitalExpenditure: amount("capitalExpenditure"),
-            debtService: amount("debtService"),
-          };
-        });
-        setWeeks(restored);
+        const result = parseStoredCashForecast(raw);
+        if (!result.ok) {
+          setForecastStorageWritable(false);
+          setForecastStorageError(t(result.error));
+          setForecastRecoveryData(raw);
+          return;
+        }
+        setWeeks(result.weeks);
+        setForecastStorageWritable(true);
+        setForecastStorageError("");
+        setForecastRecoveryData(null);
       } catch {
-        // A failed restore never clears the current in-memory worksheet.
+        setForecastStorageWritable(false);
+        setForecastStorageError(t("Saved cash forecast could not be accessed. The original browser data has been preserved."));
       }
     };
     window.addEventListener("enterpriseos:cash-forecast-updated", refreshCashForecast);
@@ -229,11 +233,25 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
   const stressDifference = stress.finalCash - finalCash;
 
   function updateWeek(index: number, key: keyof CashForecastWeekInput, raw: string) {
+    if (!forecastStorageWritable) return;
     const value = raw === "" ? 0 : Number(raw);
     if (!Number.isFinite(value)) return;
     setWeeks((current) => current.map((week, weekIndex) =>
       weekIndex === index ? { ...week, [key]: Math.max(0, value) } : week,
     ));
+  }
+
+  function downloadRecoveryData(raw: string | null, filename: string) {
+    if (raw === null) return;
+    const blob = new Blob([raw], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   async function exportForecast() {
@@ -334,11 +352,15 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
           <p>{t("Plan expected cash collections and payments week by week to anticipate liquidity pressure.")}</p>
         </div>
         <div className="cash-forecast-actions">
-          <button type="button" className="secondary-button" onClick={() => setWeeks(createEmptyCashForecast(13))}>{t("Clear forecast")}</button>
-          <button type="button" className="primary-button" onClick={exportForecast}>{t("Export forecast")}</button>
+          <button type="button" className="secondary-button" disabled={!forecastStorageWritable} onClick={() => setWeeks(createEmptyCashForecast(13))}>{t("Clear forecast")}</button>
+          <button type="button" className="primary-button" disabled={!forecastStorageWritable} onClick={exportForecast}>{t("Export forecast")}</button>
+          {forecastRecoveryData !== null && <button type="button" className="secondary-button" onClick={() => downloadRecoveryData(forecastRecoveryData, "enterpriseos-cash-forecast-recovery.json")}>{t("Download original forecast data")}</button>}
+          {invoiceRecoveryData !== null && <button type="button" className="secondary-button" onClick={() => downloadRecoveryData(invoiceRecoveryData, "enterpriseos-invoice-recovery.json")}>{t("Download original invoice data")}</button>}
         </div>
       </div>
 
+      {forecastStorageError && <p className="cash-forecast-warning" role="alert">{forecastStorageError} {t("Editing and export are blocked until the original forecast is recovered or a valid backup is restored.")}</p>}
+      {invoiceStorageError && <p className="cash-forecast-warning" role="alert">{invoiceStorageError} {t("Invoice projections are disabled because the complete invoice register could not be validated.")}</p>}
       <section className="panel cash-forecast-invoice-panel" aria-labelledby="invoice-cash-integration-title">
         <div className="cash-forecast-invoice-head">
           <div>
@@ -347,7 +369,7 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
             <p>{t("Open customer invoices become expected collections; open supplier invoices become operating payments, based on their due dates.")}</p>
           </div>
           <label className="cash-forecast-invoice-toggle">
-            <input type="checkbox" checked={includeInvoices} onChange={(event) => setIncludeInvoices(event.target.checked)} />
+            <input type="checkbox" checked={includeInvoices} disabled={Boolean(invoiceStorageError)} onChange={(event) => setIncludeInvoices(event.target.checked)} />
             <span>{t("Include open invoices")}</span>
           </label>
         </div>
@@ -413,7 +435,7 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
                 <tr key={index}>
                   <th scope="row">{dates[index].toLocaleDateString(language === "es" ? "es-ES" : "en-GB", { day: "2-digit", month: "short" })}</th>
                   {FIELDS.map((field) => <td key={field.key}>
-                    <label className="cash-forecast-input-wrap"><span className="sr-only">{t(field.label)} — {t("Week")} {index + 1}</span><input type="number" min="0" step="100" inputMode="decimal" value={weeks[index][field.key] || ""} placeholder="0" onChange={(event) => updateWeek(index, field.key, event.target.value)} /></label>
+                    <label className="cash-forecast-input-wrap"><span className="sr-only">{t(field.label)} — {t("Week")} {index + 1}</span><input type="number" min="0" step="100" inputMode="decimal" disabled={!forecastStorageWritable} value={weeks[index][field.key] || ""} placeholder="0" onChange={(event) => updateWeek(index, field.key, event.target.value)} /></label>
                     {includeInvoices && field.key === "collections" && invoiceProjection[index].receivableCollections > 0 && <small className="cash-forecast-linked-amount">+{formatMoney(invoiceProjection[index].receivableCollections, language)} {t("invoices")}</small>}
                     {includeInvoices && field.key === "operatingPayments" && invoiceProjection[index].payablePayments > 0 && <small className="cash-forecast-linked-amount">+{formatMoney(invoiceProjection[index].payablePayments, language)} {t("invoices")}</small>}
                   </td>)}

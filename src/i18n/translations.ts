@@ -910,6 +910,10 @@ const spanish: Record<string, string> = {
   "Saved invoice data contains duplicate customer or supplier references. The original browser data has been preserved.": "Los datos de facturas guardados contienen referencias duplicadas de clientes o proveedores. Se han conservado los datos originales del navegador.",
   "Saved invoice data could not be accessed. The original browser data has been preserved.": "No se ha podido acceder a los datos de facturas guardados. Se han conservado los datos originales del navegador.",
 
+  "Saved cash forecast could not be accessed. The original browser data has been preserved.": "No se ha podido acceder a la previsión de caja guardada. Se han conservado los datos originales del navegador.",
+  "Editing and export are blocked until the original forecast is recovered or a valid backup is restored.": "La edición y la exportación están bloqueadas hasta recuperar la previsión original o restaurar una copia válida.",
+  "Invoice projections are disabled because the complete invoice register could not be validated.": "Las proyecciones de facturas están desactivadas porque no se ha podido validar el registro completo.",
+  "Download original forecast data": "Descargar datos originales de la previsión",
   "Invoice changes are unavailable until the saved register is recovered or restored from a backup.": "No se pueden modificar las facturas hasta recuperar el registro guardado o restaurarlo desde una copia de seguridad.",
   "The saved invoice register is invalid or unavailable. Export was blocked to avoid presenting incomplete data.": "El registro de facturas guardado no es válido o no está disponible. Se ha bloqueado la exportación para evitar mostrar datos incompletos.",
   "The saved invoice register is invalid or unavailable. The backup was not created to protect your data.": "El registro de facturas guardado no es válido o no está disponible. No se ha creado la copia para proteger tus datos.",
