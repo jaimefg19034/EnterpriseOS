@@ -40,7 +40,17 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   const [csvImportMessage, setCsvImportMessage] = useState("");
   const csvInputRef = useRef<HTMLInputElement>(null);
   const backupInputRef = useRef<HTMLInputElement>(null);
-  const today = useMemo(() => todayISO(), []);
+  const [today, setToday] = useState(todayISO);
+
+  useEffect(() => {
+    const refreshToday = () => setToday(todayISO());
+    const interval = window.setInterval(refreshToday, 60_000);
+    document.addEventListener("visibilitychange", refreshToday);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", refreshToday);
+    };
+  }, []);
   const visible = useMemo(() => invoices.filter((item) => item.direction === direction), [invoices, direction]);
   const aged = useMemo(() => calculateInvoiceAgeing(visible, today).sort((a, b) => a.invoice.dueDate.localeCompare(b.invoice.dueDate)), [visible, today]);
   const summary = useMemo(() => summarizeInvoices(aged, today), [aged, today]);
