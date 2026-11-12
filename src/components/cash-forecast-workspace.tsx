@@ -94,7 +94,7 @@ function CashBalanceChart({ values, openingCash, language, stressValues }: {
         })}
         <polyline points={points} fill="none" stroke="#5872c7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
         {stressValues && <polyline points={stressPoints} fill="none" stroke="#d28b45" strokeWidth="2.5" strokeDasharray="6 5" strokeLinecap="round" strokeLinejoin="round" />}
-        {all.map((value, index) => <circle key={index} cx={x(index)} cy={y(value)} r={index === all.length - 1 ? 4.5 : 2.7} fill={value < 0 ? "#c96e70" : "#5872c7"} />)}
+        {[openingCash, ...values].map((value, index) => <circle key={`base-${index}`} cx={x(index)} cy={y(value)} r={index === values.length ? 4.5 : 2.7} fill={value < 0 ? "#c96e70" : "#5872c7"} />)}\n        {stressValues && [openingCash, ...stressValues].slice(1).map((value, index) => <circle key={`stress-${index}`} cx={x(index + 1)} cy={y(value)} r="2.4" fill={value < 0 ? "#c96e70" : "#d28b45"} />)}
         <text x="24" y="169" fill="#7c899c" fontSize="9">{translate("Opening", language)}</text>
         <text x="696" y="169" textAnchor="end" fill="#7c899c" fontSize="9">{translate("Week 13", language)}</text>
       </svg>
