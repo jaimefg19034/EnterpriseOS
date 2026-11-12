@@ -594,6 +594,11 @@ export function PlanningWorkspace({ language }: { language: Language }) {
             <div><span>{t("Budget to date")}</span><strong>{formatCurrency(result.budgetRevenueToDate, true)}</strong></div>
             <div><span>{t("Remaining forecast")}</span><strong>{formatCurrency(result.remainingForecastRevenue, true)}</strong></div>
           </div>
+          <div className="planning-chart-summary planning-variance-bridge" aria-label={t("Revenue variance bridge")}>
+            <div><span>{t("Actuals vs. budget to date")}</span><strong className={result.actualRevenueVarianceToDate >= 0 ? "variance-positive" : "variance-negative"}>{result.actualRevenueVarianceToDate >= 0 ? "+" : "−"}{formatCurrency(Math.abs(result.actualRevenueVarianceToDate), true)}</strong></div>
+            <div><span>{t("Remaining forecast vs. budget")}</span><strong className={result.remainingForecastVariance >= 0 ? "variance-positive" : "variance-negative"}>{result.remainingForecastVariance >= 0 ? "+" : "−"}{formatCurrency(Math.abs(result.remainingForecastVariance), true)}</strong></div>
+            <div><span>{t("Full-year revenue variance")}</span><strong className={result.revenueVariance >= 0 ? "variance-positive" : "variance-negative"}>{result.revenueVariance >= 0 ? "+" : "−"}{formatCurrency(Math.abs(result.revenueVariance), true)}</strong></div>
+          </div>
         </section>
       </div>
 
