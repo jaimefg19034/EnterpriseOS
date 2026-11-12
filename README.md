@@ -45,7 +45,7 @@ The first release focuses on a dependable management P&L model and a lightweight
 
 ## Project roadmap
 
-The product is being developed in deliberate stages. See [the 18-month product roadmap](docs/roadmap.md) for milestones, release gates and the day-by-day working method.
+The product is being developed in deliberate stages. See [the 18-month product roadmap](docs/roadmap.md) for milestones, release gates and the day-by-day working method. See the [competitive landscape and product gap assessment](docs/competitive-landscape.md) for the November 2026 market scan and evidence-based product priorities.
 
 ## Local development
 
