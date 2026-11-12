@@ -482,6 +482,9 @@ button:focus-visible, input:focus-visible {
 .planning-chart-summary > div { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .planning-chart-summary span { color: #929daf; font-size: 8px; }
 .planning-chart-summary strong { overflow: hidden; color: #344158; text-overflow: ellipsis; white-space: nowrap; font: 750 12px "Manrope",sans-serif; font-variant-numeric: tabular-nums; }
+.planning-variance-bridge { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e7ebf2; }
+.planning-variance-bridge .variance-positive { color: #16845b; }
+.planning-variance-bridge .variance-negative { color: #c34d58; }
 .monthly-plan-panel { margin-top: 14px; padding: 17px 18px 13px; }
 .monthly-table-scroll { width: 100%; margin-top: 14px; overflow-x: auto; }
 .monthly-plan-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 9px; white-space: nowrap; }
