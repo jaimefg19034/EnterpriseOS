@@ -116,6 +116,25 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
   const [includeInvoices, setIncludeInvoices] = useState(false);
   const [collectionReduction, setCollectionReduction] = useState(15);
   const [paymentIncrease, setPaymentIncrease] = useState(10);
+  const [asOfDate, setAsOfDate] = useState(() => toISODate(new Date()));
+
+  useEffect(() => {
+    const refreshCurrentDate = () => {
+      const nextDate = toISODate(new Date());
+      setAsOfDate((current) => current === nextDate ? current : nextDate);
+    };
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") refreshCurrentDate();
+    };
+    const interval = window.setInterval(refreshCurrentDate, 60_000);
+    window.addEventListener("focus", refreshCurrentDate);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", refreshCurrentDate);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
+  }, []);
 
   useEffect(() => {
     let restored: CashForecastWeekInput[] | null = null;
@@ -202,8 +221,7 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
     return () => window.removeEventListener("enterpriseos:cash-forecast-updated", refreshCashForecast);
   }, []);
 
-  const start = useMemo(() => mondayOf(new Date()), []);
-  const asOfDate = useMemo(() => toISODate(new Date()), []);
+  const start = useMemo(() => mondayOf(new Date(`${asOfDate}T00:00:00`)), [asOfDate]);
   const dates = useMemo(() => Array.from({ length: 13 }, (_, index) => addDays(start, index * 7)), [start]);
   const futureDatedPayments = useMemo(() => findFutureDatedInvoicePayments(invoices, asOfDate), [invoices, asOfDate]);
   const invoiceProjection = useMemo(
