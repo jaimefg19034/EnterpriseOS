@@ -577,6 +577,19 @@ export function PlanningWorkspace({ language }: { language: Language }) {
             <span aria-hidden="true">ⓘ</span>
             <p>{t("Scenario adjustments change future revenue, COGS ratio and annual operating costs. The monthly revenue profile uses illustrative seasonality weights.")}</p>
           </div>
+          <div className="planning-model-logic">
+            <div className="panel-kicker">{t("MODEL TRANSPARENCY")}</div>
+            <h3>{t("How the forecast is calculated")}</h3>
+            <ul>
+              <li>{t("Monthly budget = annual revenue budget × seasonality weight.")}</li>
+              <li>{t("Future revenue = monthly budget × (1 + scenario revenue adjustment).")}</li>
+              <li>{t("Projected revenue = actual revenue entered + remaining forecast.")}</li>
+              <li>{t("COGS = projected revenue × adjusted COGS percentage.")}</li>
+              <li>{t("EBITDA = projected revenue − COGS − operating expenses.")}</li>
+              <li>{t("Tax = max(0, profit before tax) × assumed tax rate.")}</li>
+            </ul>
+            <p>{t("Actual revenue is manually entered; it is not imported from accounting software.")}</p>
+          </div>
         </section>
 
         <section id="planning-performance" className="panel planning-performance-panel">

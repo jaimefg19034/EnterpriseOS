@@ -2,6 +2,15 @@ export type Language = "en" | "es";
 
 const spanish: Record<string, string> = {
   "Business operations": "Operaciones de negocio",
+  "MODEL TRANSPARENCY": "TRANSPARENCIA DEL MODELO",
+  "How the forecast is calculated": "Cómo se calcula la previsión",
+  "Monthly budget = annual revenue budget × seasonality weight.": "Presupuesto mensual = presupuesto anual de ingresos × peso de estacionalidad.",
+  "Future revenue = monthly budget × (1 + scenario revenue adjustment).": "Ingresos futuros = presupuesto mensual × (1 + ajuste de ingresos del escenario).",
+  "Projected revenue = actual revenue entered + remaining forecast.": "Ingresos proyectados = ingresos reales introducidos + previsión restante.",
+  "COGS = projected revenue × adjusted COGS percentage.": "Coste de ventas = ingresos proyectados × porcentaje ajustado del coste de ventas.",
+  "EBITDA = projected revenue − COGS − operating expenses.": "EBITDA = ingresos proyectados − coste de ventas − gastos operativos.",
+  "Tax = max(0, profit before tax) × assumed tax rate.": "Impuestos = máximo(0, beneficio antes de impuestos) × tipo impositivo supuesto.",
+  "Actual revenue is manually entered; it is not imported from accounting software.": "Los ingresos reales se introducen manualmente; no proceden de una importación del programa contable.",
   "Revenue variance bridge": "Desglose de la desviación de ingresos",
   "Actuals vs. budget to date": "Real frente a presupuesto hasta la fecha",
   "Remaining forecast vs. budget": "Previsión restante frente al presupuesto",
