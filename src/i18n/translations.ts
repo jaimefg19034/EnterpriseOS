@@ -2,6 +2,15 @@ export type Language = "en" | "es";
 
 const spanish: Record<string, string> = {
   "Business operations": "Operaciones de negocio",
+  "Budget to date": "Presupuesto hasta la fecha",
+  "Actual revenue variance to date": "Desviación real de ingresos hasta la fecha",
+  "Remaining budget revenue": "Presupuesto de ingresos pendiente",
+  "Remaining forecast variance": "Desviación de la previsión pendiente",
+  "Budget allocated to actual months": "Presupuesto asignado a los meses con datos reales",
+  "Actual revenue less budget to date": "Ingresos reales menos presupuesto hasta la fecha",
+  "Full-year budget less budget to date": "Presupuesto anual menos presupuesto hasta la fecha",
+  "Forecast less remaining budget": "Previsión menos presupuesto pendiente",
+  "Actual variance plus remaining forecast variance": "Desviación real más desviación de la previsión pendiente",
   "MODEL TRANSPARENCY": "TRANSPARENCIA DEL MODELO",
   "How the forecast is calculated": "Cómo se calcula la previsión",
   "Monthly budget = annual revenue budget × seasonality weight.": "Presupuesto mensual = presupuesto anual de ingresos × peso de estacionalidad.",
