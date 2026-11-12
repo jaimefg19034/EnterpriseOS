@@ -49,6 +49,8 @@ Dates are planning targets, not promises. A stage does not advance just because 
 - Add regression tests before changing financial calculations.
 
 ### P1 — Make the financial workflow dependable
+- Use the [competitive landscape and product gap assessment](competitive-landscape.md) as a quarterly input to priorities; validate gaps with customer discovery rather than copying competitor feature lists.
+- Prioritise transparent, rolling finance planning and source-to-report traceability over broad ERP feature count.
 - Define a common reporting-period model (month, quarter, financial year).
 - Add actual-versus-budget-versus-forecast variance analysis with consistent formulas.
 - Strengthen three-statement integrity checks and explain reconciliation differences.
