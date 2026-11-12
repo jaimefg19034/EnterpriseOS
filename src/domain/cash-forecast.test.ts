@@ -84,7 +84,7 @@ describe("cash stress scenario", () => {
     expect(result.firstNegativeWeek).toBe(-1);
   });
 
-  it("caps scenario assumptions and flags the first negative week", () =>
+  it("caps scenario assumptions and flags the first negative week", () => {
     const result = calculateCashStressScenario(100, [
       { collections: 100, operatingPayments: 0, capitalExpenditure: 0, debtService: 0 },
       { collections: 0, operatingPayments: 200, capitalExpenditure: 0, debtService: 0 },
