@@ -1,9 +1,56 @@
 import { describe, expect, it } from "vitest";
-import { addInvoicePayment, calculateInvoiceAgeing, findDuplicateInvoice, normaliseInvoice, parseInvoiceCsv, parseStoredWorkingCapitalInvoices, summarizeInvoices, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "./working-capital";
+import { addInvoicePayment, calculateInvoiceAgeing, findDuplicateInvoice, findFutureDatedInvoicePayments, normaliseInvoice, parseInvoiceCsv, parseStoredWorkingCapitalInvoices, removeFutureInvoicePayment, summarizeInvoices, validateWorkingCapitalInvoice, type WorkingCapitalInvoice } from "./working-capital";
 
 const invoice = (overrides: Partial<WorkingCapitalInvoice> = {}): WorkingCapitalInvoice => ({
   id: "inv-1", direction: "receivable", counterparty: "Acme", reference: "INV-1",
   issueDate: "2026-10-01", dueDate: "2026-10-01", amount: 1000, paidAmount: 200, ...overrides,
+});
+
+describe("legacy future-dated invoice payment recovery", () => {
+  it("detects future-dated payment records without changing invoice data", () => {
+    const source = invoice({
+      paidAmount: 300,
+      payments: [
+        { id: "past", date: "2026-11-10", amount: 100 },
+        { id: "future", date: "2026-11-15", amount: 200 },
+      ],
+    });
+    expect(findFutureDatedInvoicePayments([source], "2026-11-12")).toEqual([{
+      invoiceId: "inv-1",
+      invoiceReference: "INV-1",
+      counterparty: "Acme",
+      payment: { id: "future", date: "2026-11-15", amount: 200 },
+    }]);
+    expect(source.paidAmount).toBe(300);
+    expect(source.payments).toHaveLength(2);
+  });
+
+  it("removes only a future-dated payment and restores the outstanding balance", () => {
+    const source = invoice({
+      paidAmount: 300,
+      payments: [
+        { id: "past", date: "2026-11-10", amount: 100 },
+        { id: "future", date: "2026-11-15", amount: 200 },
+      ],
+    });
+    const result = removeFutureInvoicePayment(source, "future", "2026-11-12");
+    expect(result.valid).toBe(true);
+    if (result.valid) {
+      expect(result.invoice.paidAmount).toBe(100);
+      expect(result.invoice.payments).toEqual([{ id: "past", date: "2026-11-10", amount: 100 }]);
+      expect(source.paidAmount).toBe(300);
+      expect(source.payments).toHaveLength(2);
+    }
+  });
+
+  it("does not allow this recovery action to remove a past or missing payment", () => {
+    const source = invoice({
+      paidAmount: 100,
+      payments: [{ id: "past", date: "2026-11-10", amount: 100 }],
+    });
+    expect(removeFutureInvoicePayment(source, "past", "2026-11-12")).toMatchObject({ valid: false });
+    expect(removeFutureInvoicePayment(source, "missing", "2026-11-12")).toMatchObject({ valid: false });
+  });
 });
 
 describe("stored working capital invoice recovery", () => {

@@ -10,7 +10,7 @@ import {
 } from "@/domain/cash-forecast";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
 import { allocateInvoicesToCashWeeks } from "@/domain/invoice-cash-integration";
-import { parseStoredWorkingCapitalInvoices, type WorkingCapitalInvoice } from "@/domain/working-capital";
+import { findFutureDatedInvoicePayments, parseStoredWorkingCapitalInvoices, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { translate, type Language } from "@/i18n/translations";
 
 type CashForecastWorkspaceProps = {
@@ -205,9 +205,12 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
   const start = useMemo(() => mondayOf(new Date()), []);
   const asOfDate = useMemo(() => toISODate(new Date()), []);
   const dates = useMemo(() => Array.from({ length: 13 }, (_, index) => addDays(start, index * 7)), [start]);
+  const futureDatedPayments = useMemo(() => findFutureDatedInvoicePayments(invoices, asOfDate), [invoices, asOfDate]);
   const invoiceProjection = useMemo(
-    () => allocateInvoicesToCashWeeks(invoices, toISODate(start), 13, asOfDate),
-    [invoices, start, asOfDate],
+    () => futureDatedPayments.length > 0
+      ? allocateInvoicesToCashWeeks([], toISODate(start), 13, asOfDate)
+      : allocateInvoicesToCashWeeks(invoices, toISODate(start), 13, asOfDate),
+    [invoices, start, asOfDate, futureDatedPayments],
   );
   const forecastWeeks = useMemo(() => weeks.map((week, index) => includeInvoices ? ({
     ...week,
@@ -361,6 +364,10 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
 
       {forecastStorageError && <p className="cash-forecast-warning" role="alert">{forecastStorageError} {t("Editing and export are blocked until the original forecast is recovered or a valid backup is restored.")}</p>}
       {invoiceStorageError && <p className="cash-forecast-warning" role="alert">{invoiceStorageError} {t("Invoice projections are disabled because the complete invoice register could not be validated.")}</p>}
+      {futureDatedPayments.length > 0 && <p className="cash-forecast-warning" role="alert">
+        {t("Invoice projections are paused because the saved register contains future-dated payments. Review and remove any movements entered as planned rather than completed in Receivables & Payables.")}
+        {" "}{futureDatedPayments.length} {t("future-dated payment records found.")}
+      </p>}
       <section className="panel cash-forecast-invoice-panel" aria-labelledby="invoice-cash-integration-title">
         <div className="cash-forecast-invoice-head">
           <div>
@@ -369,7 +376,7 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
             <p>{t("Open customer invoices become expected collections; open supplier invoices become operating payments, based on their due dates.")}</p>
           </div>
           <label className="cash-forecast-invoice-toggle">
-            <input type="checkbox" checked={includeInvoices} disabled={Boolean(invoiceStorageError)} onChange={(event) => setIncludeInvoices(event.target.checked)} />
+            <input type="checkbox" checked={includeInvoices} disabled={Boolean(invoiceStorageError) || futureDatedPayments.length > 0} onChange={(event) => setIncludeInvoices(event.target.checked)} />
             <span>{t("Include open invoices")}</span>
           </label>
         </div>

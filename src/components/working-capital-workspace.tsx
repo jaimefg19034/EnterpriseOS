@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { addInvoicePayment, calculateInvoiceAgeing, findDuplicateInvoice, parseInvoiceCsv, parseStoredWorkingCapitalInvoices, summarizeInvoices, validateWorkingCapitalInvoice, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
+import { addInvoicePayment, calculateInvoiceAgeing, findDuplicateInvoice, findFutureDatedInvoicePayments, parseInvoiceCsv, parseStoredWorkingCapitalInvoices, removeFutureInvoicePayment, summarizeInvoices, validateWorkingCapitalInvoice, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { parseISODateUTC } from "@/domain/reporting-periods";
 import { createEmptyCashForecast, parseStoredCashForecast } from "@/domain/cash-forecast";
 import { createLocalFinanceBackup, parseLocalFinanceBackup, parseStoredFinanceBackupSections } from "@/domain/cash-working-capital-backup";
@@ -44,6 +44,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
   const visible = useMemo(() => invoices.filter((item) => item.direction === direction), [invoices, direction]);
   const aged = useMemo(() => calculateInvoiceAgeing(visible, today).sort((a, b) => a.invoice.dueDate.localeCompare(b.invoice.dueDate)), [visible, today]);
   const summary = useMemo(() => summarizeInvoices(aged, today), [aged, today]);
+  const futureDatedPayments = useMemo(() => findFutureDatedInvoicePayments(invoices, today), [invoices, today]);
 
   useEffect(() => {
     let restored: WorkingCapitalInvoice[] = [];
@@ -157,6 +158,18 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
     setInvoices((current) => [...current, ...imported]);
     setCsvPreview([]);
     setCsvImportMessage(t("Invoices imported successfully."));
+  }
+
+  function removeFuturePayment(invoice: WorkingCapitalInvoice, paymentId: string) {
+    if (!storageWritable) return;
+    if (!window.confirm(t("Remove this future-dated payment from the paid balance? The invoice will become outstanding again and can be projected using its due date."))) return;
+    const result = removeFutureInvoicePayment(invoice, paymentId, todayISO());
+    if (!result.valid) {
+      setPaymentErrors((current) => ({ ...current, [invoice.id]: t(result.error) }));
+      return;
+    }
+    setInvoices((current) => current.map((item) => item.id === invoice.id ? result.invoice : item));
+    setPaymentErrors((current) => ({ ...current, [invoice.id]: "" }));
   }
 
   function registerPayment(event: FormEvent<HTMLFormElement>, invoice: WorkingCapitalInvoice) {
@@ -406,6 +419,11 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
         </div>
       </div>
       {storageWarning && <p className="working-capital-backup-message" role="alert">{storageWarning}</p>}
+      {futureDatedPayments.length > 0 && <div className="working-capital-backup-message" role="alert">
+        <strong>{t("Review future-dated payments")}</strong>
+        <p>{t("Some saved payment movements are dated after today. They were recorded as paid before this date and may understate the outstanding invoice balance.")} {futureDatedPayments.length} {t("future-dated payment records found.")}</p>
+        <p>{t("Review each highlighted movement below. Remove it only if it was entered as a planned payment rather than money already received or paid.")}</p>
+      </div>}
       {backupMessage && <p className="working-capital-backup-message" role="status">{backupMessage}</p>}
       {csvImportMessage && <div className="working-capital-import-message" role="status">{csvImportMessage}</div>}
       {csvPreview.length > 0 && <div className="working-capital-import-preview panel">
@@ -447,7 +465,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
         <div className="working-capital-subhead"><h3>{t("Invoice register")}</h3><span>{aged.length} {t("records")}</span></div>
         {aged.length === 0 ? <div className="working-capital-empty">{t("No invoices yet. Add your first record above; the register starts empty to avoid invented financial data.")}</div> : (
           <div className="working-capital-table-scroll"><table><thead><tr><th>{t("Counterparty")}</th><th>{t("Reference")}</th><th>{t("Due date")}</th><th>{t("Amount")}</th><th>{t("Paid")}</th><th>{t("Outstanding")}</th><th>{t("Ageing")}</th><th /><th>{t("Payment history")}</th></tr></thead><tbody>
-            {aged.map((row) => <tr key={row.invoice.id}><td>{row.invoice.counterparty}</td><td>{row.invoice.reference}</td><td>{row.invoice.dueDate}</td><td>{money(row.invoice.amount, language)}</td><td>{money(row.invoice.paidAmount, language)}</td><td className="working-capital-outstanding">{money(row.outstanding, language)}</td><td><span className={row.overdueDays > 0 ? "working-capital-overdue" : "working-capital-current"}>{t(buckets.find(([key]) => key === row.bucket)?.[1] ?? "Not due")}</span></td><td><button type="button" className="working-capital-delete" aria-label={t("Delete invoice")} onClick={() => setInvoices((current) => current.filter((item) => item.id !== row.invoice.id))}>×</button></td><td><details><summary>{t("Payments")} ({row.invoice.payments?.length ?? 0})</summary><div className="working-capital-payment-history"><p>{t("Recorded payments")}: {money((row.invoice.payments ?? []).reduce((total, payment) => total + payment.amount, 0), language)}</p><small>{t("Historical paid balances entered before payment tracking have no individual dates and are not included in this movement list.")}</small>{(row.invoice.payments ?? []).map((payment) => <p key={payment.id}>{payment.date} · {money(payment.amount, language)}{payment.note ? ` · ${payment.note}` : ""}</p>)}{row.outstanding > 0 && <form onSubmit={(event) => registerPayment(event, row.invoice)}><label><span>{t("Payment date")}</span><input name="paymentDate" type="date" defaultValue={today} max={today} required /></label><label><span>{t("Payment amount")}</span><input name="paymentAmount" type="number" min="0.01" max={row.outstanding} step="0.01" required /></label><label><span>{t("Note (optional)")}</span><input name="paymentNote" maxLength={200} /></label><button type="submit" className="secondary-button">{t("Register payment")}</button></form>}{paymentErrors[row.invoice.id] && <p role="alert">{paymentErrors[row.invoice.id]}</p>}</div></details></td></tr>)}
+            {aged.map((row) => <tr key={row.invoice.id}><td>{row.invoice.counterparty}</td><td>{row.invoice.reference}</td><td>{row.invoice.dueDate}</td><td>{money(row.invoice.amount, language)}</td><td>{money(row.invoice.paidAmount, language)}</td><td className="working-capital-outstanding">{money(row.outstanding, language)}</td><td><span className={row.overdueDays > 0 ? "working-capital-overdue" : "working-capital-current"}>{t(buckets.find(([key]) => key === row.bucket)?.[1] ?? "Not due")}</span></td><td><button type="button" className="working-capital-delete" aria-label={t("Delete invoice")} onClick={() => setInvoices((current) => current.filter((item) => item.id !== row.invoice.id))}>×</button></td><td><details><summary>{t("Payments")} ({row.invoice.payments?.length ?? 0})</summary><div className="working-capital-payment-history"><p>{t("Recorded payments")}: {money((row.invoice.payments ?? []).reduce((total, payment) => total + payment.amount, 0), language)}</p><small>{t("Historical paid balances entered before payment tracking have no individual dates and are not included in this movement list.")}</small>{(row.invoice.payments ?? []).map((payment) => <div className="working-capital-payment-row" key={payment.id}><p>{payment.date} · {money(payment.amount, language)}{payment.note ? ` · ${payment.note}` : ""}</p>{payment.date > today && <button type="button" className="secondary-button" onClick={() => removeFuturePayment(row.invoice, payment.id)}>{t("Remove future-dated payment")}</button>}</div>)}{row.outstanding > 0 && <form onSubmit={(event) => registerPayment(event, row.invoice)}><label><span>{t("Payment date")}</span><input name="paymentDate" type="date" defaultValue={today} max={today} required /></label><label><span>{t("Payment amount")}</span><input name="paymentAmount" type="number" min="0.01" max={row.outstanding} step="0.01" required /></label><label><span>{t("Note (optional)")}</span><input name="paymentNote" maxLength={200} /></label><button type="submit" className="secondary-button">{t("Register payment")}</button></form>}{paymentErrors[row.invoice.id] && <p role="alert">{paymentErrors[row.invoice.id]}</p>}</div></details></td></tr>)}
           </tbody></table></div>
         )}
       </div>

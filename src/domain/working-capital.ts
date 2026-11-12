@@ -100,6 +100,57 @@ export function findDuplicateInvoice(
   );
 }
 
+export type FutureDatedInvoicePayment = {
+  invoiceId: string;
+  invoiceReference: string;
+  counterparty: string;
+  payment: InvoicePayment;
+};
+
+export function findFutureDatedInvoicePayments(
+  invoices: WorkingCapitalInvoice[],
+  asOfDate: string,
+): FutureDatedInvoicePayment[] {
+  if (!isValidISODate(asOfDate)) return [];
+  return invoices.flatMap((invoice) => (invoice.payments ?? [])
+    .filter((payment) => payment.date > asOfDate)
+    .map((payment) => ({
+      invoiceId: invoice.id,
+      invoiceReference: invoice.reference,
+      counterparty: invoice.counterparty,
+      payment,
+    })));
+}
+
+export type RemoveFutureInvoicePaymentResult =
+  | { valid: true; invoice: WorkingCapitalInvoice }
+  | { valid: false; error: string };
+
+export function removeFutureInvoicePayment(
+  invoice: WorkingCapitalInvoice,
+  paymentId: string,
+  asOfDate: string,
+): RemoveFutureInvoicePaymentResult {
+  if (!isValidISODate(asOfDate)) {
+    return { valid: false, error: "Current date is invalid." };
+  }
+  const payment = (invoice.payments ?? []).find((item) => item.id === paymentId);
+  if (!payment) return { valid: false, error: "Payment record was not found." };
+  if (payment.date <= asOfDate) {
+    return { valid: false, error: "Only future-dated payment records can be removed with this action." };
+  }
+  const remainingPayments = (invoice.payments ?? []).filter((item) => item.id !== paymentId);
+  const paidAmount = roundCurrency(Math.max(0, invoice.paidAmount - payment.amount));
+  return {
+    valid: true,
+    invoice: normaliseInvoice({
+      ...invoice,
+      paidAmount,
+      payments: remainingPayments,
+    }),
+  };
+}
+
 export type StoredInvoiceParseResult =
   | { ok: true; invoices: WorkingCapitalInvoice[] }
   | { ok: false; error: string };
