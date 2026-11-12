@@ -43,7 +43,10 @@ export type PlanningResult = {
   budgetRevenue: number;
   actualRevenueToDate: number;
   budgetRevenueToDate: number;
+  actualRevenueVarianceToDate: number;
+  remainingBudgetRevenue: number;
   remainingForecastRevenue: number;
+  remainingForecastVariance: number;
   projectedRevenue: number;
   revenueVariance: number;
   costOfGoodsSoldPercent: number;
@@ -190,6 +193,9 @@ export function buildPlanningResult(
   const budgetRevenue = roundMoney(
     monthlyRows.reduce((sum, row) => sum + row.budgetRevenue, 0),
   );
+  const actualRevenueVarianceToDate = roundMoney(actualRevenueToDate - budgetRevenueToDate);
+  const remainingBudgetRevenue = roundMoney(budgetRevenue - budgetRevenueToDate);
+  const remainingForecastVariance = roundMoney(remainingForecastRevenue - remainingBudgetRevenue);
   const projectedRevenue = roundMoney(
     actualRevenueToDate + remainingForecastRevenue,
   );
@@ -241,7 +247,10 @@ export function buildPlanningResult(
     budgetRevenue,
     actualRevenueToDate,
     budgetRevenueToDate,
+    actualRevenueVarianceToDate,
+    remainingBudgetRevenue,
     remainingForecastRevenue,
+    remainingForecastVariance,
     projectedRevenue,
     revenueVariance,
     costOfGoodsSoldPercent,
