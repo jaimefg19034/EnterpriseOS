@@ -37,6 +37,15 @@ describe("buildPlanningResult", () => {
     expect(result.monthlyRows[10].actualRevenue).toBeNull();
   });
 
+  it("reconciles the full-year revenue variance into actual and forecast components", () => {
+    const actuals = makeDemoActualRevenue(assumptions.annualRevenueBudget);
+    const result = buildPlanningResult(assumptions, actuals, "base");
+    expect(result.actualRevenueVarianceToDate).toBeCloseTo(result.actualRevenueToDate - result.budgetRevenueToDate, 2);
+    expect(result.remainingBudgetRevenue).toBeCloseTo(result.budgetRevenue - result.budgetRevenueToDate, 2);
+    expect(result.remainingForecastVariance).toBeCloseTo(result.remainingForecastRevenue - result.remainingBudgetRevenue, 2);
+    expect(result.actualRevenueVarianceToDate + result.remainingForecastVariance).toBeCloseTo(result.revenueVariance, 2);
+  });
+
   it("applies the upside scenario to future revenue and cost assumptions", () => {
     const actuals = makeDemoActualRevenue(assumptions.annualRevenueBudget);
     const base = buildPlanningResult(assumptions, actuals, "base");
