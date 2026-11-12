@@ -2,6 +2,10 @@ export type Language = "en" | "es";
 
 const spanish: Record<string, string> = {
   "Business operations": "Operaciones de negocio",
+  "Revenue variance bridge": "Desglose de la desviación de ingresos",
+  "Actuals vs. budget to date": "Real frente a presupuesto hasta la fecha",
+  "Remaining forecast vs. budget": "Previsión restante frente al presupuesto",
+  "Full-year revenue variance": "Desviación de ingresos del ejercicio",
   "Planning overview": "Resumen de planificación",
   "Planning sections": "Secciones de planificación",
   "Finance": "Finanzas",
