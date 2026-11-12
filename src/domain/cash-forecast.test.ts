@@ -65,7 +65,26 @@ describe("cash stress scenario", () => {
     expect(result.firstNegativeWeek).toBe(-1);
   });
 
-  it("caps scenario assumptions and flags the first negative week", () => {
+  it("uses a finite opening balance for empty forecasts and invalid balances", () => {
+    const empty = calculateCashStressScenario(Number.NaN, [], 15, 10);
+    expect(empty.weeks).toEqual([]);
+    expect(empty.finalCash).toBe(0);
+    expect(empty.lowestCash).toBe(0);
+    expect(empty.firstNegativeWeek).toBe(-1);
+
+    const infinite = calculateCashStressScenario(Number.POSITIVE_INFINITY, [], 15, 10);
+    expect(infinite.finalCash).toBe(0);
+    expect(infinite.lowestCash).toBe(0);
+  });
+
+  it("keeps a valid opening balance when the forecast has no weeks", () => {
+    const result = calculateCashStressScenario(1250.5, [], 15, 10);
+    expect(result.finalCash).toBe(1250.5);
+    expect(result.lowestCash).toBe(1250.5);
+    expect(result.firstNegativeWeek).toBe(-1);
+  });
+
+  it("caps scenario assumptions and flags the first negative week", () =>
     const result = calculateCashStressScenario(100, [
       { collections: 100, operatingPayments: 0, capitalExpenditure: 0, debtService: 0 },
       { collections: 0, operatingPayments: 200, capitalExpenditure: 0, debtService: 0 },

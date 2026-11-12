@@ -101,6 +101,7 @@ export function calculateCashStressScenario(
   collectionReductionPercent: number,
   operatingPaymentIncreasePercent: number,
 ): CashStressResult {
+  const normalizedOpeningCash = Number.isFinite(openingCash) ? openingCash : 0;
   const collectionReduction = Math.min(100, Math.max(0, Number.isFinite(collectionReductionPercent) ? collectionReductionPercent : 0)) / 100;
   const paymentIncrease = Math.min(500, Math.max(0, Number.isFinite(operatingPaymentIncreasePercent) ? operatingPaymentIncreasePercent : 0)) / 100;
   const stressedInputs = weeks.map((week) => ({
@@ -109,11 +110,11 @@ export function calculateCashStressScenario(
     capitalExpenditure: week.capitalExpenditure,
     debtService: week.debtService,
   }));
-  const results = calculateCashForecast(openingCash, stressedInputs);
+  const results = calculateCashForecast(normalizedOpeningCash, stressedInputs);
   return {
     weeks: results,
-    finalCash: results.at(-1)?.closingCash ?? openingCash,
-    lowestCash: Math.min(openingCash, ...results.map((week) => week.closingCash)),
+    finalCash: results.at(-1)?.closingCash ?? normalizedOpeningCash,
+    lowestCash: Math.min(normalizedOpeningCash, ...results.map((week) => week.closingCash)),
     firstNegativeWeek: results.findIndex((week) => week.closingCash < 0),
   };
 }
