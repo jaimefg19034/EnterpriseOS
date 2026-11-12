@@ -233,7 +233,6 @@ const spanish: Record<string, string> = {
   "Budget vs. actual & forecast": "Presupuesto frente a datos reales y previsión",
   "January–October actuals · November–December forecast": "Datos reales de enero a octubre · Previsión de noviembre y diciembre",
   "Actual revenue to date": "Ingresos reales hasta la fecha",
-  "Budget to date": "Presupuesto hasta la fecha",
   "Remaining forecast": "Previsión restante",
   "MONTHLY DETAIL": "DETALLE MENSUAL",
   "Revenue plan by month": "Plan de ingresos por mes",
