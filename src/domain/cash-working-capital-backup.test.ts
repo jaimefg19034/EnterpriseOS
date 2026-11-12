@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createEmptyCashForecast } from "./cash-forecast";
 import { createLocalFinanceBackup, parseLocalFinanceBackup, parseStoredFinanceBackupSections } from "./cash-working-capital-backup";
-import type { WorkingCapitalInvoice } from "./working-capital";
+import { findFutureDatedInvoicePayments, type WorkingCapitalInvoice } from "./working-capital";
 import { addPlanningYear, createInitialPlanningState, parseSavedPlanningState, serialisePlanningState } from "./planning-storage";
 
 const invoice = (overrides: Partial<WorkingCapitalInvoice> = {}): WorkingCapitalInvoice => ({
@@ -82,6 +82,25 @@ describe("local finance backup", () => {
     expect(restored.data.workingCapitalInvoices[0].paidAmount).toBe(550);
     expect(restored.data.workingCapitalInvoices[0].payments).toEqual([
       { id: "payment-1", date: "2026-11-08", amount: 300, note: "Bank transfer" },
+    ]);
+  });
+
+  it("preserves legacy future-dated payments in backups so they can be reviewed after restore", () => {
+    const source = invoice({
+      paidAmount: 500,
+      payments: [
+        { id: "completed", date: "2026-11-10", amount: 200 },
+        { id: "planned", date: "2026-11-15", amount: 300 },
+      ],
+    });
+    const backup = createLocalFinanceBackup([source], createEmptyCashForecast(13));
+    const restored = parseLocalFinanceBackup(JSON.stringify(backup));
+    expect(restored.ok).toBe(true);
+    if (!restored.ok) return;
+    expect(restored.data.workingCapitalInvoices[0].paidAmount).toBe(500);
+    expect(restored.data.workingCapitalInvoices[0].payments).toEqual(source.payments);
+    expect(findFutureDatedInvoicePayments(restored.data.workingCapitalInvoices, "2026-11-12")).toMatchObject([
+      { invoiceId: "invoice-1", payment: { id: "planned", amount: 300 } },
     ]);
   });
 

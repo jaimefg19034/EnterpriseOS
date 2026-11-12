@@ -43,6 +43,22 @@ describe("legacy future-dated invoice payment recovery", () => {
     }
   });
 
+  it("preserves undated legacy paid balances when removing a future payment", () => {
+    const source = invoice({
+      paidAmount: 600,
+      payments: [
+        { id: "past", date: "2026-11-10", amount: 100 },
+        { id: "future", date: "2026-11-15", amount: 200 },
+      ],
+    });
+    const result = removeFutureInvoicePayment(source, "future", "2026-11-12");
+    expect(result.valid).toBe(true);
+    if (!result.valid) return;
+    expect(result.invoice.paidAmount).toBe(400);
+    expect(result.invoice.payments).toEqual([{ id: "past", date: "2026-11-10", amount: 100 }]);
+    expect(result.invoice.paidAmount - result.invoice.payments!.reduce((sum, payment) => sum + payment.amount, 0)).toBe(300);
+  });
+
   it("does not allow this recovery action to remove a past or missing payment", () => {
     const source = invoice({
       paidAmount: 100,
