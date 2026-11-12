@@ -339,7 +339,11 @@ export type InvoicePaymentResult =
 export function addInvoicePayment(
   invoice: WorkingCapitalInvoice,
   payment: InvoicePayment,
+  asOfDate: string,
 ): InvoicePaymentResult {
+  if (!isValidISODate(asOfDate)) {
+    return { valid: false, error: "Current date is invalid." };
+  }
   if (!isValidInvoicePayment(payment)) {
     return { valid: false, error: "Payment date, amount or reference is invalid." };
   }
@@ -349,6 +353,9 @@ export function addInvoicePayment(
   const cleanInvoice = normaliseInvoice(invoice);
   if (payment.date < cleanInvoice.issueDate) {
     return { valid: false, error: "Payment date cannot be before the invoice issue date." };
+  }
+  if (payment.date > asOfDate) {
+    return { valid: false, error: "Payment date cannot be in the future." };
   }
   const cleanPayment = {
     ...payment,

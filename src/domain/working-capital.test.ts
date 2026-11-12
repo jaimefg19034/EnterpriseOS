@@ -64,7 +64,7 @@ describe("working capital invoice validation", () => {
   it("records dated partial payments and updates the outstanding balance", () => {
     const result = addInvoicePayment(invoice({ paidAmount: 0 }), {
       id: "payment-1", date: "2026-11-05", amount: 300, note: "Bank transfer",
-    });
+    }, "2026-11-12");
     expect(result.valid).toBe(true);
     if (!result.valid) return;
     expect(result.invoice.paidAmount).toBe(300);
@@ -72,21 +72,34 @@ describe("working capital invoice validation", () => {
     expect(result.invoice.payments).toHaveLength(1);
   });
 
+  it("rejects future-dated actual payments and allows payments dated today", () => {
+    const source = invoice({ paidAmount: 0 });
+    expect(addInvoicePayment(source, {
+      id: "future", date: "2026-11-13", amount: 10,
+    }, "2026-11-12")).toMatchObject({
+      valid: false,
+      error: "Payment date cannot be in the future.",
+    });
+    expect(addInvoicePayment(source, {
+      id: "today", date: "2026-11-12", amount: 10,
+    }, "2026-11-12")).toMatchObject({ valid: true });
+  });
+
   it("rejects duplicate, invalid and overpayment transactions", () => {
     const first = addInvoicePayment(invoice({ paidAmount: 0 }), {
       id: "payment-1", date: "2026-11-05", amount: 300,
-    });
+    }, "2026-11-12");
     expect(first.valid).toBe(true);
     if (!first.valid) return;
-    expect(addInvoicePayment(first.invoice, { id: "payment-1", date: "2026-11-06", amount: 100 }).valid).toBe(false);
-    expect(addInvoicePayment(first.invoice, { id: "payment-2", date: "2026-02-30", amount: 100 }).valid).toBe(false);
-    expect(addInvoicePayment(first.invoice, { id: "payment-3", date: "2026-11-06", amount: 701 }).valid).toBe(false);
+    expect(addInvoicePayment(first.invoice, { id: "payment-1", date: "2026-11-06", amount: 100 }, "2026-11-12").valid).toBe(false);
+    expect(addInvoicePayment(first.invoice, { id: "payment-2", date: "2026-02-30", amount: 100 }, "2026-11-12").valid).toBe(false);
+    expect(addInvoicePayment(first.invoice, { id: "payment-3", date: "2026-11-06", amount: 701 }, "2026-11-12").valid).toBe(false);
   });
 
   it("normalises payment precision before checking the outstanding balance", () => {
     const result = addInvoicePayment(invoice({ amount: 100, paidAmount: 0 }), {
       id: "rounded", date: "2026-11-05", amount: 99.999,
-    });
+    }, "2026-11-12");
     expect(result.valid).toBe(true);
     if (result.valid) {
       expect(result.invoice.paidAmount).toBe(100);
@@ -95,14 +108,14 @@ describe("working capital invoice validation", () => {
     }
     expect(addInvoicePayment(invoice({ amount: 100, paidAmount: 0 }), {
       id: "over", date: "2026-11-05", amount: 100.006,
-    }).valid).toBe(false);
+    }, "2026-11-12").valid).toBe(false);
   });
 
   it("rejects payments dated before the invoice and normalises payment IDs", () => {
     const source = invoice({ issueDate: "2026-11-10", paidAmount: 0 });
     expect(addInvoicePayment(source, {
       id: "early", date: "2026-11-09", amount: 10,
-    })).toMatchObject({ valid: false });
+    }, "2026-11-12")).toMatchObject({ valid: false });
     expect(validateWorkingCapitalInvoice({
       ...source,
       paidAmount: 10,
@@ -110,7 +123,7 @@ describe("working capital invoice validation", () => {
     })).toMatchObject({ valid: false });
     const added = addInvoicePayment(source, {
       id: "  payment-trimmed  ", date: "2026-11-10", amount: 10,
-    });
+    }, "2026-11-12");
     expect(added.valid).toBe(true);
     if (added.valid) expect(added.invoice.payments?.[0].id).toBe("payment-trimmed");
   });
@@ -118,7 +131,7 @@ describe("working capital invoice validation", () => {
   it("rejects payment amounts that round to zero cents", () => {
     expect(addInvoicePayment(invoice({ paidAmount: 0 }), {
       id: "tiny", date: "2026-11-05", amount: 0.001,
-    }).valid).toBe(false);
+    }, "2026-11-12").valid).toBe(false);
   });
 
   it("rejects payment history that exceeds the recorded paid balance", () => {

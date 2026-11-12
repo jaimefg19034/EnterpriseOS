@@ -911,6 +911,8 @@ const spanish: Record<string, string> = {
   "Saved invoice data could not be accessed. The original browser data has been preserved.": "No se ha podido acceder a los datos de facturas guardados. Se han conservado los datos originales del navegador.",
 
   "Saved cash forecast could not be accessed. The original browser data has been preserved.": "No se ha podido acceder a la previsión de caja guardada. Se han conservado los datos originales del navegador.",
+  "Payment date cannot be in the future.": "La fecha del pago no puede ser futura.",
+  "Current date is invalid.": "La fecha actual no es válida.",
   "Editing and export are blocked until the original forecast is recovered or a valid backup is restored.": "La edición y la exportación están bloqueadas hasta recuperar la previsión original o restaurar una copia válida.",
   "Invoice projections are disabled because the complete invoice register could not be validated.": "Las proyecciones de facturas están desactivadas porque no se ha podido validar el registro completo.",
   "Download original forecast data": "Descargar datos originales de la previsión",
