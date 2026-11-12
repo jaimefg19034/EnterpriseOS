@@ -169,7 +169,15 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(weeks));
     } catch {
-      // Keep edits in the current session if local storage is unavailable or full.
+      let originalData: string | null = null;
+      try {
+        originalData = window.localStorage.getItem(STORAGE_KEY);
+      } catch {
+        // The recovery download remains unavailable if browser storage cannot be read.
+      }
+      setForecastStorageWritable(false);
+      setForecastStorageError(t("The cash forecast could not be saved. Your latest changes may exist only in this session; download the last saved copy before leaving this page."));
+      setForecastRecoveryData(originalData);
     }
   }, [weeks, storageReady, forecastStorageWritable]);
 
