@@ -104,4 +104,22 @@ describe("invoice cash forecast integration", () => {
     expect(result[0].receivableCount).toBe(1);
     expect(result.reduce((total, week) => total + week.receivableCollections, 0)).toBe(500);
   });
+  it("projects only the remaining balance after several partial payments", () => {
+    const partiallyPaid = invoice({
+      amount: 1250,
+      paidAmount: 750,
+      dueDate: "2026-11-17",
+      payments: [
+        { id: "p-1", date: "2026-11-05", amount: 250 },
+        { id: "p-2", date: "2026-11-10", amount: 500 },
+      ],
+    });
+    const result = allocateInvoicesToCashWeeks([partiallyPaid], "2026-11-09", 3, "2026-11-12");
+
+    expect(result[0].receivableCollections).toBe(0);
+    expect(result[1].receivableCollections).toBe(500);
+    expect(result[1].receivableCount).toBe(1);
+    expect(result.reduce((total, week) => total + week.receivableCollections, 0)).toBe(500);
+  });
+
 });
