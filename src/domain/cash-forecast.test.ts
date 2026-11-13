@@ -24,6 +24,12 @@ describe("13-week cash forecast", () => {
     const invalid = createEmptyCashForecast(13);
     invalid[4].collections = -1;
     expect(parseStoredCashForecast(JSON.stringify(invalid)).ok).toBe(false);
+    const oversized = createEmptyCashForecast(13);
+    oversized[3].collections = 1_000_000_000_001;
+    expect(parseStoredCashForecast(JSON.stringify(oversized)).ok).toBe(false);
+    const overflow = createEmptyCashForecast(13);
+    overflow[3].collections = Number.MAX_VALUE;
+    expect(parseStoredCashForecast(JSON.stringify(overflow)).ok).toBe(false);
     const nonFinite = createEmptyCashForecast(13);
     nonFinite[2].debtService = Number.NaN;
     expect(parseStoredCashForecast(JSON.stringify(nonFinite)).ok).toBe(false);

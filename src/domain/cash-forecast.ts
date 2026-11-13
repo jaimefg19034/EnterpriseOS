@@ -1,3 +1,5 @@
+export const MAX_CASH_FORECAST_AMOUNT = 1_000_000_000_000;
+
 export type CashForecastWeekInput = {
   collections: number;
   operatingPayments: number;
@@ -65,7 +67,7 @@ function isValidStoredWeek(value: unknown): value is CashForecastWeekInput {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const week = value as Record<string, unknown>;
   return ["collections", "operatingPayments", "capitalExpenditure", "debtService"].every((key) =>
-    typeof week[key] === "number" && Number.isFinite(week[key]) && (week[key] as number) >= 0,
+    typeof week[key] === "number" && Number.isFinite(week[key]) && (week[key] as number) >= 0 && (week[key] as number) <= MAX_CASH_FORECAST_AMOUNT,
   );
 }
 

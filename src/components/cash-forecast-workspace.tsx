@@ -6,6 +6,7 @@ import {
   calculateCashStressScenario,
   createEmptyCashForecast,
   parseStoredCashForecast,
+  MAX_CASH_FORECAST_AMOUNT,
   type CashForecastWeekInput,
 } from "@/domain/cash-forecast";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
@@ -266,7 +267,7 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
   function updateWeek(index: number, key: keyof CashForecastWeekInput, raw: string) {
     if (!forecastStorageWritable) return;
     const value = raw === "" ? 0 : Number(raw);
-    if (!Number.isFinite(value)) return;
+    if (!Number.isFinite(value) || value < 0 || value > MAX_CASH_FORECAST_AMOUNT) return;
     setWeeks((current) => current.map((week, weekIndex) =>
       weekIndex === index ? { ...week, [key]: Math.max(0, value) } : week,
     ));
@@ -470,7 +471,7 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
                 <tr key={index}>
                   <th scope="row">{dates[index].toLocaleDateString(language === "es" ? "es-ES" : "en-GB", { day: "2-digit", month: "short" })}</th>
                   {FIELDS.map((field) => <td key={field.key}>
-                    <label className="cash-forecast-input-wrap"><span className="sr-only">{t(field.label)} — {t("Week")} {index + 1}</span><input type="number" min="0" step="100" inputMode="decimal" disabled={!forecastStorageWritable} value={weeks[index][field.key] || ""} placeholder="0" onChange={(event) => updateWeek(index, field.key, event.target.value)} /></label>
+                    <label className="cash-forecast-input-wrap"><span className="sr-only">{t(field.label)} — {t("Week")} {index + 1}</span><input type="number" min="0" max={MAX_CASH_FORECAST_AMOUNT} step="100" inputMode="decimal" disabled={!forecastStorageWritable} value={weeks[index][field.key] || ""} placeholder="0" onChange={(event) => updateWeek(index, field.key, event.target.value)} /></label>
                     {includeInvoices && field.key === "collections" && invoiceProjection[index].receivableCollections > 0 && <small className="cash-forecast-linked-amount">+{formatMoney(invoiceProjection[index].receivableCollections, language)} {t("invoices")}</small>}
                     {includeInvoices && field.key === "operatingPayments" && invoiceProjection[index].payablePayments > 0 && <small className="cash-forecast-linked-amount">+{formatMoney(invoiceProjection[index].payablePayments, language)} {t("invoices")}</small>}
                   </td>)}
