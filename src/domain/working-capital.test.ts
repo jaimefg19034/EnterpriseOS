@@ -101,7 +101,7 @@ describe("working capital invoice validation", () => {
     expect(validateWorkingCapitalInvoice(invoice({ amount: 0 })).valid).toBe(false);
     expect(validateWorkingCapitalInvoice(invoice({ amount: 0.001 })).valid).toBe(false);
     expect(validateWorkingCapitalInvoice(invoice({ amount: 0.004 })).valid).toBe(false);
-    expect(validateWorkingCapitalInvoice(invoice({ amount: 0.005 })).valid).toBe(true);
+    expect(validateWorkingCapitalInvoice(invoice({ amount: 0.005, paidAmount: 0 })).valid).toBe(true);
   });
 
 
