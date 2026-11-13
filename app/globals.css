@@ -1377,3 +1377,24 @@ button:focus-visible, input:focus-visible {
 .planning-model-logic ul { display: grid; gap: 6px; margin: 0; padding-left: 17px; color: #64738a; font-size: 9px; line-height: 1.5; }
 .planning-model-logic li { padding-left: 2px; }
 .planning-model-logic > p { margin: 9px 0 0; color: #8995a8; font-size: 8px; line-height: 1.5; }
+
+
+/* Side-by-side scenario analysis */
+.scenario-comparison-panel { padding: 18px 19px 14px; margin-bottom: 16px; }
+.scenario-comparison-scroll { width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
+.scenario-comparison-table { width: 100%; min-width: 760px; border-collapse: separate; border-spacing: 0; font-variant-numeric: tabular-nums; }
+.scenario-comparison-table th,.scenario-comparison-table td { padding: 11px 12px; border-bottom: 1px solid #edf0f5; text-align: right; white-space: nowrap; }
+.scenario-comparison-table thead th { color: #728097; background: #f8f9fc; font-size: 9px; font-weight: 800; }
+.scenario-comparison-table thead th:first-child,.scenario-comparison-table tbody th { text-align: left; }
+.scenario-comparison-table thead th:first-child { border-radius: 7px 0 0 7px; }
+.scenario-comparison-table thead th:last-child { border-radius: 0 7px 7px 0; }
+.scenario-comparison-table thead th span { display: block; color: #44536c; }
+.scenario-comparison-table thead th small { display: block; margin-top: 4px; color: #5873c7; font-size: 8px; font-weight: 700; }
+.scenario-comparison-table tbody th { color: #65738a; font-size: 9px; font-weight: 650; }
+.scenario-comparison-table tbody td { color: #34445d; font-size: 10px; font-weight: 750; }
+.scenario-comparison-table .active-scenario-column { background: #f3f6ff; }
+.scenario-comparison-table .scenario-delta-row th,.scenario-comparison-table .scenario-delta-row td { background: #fbfcfe; font-size: 9px; }
+.scenario-comparison-table .scenario-positive { color: #258568; }
+.scenario-comparison-table .scenario-negative { color: #b85b60; }
+.scenario-comparison-note { margin: 11px 0 0; color: #8793a5; font-size: 9px; line-height: 1.55; }
+@media(max-width:680px) { .scenario-comparison-panel { padding: 14px 12px; } .scenario-comparison-table { min-width: 700px; } .scenario-comparison-table th,.scenario-comparison-table td { padding: 10px 9px; } }

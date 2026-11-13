@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import {
   buildPlanningResult,
+  comparePlanningScenarios,
   makeDemoActualRevenue,
   SCENARIOS,
   type MonthName,
@@ -285,6 +286,10 @@ export function PlanningWorkspace({ language }: { language: Language }) {
     () => buildPlanningResult(assumptions, actualRevenue, scenario, customRevenueGrowthPercent),
     [assumptions, actualRevenue, scenario, customRevenueGrowthPercent],
   );
+  const scenarioComparisons = useMemo(
+    () => comparePlanningScenarios(assumptions, actualRevenue, customRevenueGrowthPercent),
+    [assumptions, actualRevenue, customRevenueGrowthPercent],
+  );
   const revenueVariancePercent =
     result.budgetRevenue > 0
       ? (result.revenueVariance / result.budgetRevenue) * 100
@@ -379,6 +384,21 @@ export function PlanningWorkspace({ language }: { language: Language }) {
               t(row.status),
             ]),
             [t("FULL YEAR TOTAL"), result.budgetRevenue, result.actualRevenueToDate, result.remainingForecastRevenue, result.revenueVariance, ""],
+          ],
+        },
+        {
+          name: t("Scenario Comparison"),
+          title: t("EnterpriseOS — Scenario Comparison"),
+          subtitle: `FY ${selectedYear} · ${t("Same actual revenue and annual assumptions across all scenarios")}`,
+          headers: [t("Metric"), ...scenarioComparisons.map((row) => t(row.label)), t("Upside vs. Base"), t("Downside vs. Base"), t("Custom vs. Base")],
+          widths: [34, 20, 20, 20, 20, 20, 20, 20],
+          currencyColumns: [2, 3, 4, 5, 6, 7, 8],
+          percentLabels: [t("Projected EBITDA margin"), t("EBITDA margin change vs. Base")],
+          rows: [
+            [t("Projected revenue"), ...scenarioComparisons.map((row) => row.result.projectedRevenue), scenarioComparisons[1].deltaVsBase.revenue, scenarioComparisons[2].deltaVsBase.revenue, scenarioComparisons[3].deltaVsBase.revenue],
+            [t("Projected EBITDA"), ...scenarioComparisons.map((row) => row.result.projectedEbitda), scenarioComparisons[1].deltaVsBase.ebitda, scenarioComparisons[2].deltaVsBase.ebitda, scenarioComparisons[3].deltaVsBase.ebitda],
+            [t("Projected EBITDA margin"), ...scenarioComparisons.map((row) => row.result.projectedEbitdaMarginPercent / 100), scenarioComparisons[1].deltaVsBase.ebitdaMarginPercentagePoints / 100, scenarioComparisons[2].deltaVsBase.ebitdaMarginPercentagePoints / 100, scenarioComparisons[3].deltaVsBase.ebitdaMarginPercentagePoints / 100],
+            [t("Projected net income"), ...scenarioComparisons.map((row) => row.result.projectedNetIncome), scenarioComparisons[1].deltaVsBase.netIncome, scenarioComparisons[2].deltaVsBase.netIncome, scenarioComparisons[3].deltaVsBase.netIncome],
           ],
         },
         {
@@ -542,6 +562,67 @@ export function PlanningWorkspace({ language }: { language: Language }) {
           tone="amber"
         />
       </div>
+
+      <section className="panel scenario-comparison-panel" aria-labelledby="scenario-comparison-title">
+        <div className="panel-header">
+          <div>
+            <div className="panel-kicker">{t("DECISION SUPPORT")}</div>
+            <h2 id="scenario-comparison-title">{t("Compare all scenarios")}</h2>
+            <p>{t("All four forecasts use the same annual assumptions and entered actual revenue. Differences reflect scenario settings only.")}</p>
+          </div>
+          <span className="input-count">{t("4 SCENARIOS")}</span>
+        </div>
+        <div className="scenario-comparison-scroll">
+          <table className="scenario-comparison-table">
+            <thead>
+              <tr>
+                <th scope="col">{t("Financial metric")}</th>
+                {scenarioComparisons.map((row) => (
+                  <th scope="col" key={row.key} className={row.key === scenario ? "active-scenario-column" : ""}>
+                    <span>{t(row.label)}</span>
+                    {row.key === scenario && <small>{t("Currently selected")}</small>}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">{t("Projected revenue")}</th>
+                {scenarioComparisons.map((row) => <td key={row.key} className={row.key === scenario ? "active-scenario-column" : ""}>{formatCurrency(row.result.projectedRevenue, true)}</td>)}
+              </tr>
+              <tr>
+                <th scope="row">{t("Projected EBITDA")}</th>
+                {scenarioComparisons.map((row) => <td key={row.key} className={row.key === scenario ? "active-scenario-column" : ""}>{formatCurrency(row.result.projectedEbitda, true)}</td>)}
+              </tr>
+              <tr>
+                <th scope="row">{t("Projected EBITDA margin")}</th>
+                {scenarioComparisons.map((row) => <td key={row.key} className={row.key === scenario ? "active-scenario-column" : ""}>{formatPercent(row.result.projectedEbitdaMarginPercent)}</td>)}
+              </tr>
+              <tr>
+                <th scope="row">{t("Projected net income")}</th>
+                {scenarioComparisons.map((row) => <td key={row.key} className={row.key === scenario ? "active-scenario-column" : ""}>{formatCurrency(row.result.projectedNetIncome, true)}</td>)}
+              </tr>
+              <tr className="scenario-delta-row">
+                <th scope="row">{t("Revenue change vs. Base")}</th>
+                {scenarioComparisons.map((row) => <td key={row.key} className={row.deltaVsBase.revenue >= 0 ? "scenario-positive" : "scenario-negative"}>{row.key === "base" ? "—" : `${row.deltaVsBase.revenue > 0 ? "+" : "−"}${formatCurrency(Math.abs(row.deltaVsBase.revenue), true)}`}</td>)}
+              </tr>
+              <tr className="scenario-delta-row">
+                <th scope="row">{t("EBITDA change vs. Base")}</th>
+                {scenarioComparisons.map((row) => <td key={row.key} className={row.deltaVsBase.ebitda >= 0 ? "scenario-positive" : "scenario-negative"}>{row.key === "base" ? "—" : `${row.deltaVsBase.ebitda > 0 ? "+" : "−"}${formatCurrency(Math.abs(row.deltaVsBase.ebitda), true)}`}</td>)}
+              </tr>
+              <tr className="scenario-delta-row">
+                <th scope="row">{t("Net income change vs. Base")}</th>
+                {scenarioComparisons.map((row) => <td key={row.key} className={row.deltaVsBase.netIncome >= 0 ? "scenario-positive" : "scenario-negative"}>{row.key === "base" ? "—" : `${row.deltaVsBase.netIncome > 0 ? "+" : "−"}${formatCurrency(Math.abs(row.deltaVsBase.netIncome), true)}`}</td>)}
+              </tr>
+              <tr className="scenario-delta-row">
+                <th scope="row">{t("EBITDA margin change vs. Base")}</th>
+                {scenarioComparisons.map((row) => <td key={row.key} className={row.deltaVsBase.ebitdaMarginPercentagePoints >= 0 ? "scenario-positive" : "scenario-negative"}>{row.key === "base" ? "—" : `${row.deltaVsBase.ebitdaMarginPercentagePoints > 0 ? "+" : ""}${formatPercent(row.deltaVsBase.ebitdaMarginPercentagePoints)} pp`}</td>)}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="scenario-comparison-note">{t("Actual revenue entered to date is held constant across scenarios. Scenario deltas are measured against Base and are not additional revenue forecasts.")}</p>
+      </section>
 
       <div className="planning-main-grid">
         <section id="planning-assumptions" className="panel planning-assumptions-panel">

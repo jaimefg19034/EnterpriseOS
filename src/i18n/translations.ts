@@ -1,6 +1,20 @@
 export type Language = "en" | "es";
 
 const spanish: Record<string, string> = {
+  "Scenario Comparison": "Comparación de escenarios",
+  "EnterpriseOS — Scenario Comparison": "EnterpriseOS — Comparación de escenarios",
+  "Same actual revenue and annual assumptions across all scenarios": "Mismos ingresos reales e hipótesis anuales en todos los escenarios",
+  "DECISION SUPPORT": "APOYO A LA DECISIÓN",
+  "Compare all scenarios": "Comparar todos los escenarios",
+  "All four forecasts use the same annual assumptions and entered actual revenue. Differences reflect scenario settings only.": "Las cuatro previsiones utilizan las mismas hipótesis anuales y los ingresos reales introducidos. Las diferencias se deben únicamente a los ajustes de cada escenario.",
+  "4 SCENARIOS": "4 ESCENARIOS",
+  "Financial metric": "Métrica financiera",
+  "Currently selected": "Seleccionado",
+  "Revenue change vs. Base": "Variación de ingresos vs. Base",
+  "EBITDA change vs. Base": "Variación de EBITDA vs. Base",
+  "Net income change vs. Base": "Variación del beneficio neto vs. Base",
+  "EBITDA margin change vs. Base": "Variación del margen EBITDA vs. Base",
+  "Actual revenue entered to date is held constant across scenarios. Scenario deltas are measured against Base and are not additional revenue forecasts.": "Los ingresos reales introducidos hasta la fecha se mantienen iguales en todos los escenarios. Las diferencias se miden frente al escenario Base y no son previsiones adicionales.",
   "Business operations": "Operaciones de negocio",
   "Budget to date": "Presupuesto hasta la fecha",
   "Actual revenue variance to date": "Desviación real de ingresos hasta la fecha",
