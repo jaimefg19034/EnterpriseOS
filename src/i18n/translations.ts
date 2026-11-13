@@ -2,6 +2,9 @@ export type Language = "en" | "es";
 
 const spanish: Record<string, string> = {
   "Scenario Comparison": "Comparación de escenarios",
+  "Download invoice recovery copy": "Descargar copia de recuperación de facturas",
+  "Invoice changes could not be saved in this browser. Your current session data is still available; download a recovery copy before leaving this page.": "No se han podido guardar los cambios de facturas en este navegador. Los datos de la sesión siguen disponibles; descarga una copia de recuperación antes de salir de esta página.",
+  "A recovery copy is available for the invoice data currently held in this session.": "Hay disponible una copia de recuperación de los datos de facturas que están actualmente en esta sesión.",
   "EnterpriseOS — Scenario Comparison": "EnterpriseOS — Comparación de escenarios",
   "Same actual revenue and annual assumptions across all scenarios": "Mismos ingresos reales e hipótesis anuales en todos los escenarios",
   "DECISION SUPPORT": "APOYO A LA DECISIÓN",

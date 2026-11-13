@@ -82,8 +82,16 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
 
   useEffect(() => {
     if (!ready || !storageWritable) return;
-    try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(invoices)); } catch { /* Optional browser storage. */ }
-    window.dispatchEvent(new Event("enterpriseos:working-capital-updated"));
+    const serialised = JSON.stringify(invoices);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, serialised);
+      window.dispatchEvent(new Event("enterpriseos:working-capital-updated"));
+    } catch {
+      setStorageWritable(false);
+      setStorageWarning(t("Invoice changes could not be saved in this browser. Your current session data is still available; download a recovery copy before leaving this page."));
+      setSavedInvoiceRecoveryData(serialised);
+      setBackupMessage(t("A recovery copy is available for the invoice data currently held in this session."));
+    }
   }, [invoices, ready, storageWritable]);
 
   function addInvoice(event: FormEvent<HTMLFormElement>) {
@@ -422,7 +430,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
           <button className="secondary-button" type="button" onClick={() => csvInputRef.current?.click()}>{t("Import CSV")}</button>
           <input ref={csvInputRef} className="sr-only" type="file" accept=".csv,text/csv" onChange={prepareCsvImport} />
           <button className="secondary-button" type="button" onClick={exportRegister}>{t("Export register")}</button>
-          {savedInvoiceRecoveryData !== null && <button className="secondary-button" type="button" onClick={downloadOriginalInvoiceData}>{t("Download original invoice data")}</button>}
+          {savedInvoiceRecoveryData !== null && <button className="secondary-button" type="button" onClick={downloadOriginalInvoiceData}>{t("Download invoice recovery copy")}</button>}
           <button className="secondary-button" type="button" onClick={downloadLocalBackup}>{t("Download data backup")}</button>
           <button className="secondary-button" type="button" onClick={() => backupInputRef.current?.click()}>{t("Restore backup")}</button>
           <input ref={backupInputRef} className="sr-only" type="file" accept=".json,application/json" onChange={restoreLocalBackup} />
