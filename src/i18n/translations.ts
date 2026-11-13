@@ -971,6 +971,7 @@ const spanish: Record<string, string> = {
   "The restore failed and the previous data could not be fully recovered. Some browser data may have changed. Reload the page and download any recoverable data before continuing.": "La restauración ha fallado y no se han podido recuperar por completo los datos anteriores. Es posible que algunos datos del navegador hayan cambiado. Recarga la página y descarga cualquier dato recuperable antes de continuar.",
   "Download original invoice data": "Descargar datos originales de facturas",
   "A copy of the original saved invoice data has been downloaded. Keep it safe before attempting recovery.": "Se ha descargado una copia de los datos originales de facturas. Guárdala en un lugar seguro antes de intentar recuperarlos.",
+  "The invoice recovery copy has been downloaded. Keep it safe before attempting recovery.": "Se ha descargado la copia de recuperación de facturas. Guárdala en un lugar seguro antes de intentar recuperar los datos.",
 };
 
 

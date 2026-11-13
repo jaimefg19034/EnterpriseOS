@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { addInvoicePayment, calculateInvoiceAgeing, findDuplicateInvoice, findFutureDatedInvoicePayments, parseInvoiceCsv, parseStoredWorkingCapitalInvoices, removeFutureInvoicePayment, summarizeInvoices, validateWorkingCapitalInvoice, type InvoiceDirection, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { parseISODateUTC } from "@/domain/reporting-periods";
-import { createEmptyCashForecast, parseStoredCashForecast } from "@/domain/cash-forecast";
+import { parseStoredCashForecast } from "@/domain/cash-forecast";
 import { createLocalFinanceBackup, parseLocalFinanceBackup, parseStoredFinanceBackupSections } from "@/domain/cash-working-capital-backup";
 import { LEGACY_PLANNING_STORAGE_KEY, PLANNING_STORAGE_KEY } from "@/domain/planning-storage";
 import { OPERATIONS_STORAGE_KEY } from "@/domain/operations";
@@ -87,10 +87,12 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
       window.localStorage.setItem(STORAGE_KEY, serialised);
       window.dispatchEvent(new Event("enterpriseos:working-capital-updated"));
     } catch {
-      setStorageWritable(false);
-      setStorageWarning(t("Invoice changes could not be saved in this browser. Your current session data is still available; download a recovery copy before leaving this page."));
-      setSavedInvoiceRecoveryData(serialised);
-      setBackupMessage(t("A recovery copy is available for the invoice data currently held in this session."));
+      window.setTimeout(() => {
+        setStorageWritable(false);
+        setStorageWarning(t("Invoice changes could not be saved in this browser. Your current session data is still available; download a recovery copy before leaving this page."));
+        setSavedInvoiceRecoveryData(serialised);
+        setBackupMessage(t("A recovery copy is available for the invoice data currently held in this session."));
+      }, 0);
     }
   }, [invoices, ready, storageWritable]);
 
@@ -317,7 +319,7 @@ export function WorkingCapitalWorkspace({ language }: { language: Language }) {
     link.click();
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-    setBackupMessage(t("A copy of the original saved invoice data has been downloaded. Keep it safe before attempting recovery."));
+    setBackupMessage(t("The invoice recovery copy has been downloaded. Keep it safe before attempting recovery."));
   }
 
   function downloadLocalBackup() {
