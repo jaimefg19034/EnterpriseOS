@@ -81,6 +81,20 @@ describe("calculateThreeStatements", () => {
     expect(result.balanceSheet.isBalanced).toBe(true);
   });
 
+  it("returns an unavailable current ratio when current liabilities are zero", () => {
+    const pnl = calculateFinancials(incomeStatementInputs);
+    const result = calculateThreeStatements(pnl, {
+      ...DEFAULT_THREE_STATEMENT_ASSUMPTIONS,
+      payableDays: 0,
+    });
+
+    expect(result.balanceSheet.currentLiabilities).toBe(0);
+    expect(result.balanceSheet.currentRatio).toBeNull();
+    expect(Object.values(result.balanceSheet).every((value) =>
+      typeof value !== "number" || Number.isFinite(value),
+    )).toBe(true);
+  });
+
   it("normalises invalid and negative driver assumptions", () => {
     const pnl = calculateFinancials(incomeStatementInputs);
     const result = calculateThreeStatements(pnl, {

@@ -96,7 +96,8 @@ function money(value: number, language: Language): string {
   }).format(value);
 }
 
-function ratio(value: number, language: Language): string {
+function ratio(value: number | null, language: Language): string {
+  if (value === null) return "—";
   const formatted = new Intl.NumberFormat(language === "es" ? "es-ES" : "en-GB", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

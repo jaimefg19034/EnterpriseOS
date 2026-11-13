@@ -88,7 +88,7 @@ export type ThreeStatementResults = {
     isBalanced: boolean;
     netWorkingCapital: number;
     netDebt: number;
-    currentRatio: number;
+    currentRatio: number | null;
   };
   drivers: {
     daysSalesOutstanding: number;
@@ -297,9 +297,7 @@ export function calculateThreeStatements(
       currentRatio:
         currentLiabilities > 0
           ? roundCurrency(currentAssets / currentLiabilities)
-          : currentAssets > 0
-            ? Number.POSITIVE_INFINITY
-            : 0,
+          : null,
     },
     drivers: {
       daysSalesOutstanding: dso,
