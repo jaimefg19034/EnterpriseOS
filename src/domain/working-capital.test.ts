@@ -99,6 +99,9 @@ describe("working capital invoice validation", () => {
     expect(validateWorkingCapitalInvoice(invoice({ issueDate: "2026-11-10", dueDate: "2026-11-09" })).valid).toBe(false);
     expect(validateWorkingCapitalInvoice(invoice({ paidAmount: 1001 })).valid).toBe(false);
     expect(validateWorkingCapitalInvoice(invoice({ amount: 0 })).valid).toBe(false);
+    expect(validateWorkingCapitalInvoice(invoice({ amount: 0.001 })).valid).toBe(false);
+    expect(validateWorkingCapitalInvoice(invoice({ amount: 0.004 })).valid).toBe(false);
+    expect(validateWorkingCapitalInvoice(invoice({ amount: 0.005 })).valid).toBe(true);
   });
 
 

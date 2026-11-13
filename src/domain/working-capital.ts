@@ -65,7 +65,7 @@ export function validateWorkingCapitalInvoice(value: unknown): InvoiceValidation
       !isValidISODate(item.issueDate) || !isValidISODate(item.dueDate) || item.dueDate < item.issueDate) {
     return { valid: false, error: "Invoice dates are invalid or the due date is before the issue date." };
   }
-  if (typeof item.amount !== "number" || !Number.isFinite(item.amount) || item.amount <= 0 || item.amount > 1_000_000_000_000) {
+  if (typeof item.amount !== "number" || !Number.isFinite(item.amount) || item.amount <= 0 || roundCurrency(item.amount) <= 0 || item.amount > 1_000_000_000_000) {
     return { valid: false, error: "Invoice amount must be positive and within the supported limit." };
   }
   if (typeof item.paidAmount !== "number" || !Number.isFinite(item.paidAmount) || item.paidAmount < 0 || item.paidAmount > item.amount) {
