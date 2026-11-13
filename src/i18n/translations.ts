@@ -14,6 +14,7 @@ const spanish: Record<string, string> = {
   "EBITDA change vs. Base": "Variación de EBITDA vs. Base",
   "Net income change vs. Base": "Variación del beneficio neto vs. Base",
   "EBITDA margin change vs. Base": "Variación del margen EBITDA vs. Base",
+  "EBITDA margin change (pp)": "Variación del margen EBITDA (pp)",
   "Actual revenue entered to date is held constant across scenarios. Scenario deltas are measured against Base and are not additional revenue forecasts.": "Los ingresos reales introducidos hasta la fecha se mantienen iguales en todos los escenarios. Las diferencias se miden frente al escenario Base y no son previsiones adicionales.",
   "Business operations": "Operaciones de negocio",
   "Budget to date": "Presupuesto hasta la fecha",

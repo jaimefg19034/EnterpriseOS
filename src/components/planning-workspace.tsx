@@ -392,12 +392,13 @@ export function PlanningWorkspace({ language }: { language: Language }) {
           subtitle: `FY ${selectedYear} · ${t("Same actual revenue and annual assumptions across all scenarios")}`,
           headers: [t("Metric"), ...scenarioComparisons.map((row) => t(row.label)), t("Upside vs. Base"), t("Downside vs. Base"), t("Custom vs. Base")],
           widths: [34, 20, 20, 20, 20, 20, 20, 20],
-          currencyColumns: [2, 3, 4, 5, 6, 7, 8],
-          percentLabels: [t("Projected EBITDA margin"), t("EBITDA margin change vs. Base")],
+          currencyLabels: [t("Projected revenue"), t("Projected EBITDA"), t("Projected net income")],
+          percentLabels: [t("Projected EBITDA margin")],
           rows: [
             [t("Projected revenue"), ...scenarioComparisons.map((row) => row.result.projectedRevenue), scenarioComparisons[1].deltaVsBase.revenue, scenarioComparisons[2].deltaVsBase.revenue, scenarioComparisons[3].deltaVsBase.revenue],
             [t("Projected EBITDA"), ...scenarioComparisons.map((row) => row.result.projectedEbitda), scenarioComparisons[1].deltaVsBase.ebitda, scenarioComparisons[2].deltaVsBase.ebitda, scenarioComparisons[3].deltaVsBase.ebitda],
-            [t("Projected EBITDA margin"), ...scenarioComparisons.map((row) => row.result.projectedEbitdaMarginPercent / 100), scenarioComparisons[1].deltaVsBase.ebitdaMarginPercentagePoints / 100, scenarioComparisons[2].deltaVsBase.ebitdaMarginPercentagePoints / 100, scenarioComparisons[3].deltaVsBase.ebitdaMarginPercentagePoints / 100],
+            [t("Projected EBITDA margin"), ...scenarioComparisons.map((row) => row.result.projectedEbitdaMarginPercent / 100), null, null, null],
+            [t("EBITDA margin change (pp)"), null, null, null, null, scenarioComparisons[1].deltaVsBase.ebitdaMarginPercentagePoints, scenarioComparisons[2].deltaVsBase.ebitdaMarginPercentagePoints, scenarioComparisons[3].deltaVsBase.ebitdaMarginPercentagePoints],
             [t("Projected net income"), ...scenarioComparisons.map((row) => row.result.projectedNetIncome), scenarioComparisons[1].deltaVsBase.netIncome, scenarioComparisons[2].deltaVsBase.netIncome, scenarioComparisons[3].deltaVsBase.netIncome],
           ],
         },
@@ -617,7 +618,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
               </tr>
               <tr className="scenario-delta-row">
                 <th scope="row">{t("EBITDA margin change vs. Base")}</th>
-                {scenarioComparisons.map((row) => <td key={row.key} className={row.deltaVsBase.ebitdaMarginPercentagePoints >= 0 ? "scenario-positive" : "scenario-negative"}>{row.key === "base" ? "—" : `${row.deltaVsBase.ebitdaMarginPercentagePoints > 0 ? "+" : ""}${formatPercent(row.deltaVsBase.ebitdaMarginPercentagePoints)} pp`}</td>)}
+                {scenarioComparisons.map((row) => <td key={row.key} className={row.deltaVsBase.ebitdaMarginPercentagePoints >= 0 ? "scenario-positive" : "scenario-negative"}>{row.key === "base" ? "—" : `${row.deltaVsBase.ebitdaMarginPercentagePoints > 0 ? "+" : ""}${row.deltaVsBase.ebitdaMarginPercentagePoints.toFixed(1)} pp`}</td>)}
               </tr>
             </tbody>
           </table>
