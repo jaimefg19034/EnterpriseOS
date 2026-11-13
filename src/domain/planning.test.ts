@@ -20,7 +20,9 @@ const assumptions: PlanningAssumptions = {
 describe("buildPlanningResult", () => {
   it("compares all four scenarios against the same actuals and base case", () => {
     const actuals = makeDemoActualRevenue(assumptions.annualRevenueBudget);
+    const originalActuals = { ...actuals };
     const comparison = comparePlanningScenarios(assumptions, actuals, 7.5);
+    expect(actuals).toEqual(originalActuals);
 
     expect(comparison.map((row) => row.key)).toEqual([
       "base", "upside", "downside", "custom",
@@ -47,6 +49,9 @@ describe("buildPlanningResult", () => {
       );
       expect(row.deltaVsBase.netIncome).toBeCloseTo(
         row.result.projectedNetIncome - comparison[0].result.projectedNetIncome, 2,
+      );
+      expect(row.deltaVsBase.ebitdaMarginPercentagePoints).toBeCloseTo(
+        row.result.projectedEbitdaMarginPercent - comparison[0].result.projectedEbitdaMarginPercent, 2,
       );
     }
   });

@@ -495,6 +495,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
       <p className="planning-storage-status" role="status">{t(storageMessage || "Preparing local plan storage…")}</p>
       <nav className="planning-section-nav" aria-label={t("Planning sections")}>
         <a href="#planning-overview" onClick={navigateToPlanningSection}>{t("Planning overview")}</a>
+        <a href="#scenario-comparison" onClick={navigateToPlanningSection}>{t("Scenario comparison")}</a>
         <a href="#planning-assumptions" onClick={navigateToPlanningSection}>{t("Annual assumptions")}</a>
         <a href="#planning-performance" onClick={navigateToPlanningSection}>{t("Budget vs. actual & forecast")}</a>
         <a href="#planning-monthly" onClick={navigateToPlanningSection}>{t("Revenue plan by month")}</a>
@@ -563,7 +564,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
         />
       </div>
 
-      <section className="panel scenario-comparison-panel" aria-labelledby="scenario-comparison-title">
+      <section id="scenario-comparison" className="panel scenario-comparison-panel" aria-labelledby="scenario-comparison-title">
         <div className="panel-header">
           <div>
             <div className="panel-kicker">{t("DECISION SUPPORT")}</div>
