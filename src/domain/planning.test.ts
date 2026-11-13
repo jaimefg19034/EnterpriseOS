@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildPlanningResult,
+  comparePlanningScenarios,
   makeDemoActualRevenue,
   MONTHS,
   SEASONALITY_WEIGHTS,
@@ -17,6 +18,39 @@ const assumptions: PlanningAssumptions = {
 };
 
 describe("buildPlanningResult", () => {
+  it("compares all four scenarios against the same actuals and base case", () => {
+    const actuals = makeDemoActualRevenue(assumptions.annualRevenueBudget);
+    const comparison = comparePlanningScenarios(assumptions, actuals, 7.5);
+
+    expect(comparison.map((row) => row.key)).toEqual([
+      "base", "upside", "downside", "custom",
+    ]);
+    expect(comparison[0].deltaVsBase).toEqual({
+      revenue: 0,
+      ebitda: 0,
+      netIncome: 0,
+      ebitdaMarginPercentagePoints: 0,
+    });
+    expect(comparison[1].result.actualRevenueToDate).toBe(comparison[0].result.actualRevenueToDate);
+    expect(comparison[2].result.actualRevenueToDate).toBe(comparison[0].result.actualRevenueToDate);
+    expect(comparison[3].result.actualRevenueToDate).toBe(comparison[0].result.actualRevenueToDate);
+    expect(comparison[3].result.scenario.revenueGrowthPercent).toBe(7.5);
+    expect(comparison[1].deltaVsBase.revenue).toBeGreaterThan(0);
+    expect(comparison[2].deltaVsBase.revenue).toBeLessThan(0);
+    expect(comparison[3].deltaVsBase.revenue).toBeGreaterThan(0);
+    for (const row of comparison) {
+      expect(row.deltaVsBase.revenue).toBeCloseTo(
+        row.result.projectedRevenue - comparison[0].result.projectedRevenue, 2,
+      );
+      expect(row.deltaVsBase.ebitda).toBeCloseTo(
+        row.result.projectedEbitda - comparison[0].result.projectedEbitda, 2,
+      );
+      expect(row.deltaVsBase.netIncome).toBeCloseTo(
+        row.result.projectedNetIncome - comparison[0].result.projectedNetIncome, 2,
+      );
+    }
+  });
+
   it("allocates the annual revenue budget across all 12 months", () => {
     const result = buildPlanningResult(assumptions, {}, "base");
 

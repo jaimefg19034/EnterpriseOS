@@ -65,6 +65,18 @@ export type PlanningResult = {
   ebitdaVariance: number;
 };
 
+export type ScenarioComparisonRow = {
+  key: ScenarioKey;
+  label: string;
+  result: PlanningResult;
+  deltaVsBase: {
+    revenue: number;
+    ebitda: number;
+    netIncome: number;
+    ebitdaMarginPercentagePoints: number;
+  };
+};
+
 export const SCENARIOS: Record<PresetScenarioKey, ScenarioDefinition> = {
   base: {
     key: "base",
@@ -268,6 +280,44 @@ export function buildPlanningResult(
     budgetEbitda,
     ebitdaVariance: roundMoney(projectedEbitda - budgetEbitda),
   };
+}
+
+/**
+ * Calculates all four planning cases from the same assumptions and actuals.
+ * Each case is independent; the currently selected UI scenario is not mutated.
+ * Deltas are measured against the Base case and are rounded to cents (or
+ * percentage points for EBITDA margin).
+ */
+export function comparePlanningScenarios(
+  assumptions: PlanningAssumptions,
+  actualRevenueByMonth: ActualRevenueByMonth,
+  customRevenueGrowthPercent = 0,
+): ScenarioComparisonRow[] {
+  const keys: ScenarioKey[] = ["base", "upside", "downside", "custom"];
+  const results = keys.map((key) => ({
+    key,
+    result: buildPlanningResult(
+      assumptions,
+      actualRevenueByMonth,
+      key,
+      customRevenueGrowthPercent,
+    ),
+  }));
+  const base = results[0].result;
+
+  return results.map(({ key, result }) => ({
+    key,
+    label: result.scenario.label,
+    result,
+    deltaVsBase: {
+      revenue: roundMoney(result.projectedRevenue - base.projectedRevenue),
+      ebitda: roundMoney(result.projectedEbitda - base.projectedEbitda),
+      netIncome: roundMoney(result.projectedNetIncome - base.projectedNetIncome),
+      ebitdaMarginPercentagePoints: roundMoney(
+        result.projectedEbitdaMarginPercent - base.projectedEbitdaMarginPercent,
+      ),
+    },
+  }));
 }
 
 export function makeDemoActualRevenue(
