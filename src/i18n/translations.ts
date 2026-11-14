@@ -1,6 +1,7 @@
 export type Language = "en" | "es";
 
 const spanish: Record<string, string> = {
+  "Local demo environment": "Entorno de demostración local",
   "FINANCE OPERATING SYSTEM": "SISTEMA OPERATIVO FINANCIERO",
   "Scenario Comparison": "Comparación de escenarios",
   "Download invoice recovery copy": "Descargar copia de recuperación de facturas",
