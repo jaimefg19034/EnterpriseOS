@@ -176,3 +176,31 @@
  .p-site .p-flow-node,.p-site .p-comparison>div:not(.p-comparison-arrow){transition:none!important}
  .p-site .p-flow-node,.p-site .p-flow-node:nth-child(n){transform:none!important}
 }
+
+
+/* Pointer-local key light and micro-parallax for the real workspace chassis. */
+.p-site .p-product-frame{
+  background-image:
+    radial-gradient(560px circle at var(--product-light-x,50%) var(--product-light-y,34%),rgba(255,255,255,.52),transparent 68%),
+    linear-gradient(145deg,#eef0e9 0%,#dfe4de 48%,#d4dbd7 100%);
+}
+.p-site .p-product-live{
+  transition:transform .42s cubic-bezier(.2,.8,.2,1);
+  transform:rotateX(var(--product-tilt-x,0deg)) rotateY(var(--product-tilt-y,0deg)) translateZ(12px);
+}
+.p-site .p-product-frame.is-pointer-active .p-product-live{
+  will-change:transform;
+}
+@media(hover:hover) and (pointer:fine){
+  .p-site .p-product-frame.is-pointer-active{
+    border-color:rgba(101,123,208,.46);
+    box-shadow:0 2px 0 rgba(255,255,255,.9),0 20px 38px rgba(23,38,62,.1),0 48px 110px rgba(23,38,62,.15),inset 0 1px 0 rgba(255,255,255,.9);
+  }
+}
+@media(max-width:720px){
+  .p-site .p-product-frame{background-image:linear-gradient(145deg,#eef0e9 0%,#dfe4de 48%,#d4dbd7 100%)}
+  .p-site .p-product-live{transform:none;transition:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .p-site .p-product-live{transform:none!important;transition:none!important;will-change:auto!important}
+}
