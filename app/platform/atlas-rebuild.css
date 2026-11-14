@@ -351,3 +351,9 @@ html{scroll-behavior:smooth}
  .ax-site *,.ax-site *:before,.ax-site *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
  .ax-ribbon-track{animation:none!important}
 }
+
+/* Disable the remaining scroll-linked blur reveal and decorative backdrop costs. */
+.ax-manifesto h2{animation:none!important;filter:none!important}
+.ax-header{backdrop-filter:none!important}
+.ax-menu-overlay{animation:none!important;clip-path:none!important}
+.ax-site :is(.ax-manifesto h2,.ax-header,.ax-menu-overlay){will-change:auto}
