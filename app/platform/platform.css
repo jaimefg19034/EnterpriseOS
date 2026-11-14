@@ -281,3 +281,37 @@
  .p-product-demo-note p{font-size:10px}
  .p-sim-disclaimer{font-size:7px}
 }
+
+
+/* Product showcase — editorial instrument frame */
+.p-product-frame{position:relative;padding:0 22px 18px;border:1px solid #cbd1cd;background:#e1e4de;box-shadow:0 38px 90px #17263e18}
+.p-product-frame:before{content:"";position:absolute;top:0;left:22px;width:1px;height:100%;background:#c1c9c4;pointer-events:none}
+.p-product-frame-head,.p-product-frame-foot{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:18px;min-height:61px;padding:0 8px 0 17px}
+.p-frame-identity{display:flex;align-items:center;gap:15px}
+.p-frame-index{color:#657bd0;font:500 9px/1 var(--mono);letter-spacing:.8px}
+.p-frame-identity>span:last-child{display:flex;flex-direction:column;gap:3px}
+.p-frame-identity b{color:#26364a;font:600 9px/1 var(--display);letter-spacing:1px}
+.p-frame-identity small{color:#89938e;font:500 6px/1.3 var(--mono);letter-spacing:.8px}
+.p-frame-status{display:flex;align-items:center;gap:8px;color:#64736e;font:500 7px/1.4 var(--mono);letter-spacing:.7px}
+.p-frame-status i{width:6px;height:6px;border-radius:50%;background:#5cba99;box-shadow:0 0 0 3px #5cba9925}
+.p-frame-status span{color:#a0aaa4}
+.p-product-frame .p-product-stage{border:1px solid #cbd2ce;box-shadow:0 12px 36px #17263e0b}
+.p-product-frame-foot{min-height:39px;padding-top:7px;color:#7e8984;font:500 6px/1.5 var(--mono);letter-spacing:.8px}
+.p-product-frame-foot b{margin-left:7px;color:#657bd0;font-size:10px;font-weight:500}
+.p-product-live .planning-workspace{border:0}
+.p-product-live .planning-storage-status{margin-top:8px}
+@media(max-width:720px){
+ .p-product-frame{padding:0 9px 10px}
+ .p-product-frame:before{left:9px}
+ .p-product-frame-head{min-height:53px;padding:0 4px 0 8px}
+ .p-frame-identity{gap:9px}
+ .p-frame-identity b{font-size:8px}
+ .p-frame-identity small{font-size:5px}
+ .p-frame-index{font-size:8px}
+ .p-frame-status{gap:5px;font-size:5px;letter-spacing:.35px}
+ .p-product-frame-foot{min-height:32px;padding:6px 4px 0;font-size:5px;letter-spacing:.35px}
+}
+@media(prefers-reduced-motion:reduce){
+ .p-field-route{animation:none}
+ .p-contours,.p-scenario-lines i:after,.p-sim-bars i b{transition:none}
+}
