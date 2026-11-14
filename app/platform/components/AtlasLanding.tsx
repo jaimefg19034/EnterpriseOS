@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const benefits = [
   { number: "01", title: "Entiende el rendimiento", copy: "Lee ingresos, costes y márgenes desde una única perspectiva.", icon: "performance" },
@@ -56,6 +56,17 @@ export default function AtlasLanding() {
   const [demoAccessOpen, setDemoAccessOpen] = useState(false);
   const [demoCode, setDemoCode] = useState("");
   const [demoError, setDemoError] = useState("");
+  const [highlightedPlan, setHighlightedPlan] = useState("");
+
+  useEffect(() => {
+    const syncPlanFromHash = () => {
+      const match = window.location.hash.match(/^#plan-(essential|professional|business)$/);
+      setHighlightedPlan(match?.[1] ?? "");
+    };
+    syncPlanFromHash();
+    window.addEventListener("hashchange", syncPlanFromHash);
+    return () => window.removeEventListener("hashchange", syncPlanFromHash);
+  }, []);
 
   function openDemoAccess(event: React.MouseEvent<HTMLAnchorElement>) {
     event.preventDefault();
@@ -71,17 +82,17 @@ export default function AtlasLanding() {
       return;
     }
     window.sessionStorage.setItem("enterpriseos:demo-access", "granted");
-    window.location.href = "/EnterpriseOS/";
+    window.location.assign("/EnterpriseOS/");
   }
 
   return <main className="eos-home" id="top">
     <header className="eos-home-nav">
       <Brand />
-      <nav aria-label="Navegación principal"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a></nav>
+      <nav aria-label="Navegación principal"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a><details className="eos-home-plan-menu"><summary>Ver paquetes <span aria-hidden="true">⌄</span></summary><div><a href="#plan-essential" onClick={() => setHighlightedPlan("essential")}>Essential <small>29 €/mes</small></a><a href="#plan-professional" onClick={() => setHighlightedPlan("professional")}>Professional <small>79 €/mes</small></a><a href="#plan-business" onClick={() => setHighlightedPlan("business")}>Business <small>149 €/mes</small></a></div></details></nav>
       <div className="eos-home-nav-actions">
         <a className="eos-home-login" href="/EnterpriseOS/account/">Iniciar sesión</a>
         <a className="eos-home-workspace-link" href="/EnterpriseOS/" onClick={openDemoAccess}>Entrar al workspace <Arrow /></a>
-        <a className="eos-home-button eos-home-button-small" href="/EnterpriseOS/account/?mode=signup">Crear cuenta <Arrow /></a>
+        <a className="eos-home-button eos-home-button-small" href="/EnterpriseOS/account/?mode=signup">Empezar <Arrow /></a>
       </div>
     </header>
 
@@ -101,8 +112,9 @@ export default function AtlasLanding() {
     </section>
 
     <section className="eos-home-what" id="what">
-      <div className="eos-home-section-top"><span>QUÉ HACEMOS</span><span>UNA PLATAFORMA. CUATRO RESULTADOS.</span></div>
-      <div className="eos-home-what-heading"><h2>Menos ruido.<br /><em>Más perspectiva.</em></h2><p>Todo lo esencial para entender la salud financiera de tu empresa, sin convertir tu día a día en otro laberinto de hojas de cálculo.</p></div>
+      <div className="eos-home-section-top"><span>QUÉ HACEMOS</span><span>DEL DATO A UNA DECISIÓN MEJOR</span></div>
+      <div className="eos-home-what-heading"><h2>De hojas dispersas<br /><em>a una visión clara.</em></h2><p>Reunimos los números clave de tu empresa en un espacio de gestión: ves cómo rinde, pruebas escenarios y anticipas la caja antes de decidir.</p></div>
+      <div className="eos-home-process"><article><span>01 / INTRODUCE</span><h3>Parte de tus datos</h3><p>Añade ingresos, costes, presupuestos, cobros y pagos con tus propios supuestos.</p></article><div className="eos-home-process-line" aria-hidden="true"><svg viewBox="0 0 100 16"><path d="M1 8h96m-7-6 7 6-7 6"/></svg></div><article><span>02 / ANALIZA</span><h3>Entiende el impacto</h3><p>Consulta márgenes, compara escenarios y relaciona resultado, balance y caja.</p></article><div className="eos-home-process-line" aria-hidden="true"><svg viewBox="0 0 100 16"><path d="M1 8h96m-7-6 7 6-7 6"/></svg></div><article><span>03 / DECIDE</span><h3>Actúa con contexto</h3><p>Detecta necesidades de liquidez, revisa costes y comparte informes de gestión.</p></article></div>
       <div className="eos-home-benefits">{benefits.map((item) => <article className="eos-home-benefit" key={item.number}>
         <div className="eos-home-benefit-top"><span>{item.number}</span><BenefitIcon type={item.icon}/></div>
         <h3>{item.title}</h3><p>{item.copy}</p><div className="eos-home-benefit-line" />
@@ -177,29 +189,29 @@ export default function AtlasLanding() {
         <p>Empieza con el control financiero esencial y amplía tus capacidades cuando tu empresa lo necesite. Todos los precios son mensuales, sin IVA.</p>
       </div>
       <div className="eos-home-pricing-grid">
-        <article className="eos-home-tier-card">
+        <article id="plan-essential" className={"eos-home-tier-card " + (highlightedPlan === "essential" ? "is-selected" : "")}>
           <div className="eos-home-tier-top"><span>01 / ESSENTIAL</span><span>START</span></div>
           <h3>Essential</h3><p>Control financiero esencial para empresas pequeñas.</p>
           <div className="eos-home-tier-price"><strong>29 €</strong><span>/ mes</span></div>
-          <ul><li>Dashboard ejecutivo</li><li>Cuenta de resultados (P&amp;L)</li><li>Indicadores financieros básicos</li></ul>
-          <a className="eos-home-tier-link" href="/EnterpriseOS/account/?mode=signup&plan=essential">Elegir Essential <Arrow /></a>
+          <div className="eos-home-feature-list"><div><b>Dashboard financiero</b><p>Ingresos, costes, EBITDA, márgenes y resultado neto en una vista ejecutiva.</p></div><div><b>Cuenta de resultados editable</b><p>Introduce ventas, costes directos, gastos, amortización, intereses e impuestos; los resultados se recalculan al instante.</p></div><div><b>Indicadores de rentabilidad</b><p>Consulta margen bruto, margen EBITDA y margen neto calculados a partir de tus datos.</p></div><div><b>Modelo de gestión</b><p>Trabaja con una vista anual en euros y supuestos modificables, sin contabilidad conectada.</p></div></div>
+          <a className="eos-home-tier-link" href="/EnterpriseOS/account/?mode=signup&plan=essential">Empezar con Essential <Arrow /></a>
         </article>
-        <article className="eos-home-tier-card is-recommended">
+        <article id="plan-professional" className={"eos-home-tier-card is-recommended " + (highlightedPlan === "professional" ? "is-selected" : "")}>
           <div className="eos-home-tier-top"><span>02 / PROFESSIONAL</span><span className="eos-home-recommended">RECOMENDADO</span></div>
           <h3>Professional</h3><p>Planificación y modelización para anticipar decisiones.</p>
           <div className="eos-home-tier-price"><strong>79 €</strong><span>/ mes</span></div>
-          <ul><li>Todo lo incluido en Essential</li><li>Presupuestos y escenarios</li><li>Modelo financiero de tres estados</li><li>Informes y exportaciones</li></ul>
-          <a className="eos-home-button eos-home-tier-cta" href="/EnterpriseOS/account/?mode=signup&plan=professional">Elegir Professional <Arrow /></a>
+          <div className="eos-home-feature-list"><div><b>Todo Essential</b><p>Dashboard, cuenta de resultados editable e indicadores de rentabilidad.</p></div><div><b>Presupuestos y escenarios</b><p>Define objetivos e hipótesis de ingresos y costes; compara escenarios y evolución mensual.</p></div><div><b>Modelo de tres estados</b><p>Relaciona cuenta de resultados, balance y flujo de caja con supuestos financieros editables.</p></div><div><b>Previsión de tesorería a 13 semanas</b><p>Proyecta manualmente entradas y salidas para anticipar tensiones de liquidez.</p></div><div><b>Capital circulante</b><p>Analiza plazos de cobro, inventario y pago a proveedores para entender el ciclo de caja.</p></div><div><b>Informes y Excel</b><p>Consulta el informe de gestión y exporta la cuenta de resultados para seguir trabajando.</p></div></div>
+          <a className="eos-home-button eos-home-tier-cta" href="/EnterpriseOS/account/?mode=signup&plan=professional">Empezar con Professional <Arrow /></a>
         </article>
-        <article className="eos-home-tier-card">
+        <article id="plan-business" className={"eos-home-tier-card " + (highlightedPlan === "business" ? "is-selected" : "")}>
           <div className="eos-home-tier-top"><span>03 / BUSINESS</span><span>ADVANCED</span></div>
           <h3>Business</h3><p>Visión financiera y operativa ampliada.</p>
           <div className="eos-home-tier-price"><strong>149 €</strong><span>/ mes</span></div>
-          <ul><li>Todo lo incluido en Professional</li><li>Operaciones y centros de coste</li><li>Análisis operativo ampliado</li><li>Acceso a todas las áreas actuales</li></ul>
-          <a className="eos-home-tier-link" href="/EnterpriseOS/account/?mode=signup&plan=business">Elegir Business <Arrow /></a>
+          <div className="eos-home-feature-list"><div><b>Todo Professional</b><p>Incluye planificación, tres estados financieros, tesorería, capital circulante e informes.</p></div><div><b>Pipeline comercial</b><p>Registra oportunidades, importes, fases y fechas previstas de cierre.</p></div><div><b>Seguimiento de proyectos</b><p>Controla responsables, presupuestos, gasto acumulado, fechas y estado.</p></div><div><b>Riesgos y KPIs</b><p>Documenta riesgos con su valoración y sigue indicadores frente a objetivos.</p></div><div><b>Centros de coste y gastos</b><p>Registra presupuestos, gasto y movimientos por área para entender dónde se consume el margen.</p></div><div><b>Exportación operativa</b><p>Descarga los registros operativos en CSV para analizarlos fuera de la plataforma.</p></div></div>
+          <a className="eos-home-tier-link" href="/EnterpriseOS/account/?mode=signup&plan=business">Empezar con Business <Arrow /></a>
         </article>
       </div>
-      <p className="eos-home-pricing-disclaimer">PRECIOS PROPUESTOS · SIN IVA · CONTRATACIÓN ONLINE PENDIENTE DE ACTIVAR SUPABASE Y STRIPE. LOS DATOS DE ESTA VERSIÓN SIGUEN EN ALMACENAMIENTO LOCAL.</p>
+      <div className="eos-home-pricing-foot"><p>Todos los planes son mensuales y se muestran sin IVA.</p><p><b>Alcance actual:</b> los datos se introducen manualmente y se guardan en el navegador. No hay conexión bancaria, sincronización contable, multiempresa ni almacenamiento centralizado activo. El alta y el cobro online se activarán al completar la configuración de Supabase y Stripe.</p></div>
     </section>
 
     <section className="eos-home-close">
