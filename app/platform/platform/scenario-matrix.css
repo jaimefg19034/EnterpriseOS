@@ -38,3 +38,16 @@
 
 /* Keep live scenario feedback available to screen readers without altering the editorial layout. */
 .p-scenario-sr-status{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+
+
+/* SCENARIO INSTRUMENT / cursor-lit surfaces with restrained physical tilt. */
+@media (hover:hover) and (pointer:fine) {
+ .p-site .p-scenario-card{isolation:isolate;overflow:hidden;transform:perspective(1100px) rotateX(var(--scenario-tilt-x,0deg)) rotateY(var(--scenario-tilt-y,0deg)) translateY(0);transform-style:preserve-3d;transition:transform .28s cubic-bezier(.2,.8,.2,1),border-color .25s,background .25s,box-shadow .25s;will-change:transform}
+ .p-site .p-scenario-card:hover{transform:perspective(1100px) rotateX(var(--scenario-tilt-x,0deg)) rotateY(var(--scenario-tilt-y,0deg)) translateY(-5px);box-shadow:0 24px 48px #17263e20,0 3px 8px #17263e0d}
+ .p-site .p-scenario-card::before{position:absolute;inset:0;z-index:0;content:"";pointer-events:none;opacity:0;background:radial-gradient(420px circle at var(--scenario-x,50%) var(--scenario-y,35%),rgba(101,123,208,.17),transparent 62%);transition:opacity .25s}
+ .p-site .p-scenario-card:hover::before{opacity:1}
+ .p-site .p-scenario-card::after{position:absolute;inset:0;z-index:0;content:"";pointer-events:none;border-top:1px solid rgba(255,255,255,.72);opacity:.65}
+ .p-site .p-scenario-card>*{position:relative;z-index:1;transform:translateZ(12px)}
+ .p-site .p-scenario-card[aria-pressed="true"]::before{background:radial-gradient(420px circle at var(--scenario-x,50%) var(--scenario-y,35%),rgba(166,182,255,.22),transparent 62%)}
+}
+@media (prefers-reduced-motion:reduce){.p-site .p-scenario-card{transform:none!important;will-change:auto}}
