@@ -56,7 +56,7 @@ export default function AtlasLanding() {
       <Brand />
       <nav aria-label="Navegación principal"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a></nav>
       <div className="eos-home-nav-actions">
-        <a className="eos-home-login" href="/EnterpriseOS/">Iniciar sesión</a>
+        <a className="eos-home-login" href="/EnterpriseOS/account/">Iniciar sesión</a>
         <a className="eos-home-button eos-home-button-small" href="/EnterpriseOS/">Empezar ahora <Arrow /></a>
       </div>
     </header>
@@ -87,17 +87,34 @@ export default function AtlasLanding() {
 
     <section className="eos-home-pricing" id="pricing">
       <div className="eos-home-section-top"><span>PRECIOS</span><span>ACCESO AL FINANCIAL ATLAS</span></div>
-      <div className="eos-home-pricing-layout">
-        <div className="eos-home-pricing-copy"><div className="eos-home-kicker"><i /> EARLY ACCESS</div><h2>Empieza a decidir<br /><em>con perspectiva.</em></h2><p>Accede al workspace financiero de EnterpriseOS y explora sus herramientas de planificación, análisis y tesorería.</p><div className="eos-home-price-note"><span>PRECIO</span><strong>Tarifa de lanzamiento</strong><small>Solicita la tarifa actual. No hay un precio público confirmado todavía.</small></div></div>
-        <article className="eos-home-price-card">
-          <div className="eos-home-price-card-top"><span>ENTERPRISEOS / ACCESS</span><span className="eos-home-recommended">ACCESO DISPONIBLE</span></div>
-          <div className="eos-home-price-title"><h3>Financial Atlas</h3><p>El espacio de trabajo para modelar, planificar y anticipar.</p></div>
-          <div className="eos-home-price-value"><strong>Precio bajo solicitud</strong><span>Tarifa de lanzamiento</span></div>
-          <ul><li>Planificación y escenarios</li><li>Modelo financiero y reporting</li><li>Previsión de tesorería a 13 semanas</li><li>Seguimiento de capital circulante</li></ul>
-          <a className="eos-home-button eos-home-price-cta" href="/EnterpriseOS/">Solicitar acceso <Arrow /></a>
-          <small className="eos-home-price-foot">MVP · DATOS INTRODUCIDOS MANUALMENTE · SIN CONEXIÓN BANCARIA ACTIVA</small>
+      <div className="eos-home-pricing-intro">
+        <div><div className="eos-home-kicker"><i /> PLANES MENSUALES</div><h2>Elige el nivel de<br /><em>claridad que necesitas.</em></h2></div>
+        <p>Empieza con el control financiero esencial y amplía tus capacidades cuando tu empresa lo necesite. Todos los precios son mensuales, sin IVA.</p>
+      </div>
+      <div className="eos-home-pricing-grid">
+        <article className="eos-home-tier-card">
+          <div className="eos-home-tier-top"><span>01 / ESSENTIAL</span><span>START</span></div>
+          <h3>Essential</h3><p>Control financiero esencial para empresas pequeñas.</p>
+          <div className="eos-home-tier-price"><strong>29 €</strong><span>/ mes</span></div>
+          <ul><li>Dashboard ejecutivo</li><li>Cuenta de resultados (P&amp;L)</li><li>Indicadores financieros básicos</li></ul>
+          <a className="eos-home-tier-link" href="/EnterpriseOS/account/?mode=signup&plan=essential">Elegir Essential <Arrow /></a>
+        </article>
+        <article className="eos-home-tier-card is-recommended">
+          <div className="eos-home-tier-top"><span>02 / PROFESSIONAL</span><span className="eos-home-recommended">RECOMENDADO</span></div>
+          <h3>Professional</h3><p>Planificación y modelización para anticipar decisiones.</p>
+          <div className="eos-home-tier-price"><strong>79 €</strong><span>/ mes</span></div>
+          <ul><li>Todo lo incluido en Essential</li><li>Presupuestos y escenarios</li><li>Modelo financiero de tres estados</li><li>Informes y exportaciones</li></ul>
+          <a className="eos-home-button eos-home-tier-cta" href="/EnterpriseOS/account/?mode=signup&plan=professional">Elegir Professional <Arrow /></a>
+        </article>
+        <article className="eos-home-tier-card">
+          <div className="eos-home-tier-top"><span>03 / BUSINESS</span><span>ADVANCED</span></div>
+          <h3>Business</h3><p>Visión financiera y operativa ampliada.</p>
+          <div className="eos-home-tier-price"><strong>149 €</strong><span>/ mes</span></div>
+          <ul><li>Todo lo incluido en Professional</li><li>Operaciones y centros de coste</li><li>Análisis operativo ampliado</li><li>Acceso a todas las áreas actuales</li></ul>
+          <a className="eos-home-tier-link" href="/EnterpriseOS/account/?mode=signup&plan=business">Elegir Business <Arrow /></a>
         </article>
       </div>
+      <p className="eos-home-pricing-disclaimer">PRECIOS PROPUESTOS · SIN IVA · CONTRATACIÓN ONLINE PENDIENTE DE ACTIVAR SUPABASE Y STRIPE. LOS DATOS DE ESTA VERSIÓN SIGUEN EN ALMACENAMIENTO LOCAL.</p>
     </section>
 
     <section className="eos-home-close">
