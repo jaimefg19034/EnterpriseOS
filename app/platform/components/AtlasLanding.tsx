@@ -56,7 +56,27 @@ function AtlasHeader() {
   );
 }
 
-function AtlasCursor() {\n  const cursorRef = useRef<HTMLDivElement>(null);\n  useEffect(() => {\n    if (window.matchMedia("(pointer: coarse)").matches) return;\n    const onMove = (event: PointerEvent) => {\n      const node = cursorRef.current;\n      if (!node) return;\n      node.style.left = event.clientX + "px";\n      node.style.top = event.clientY + "px";\n      const target = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-cursor],a,button") : null;\n      const label = target?.dataset.cursor ?? (target ? "OPEN" : "");\n      node.textContent = label;\n      node.classList.toggle("is-active", Boolean(label));\n    };\n    window.addEventListener("pointermove", onMove, { passive: true });\n    return () => window.removeEventListener("pointermove", onMove);\n  }, []);\n  return <div className="ax-cursor-lens" ref={cursorRef} aria-hidden="true" />;\n}\n\nfunction Preloader() {
+function AtlasCursor() {
+  const cursorRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    const onMove = (event: PointerEvent) => {
+      const node = cursorRef.current;
+      if (!node) return;
+      node.style.left = event.clientX + "px";
+      node.style.top = event.clientY + "px";
+      const target = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-cursor],a,button") : null;
+      const label = target?.dataset.cursor ?? (target ? "OPEN" : "");
+      node.textContent = label;
+      node.classList.toggle("is-active", Boolean(label));
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onMove);
+  }, []);
+  return <div className="ax-cursor-lens" ref={cursorRef} aria-hidden="true" />;
+}
+
+function Preloader() {
   return <div className="ax-preloader" aria-hidden="true"><div className="ax-preloader-mark">E<span>O</span>S</div><div className="ax-preloader-track"><i /></div><small>INITIALISING FINANCIAL ATLAS / 001</small></div>;
 }
 
