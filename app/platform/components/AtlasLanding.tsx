@@ -57,7 +57,8 @@ export default function AtlasLanding() {
       <nav aria-label="Navegación principal"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a></nav>
       <div className="eos-home-nav-actions">
         <a className="eos-home-login" href="/EnterpriseOS/account/">Iniciar sesión</a>
-        <a className="eos-home-button eos-home-button-small" href="/EnterpriseOS/account/">Empezar ahora <Arrow /></a>
+        <a className="eos-home-workspace-link" href="/EnterpriseOS/">Entrar al workspace <Arrow /></a>
+        <a className="eos-home-button eos-home-button-small" href="/EnterpriseOS/account/?mode=signup">Crear cuenta <Arrow /></a>
       </div>
     </header>
 
@@ -67,8 +68,8 @@ export default function AtlasLanding() {
         <h1>La claridad financiera<br />para <em>decidir mejor.</em></h1>
         <p>Conecta rendimiento, planificación y tesorería. Comprende qué ocurre en tu negocio y anticipa lo que viene.</p>
         <div className="eos-home-hero-actions">
-          <a className="eos-home-button" href="/EnterpriseOS/account/">Crear cuenta / Empezar <Arrow /></a>
-          <a className="eos-home-text-link" href="/EnterpriseOS/account/">Iniciar sesión <span>↗</span></a>
+          <a className="eos-home-button" href="/EnterpriseOS/">Explorar workspace demo <Arrow /></a>
+          <a className="eos-home-text-link" href="/EnterpriseOS/account/">Ya tengo cuenta · Iniciar sesión <span>↗</span></a>
         </div>
         <div className="eos-home-proof"><span><i /> UNA VISIÓN FINANCIERA CONECTADA</span><span>DISEÑADO PARA DECISORES</span></div>
       </div>
@@ -83,6 +84,67 @@ export default function AtlasLanding() {
         <div className="eos-home-benefit-top"><span>{item.number}</span><BenefitIcon type={item.icon}/></div>
         <h3>{item.title}</h3><p>{item.copy}</p><div className="eos-home-benefit-line" />
       </article>)}</div>
+    </section>
+
+
+    <section className="eos-home-product" id="product">
+      <div className="eos-home-section-top"><span>QUÉ PUEDES HACER</span><span>DEL DATO A LA DECISIÓN</span></div>
+      <div className="eos-home-product-heading">
+        <div><div className="eos-home-kicker"><i /> EL WORKSPACE POR DENTRO</div><h2>Tu negocio, explicado<br /><em>en números claros.</em></h2></div>
+        <p>EnterpriseOS reúne herramientas de análisis y planificación para que puedas entender el presente, probar decisiones y ver sus posibles consecuencias.</p>
+      </div>
+      <div className="eos-home-product-grid">
+        <article className="eos-home-product-card eos-home-product-card-wide">
+          <div className="eos-home-product-visual eos-home-visual-dashboard">
+            <div className="eos-home-mini-top"><span>EXECUTIVE OVERVIEW</span><i>FY 2026 · DEMO</i></div>
+            <div className="eos-home-mini-kpis"><div><small>REVENUE</small><b>€248k</b><i>↗ 8.4%</i></div><div><small>EBITDA</small><b>€51k</b><i>↗ 6.2%</i></div><div><small>CASH</small><b>€112k</b><i>↗ 4.1%</i></div></div>
+            <div className="eos-home-mini-chart"><span style={{height:"34%"}}/><span style={{height:"45%"}}/><span style={{height:"42%"}}/><span style={{height:"57%"}}/><span style={{height:"64%"}}/><span style={{height:"78%"}}/><span style={{height:"88%"}}/></div>
+          </div>
+          <div className="eos-home-product-copy"><span>01 / VISIÓN EJECUTIVA</span><h3>Entiende cómo va tu empresa.</h3><p>Visualiza ingresos, costes, márgenes y resultados en un dashboard pensado para detectar lo importante de un vistazo.</p></div>
+        </article>
+        <article className="eos-home-product-card">
+          <div className="eos-home-product-visual eos-home-visual-scenarios">
+            <div className="eos-home-scenario-lines"><span>BASE <b>€248k</b><i style={{width:"72%"}}/></span><span>GROWTH <b>€286k</b><i style={{width:"91%"}}/></span><span>CONSERVATIVE <b>€218k</b><i style={{width:"58%"}}/></span></div>
+            <div className="eos-home-scenario-note">3 ESCENARIOS COMPARABLES</div>
+          </div>
+          <div className="eos-home-product-copy"><span>02 / PLANIFICACIÓN</span><h3>Prueba antes de decidir.</h3><p>Modifica presupuestos y supuestos para comparar escenarios y medir su impacto en ingresos y rentabilidad.</p></div>
+        </article>
+        <article className="eos-home-product-card">
+          <div className="eos-home-product-visual eos-home-visual-cash">
+            <div className="eos-home-cash-head"><span>13-WEEK CASH VIEW</span><b>€112,400</b></div>
+            <div className="eos-home-cash-bars">{[68,54,78,48,85,63,92,72,58,88,67,96,78].map((h,i)=><i key={i} style={{height:h+"%"}} />)}</div>
+            <div className="eos-home-cash-legend"><span>ENTRADAS</span><span>SALIDAS</span></div>
+          </div>
+          <div className="eos-home-product-copy"><span>03 / TESORERÍA</span><h3>Anticipa tus necesidades de caja.</h3><p>Prepara una previsión manual de 13 semanas y sigue cobros, pagos y vencimientos pendientes.</p></div>
+        </article>
+        <article className="eos-home-product-card">
+          <div className="eos-home-product-visual eos-home-visual-statements">
+            <div className="eos-home-statement-row"><span>Income statement</span><b>EBITDA</b><i>€51.0k</i></div>
+            <div className="eos-home-statement-row"><span>Balance sheet</span><b>ASSETS</b><i>€184.2k</i></div>
+            <div className="eos-home-statement-row"><span>Cash flow</span><b>NET CASH</b><i>+€18.6k</i></div>
+            <div className="eos-home-statement-link">RESULTADO ↔ BALANCE ↔ CAJA</div>
+          </div>
+          <div className="eos-home-product-copy"><span>04 / MODELO FINANCIERO</span><h3>Conecta los tres estados.</h3><p>Relaciona cuenta de resultados, balance y flujo de caja mediante supuestos editables en un modelo simplificado.</p></div>
+        </article>
+        <article className="eos-home-product-card">
+          <div className="eos-home-product-visual eos-home-visual-operations">
+            <div className="eos-home-ops-center">COSTES<br/><b>POR ÁREA</b></div>
+            <div className="eos-home-ops-node node-a">SALES</div><div className="eos-home-ops-node node-b">OPS</div><div className="eos-home-ops-node node-c">ADMIN</div>
+            <div className="eos-home-ops-ring"/>
+          </div>
+          <div className="eos-home-product-copy"><span>05 / OPERACIONES</span><h3>Localiza dónde se consume el margen.</h3><p>Registra y analiza costes por centro o área para añadir contexto operativo a la lectura financiera.</p></div>
+        </article>
+        <article className="eos-home-product-card">
+          <div className="eos-home-product-visual eos-home-visual-reports">
+            <div className="eos-home-report-sheet"><div/><div/><div/><div/><div/></div>
+            <div className="eos-home-report-export"><b> XLSX </b><span>MANAGEMENT REPORT</span><i>READY TO EXPORT ↗</i></div>
+          </div>
+          <div className="eos-home-product-copy"><span>06 / INFORMES</span><h3>Convierte el análisis en acción.</h3><p>Consulta informes de gestión y exporta resultados para compartirlos o seguir trabajando con ellos.</p></div>
+        </article>
+      </div>
+      <div className="eos-home-product-foot"><span>UN FLUJO DE TRABAJO SENCILLO</span><div><b>01</b> Entender <i>→</i> <b>02</b> Planificar <i>→</i> <b>03</b> Anticipar <i>→</i> <b>04</b> Decidir</div></div>
+      <div className="eos-home-product-cta"><p>¿Quieres verlo funcionando? Entra y explora el entorno de demostración.</p><a className="eos-home-button" href="/EnterpriseOS/">Abrir workspace demo <Arrow /></a></div>
+      <p className="eos-home-product-disclaimer">VISTA ILUSTRATIVA · CIFRAS SINTÉTICAS · DATOS Y SUPUESTOS INTRODUCIDOS MANUALMENTE · LOS CAMBIOS SE GUARDAN LOCALMENTE EN ESTA VERSIÓN.</p>
     </section>
 
     <section className="eos-home-pricing" id="pricing">
@@ -121,12 +183,12 @@ export default function AtlasLanding() {
       <div className="eos-home-close-orbit" aria-hidden="true"><span /><span /><span /></div>
       <div className="eos-home-kicker"><i /> EL SIGUIENTE PASO</div>
       <h2>Entiende los números.<br /><em>Adelántate a las decisiones.</em></h2>
-      <div className="eos-home-close-bottom"><p>Entra en EnterpriseOS y lleva tu planificación financiera a un lugar más claro.</p><a className="eos-home-button" href="/EnterpriseOS/account/">Empezar ahora <Arrow /></a></div>
+      <div className="eos-home-close-bottom"><p>Entra en EnterpriseOS y lleva tu planificación financiera a un lugar más claro.</p><a className="eos-home-button" href="/EnterpriseOS/">Entrar al workspace <Arrow /></a></div>
     </section>
 
     <footer className="eos-home-footer">
       <div className="eos-home-footer-main"><Brand /><p>Financial Decision Intelligence<br />para empresas que quieren decidir con contexto.</p></div>
-      <div className="eos-home-footer-links"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a><a href="/EnterpriseOS/account/">Iniciar sesión</a><a href="/EnterpriseOS/account/">Empezar ahora</a></div>
+      <div className="eos-home-footer-links"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a><a href="/EnterpriseOS/account/">Iniciar sesión</a><a href="/EnterpriseOS/">Workspace demo</a></div>
       <div className="eos-home-footer-bottom"><span>© {new Date().getFullYear()} ENTERPRISEOS</span><span>DATOS MANUALES · PERSISTENCIA LOCAL · MVP</span><span>THE FINANCIAL ATLAS</span></div>
     </footer>
   </main>;
