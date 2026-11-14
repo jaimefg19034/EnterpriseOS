@@ -1,18 +1,116 @@
 import Arrow from "../../components/ui/Arrow";
 import TechnicalLabel from "../../components/ui/TechnicalLabel";
 
+const disciplines = [
+  {
+    number: "01",
+    code: "PERFORMANCE / MODEL",
+    title: "Entender el resultado.",
+    description: "Relaciona ingresos, estructura de costes y márgenes para leer qué está impulsando el rendimiento del negocio.",
+    className: "p-discipline-performance",
+    visual: "model",
+  },
+  {
+    number: "02",
+    code: "PLANNING / SCENARIOS",
+    title: "Poner a prueba el futuro.",
+    description: "Construye presupuestos y contrasta escenarios para medir el efecto de distintas hipótesis antes de decidir.",
+    className: "p-discipline-planning",
+    visual: "scenarios",
+  },
+  {
+    number: "03",
+    code: "LIQUIDITY / 13 WEEKS",
+    title: "Ver venir la tensión de caja.",
+    description: "Proyecta cobros, pagos y saldo de tesorería en un horizonte móvil de trece semanas.",
+    className: "p-discipline-liquidity",
+    visual: "liquidity",
+  },
+  {
+    number: "04",
+    code: "REPORTING / MANAGEMENT",
+    title: "Leer el negocio con criterio.",
+    description: "Consulta resultados e indicadores de gestión con una estructura financiera coherente.",
+    className: "p-discipline-reporting",
+    visual: "reporting",
+  },
+];
+
+function DisciplineVisual({ type }: { type: string }) {
+  if (type === "model") {
+    return (
+      <div className="p-discipline-visual p-discipline-model" aria-hidden="true">
+        <div className="p-model-equation"><span>REVENUE</span><i>−</i><span>COSTS</span><i>=</i><b>RESULT</b></div>
+        <div className="p-model-flow"><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /></div>
+        <div className="p-model-axis"><span>ACTUAL</span><span>PLAN</span><span>VARIANCE</span></div>
+      </div>
+    );
+  }
+  if (type === "scenarios") {
+    return (
+      <div className="p-discipline-visual p-discipline-scenarios" aria-hidden="true">
+        <div className="p-scenario-legend"><span><i /> UPSIDE</span><span><i /> BASE</span><span><i /> DOWNSIDE</span></div>
+        <svg viewBox="0 0 520 150" role="presentation">
+          <path d="M0 116 C70 110 95 100 150 91 S245 72 300 48 S410 25 520 10" />
+          <path d="M0 116 C80 110 110 104 170 98 S260 84 330 78 S440 70 520 64" />
+          <path d="M0 116 C75 118 110 122 170 126 S280 132 350 137 S450 142 520 147" />
+          <path className="p-scenario-origin" d="M0 0V150" />
+        </svg>
+        <div className="p-scenario-axis"><span>STARTING POINT</span><span>MODELLED OUTLOOK →</span></div>
+      </div>
+    );
+  }
+  if (type === "liquidity") {
+    return (
+      <div className="p-discipline-visual p-discipline-liquidity-chart" aria-hidden="true">
+        <div className="p-liquidity-label"><span>ROLLING CASH VIEW</span><b>13 <small>WEEKS</small></b></div>
+        <div className="p-liquidity-bars">{[42, 56, 49, 66, 58, 73, 61, 79, 68, 84, 72, 91, 77].map((height, index) => <i key={index} style={{ height: `${height}%` }} />)}</div>
+        <div className="p-model-axis"><span>W01</span><span>W07</span><span>W13</span></div>
+      </div>
+    );
+  }
+  return (
+    <div className="p-discipline-visual p-discipline-report" aria-hidden="true">
+      <div className="p-report-row p-report-head"><span>MANAGEMENT VIEW</span><span>PERIOD</span></div>
+      <div className="p-report-row"><span>Revenue</span><i /><b>01</b></div>
+      <div className="p-report-row"><span>Operating costs</span><i /><b>02</b></div>
+      <div className="p-report-row p-report-emphasis"><span>Operating result</span><i /><b>03</b></div>
+      <div className="p-report-row"><span>Cash position</span><i /><b>04</b></div>
+    </div>
+  );
+}
+
 export default function CapabilityBento() {
   return (
-    <section className="p-capabilities" id="capabilities">
-        <div className="p-cap-heading"><TechnicalLabel number="03">THE FINANCIAL SYSTEM</TechnicalLabel><span>FOUR CONNECTED DISCIPLINES</span></div>
-        <div className="p-cap-intro"><h2>No más números<br />sin <em>contexto.</em></h2><p>Un espacio de trabajo que relaciona hipótesis, rendimiento y liquidez. Cada vista responde a una pregunta distinta del negocio.</p></div>
-        <div className="p-cap-grid">
-          <article className="p-cap p-cap-model"><div className="p-cap-meta"><span>01 / PERFORMANCE</span><b>MODEL</b></div><div className="p-cap-visual p-visual-model"><div className="p-mini-stat"><small>REVENUE / FY</small><strong>248.000<span> €</span></strong></div><div className="p-mini-bars">{[28,42,36,57,48,69,62,78,71,88,78,96].map((v,i)=><i key={i} style={{height:`${v}%`}} />)}</div><div className="p-mini-axis"><span>JAN</span><span>APR</span><span>JUL</span><span>OCT</span><span>DEC</span></div></div><div className="p-cap-copy"><h3>Modelización financiera</h3><p>Comprende cómo ingresos, costes, márgenes y supuestos construyen el resultado del negocio.</p><a href="/EnterpriseOS/">Explorar el modelo <Arrow /></a></div></article>
-          <article className="p-cap p-cap-planning"><div className="p-cap-meta"><span>02 / PLANNING</span><b>SCENARIOS</b></div><div className="p-cap-visual p-visual-planning"><div className="p-scenario-lines"><span>GROWTH <i /></span><span>BASE <i /></span><span>DOWNSIDE <i /></span></div><div className="p-scenario-axis"><span>NOW</span><span>FY 2026</span><span>OUTLOOK</span></div></div><div className="p-cap-copy"><h3>Presupuestos y escenarios</h3><p>Compara hipótesis y entiende cómo cambian las previsiones antes de comprometer recursos.</p><a href="/EnterpriseOS/">Explorar planificación <Arrow /></a></div></article>
-          <article className="p-cap p-cap-cash"><div className="p-cap-meta"><span>03 / LIQUIDITY</span><b>13 WEEKS</b></div><div className="p-cap-visual p-visual-cash"><div className="p-cash-heading"><small>WEEKLY CASH OUTLOOK</small><strong>13 <i>WEEKS</i></strong></div><div className="p-cash-track">{[54,67,49,76,62,82,69,73,57,88,72,94,81].map((v,i)=><i key={i} style={{height:`${v}%`}} />)}</div><div className="p-cash-axis"><span>W01</span><span>W06</span><span>W13</span></div></div><div className="p-cap-copy"><h3>Previsión de tesorería</h3><p>Visualiza cobros, pagos y evolución prevista de caja para anticipar tensiones de liquidez.</p><a href="/EnterpriseOS/">Explorar tesorería <Arrow /></a></div></article>
-          <article className="p-cap p-cap-report"><div className="p-cap-meta"><span>04 / REPORTING</span><b>STATEMENTS</b></div><div className="p-cap-visual p-visual-report"><div className="p-report-sheet"><small>MANAGEMENT P&L <span>FY / 2026</span></small>{[[ "Ingresos", "248.000 €" ],[ "Costes operativos", "(197.000 €)" ],[ "EBITDA", "51.000 €" ],[ "Margen EBITDA", "20,6 %" ]].map(row=><div key={row[0]}><span>{row[0]}</span><b>{row[1]}</b></div>)}<small>MODEL OUTPUT <span>EUR</span></small></div></div><div className="p-cap-copy"><h3>Estados e informes</h3><p>Lee estados financieros y métricas de gestión desde una estructura común.</p><a href="/EnterpriseOS/">Explorar informes <Arrow /></a></div></article>
+    <section className="p-capabilities p-capabilities-editorial" id="capabilities" aria-labelledby="capabilities-title">
+      <div className="p-cap-heading">
+        <TechnicalLabel number="03">THE FINANCIAL SYSTEM</TechnicalLabel>
+        <span>FOUR CONNECTED DISCIPLINES</span>
+      </div>
+      <div className="p-cap-intro p-cap-intro-editorial">
+        <h2 id="capabilities-title">No más números<br />sin <em>contexto.</em></h2>
+        <div>
+          <p>La gestión financiera no son cuatro pantallas aisladas. Es una lectura conectada del rendimiento, la planificación, la liquidez y los resultados.</p>
+          <span className="p-cap-intro-index">A SYSTEM FOR BETTER FINANCIAL DECISIONS <b>→</b></span>
         </div>
-        <p className="p-disclaimer"><b>DATA NOTE</b> Las visualizaciones y cifras de esta página son ilustrativas; no representan datos de una empresa conectada.</p>
-      </section>
+      </div>
+      <div className="p-disciplines">
+        {disciplines.map((discipline) => (
+          <article className={`p-discipline ${discipline.className}`} key={discipline.number}>
+            <div className="p-discipline-meta"><span>{discipline.number} / {discipline.code}</span><span>FINANCIAL ATLAS</span></div>
+            <DisciplineVisual type={discipline.visual} />
+            <div className="p-discipline-copy">
+              <span className="p-discipline-index">{discipline.number}</span>
+              <div>
+                <h3>{discipline.title}</h3>
+                <p>{discipline.description}</p>
+                <a href="/EnterpriseOS/">{discipline.number === "01" ? "Explorar el modelo" : discipline.number === "02" ? "Explorar planificación" : discipline.number === "03" ? "Explorar tesorería" : "Explorar informes"} <Arrow /></a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+      <p className="p-disclaimer"><b>DATA NOTE</b> Los elementos gráficos de esta sección son esquemáticos. No representan datos reales ni una conexión bancaria activa.</p>
+    </section>
   );
 }
