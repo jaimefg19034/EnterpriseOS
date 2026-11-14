@@ -135,8 +135,9 @@ export default function AtlasLanding() {
         : id === "faq"
           ? target.querySelector<HTMLElement>(".eos-home-faq-heading")
           : target;
-    const navHeight = (navRef.current?.closest(".eos-home-nav") as HTMLElement | null)?.getBoundingClientRect().height ?? 0;
-    const top = Math.max(0, window.scrollY + (contentTarget ?? target).getBoundingClientRect().top - navHeight - 20);
+    const nav = navRef.current?.closest(".eos-home-nav") as HTMLElement | null;
+    const navBottom = nav?.getBoundingClientRect().bottom ?? 0;
+    const top = Math.max(0, window.scrollY + (contentTarget ?? target).getBoundingClientRect().top - navBottom - 12);
     window.history.pushState(null, "", href);
     window.scrollTo({ top, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }
@@ -258,10 +259,10 @@ export default function AtlasLanding() {
     <section className="eos-home-pricing">
       <div className="eos-home-section-top"><span>PRECIOS</span><span>ACCESO AL FINANCIAL ATLAS</span></div>
       <div className="eos-home-pricing-intro">
-        <div><div className="eos-home-kicker"><i /> PLANES MENSUALES</div><h2>Elige el nivel de<br /><em>claridad que necesitas.</em></h2></div>
+        <div><div className="eos-home-kicker"><i /> PLANES MENSUALES</div><h2 id="pricing">Elige el nivel de<br /><em>claridad que necesitas.</em></h2></div>
         <p>Empieza con el control financiero esencial y amplía tus capacidades cuando tu empresa lo necesite. Todos los precios son mensuales, sin IVA.</p>
       </div>
-      <div className="eos-home-pricing-grid" id="pricing">
+      <div className="eos-home-pricing-grid">
         <article id="plan-essential" className={"eos-home-tier-card " + (highlightedPlan === "essential" ? "is-selected" : "")} onPointerMove={trackSurfacePointer}>
           <div className="eos-home-tier-top"><span>01 / ESSENTIAL</span><span>START</span></div>
           <h3>Essential</h3><p>Control financiero esencial para empresas pequeñas.</p>
