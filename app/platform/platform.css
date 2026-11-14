@@ -205,3 +205,6 @@
   .p-nav .p-desktop-nav { display:none!important; }
   .p-nav .p-mega-menu .p-mega-links { display:flex!important; }
 }
+
+.p-mega-menu .p-mega-links { gap:0; margin-left:0; }
+.p-mega-menu .p-mega-links a { margin-left:0; }
