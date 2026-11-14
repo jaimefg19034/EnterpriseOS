@@ -315,3 +315,25 @@
  .p-field-route{animation:none}
  .p-contours,.p-scenario-lines i:after,.p-sim-bars i b{transition:none}
 }
+
+
+/* Decision Field — tactile controls and layered data surface */
+.p-simulator{position:relative;isolation:isolate}
+.p-sim-copy{position:relative;z-index:1}
+.p-switch{gap:0;padding:4px;border-color:#d0d6d2;background:#e9ebe5}
+.p-switch button{position:relative;min-width:92px;padding:11px 15px;color:#64717c;font-size:9px;font-weight:600;transition:background .25s,color .25s,transform .25s}
+.p-switch button:hover:not(.active){background:#f7f7f2;color:#17263e}
+.p-switch button:focus-visible{z-index:2;outline:2px solid #657bd0;outline-offset:3px}
+.p-switch button.active{background:#17263e;color:#fff;box-shadow:0 4px 12px #17263e24}
+.p-sim-panel{position:relative;isolation:isolate;overflow:hidden}
+.p-sim-panel:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.22;background-image:linear-gradient(#b8c8e015 1px,transparent 1px),linear-gradient(90deg,#b8c8e015 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(135deg,#000 0%,transparent 78%)}
+.p-sim-panel:after{content:"";position:absolute;top:0;left:29px;width:72px;height:2px;background:#a6b6ff}
+.p-sim-top,.p-sim-context,.p-values,.p-sim-bars,.p-sim-foot,.p-sim-disclaimer{position:relative}
+.p-sim-disclaimer{max-width:620px}
+@media(max-width:720px){
+ .p-switch button{min-width:0;padding:10px 4px}
+ .p-sim-panel:after{left:15px}
+}
+@media(prefers-reduced-motion:reduce){
+ .p-switch button{transition:none}
+}
