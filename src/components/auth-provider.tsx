@@ -15,6 +15,7 @@ type AuthContextValue = {
   signUp: (email: string, password: string) => Promise<boolean>;
   signOut: () => Promise<void>;
   startCheckout: (plan: PlanId) => Promise<void>;
+  openBillingPortal: () => Promise<void>;
   refreshPlan: () => Promise<void>;
 };
 
@@ -167,10 +168,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.assign(payload.url as string);
   }, [session]);
 
+  const openBillingPortal = useCallback(async () => {
+    if (!session?.access_token) throw new Error("Inicia sesión para gestionar tu suscripción.");
+    const response = await fetch(apiBase + "/functions/v1/create-portal-session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: "Bearer " + session.access_token,
+      },
+      body: JSON.stringify({}),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload.url) throw new Error(payload.error ?? "No se pudo abrir el portal de facturación.");
+    window.location.assign(payload.url as string);
+  }, [session]);
+
   const value = useMemo<AuthContextValue>(() => ({
     configured, loading, user: session?.user ?? null, plan, subscriptionStatus,
-    signIn, signUp, signOut, startCheckout, refreshPlan,
-  }), [loading, session, plan, subscriptionStatus, signIn, signUp, signOut, startCheckout, refreshPlan]);
+    signIn, signUp, signOut, startCheckout, openBillingPortal, refreshPlan,
+  }), [loading, session, plan, subscriptionStatus, signIn, signUp, signOut, startCheckout, openBillingPortal, refreshPlan]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
