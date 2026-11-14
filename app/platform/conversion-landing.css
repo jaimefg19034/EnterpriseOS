@@ -808,3 +808,28 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}
   .eos-home-orbit-svg,.eos-home-orbit-sweep,.eos-home-visual:before,.eos-home-core,.eos-home-data { animation:none!important; }
   .eos-home-product-card,.eos-home-tier-card,.eos-home-nav-indicator,.eos-home-login,.eos-home-button { transition:none!important; }
 }
+
+
+/* Final micro-detail pass */
+.eos-home-core { position:absolute;will-change:transform; }
+.eos-home-core:before,.eos-home-core:after { position:absolute; }
+.eos-home-orbit-svg { will-change:transform; }
+.eos-home-visual:before { will-change:transform,opacity; }
+.eos-home-data { will-change:transform; }
+.eos-home-product-card:before,.eos-home-tier-card:before { will-change:opacity; }
+.eos-home-product-card:after,.eos-home-tier-card:after { pointer-events:none; }
+.eos-home-nav a:focus-visible,.eos-home-plan-menu summary:focus-visible {
+  outline:2px solid #ffffff;
+  outline-offset:4px;
+  border-radius:4px;
+}
+.eos-home-plan-menu>div a:focus-visible {
+  color:#000000;
+  background:#ddff70;
+  outline:2px solid #ffffff;
+  outline-offset:2px;
+}
+@media(max-width:760px) {
+  .eos-home-visual:before { animation:none;opacity:.65; }
+  .eos-home-orbit-svg { animation-duration:48s; }
+}
