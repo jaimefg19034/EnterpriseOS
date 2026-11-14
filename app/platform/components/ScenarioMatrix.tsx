@@ -50,6 +50,7 @@ export default function ScenarioMatrix({
           );
         })}
       </div>
+      <p className="p-scenario-sr-status" role="status" aria-live="polite" aria-atomic="true">Escenario seleccionado: {scenarios[scenario].label}. Ingresos {scenarios[scenario].revenue}, EBITDA {scenarios[scenario].ebitda}, caja {scenarios[scenario].cash}.</p>
       <div className="p-scenario-matrix-note">
         <span>DEMO DATA · NO CUSTOMER CASE OR LIVE FINANCIAL DATA</span>
         <span>Seleccionar una tarjeta actualiza también la visualización del simulador.</span>
