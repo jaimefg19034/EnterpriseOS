@@ -5,9 +5,9 @@ import "./enterprise-design.css";
 import "./executive-overhaul.css";
 
 export const metadata: Metadata = {
-  title: "EnterpriseOS — Financial workspace",
+  title: "EnterpriseOS — Sistema de gestión empresarial",
   description:
-    "A focused financial modelling and business-analysis workspace for growing companies.",
+    "Sistema de planificación financiera, análisis y control de gestión para empresas en crecimiento.",
 };
 
 export default function RootLayout({
@@ -16,7 +16,7 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <body>{children}</body>
     </html>
   );

@@ -505,86 +505,124 @@ export default function Home() {
 
         <div className="content-area">
           {view === "overview" && (
-            <div className="command-center">
-              <section className="command-hero">
-                <div className="command-hero-copy">
-                  <div className="eyebrow">{t("FINANCE COMMAND CENTRE")} <span className="eyebrow-dot" /> {t("FY 2026")}</div>
-                  <h1>{t("The financial pulse of the business.")}</h1>
-                  <p>{t("Read performance, profitability and the drivers behind every result in one connected management view.")}</p>
-                  <div className="command-hero-meta"><span className="demo-badge"><i /> {t("ILLUSTRATIVE WORKSPACE")}</span><span>{t("Aster & Co. · EUR")}</span></div>
+            <div className="eos-command">
+              <header className="eos-command-heading">
+                <div className="eos-heading-index"><span>01</span><i /></div>
+                <div className="eos-heading-copy">
+                  <div className="eyebrow">{t("EXECUTIVE OFFICE")} <span className="eyebrow-dot" /> {t("FY 2026")}</div>
+                  <h1>{t("See the business. Understand the numbers. Decide what comes next.")}</h1>
+                  <p>{t("A connected management view built around the financial drivers that shape the company.")}</p>
                 </div>
-                <div className="command-hero-actions">
-                  <button className="primary-button" onClick={() => setView("model")}>{t("Edit financial model")} <Icon name="arrow" size={16} /></button>
-                  <button className="secondary-button" onClick={() => setInputs(DEMO_INPUTS)}><Icon name="refresh" size={15} /> {t("Reset demo")}</button>
+                <div className="eos-heading-actions">
+                  <span className="eos-period-label">{t("ANNUAL VIEW")} · EUR</span>
+                  <button className="primary-button" onClick={() => setView("model")}>{t("Open financial model")} <Icon name="arrow" size={15} /></button>
+                  <button className="secondary-button" onClick={() => setInputs(DEMO_INPUTS)}><Icon name="refresh" size={14} /> {t("Reset demo")}</button>
                 </div>
-              </section>
+              </header>
 
-              <section className="command-kpi-strip" aria-label={t("Financial performance summary")}>
-                <article className="command-kpi command-kpi-primary">
-                  <span>{t("Revenue")}</span><strong>{formatCurrency(results.revenue, true)}</strong>
-                  <small>{t("Reported period")}</small>
-                </article>
-                <article className="command-kpi">
-                  <span>{t("Gross profit")}</span><strong>{formatCurrency(results.grossProfit, true)}</strong>
-                  <small>{formatPercent(results.grossMarginPercent)} {t("gross margin")}</small>
-                </article>
-                <article className="command-kpi">
-                  <span>{t("EBITDA")}</span><strong>{formatCurrency(results.ebitda, true)}</strong>
-                  <small>{formatPercent(results.ebitdaMarginPercent)} {t("EBITDA margin")}</small>
-                </article>
-                <article className="command-kpi">
-                  <span>{t("Net income")}</span><strong className={results.netIncome < 0 ? "negative-value" : ""}>{formatCurrency(results.netIncome, true)}</strong>
-                  <small>{formatPercent(results.netMarginPercent)} {t("net margin")}</small>
-                </article>
-              </section>
-
-              <div className="command-main-grid">
-                <section className="panel command-performance">
-                  <div className="command-section-heading">
-                    <div><div className="panel-kicker">{t("OPERATING PERFORMANCE")}</div><h2>{t("Revenue and operating performance")}</h2><p>{t("Six-month performance trend, read alongside the live management model.")}</p></div>
-                    <button className="text-action" onClick={() => setView("model")}>{t("Open model")} <Icon name="arrow" size={14} /></button>
+              <section className="eos-executive-stage" aria-label={t("Executive financial overview")}>
+                <div className="eos-stage-performance">
+                  <div className="eos-stage-topline">
+                    <span className="eos-stage-index">A / 01</span>
+                    <span className="eos-stage-kicker">{t("REVENUE PERFORMANCE")}</span>
+                    <span className="eos-stage-sample"><i /> {t("ILLUSTRATIVE DATA")}</span>
                   </div>
-                  <TrendChart language={language} />
-                  <div className="command-chart-foot">
-                    <div><span>{t("Current EBITDA")}</span><strong>{formatCurrency(results.ebitda)}</strong></div>
-                    <div><span>{t("Operating cost base")}</span><strong>{formatCurrency(results.costOfGoodsSold + results.operatingExpenses + results.depreciationAndAmortisation)}</strong></div>
-                    <div><span>{t("Net result")}</span><strong className={results.netIncome < 0 ? "negative-value" : ""}>{formatCurrency(results.netIncome)}</strong></div>
+                  <div className="eos-revenue-heading">
+                    <div><span>{t("Revenue recognised")}</span><strong>{formatCurrency(results.revenue, true)}</strong></div>
+                    <span className="eos-revenue-unit">{t("FY 2026")}<br />EUR</span>
                   </div>
-                </section>
+                  <div className="eos-stage-chart">
+                    <TrendChart language={language} />
+                  </div>
+                  <div className="eos-stage-foot">
+                    <span>{t("Six-month illustrative trend")}</span>
+                    <span>{t("Revenue")} <b>{formatCurrency(results.revenue, true)}</b></span>
+                  </div>
+                </div>
 
-                <aside className="command-side-stack">
-                  <section className="panel command-profit-panel">
-                    <div className="panel-kicker">{t("PROFITABILITY WALK")}</div>
-                    <h2>{t("How revenue becomes net profit")}</h2>
-                    <div className="command-profit-rows">
-                      <div><span>{t("Revenue")}</span><strong>{formatCurrency(results.revenue)}</strong></div>
-                      <div><span>{t("Gross profit")}</span><strong>{formatCurrency(results.grossProfit)}</strong></div>
-                      <div><span>{t("EBITDA")}</span><strong>{formatCurrency(results.ebitda)}</strong></div>
-                      <div><span>{t("EBIT")}</span><strong>{formatCurrency(results.ebit)}</strong></div>
-                      <div className="command-profit-total"><span>{t("Net income")}</span><strong className={results.netIncome < 0 ? "negative-value" : ""}>{formatCurrency(results.netIncome)}</strong></div>
-                    </div>
-                    <button className="text-action" onClick={() => setView("model")}>{t("Inspect calculations")} <Icon name="arrow" size={14} /></button>
-                  </section>
-                  <section className="command-model-status">
-                    <span className="command-status-icon"><Icon name="check" size={18} /></span>
-                    <div><strong>{t("Model recalculates live")}</strong><p>{t("Displayed results are derived from the six editable operating assumptions.")}</p></div>
-                  </section>
+                <aside className="eos-stage-bridge">
+                  <div className="eos-bridge-heading">
+                    <div><span className="eos-bridge-index">A / 02</span><span className="eos-bridge-kicker">{t("PROFITABILITY BRIDGE")}</span></div>
+                    <span className="eos-bridge-unit">EUR</span>
+                  </div>
+                  <h2>{t("Where revenue goes")}</h2>
+                  <p>{t("Follow the calculation from sales to the final result.")}</p>
+                  <div className="eos-bridge-list">
+                    <div className="eos-bridge-row eos-bridge-start"><span>{t("Revenue")}</span><strong>{formatCurrency(results.revenue)}</strong></div>
+                    <div className="eos-bridge-row eos-bridge-deduction"><span>{t("Cost of goods sold")}</span><strong>−{formatCurrency(results.costOfGoodsSold)}</strong></div>
+                    <div className="eos-bridge-row eos-bridge-subtotal"><span>{t("Gross profit")}</span><strong>{formatCurrency(results.grossProfit)}</strong></div>
+                    <div className="eos-bridge-row eos-bridge-deduction"><span>{t("Operating expenses")}</span><strong>−{formatCurrency(results.operatingExpenses)}</strong></div>
+                    <div className="eos-bridge-row eos-bridge-key"><span>EBITDA</span><strong>{formatCurrency(results.ebitda)}</strong></div>
+                    <div className="eos-bridge-row eos-bridge-deduction"><span>{t("D&A, interest and tax")}</span><strong>−{formatCurrency(results.depreciationAndAmortisation + results.interestExpense + results.incomeTax)}</strong></div>
+                    <div className="eos-bridge-row eos-bridge-final"><span>{t("Net income")}</span><strong className={results.netIncome < 0 ? "negative-value" : ""}>{formatCurrency(results.netIncome)}</strong></div>
+                  </div>
+                  <button className="eos-bridge-link" onClick={() => setView("model")}>{t("Inspect every assumption")} <Icon name="arrow" size={14} /></button>
                 </aside>
-              </div>
+              </section>
 
-              <section className="command-workspaces">
-                <div className="command-section-heading">
-                  <div><div className="panel-kicker">{t("MANAGEMENT WORKSPACES")}</div><h2>{t("From financial reading to business action")}</h2><p>{t("Each workspace connects a different part of planning, finance and execution.")}</p></div>
-                </div>
-                <div className="command-workspace-grid">
-                  <button className="command-workspace-card" onClick={() => setView("planning")}><span className="command-workspace-icon"><Icon name="trend" size={19} /></span><span className="command-workspace-copy"><strong>{t("Budget & scenarios")}</strong><small>{t("Build a plan, compare scenarios and track actuals.")}</small></span><Icon name="arrow" size={16} /></button>
-                  <button className="command-workspace-card" onClick={() => setView("statements")}><span className="command-workspace-icon"><Icon name="chart" size={19} /></span><span className="command-workspace-copy"><strong>{t("Three financial statements")}</strong><small>{t("Connect profit, balance sheet and cash flow assumptions.")}</small></span><Icon name="arrow" size={16} /></button>
-                  <button className="command-workspace-card" onClick={() => setView("operations")}><span className="command-workspace-icon"><Icon name="building" size={19} /></span><span className="command-workspace-copy"><strong>{t("Business operations")}</strong><small>{t("Track projects, pipeline, risks, KPIs and cost centres.")}</small></span><Icon name="arrow" size={16} /></button>
-                  <button className="command-workspace-card" onClick={() => setView("reports")}><span className="command-workspace-icon"><Icon name="file" size={19} /></span><span className="command-workspace-copy"><strong>{t("Reports & exports")}</strong><small>{t("Prepare and export the current management view.")}</small></span><Icon name="arrow" size={16} /></button>
+              <section className="eos-margin-section">
+                <div className="eos-section-marker"><span>B</span><i /></div>
+                <div className="eos-margin-content">
+                  <div className="eos-section-heading">
+                    <div><span className="eos-section-kicker">{t("MARGIN PROFILE")}</span><h2>{t("How much value does the business retain?")}</h2></div>
+                    <span className="eos-section-note">{t("Calculated from the current model")}</span>
+                  </div>
+                  <div className="eos-margin-grid">
+                    <article className="eos-margin-item">
+                      <div className="eos-margin-label"><span>{t("Gross margin")}</span><b>01</b></div>
+                      <strong>{formatPercent(results.grossMarginPercent)}</strong>
+                      <div className="eos-margin-track"><i style={{width:`${Math.max(0,Math.min(100,results.grossMarginPercent))}%`}} /></div>
+                      <small>{t("Revenue remaining after direct costs")}</small>
+                    </article>
+                    <article className="eos-margin-item">
+                      <div className="eos-margin-label"><span>{t("EBITDA margin")}</span><b>02</b></div>
+                      <strong>{formatPercent(results.ebitdaMarginPercent)}</strong>
+                      <div className="eos-margin-track"><i style={{width:`${Math.max(0,Math.min(100,results.ebitdaMarginPercent))}%`}} /></div>
+                      <small>{t("Operating earnings before D&A")}</small>
+                    </article>
+                    <article className="eos-margin-item">
+                      <div className="eos-margin-label"><span>{t("Net margin")}</span><b>03</b></div>
+                      <strong className={results.netMarginPercent < 0 ? "negative-value" : ""}>{formatPercent(results.netMarginPercent)}</strong>
+                      <div className="eos-margin-track"><i className={results.netMarginPercent < 0 ? "is-negative" : ""} style={{width:`${Math.max(0,Math.min(100,Math.abs(results.netMarginPercent)))}%`}} /></div>
+                      <small>{t("Final profit retained from revenue")}</small>
+                    </article>
+                  </div>
                 </div>
               </section>
 
-              <div className="command-disclaimer"><Icon name="info" size={16} /><p><strong>{t("Data scope")}</strong> {t("This workspace currently uses illustrative sample figures. It is a management-planning MVP, not a connected accounting ledger or statutory reporting system.")}</p></div>
+              <section className="eos-workspace-section">
+                <div className="eos-section-marker"><span>C</span><i /></div>
+                <div className="eos-workspace-content">
+                  <div className="eos-section-heading">
+                    <div><span className="eos-section-kicker">{t("THE ENTERPRISEOS SYSTEM")}</span><h2>{t("Move from financial insight to execution.")}</h2></div>
+                    <span className="eos-section-note">{t("FOUR CONNECTED WORKSPACES")}</span>
+                  </div>
+                  <div className="eos-workspace-list">
+                    <button className="eos-workspace-row" onClick={() => setView("planning")}>
+                      <span className="eos-workspace-number">01</span><span className="eos-workspace-glyph"><Icon name="trend" size={19} /></span>
+                      <span className="eos-workspace-description"><strong>{t("Planning & scenarios")}</strong><small>{t("Build budgets, test assumptions and compare alternative outcomes.")}</small></span>
+                      <span className="eos-workspace-category">{t("PLAN")}</span><Icon name="arrow" size={17} />
+                    </button>
+                    <button className="eos-workspace-row" onClick={() => setView("statements")}>
+                      <span className="eos-workspace-number">02</span><span className="eos-workspace-glyph"><Icon name="chart" size={19} /></span>
+                      <span className="eos-workspace-description"><strong>{t("Three-statement model")}</strong><small>{t("Connect profit, balance sheet and cash flow assumptions.")}</small></span>
+                      <span className="eos-workspace-category">{t("MODEL")}</span><Icon name="arrow" size={17} />
+                    </button>
+                    <button className="eos-workspace-row" onClick={() => setView("operations")}>
+                      <span className="eos-workspace-number">03</span><span className="eos-workspace-glyph"><Icon name="building" size={19} /></span>
+                      <span className="eos-workspace-description"><strong>{t("Business operations")}</strong><small>{t("Manage pipeline, projects, risks, KPIs and cost centres.")}</small></span>
+                      <span className="eos-workspace-category">{t("OPERATE")}</span><Icon name="arrow" size={17} />
+                    </button>
+                    <button className="eos-workspace-row" onClick={() => setView("reports")}>
+                      <span className="eos-workspace-number">04</span><span className="eos-workspace-glyph"><Icon name="file" size={19} /></span>
+                      <span className="eos-workspace-description"><strong>{t("Reports & exports")}</strong><small>{t("Review and export the current management information.")}</small></span>
+                      <span className="eos-workspace-category">{t("REPORT")}</span><Icon name="arrow" size={17} />
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              <footer className="eos-data-note"><span><Icon name="info" size={15} /></span><p><strong>{t("Important data note")}</strong>{t("This version uses illustrative figures and manually entered assumptions. It is a management-planning MVP, not a connected accounting ledger or statutory reporting system.")}</p><span className="eos-data-stamp">{t("MODEL SCOPE")} / 01</span></footer>
             </div>
           )}
 
