@@ -125,3 +125,8 @@ The hero field updates its six spatial CSS custom properties directly on the poi
 Capability modules use a shared 3D perspective context with restrained elevation, a machined hairline rim, layered shadows, and distinct Z positions for metadata, visual instrument, and copy. Their miniature diagrams sit on inset translucent surfaces; module labels remain readable and disclose manual or MVP scope. Hover elevation is limited to fine pointers, while touch layouts remain static and reduced-motion removes transforms.
 
 The product showcase treats the actual planning workspace as an instrument mounted inside a layered chassis. The X-ray rail, workspace surface, and outer frame occupy separate visual planes. This is CSS perspective and layered compositing, not a WebGL model. The live workspace remains the real application component and keeps its existing temporary sample-data behavior.
+
+
+## Spatial conversion and footer
+
+The conversion surface uses a restrained radial key light, a layered dark chassis, and a raised glass-like brand seal. The footer receives a low-contrast architectural grid and recessed typographic treatment. The CTA remains readable and functional without requiring pointer interaction; mobile removes the spatial transforms and reduced-motion disables them. No fake live telemetry, awards, customer marks, or unsupported contact form has been introduced.
