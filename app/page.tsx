@@ -6,7 +6,7 @@ import { PlanningWorkspace } from "@/components/planning-workspace";
 import { ThreeStatementsWorkspace } from "@/components/three-statements-workspace";
 import { OperationsWorkspace } from "@/components/operations-workspace";
 import { useAuth } from "@/components/auth-provider";
-import { canAccessView, minimumPlanForView, PLANS, type PlanId } from "@/lib/plans";
+import { canAccessView, minimumPlanForView, PLANS } from "@/lib/plans";
 import { translate, type Language } from "@/i18n/translations";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
 import {
@@ -496,7 +496,7 @@ export default function Home() {
               <button type="button" className={language === "es" ? "selected" : ""} onClick={() => setLanguage("es")} aria-pressed={language === "es"}>ES</button>
             </div>
             <span className="period-pill"><Icon name="clock" size={14} /> {t("FY 2026")}</span>
-            {auth.plan && <span className="period-pill">{PLANS[auth.plan].name}</span>}
+            {auth.plan && <Link className="period-pill" href="/account/?mode=manage" title="Gestionar suscripción">{PLANS[auth.plan].name} · Gestionar</Link>}
             <span className="topbar-divider" />
             <button type="button" className="icon-button" aria-label={t("Workspace information")} title={t("Demo workspace")} onClick={() => setShowWorkspaceInfo(true)}>
               <Icon name="info" size={17} />
