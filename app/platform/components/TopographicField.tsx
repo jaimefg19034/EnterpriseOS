@@ -2,6 +2,7 @@
 
 import type { PointerEvent } from "react";
 import { scenarios, type Scenario } from "./scenarios";
+import LiquidAtlasScene from "./LiquidAtlasScene";
 
 
 function TopographicField({ scenario }: { scenario: Scenario }) {
@@ -49,6 +50,7 @@ function TopographicField({ scenario }: { scenario: Scenario }) {
       role="group"
       aria-label={`Visualización ilustrativa del escenario ${active.label}. Mueve el puntero para explorar la profundidad del campo en dispositivos compatibles.`}
     >
+      <LiquidAtlasScene />
       <div className="p-field-top"><span>EOS / DECISION FIELD</span><span>ILLUSTRATIVE OUTPUT · NO LIVE DATA</span></div>
       <svg className="p-contours" viewBox="0 0 760 520" role="img" aria-label="Líneas topográficas que representan escenarios financieros">
         <defs>
