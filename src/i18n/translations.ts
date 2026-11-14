@@ -973,6 +973,7 @@ const spanish: Record<string, string> = {
   "A copy of the original saved invoice data has been downloaded. Keep it safe before attempting recovery.": "Se ha descargado una copia de los datos originales de facturas. Guárdala en un lugar seguro antes de intentar recuperarlos.",
   "The invoice recovery copy has been downloaded. Keep it safe before attempting recovery.": "Se ha descargado la copia de recuperación de facturas. Guárdala en un lugar seguro antes de intentar recuperar los datos.",
 
+  "BUSINESS CONTROL SYSTEM": "SISTEMA DE CONTROL EMPRESARIAL",
   "FINANCE COMMAND CENTRE": "CENTRO DE MANDO FINANCIERO",
   "The financial pulse of the business.": "El pulso financiero de la empresa.",
   "Read performance, profitability and the drivers behind every result in one connected management view.": "Consulta el rendimiento, la rentabilidad y los factores que explican cada resultado desde una única visión de gestión.",

@@ -366,10 +366,10 @@ export default function Home() {
     <main className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark"><span>{t("e")}</span></div>
+          <div className="brand-mark brand-monogram" aria-hidden="true"><span>E</span><i /> </div>
           <div>
             <div className="brand-name">{t("enterprise")}<span>{t("os")}</span></div>
-            <div className="brand-caption">{t("FINANCIAL WORKSPACE")}</div>
+            <div className="brand-caption">{t("BUSINESS CONTROL SYSTEM")}</div>
           </div>
         </div>
 

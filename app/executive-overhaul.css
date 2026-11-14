@@ -306,3 +306,114 @@
   .command-kpi { min-height:108px; }
   .command-kpi strong { font-size:21px; }
 }
+
+/* Shared EnterpriseOS design language across every management workspace. */
+.brand-monogram {
+  position:relative;
+  overflow:hidden;
+  border-radius:9px;
+  background:linear-gradient(145deg,#6f89e6 0%,#4968c8 58%,#344fae 100%);
+}
+.brand-monogram span {
+  position:relative;
+  z-index:1;
+  transform:translate(-1px,-1px);
+  font:800 25px/.9 "Manrope",sans-serif;
+  letter-spacing:-2px;
+}
+.brand-monogram i {
+  position:absolute;
+  right:7px;
+  bottom:7px;
+  width:9px;
+  height:9px;
+  border-right:2px solid rgba(255,255,255,.9);
+  border-bottom:2px solid rgba(255,255,255,.9);
+}
+.brand-caption { letter-spacing:1.15px; }
+.page-heading {
+  align-items:flex-start;
+  padding:5px 0 19px;
+  margin-bottom:20px;
+  border-bottom:1px solid var(--line);
+}
+.page-heading h1 {
+  margin:11px 0 6px;
+  font-size:clamp(27px,2.5vw,35px);
+  letter-spacing:-1.35px;
+}
+.page-heading p { max-width:680px; font-size:11px; line-height:1.65; }
+.page-heading .eyebrow { letter-spacing:1.25px; }
+.heading-actions { padding-top:4px; }
+.panel, .operations-content, .planning-year-card, .operations-tabs,
+.three-statements-drivers, .three-statements-output {
+  border-radius:5px;
+  box-shadow:none;
+}
+.operations-workspace { gap:15px; }
+.operations-metrics { gap:9px; }
+.operations-metrics .metric-card {
+  min-height:112px;
+  padding:17px 18px;
+  border-radius:5px;
+  box-shadow:none;
+}
+.operations-metrics .metric-card strong { font-size:25px; letter-spacing:-.8px; }
+.operations-tabs {
+  gap:2px;
+  padding:4px;
+  border-radius:5px;
+  background:rgba(255,255,255,.65);
+}
+.operations-tabs button {
+  min-height:36px;
+  padding:8px 11px;
+  border-radius:3px;
+  font-size:9px;
+}
+.operations-tabs button.active {
+  color:var(--ink);
+  background:rgba(85,116,223,.10);
+  box-shadow:inset 0 -2px 0 var(--blue);
+}
+.operations-content {
+  padding:23px;
+  border-radius:5px;
+}
+.operations-section-heading { padding-bottom:13px; }
+.operations-section-heading h2 {
+  font:750 19px/1.25 "Manrope",sans-serif;
+  letter-spacing:-.45px;
+}
+.operations-form {
+  padding:15px;
+  border:1px solid var(--line);
+  border-radius:4px;
+  background:#fbfcfe;
+}
+.operations-table-wrap { border-radius:4px; }
+.planning-section-nav {
+  border-radius:4px;
+  box-shadow:none;
+}
+.planning-section-nav a { border-radius:3px; }
+.planning-year-card { border-radius:4px; }
+.three-statements-workspace-grid { gap:12px; }
+.three-statements-drivers, .three-statements-output { border-radius:5px; }
+.three-statement-stat {
+  border-radius:4px;
+  box-shadow:none;
+}
+.three-statement-tabs button,
+.statement-tabs button { border-radius:3px; }
+@media(max-width:900px) {
+  .operations-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .operations-tabs { overflow-x:auto; scrollbar-width:thin; }
+  .operations-tabs button { flex:0 0 auto; }
+}
+@media(max-width:650px) {
+  .page-heading { flex-direction:column; gap:13px; }
+  .heading-actions { flex-wrap:wrap; }
+  .operations-content { padding:14px; }
+  .operations-form { padding:11px; }
+}
