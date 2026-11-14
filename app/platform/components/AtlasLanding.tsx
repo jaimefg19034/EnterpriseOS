@@ -10,7 +10,7 @@ const benefits = [
 ] as const;
 
 function Brand() {
-  return <a className="eos-home-brand" href="#top" aria-label="EnterpriseOS, inicio" onClick={scrollToAnchor}>
+  return <a className="eos-home-brand" href="#top" aria-label="EnterpriseOS, inicio">
     <span className="eos-home-mark">E<span>O</span></span>
     <span className="eos-home-brand-name">ENTERPRISE<span>OS</span><small>FINANCIAL DECISION INTELLIGENCE</small></span>
   </a>;
