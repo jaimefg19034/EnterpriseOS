@@ -49,17 +49,17 @@ export default function DecisionField({ scenario, onScenarioChange }: { scenario
           <div><small>CAJA PREVISTA</small><strong>{active.cash}</strong><span>Posición estimada</span></div>
         </div>
 
-        <div className="p-sim-bars" aria-label="Índices visuales comparativos del escenario">
-          {([["Ingresos", active.bars[0]], ["EBITDA", active.bars[1]], ["Liquidez", active.bars[2]]] as [string, number][]).map(([label, value]) => (
+        <div className="p-sim-bars" aria-label="Índice ilustrativo por escenario, con base igual a 100">
+          {([["Ingresos", active.bars[0]], ["EBITDA", active.bars[1]], ["Caja", active.bars[2]]] as [string, number][]).map(([label, value]) => (
             <div key={label}>
               <span>{label}</span>
-              <i><b style={{ width: `${value}%` }} /></i>
+              <i><b style={{ width: `${(value / 140) * 100}%` }} /></i><small>{value}</small>
             </div>
           ))}
         </div>
 
         <div className="p-sim-foot">
-          <span>BASE / DOWNSIDE / UPSIDE</span>
+          <span>ÍNDICE RELATIVO · BASE = 100</span>
           <span>NO LIVE DATA CONNECTED</span>
         </div>
       </div>
