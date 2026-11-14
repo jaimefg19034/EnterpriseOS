@@ -62,6 +62,7 @@ export default function DecisionField({ scenario, onScenarioChange }: { scenario
           <span>ÍNDICE RELATIVO · BASE = 100</span>
           <span>NO LIVE DATA CONNECTED</span>
         </div>
+        <p className="p-sim-disclaimer">Ejemplo sintético, no asociado a una empresa real. Los índices comparan cada escenario con el escenario base; las cifras se muestran redondeadas.</p>
       </div>
     </section>
   );
