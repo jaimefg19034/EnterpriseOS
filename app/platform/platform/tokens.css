@@ -1,0 +1,23 @@
+/* FINANCIAL ATLAS — semantic design tokens (OMEGA phases 5–7) */
+.p-site{
+  --atlas-canvas:#f0eee8;
+  --atlas-paper:#faf9f5;
+  --atlas-stone:#e8e9e3;
+  --atlas-ink:#121b2a;
+  --atlas-midnight:#14243b;
+  --atlas-ink-muted:#6e7884;
+  --atlas-ink-faint:#87909b;
+  --atlas-line:rgba(18,27,42,.15);
+  --atlas-line-inverse:rgba(250,249,245,.16);
+  --atlas-periwinkle:#a6b6ff;
+  --atlas-sage:#5cba99;
+  --atlas-clay:#d58b65;
+  --atlas-mono:"IBM Plex Mono",monospace;
+  --atlas-display:"Space Grotesk","General Sans",sans-serif;
+  --atlas-editorial:"Instrument Serif",Georgia,serif;
+  --atlas-ease:cubic-bezier(.16,1,.3,1);
+  --atlas-ease-standard:cubic-bezier(.2,.8,.2,1);
+  --atlas-shadow-card:0 18px 42px rgba(18,27,42,.10);
+  --atlas-shadow-stage:0 34px 90px rgba(8,19,33,.24);
+  --atlas-hairline:1px solid var(--atlas-line);
+}
