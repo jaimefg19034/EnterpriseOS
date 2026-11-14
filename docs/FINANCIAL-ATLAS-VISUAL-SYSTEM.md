@@ -113,3 +113,8 @@ Before merge or publication:
 3. Verify dock clearance, focus visibility, contrast, text wrapping and no horizontal overflow.
 4. Verify keyboard navigation and `prefers-reduced-motion`.
 5. Capture browser screenshots for visual QA; a passing build alone is not proof of visual correctness.
+
+
+## Spatial Field — pointer performance and accessibility
+
+The hero field updates its six spatial CSS custom properties directly on the pointer target. Pointer movement does not trigger React state updates or re-render the contour SVG and financial labels. Pointer leave and cancellation remove the active class and restore the CSS defaults. Touch input is intentionally ignored; the mobile composition remains static. The reduced-motion mode disables the moving spotlight and spatial transforms rather than merely shortening their duration. This is a CSS 3D interaction, not a WebGL scene or a physically based refraction simulation.
