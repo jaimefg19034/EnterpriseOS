@@ -33,6 +33,18 @@ Deno.serve(async (request) => {
     const price = planPrices[plan];
     if (!price) return Response.json({ error: "This plan is not configured for checkout." }, { status: 400, headers: cors });
 
+    const { data: activeSubscription, error: subscriptionError } = await supabase
+      .from("subscriptions")
+      .select("stripe_subscription_id")
+      .eq("user_id", user.id)
+      .in("status", ["active", "trialing"])
+      .limit(1)
+      .maybeSingle();
+    if (subscriptionError) throw subscriptionError;
+    if (activeSubscription) {
+      return Response.json({ error: "Ya tienes una suscripción activa. Gestiona los cambios desde el portal de facturación." }, { status: 409, headers: cors });
+    }
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
     const appUrl = Deno.env.get("APP_URL")!;
     const session = await stripe.checkout.sessions.create({
