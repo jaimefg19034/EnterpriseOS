@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&family=Unbounded:wght@400;500;600;700&display=swap');
 
-:root{--ax-ink:#07090d;--ax-panel:#0c1118;--ax-paper:#e9e8e2;--ax-muted:#929ba5;--ax-line:rgba(228,236,240,.16);--ax-acid:#d6ff62;--ax-cyan:#8bd8d1;--ax-serif:"Instrument Serif",Georgia,serif;--ax-display:"Space Grotesk",sans-serif;--ax-body:"Manrope",sans-serif;--ax-mono:"DM Mono",monospace}
+:root{--ax-ink:#07090d;--ax-panel:#0c1118;--ax-paper:#e9e8e2;--ax-muted:#929ba5;--ax-line:rgba(228,236,240,.16);--ax-acid:#d6ff62;--ax-cyan:#8bd8d1;--ax-serif:"Instrument Serif",Georgia,serif;--ax-display:"Unbounded",sans-serif;--ax-body:"Manrope",sans-serif;--ax-mono:"IBM Plex Mono",monospace}
 html{scroll-behavior:smooth;scroll-padding-top:80px}
 body:has(.ax-site){background:var(--ax-ink);color:var(--ax-paper)}
 .ax-site{position:relative;isolation:isolate;overflow:hidden;background:var(--ax-ink);color:var(--ax-paper);font-family:var(--ax-body);font-size:14px;line-height:1.5}
@@ -169,3 +169,13 @@ body:has(.ax-site){background:var(--ax-ink);color:var(--ax-paper)}
 .ax-footer{padding:35px 20px 20px}.ax-footer-top{align-items:flex-start;gap:15px;flex-wrap:wrap}.ax-footer-top p{order:3;width:100%;max-width:240px}.ax-footer-links{flex-wrap:wrap;gap:15px 20px;font-size:7px}.ax-footer-word{font-size:clamp(60px,15vw,100px);margin:55px 0 35px}.ax-footer-bottom{flex-wrap:wrap;gap:12px;font-size:6px}.ax-footer-bottom span:nth-child(2){width:100%;order:3}
 }
 @media(prefers-reduced-motion:reduce){.ax-site *,.ax-site *:before,.ax-site *:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.ax-ribbon-track{animation:none}.ax-preloader{display:none}}
+
+/* Optical cursor, variable type and dimensional surface finish */
+.ax-cursor-lens{position:fixed;z-index:500;left:-100px;top:-100px;width:18px;height:18px;border:1px solid rgba(214,255,98,.85);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);display:grid;place-items:center;color:#10150d;background:rgba(214,255,98,.9);font:7px var(--ax-mono);letter-spacing:.04em;white-space:nowrap;transition:width .22s,height .22s,background .22s,border-radius .22s;mix-blend-mode:screen}
+.ax-cursor-lens.is-active{width:88px;height:88px;border-radius:50%;background:rgba(214,255,98,.1);border:1px solid var(--ax-acid);color:var(--ax-acid);backdrop-filter:blur(8px)}
+.ax-round-cta{box-shadow:inset 0 1px 1px rgba(255,255,255,.65),0 6px 0 #8da83e,0 14px 42px rgba(214,255,98,.18)}
+.ax-round-cta:hover{box-shadow:inset 0 1px 1px rgba(255,255,255,.7),0 3px 0 #8da83e,0 20px 60px rgba(214,255,98,.24)}
+.ax-hero h1{font-variation-settings:"wght" 650;animation:ax-display-breathe 8s ease-in-out infinite alternate}
+@keyframes ax-display-breathe{from{font-variation-settings:"wght" 560}to{font-variation-settings:"wght" 700}}
+@supports(animation-timeline:view()){.ax-manifesto h2{animation:ax-reveal-type linear both;animation-timeline:view(block);animation-range:entry 10% exit 65%}@keyframes ax-reveal-type{from{letter-spacing:-.15em;filter:blur(5px);opacity:.55}to{letter-spacing:-.09em;filter:blur(0);opacity:1}}}
+@media(hover:none),(pointer:coarse){.ax-cursor-lens{display:none}}
