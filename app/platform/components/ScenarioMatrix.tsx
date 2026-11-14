@@ -58,14 +58,14 @@ export default function ScenarioMatrix({
               onPointerLeave={resetScenarioLight}
               onPointerCancel={resetScenarioLight}
             >
-              <div className="p-scenario-card-top"><span>0{index + 1} / {codes[key]}</span><b>{item.delta}</b></div>
-              <h3>{item.label}</h3>
-              <div className="p-scenario-card-metrics">
-                <div><small>INGRESOS</small><strong>{item.revenue}</strong></div>
-                <div><small>EBITDA</small><strong>{item.ebitda}</strong></div>
-                <div><small>CAJA</small><strong>{item.cash}</strong></div>
-              </div>
-              <div className="p-scenario-card-foot"><span>ILLUSTRATIVE MODEL</span><span>{selected ? "SELECTED ✓" : "SELECT TO EXPLORE"}</span></div>
+              <span className="p-scenario-card-top"><span>0{index + 1} / {codes[key]}</span><b>{item.delta}</b></span>
+              <span className="p-scenario-card-title">{item.label}</span>
+              <span className="p-scenario-card-metrics">
+                <span><small>INGRESOS</small><strong>{item.revenue}</strong></span>
+                <span><small>EBITDA</small><strong>{item.ebitda}</strong></span>
+                <span><small>CAJA</small><strong>{item.cash}</strong></span>
+              </span>
+              <span className="p-scenario-card-foot"><span>ILLUSTRATIVE MODEL</span><span>{selected ? "SELECTED ✓" : "SELECT TO EXPLORE"}</span></span>
             </button>
           );
         })}
