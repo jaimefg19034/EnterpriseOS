@@ -257,3 +257,23 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}
 @media(max-width:1000px){.eos-home-nav{gap:16px;padding-left:24px;padding-right:24px}.eos-home-nav nav{gap:14px}.eos-home-nav-actions{gap:12px}.eos-home-workspace-link{display:none}}
 @media(max-width:760px){.eos-home-nav{position:sticky;min-height:74px;height:auto;flex-wrap:wrap;padding:12px 18px;gap:10px}.eos-home-nav nav{order:3;width:100%;justify-content:flex-start;overflow-x:auto;padding:7px 0 2px;gap:20px}.eos-home-nav-actions{margin-left:auto}.eos-home-nav-actions .eos-home-login{display:inline-flex}.eos-home-nav-actions .eos-home-button-small{min-height:36px}.eos-home-plan-menu>div{left:auto;right:0}.eos-home-process{grid-template-columns:1fr;gap:15px;margin:27px 0 35px}.eos-home-process-line{width:1px;height:22px;margin:0 0 0 6px;background:rgba(131,217,209,.6)}.eos-home-process-line svg{display:none}.eos-home-pricing-foot{grid-template-columns:1fr;gap:9px}}
 @media(prefers-reduced-motion:reduce){.eos-home-tier-card,.eos-home-product-card,.eos-home-product-card:before{transition:none!important;transform:none!important}}
+
+
+/* Conversion clarity: stronger hierarchy and transparent FAQ */
+.eos-home-hero-copy>h1{max-width:760px}
+.eos-home-proof{flex-wrap:wrap;row-gap:10px}
+.eos-home-proof span:last-child{color:#c3cfca}
+.eos-home-faq{padding:100px clamp(22px,8vw,125px);background:#0d1519;border-top:1px solid var(--eh-line)}
+.eos-home-faq-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:36px;margin:42px 0 34px}
+.eos-home-faq-heading h2{margin:0;font:600 clamp(38px,5vw,64px)/1.02 'Space Grotesk',sans-serif;letter-spacing:-.065em}
+.eos-home-faq-heading h2 em{font-style:normal;color:var(--eh-acid)}
+.eos-home-faq-heading>p{max-width:370px;margin:0 0 5px;color:#b8c5bf;font-size:13px;line-height:1.8}
+.eos-home-faq-list{max-width:940px;border-top:1px solid rgba(226,239,235,.18)}
+.eos-home-faq-list details{border-bottom:1px solid rgba(226,239,235,.18)}
+.eos-home-faq-list summary{position:relative;padding:21px 42px 21px 0;color:#f2f6ef;font-size:14px;font-weight:650;cursor:pointer;list-style:none}
+.eos-home-faq-list summary::-webkit-details-marker{display:none}
+.eos-home-faq-list summary:after{content:"+";position:absolute;right:4px;top:16px;color:var(--eh-acid);font:24px 'DM Mono',monospace}
+.eos-home-faq-list details[open] summary:after{content:"−"}
+.eos-home-faq-list details p{max-width:800px;margin:0;padding:0 35px 22px 0;color:#b8c5bf;font-size:12px;line-height:1.85}
+.eos-home-tier-card .eos-home-tier-link,.eos-home-tier-cta{cursor:pointer}
+@media(max-width:760px){.eos-home-faq{padding:72px 20px}.eos-home-faq-heading{display:block}.eos-home-faq-heading>p{margin-top:20px}}
