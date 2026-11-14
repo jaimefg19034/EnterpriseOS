@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import "./enterprise-design.css";
 
 export const metadata: Metadata = {
   title: "EnterpriseOS — Financial workspace",
