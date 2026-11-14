@@ -1782,7 +1782,7 @@ select:focus-visible,textarea:focus-visible) {
 }
 
 /* Light, accessible access and subscription states. */
-.eos-demo-gate,.eos-plan-required{color:#09090B!important;background-color:#F1F5F9!important;background-image:radial-gradient(ellipse at 75% 8%,rgba(126,148,220,.12),transparent 35%),linear-gradient(rgba(71,85,105,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(71,85,105,.035) 1px,transparent 1px)!important;background-size:auto,28px 28px,28px 28px!important;font-family:"Cabinet Grotesk",Inter,system-ui,sans-serif!important}
+.eos-demo-gate,.eos-plan-required{--ws-mono:"Fragment Mono",monospace;color:#09090B!important;background-color:#F1F5F9!important;background-image:radial-gradient(ellipse at 75% 8%,rgba(126,148,220,.12),transparent 35%),linear-gradient(rgba(71,85,105,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(71,85,105,.035) 1px,transparent 1px)!important;background-size:auto,28px 28px,28px 28px!important;font-family:"Cabinet Grotesk",Inter,system-ui,sans-serif!important}
 .eos-demo-gate :where(*),.eos-plan-required :where(*){color:#09090B!important}
 .eos-demo-gate :where(p,small,.eos-demo-tag,.eos-demo-kicker,.eos-demo-gate-note,.eos-demo-gate-footer),.eos-plan-required p{color:#334155!important}
 .eos-demo-gate-top{min-height:48px}
