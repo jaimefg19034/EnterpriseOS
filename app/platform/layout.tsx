@@ -10,6 +10,7 @@ import "./platform/interactions.css";
 import "./platform/scenario-matrix.css";
 import "./platform/ticker.css";
 import "./platform/motion-mobile.css";
+import "./platform/spatial-cinema.css";
 
 const platformUrl = "https://jaimefg19034.github.io/EnterpriseOS/platform/";
 
