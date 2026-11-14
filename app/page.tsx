@@ -237,6 +237,17 @@ function Icon({
 
 function TrendChart({ language }: { language: Language }) {
   const t = (value: string) => translate(value, language);
+  const commandItems: { label: string; detail: string; run: () => void }[] = [
+    { label: t("Overview"), detail: "01 · Executive view", run: () => setView("overview") },
+    { label: t("Financial model"), detail: "02.1 · Management P&L", run: () => setView("model") },
+    { label: t("Budget & scenarios"), detail: "02.2 · Planning", run: () => setView("planning") },
+    { label: t("3 statements"), detail: "02.3 · Financial statements", run: () => setView("statements") },
+    { label: t("Operations & intelligence"), detail: "03.1 · Operations", run: () => setView("operations") },
+    { label: t("Reports & exports"), detail: "03.2 · Reporting", run: () => setView("reports") },
+    { label: t("Reset demo"), detail: "Restore illustrative model assumptions", run: () => { setInputs(DEMO_INPUTS); setView("overview"); } },
+    { label: t("Export Excel"), detail: "Download current management P&L", run: () => { void exportExcel(); } },
+  ];
+  const filteredCommands = commandItems.filter((item) => (item.label + " " + item.detail).toLowerCase().includes(commandQuery.toLowerCase()));
   const max = 270;
   const points = TREND.map((point, index) => ({
     x: 30 + index * 102,
@@ -321,6 +332,8 @@ export default function Home() {
   const [view, setView] = useState<View>("overview");
   const [showWorkspaceInfo, setShowWorkspaceInfo] = useState(false);
   const [showHelpGuide, setShowHelpGuide] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
+  const [commandQuery, setCommandQuery] = useState("");
   const demoAccessGranted = useSyncExternalStore(subscribeDemoAccess, getDemoAccessSnapshot, getServerDemoAccessSnapshot);
   const [demoCode, setDemoCode] = useState("");
   const [demoCodeError, setDemoCodeError] = useState("");
@@ -349,6 +362,19 @@ export default function Home() {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+
+  useEffect(() => {
+    function handleCommandShortcut(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setCommandOpen((open) => !open);
+        setCommandQuery("");
+      }
+      if (event.key === "Escape") setCommandOpen(false);
+    }
+    window.addEventListener("keydown", handleCommandShortcut);
+    return () => window.removeEventListener("keydown", handleCommandShortcut);
+  }, []);
 
   useEffect(() => {
     if (auth.configured && !auth.loading && !auth.user) {
@@ -445,7 +471,7 @@ export default function Home() {
     <main className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark brand-monogram" aria-hidden="true"><span>E</span><i /> </div>
+          <div className="brand-mark brand-vector" aria-hidden="true"><svg viewBox="0 0 40 40" role="img"><path d="M20 3.5 35.5 12.4v15.2L20 36.5 4.5 27.6V12.4L20 3.5Z" /><path d="M12 12.5h16M12 20h12M12 27.5h16M28 12.5v15" /></svg></div>
           <div>
             <div className="brand-name">{t("enterprise")}<span>{t("os")}</span></div>
             <div className="brand-caption">{t("FINANCE OPERATING SYSTEM")}</div>
@@ -542,6 +568,9 @@ export default function Home() {
             <strong>{view === "overview" ? t("Overview") : view === "model" ? t("Financial model") : view === "planning" ? t("Budget & scenarios") : view === "statements" ? t("3 statements") : view === "operations" ? t("Operations") : t("Reports")}</strong>
           </div>
           <div className="topbar-actions">
+            <button type="button" className="command-launcher" onClick={() => { setCommandOpen(true); setCommandQuery(""); }} aria-label={t("Open command menu")}>
+              <Icon name="search" size={14} /><span>{t("Quick command")}</span><kbd>⌘ K</kbd>
+            </button>
             <Link className="product-overview-link" href="/platform">Product overview <Icon name="arrow" size={13} /></Link>
             <div className="language-switch" role="group" aria-label={t("Language")}>
               <button type="button" className={language === "en" ? "selected" : ""} onClick={() => setLanguage("en")} aria-pressed={language === "en"}>EN</button>
@@ -605,6 +634,29 @@ export default function Home() {
         )}
 
         <div className="content-area">
+          <section className="workspace-utility-rail" aria-label={t("Workspace controls")}>
+            <div className="utility-status"><span className="utility-pulse" /><div><strong>{t("LOCAL MODEL ENGINE")}</strong><small>{t("READY · SYNCHRONOUS CALCULATIONS")}</small></div></div>
+            <div className="utility-metric"><span>{t("REVENUE MODEL")}</span><strong>{formatCurrency(results.revenue, true)}</strong></div>
+            <div className="utility-metric"><span>EBITDA</span><strong>{formatCurrency(results.ebitda, true)}</strong></div>
+            <div className="utility-metric"><span>{t("INPUTS")}</span><strong>06 / 06</strong></div>
+            <div className="utility-actions">
+              <button type="button" onClick={() => setView("model")}>{t("Edit model")} <Icon name="arrow" size={13} /></button>
+              <button type="button" onClick={() => setView("reports")}>{t("Reports")} <Icon name="file" size={13} /></button>
+            </div>
+          </section>
+          {commandOpen && (
+            <div className="command-palette-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setCommandOpen(false); }}>
+              <section className="command-palette" role="dialog" aria-modal="true" aria-label={t("Quick command")}>
+                <div className="command-palette-search"><Icon name="search" size={18} /><input autoFocus value={commandQuery} onChange={(event) => setCommandQuery(event.target.value)} placeholder={t("Search workspaces and actions…")} /><kbd>ESC</kbd></div>
+                <div className="command-palette-label">{t("NAVIGATION & ACTIONS")}</div>
+                <div className="command-palette-results">
+                  {filteredCommands.map((item) => <button type="button" key={item.label} onClick={() => { item.run(); setCommandOpen(false); }}><span><strong>{item.label}</strong><small>{item.detail}</small></span><Icon name="arrow" size={15} /></button>)}
+                  {filteredCommands.length === 0 && <p className="command-palette-empty">{t("No matching command. Try another search.")}</p>}
+                </div>
+                <footer><span><kbd>↵</kbd> {t("Select action")}</span><span><kbd>⌘ K</kbd> {t("Toggle command menu")}</span></footer>
+              </section>
+            </div>
+          )}
           {view === "overview" && (
             <div className="eos-command">
               <header className="eos-command-heading">
