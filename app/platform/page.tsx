@@ -10,7 +10,7 @@ import ManifestoSection from "./components/ManifestoSection";
 import TrustSection from "./components/TrustSection";
 import CapabilityBento from "./components/CapabilityBento";
 import ProductShowcase from "./components/ProductShowcase";
-import DecisionFieldSimulator from "./components/DecisionFieldSimulator";
+import DecisionField from "./components/DecisionField";
 import ProductAnatomy from "./components/ProductAnatomy";
 import ConversionSection from "./components/ConversionSection";
 import { type Scenario } from "./components/scenarios";
@@ -39,7 +39,7 @@ export default function PlatformPage() {
 
       <ProductShowcase />
 
-      <DecisionFieldSimulator scenario={scenario} onScenarioChange={setScenario} />
+      <DecisionField scenario={scenario} onScenarioChange={setScenario} />
 
       <ProductAnatomy />
 
