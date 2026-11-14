@@ -98,7 +98,11 @@ export default function LiquidAtlasScene() {
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
     const resolution = gl.getUniformLocation(program, "u_resolution");
     const pointer = gl.getUniformLocation(program, "u_pointer");
-    const time = gl.getUniformLocation(program, "u_time");\n    const scroll = gl.getUniformLocation(program, "u_scroll");\n    let scrollPosition = Math.min(1, window.scrollY / Math.max(1, window.innerHeight * 4));\n    const onScroll = () => { scrollPosition = Math.min(1, window.scrollY / Math.max(1, window.innerHeight * 4)); };\n    window.addEventListener("scroll", onScroll, { passive: true });
+    const time = gl.getUniformLocation(program, "u_time");
+    const scroll = gl.getUniformLocation(program, "u_scroll");
+    let scrollPosition = Math.min(1, window.scrollY / Math.max(1, window.innerHeight * 4));
+    const onScroll = () => { scrollPosition = Math.min(1, window.scrollY / Math.max(1, window.innerHeight * 4)); };
+    window.addEventListener("scroll", onScroll, { passive: true });
     let pointerX = 0.5, pointerY = 0.5, frame = 0;
     const start = performance.now();
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -125,7 +129,8 @@ export default function LiquidAtlasScene() {
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.uniform2f(pointer, pointerX, pointerY);
-      gl.uniform1f(time, reduced ? 0 : (performance.now() - start) / 1000);\n      gl.uniform1f(scroll, reduced ? 0 : scrollPosition);
+      gl.uniform1f(time, reduced ? 0 : (performance.now() - start) / 1000);
+      gl.uniform1f(scroll, reduced ? 0 : scrollPosition);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     };
     let lastFrame = 0;
@@ -139,7 +144,8 @@ export default function LiquidAtlasScene() {
       window.cancelAnimationFrame(frame);
       observer.disconnect();
       (pointerHost ?? host).removeEventListener("pointermove", onPointer);
-      (pointerHost ?? host).removeEventListener("pointerleave", onLeave);\n      window.removeEventListener("scroll", onScroll);
+      (pointerHost ?? host).removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("scroll", onScroll);
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
       gl.deleteShader(vertex);
