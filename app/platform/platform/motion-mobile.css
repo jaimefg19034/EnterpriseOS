@@ -2,7 +2,7 @@
 .p-site .p-discipline,.p-site .p-scenario-card{isolation:isolate}
 .p-site .p-discipline::after,.p-site .p-scenario-card::after{
   position:absolute;inset:0;z-index:0;content:"";pointer-events:none;opacity:0;
-  background:radial-gradient(420px circle at 50% 35%,rgba(255,255,255,.72),rgba(166,182,255,.12) 34%,transparent 72%);
+  background:radial-gradient(420px circle at var(--card-x,50%) var(--card-y,35%),rgba(255,255,255,.72),rgba(166,182,255,.12) 34%,transparent 72%);
   transition:opacity .55s var(--atlas-ease);
 }
 .p-site .p-discipline>* ,.p-site .p-scenario-card>*{position:relative;z-index:1}
