@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type PointerEvent } from "react";
+import { useEffect, useState, type PointerEvent, type ReactNode } from "react";
 import LiquidAtlasScene from "./LiquidAtlasScene";
 import { scenarios, type Scenario } from "./scenarios";
 import { PlanningWorkspace } from "@/components/planning-workspace";
@@ -24,7 +24,7 @@ const modules = [
   { n: "08", code: "CONTROL", title: "Trazabilidad", desc: "Supuestos identificables y separación entre datos y estimaciones.", stat: "INPUT → OUTPUT", type: "control" },
 ];
 
-function Eyebrow({ children }: { children: React.ReactNode }) {
+function Eyebrow({ children }: { children: ReactNode }) {
   return <span className="ax-eyebrow"><i />{children}</span>;
 }
 
@@ -148,6 +148,7 @@ function Anatomy() {
       <div className="ax-exploded-center">ENTERPRISE<span>OS</span><small>FINANCIAL LOGIC / MVP</small></div>
     </div>
     <div className="ax-anatomy-caption"><span>FIG 04.01 — CONCEPTUAL PRODUCT ARCHITECTURE</span><span>NOT A CLAIM OF AUTOMATED DATA INGESTION</span></div>
+    <WorkspacePreview />
   </section>;
 }
 
@@ -234,7 +235,6 @@ export default function AtlasLanding() {
     <Studio scenario={scenario} onChange={setScenario} />
     <Dossiers />
     <Comparison />
-    <WorkspacePreview />
     <FinalPortal />
     <Footer />
   </main>;
