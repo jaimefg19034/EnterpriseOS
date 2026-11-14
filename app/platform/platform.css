@@ -105,3 +105,18 @@
   .p-manifesto-bottom{margin-left:0;align-items:flex-start;flex-direction:column}
   .p-proof-intro h2,.p-cap-intro h2,.p-product-intro h2,.p-sim-copy h2,.p-architecture-main h2,.p-cta h2{font-size:var(--type-section)}
 }
+
+
+/* Decision Field — make the active assumption explicit, not just the selected tab. */
+.p-sim-context{display:grid;grid-template-columns:1fr auto;align-items:center;gap:5px 16px;padding:19px 0 17px;border-bottom:1px solid #ffffff25}
+.p-sim-context>span:first-child{grid-column:1/-1;color:#91a3bb;font:500 7px/1.5 var(--mono);letter-spacing:1px}
+.p-sim-context>strong{color:#f4f6f9;font:600 20px/1.1 var(--display);letter-spacing:-.6px}
+.p-sim-delta{justify-self:end;color:#a6b6ff;font:600 12px/1 var(--display);white-space:nowrap}
+.p-sim-delta small{display:block;margin-top:6px;color:#91a3bb;font:500 6px/1.4 var(--mono);letter-spacing:.8px;text-align:right}
+.p-sim-delta.is-base{color:#b8c4d5}
+.p-values{padding-top:22px}
+@media(max-width:720px){
+  .p-sim-context{padding:16px 0 14px}
+  .p-sim-context>strong{font-size:18px}
+  .p-sim-delta{font-size:11px}
+}
