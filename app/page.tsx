@@ -341,6 +341,7 @@ export default function Home() {
   }
 
   async function exportExcel() {
+    if (auth.configured && auth.plan === "essential") return;
     await downloadExcelWorkbook({
       filename: "enterpriseos-management-pnl-fy2026.xlsx",
       sheets: [{
