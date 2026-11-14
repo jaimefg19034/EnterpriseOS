@@ -4,6 +4,7 @@ import "./globals.css";
 import "./enterprise-design.css";
 import "./executive-overhaul.css";
 import "./account.css";
+import "./workspace-atlas.css";
 import { AuthProvider } from "@/components/auth-provider";
 
 export const metadata: Metadata = {
