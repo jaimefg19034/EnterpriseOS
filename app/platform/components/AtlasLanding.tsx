@@ -60,7 +60,7 @@ function AtlasCursor() {
   const cursorRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) return;
-    const onMove = (event: globalThis.PointerEvent) => {
+    const onMove = (event: PointerEvent) => {
       const node = cursorRef.current;
       if (!node) return;
       node.style.left = event.clientX + "px";
