@@ -746,7 +746,7 @@ export default function Home() {
 
           <footer className="page-footer">
             <span>{t("© 2026 EnterpriseOS")}</span>
-            <span><i /> {t("All systems operational")}</span>
+            <span><i /> {t("Local demo environment")}</span>
             <span>{t("Built for clearer business decisions.")}</span>
           </footer>
         </div>
