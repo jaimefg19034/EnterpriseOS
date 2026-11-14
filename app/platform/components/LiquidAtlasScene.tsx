@@ -93,7 +93,7 @@ export default function LiquidAtlasScene() {
     const canvas = canvasRef.current;
     const host = canvas?.parentElement;
     if (!canvas || !host) return;
-    const gl = canvas.getContext("webgl", { alpha: true, antialias: false, powerPreference: "low-power" });
+    const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false, antialias: false, powerPreference: "low-power" });
     if (!gl) return;
 
     const vertex = compile(gl, gl.VERTEX_SHADER, vertexSource);
@@ -116,7 +116,8 @@ export default function LiquidAtlasScene() {
     const resolution = gl.getUniformLocation(program, "u_resolution");
     const pointer = gl.getUniformLocation(program, "u_pointer");
     const time = gl.getUniformLocation(program, "u_time");
-    let pointerX = 0.5, pointerY = 0.5, frame = 0, start = performance.now();
+    let pointerX = 0.5, pointerY = 0.5, frame = 0;
+    const start = performance.now();
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const onPointer = (event: PointerEvent) => {
