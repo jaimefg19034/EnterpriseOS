@@ -28,11 +28,19 @@ export default function ProductShowcase() {
           <div className="p-frame-status"><i /> INTERACTIVE PREVIEW <span>·</span> SAMPLE DATA</div>
         </div>
         <div className="p-product-stage p-product-live">
-          <div className="p-live-product-bar">
-            <span>MODULE 01 — PLANNING WORKSPACE</span>
-            <span>MODEL INPUTS / OUTPUTS / SCENARIOS</span>
+          <aside className="p-product-xray" aria-label="Lectura de la arquitectura del workspace">
+            <div className="p-xray-step"><small>01 / INPUTS</small><b>Supuestos</b><span>Entradas manuales</span></div>
+            <div className="p-xray-step"><small>02 / MODEL</small><b>Plan y escenarios</b><span>Hipótesis y resultados</span></div>
+            <div className="p-xray-step"><small>03 / OUTPUT</small><b>Lectura financiera</b><span>Resultados y caja prevista</span></div>
+            <p>MODEL FLOW <i>01 → 02 → 03</i></p>
+          </aside>
+          <div className="p-product-live-main">
+            <div className="p-live-product-bar">
+              <span>MODULE 01 — PLANNING WORKSPACE</span>
+              <span>MODEL INPUTS / OUTPUTS / SCENARIOS</span>
+            </div>
+            <PlanningWorkspace language="es" previewMode />
           </div>
-          <PlanningWorkspace language="es" previewMode />
         </div>
         <div className="p-product-frame-foot">
           <span>INTERACTIVE COMPONENT · NOT A STATIC MOCKUP</span>
