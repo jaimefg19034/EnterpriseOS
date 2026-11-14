@@ -29,11 +29,13 @@ function subscribeToLanguage(onStoreChange: () => void) {
 }
 
 function getLanguageSnapshot(): Language {
-  return typeof window !== "undefined" && window.localStorage.getItem("enterpriseos-language") === "es" ? "es" : "en";
+  if (typeof window === "undefined") return "es";
+  const savedLanguage = window.localStorage.getItem("enterpriseos-language");
+  return savedLanguage === "en" || savedLanguage === "es" ? savedLanguage : "es";
 }
 
 function getServerLanguageSnapshot(): Language {
-  return "en";
+  return "es";
 }
 
 const DEMO_INPUTS: FinancialInputs = {
@@ -507,8 +509,8 @@ export default function Home() {
               <section className="command-hero">
                 <div className="command-hero-copy">
                   <div className="eyebrow">{t("FINANCE COMMAND CENTRE")} <span className="eyebrow-dot" /> {t("FY 2026")}</div>
-                  <h1>{t("The business, in one view.")}</h1>
-                  <p>{t("A decision-ready view of performance, profitability and the assumptions behind the numbers.")}</p>
+                  <h1>{t("The financial pulse of the business.")}</h1>
+                  <p>{t("Read performance, profitability and the drivers behind every result in one connected management view.")}</p>
                   <div className="command-hero-meta"><span className="demo-badge"><i /> {t("ILLUSTRATIVE WORKSPACE")}</span><span>{t("Aster & Co. · EUR")}</span></div>
                 </div>
                 <div className="command-hero-actions">
@@ -539,7 +541,7 @@ export default function Home() {
               <div className="command-main-grid">
                 <section className="panel command-performance">
                   <div className="command-section-heading">
-                    <div><div className="panel-kicker">{t("PERFORMANCE INTELLIGENCE")}</div><h2>{t("Revenue & operating performance")}</h2><p>{t("Six-month trend alongside the live management model.")}</p></div>
+                    <div><div className="panel-kicker">{t("OPERATING PERFORMANCE")}</div><h2>{t("Revenue and operating performance")}</h2><p>{t("Six-month performance trend, read alongside the live management model.")}</p></div>
                     <button className="text-action" onClick={() => setView("model")}>{t("Open model")} <Icon name="arrow" size={14} /></button>
                   </div>
                   <TrendChart language={language} />
@@ -552,8 +554,8 @@ export default function Home() {
 
                 <aside className="command-side-stack">
                   <section className="panel command-profit-panel">
-                    <div className="panel-kicker">{t("PROFITABILITY BRIDGE")}</div>
-                    <h2>{t("From sales to net result")}</h2>
+                    <div className="panel-kicker">{t("PROFITABILITY WALK")}</div>
+                    <h2>{t("How revenue becomes net profit")}</h2>
                     <div className="command-profit-rows">
                       <div><span>{t("Revenue")}</span><strong>{formatCurrency(results.revenue)}</strong></div>
                       <div><span>{t("Gross profit")}</span><strong>{formatCurrency(results.grossProfit)}</strong></div>
@@ -572,7 +574,7 @@ export default function Home() {
 
               <section className="command-workspaces">
                 <div className="command-section-heading">
-                  <div><div className="panel-kicker">{t("WORKING AREAS")}</div><h2>{t("Move from insight to action")}</h2><p>{t("Open a dedicated workspace to plan, test and manage the business.")}</p></div>
+                  <div><div className="panel-kicker">{t("MANAGEMENT WORKSPACES")}</div><h2>{t("From financial reading to business action")}</h2><p>{t("Each workspace connects a different part of planning, finance and execution.")}</p></div>
                 </div>
                 <div className="command-workspace-grid">
                   <button className="command-workspace-card" onClick={() => setView("planning")}><span className="command-workspace-icon"><Icon name="trend" size={19} /></span><span className="command-workspace-copy"><strong>{t("Budget & scenarios")}</strong><small>{t("Build a plan, compare scenarios and track actuals.")}</small></span><Icon name="arrow" size={16} /></button>
