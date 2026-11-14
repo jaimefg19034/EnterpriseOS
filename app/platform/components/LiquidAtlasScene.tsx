@@ -144,7 +144,8 @@ export default function LiquidAtlasScene() {
       gl.uniform1f(time, reduced ? 0 : (performance.now() - start) / 1000);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     };
-    let lastFrame = 0;\n    const animate = (now: number) => { if (now - lastFrame >= 33) { draw(); lastFrame = now; } frame = window.requestAnimationFrame(animate); };
+    let lastFrame = 0;
+    const animate = (now: number) => { if (now - lastFrame >= 33) { draw(); lastFrame = now; } frame = window.requestAnimationFrame(animate); };
     const observer = new ResizeObserver(resize);
     observer.observe(host);
     resize();
