@@ -9,6 +9,7 @@ import TrustSection from "./components/TrustSection";
 import CapabilityBento from "./components/CapabilityBento";
 import ProductShowcase from "./components/ProductShowcase";
 import DecisionField from "./components/DecisionField";
+import ScenarioMatrix from "./components/ScenarioMatrix";
 import ProductAnatomy from "./components/ProductAnatomy";
 import ConversionSection from "./components/ConversionSection";
 import { type Scenario } from "./components/scenarios";
@@ -27,6 +28,8 @@ export default function PlatformPage() {
         {[[ "01", "Modelar", "Entender los motores del negocio" ], [ "02", "Planificar", "Contrastar hipótesis y escenarios" ], [ "03", "Anticipar", "Leer el impacto en caja" ], [ "04", "Decidir", "Actuar con contexto" ]].map(item => <div className="p-principle" key={item[0]}><small>{item[0]}</small><b>{item[1]}</b><span>{item[2]}</span></div>)}
       </section>
 
+      <div className="p-ticker" aria-label="Principios de trabajo de EnterpriseOS"><div className="p-ticker-track" aria-hidden="true">{["MODEL / DECIDE","SCENARIOS / OUTLOOK","LIQUIDITY / 13 WEEKS","MANAGEMENT P&L","PLAN / ACTUAL / VARIANCE","MODEL / DECIDE","SCENARIOS / OUTLOOK","LIQUIDITY / 13 WEEKS","MANAGEMENT P&L","PLAN / ACTUAL / VARIANCE"].map((item, index) => <span key={index}>{item}<i>✳</i></span>)}</div></div>
+
       <ManifestoSection />
 
       <TrustSection />
@@ -36,6 +39,8 @@ export default function PlatformPage() {
       <ProductShowcase />
 
       <DecisionField scenario={scenario} onScenarioChange={setScenario} />
+
+      <ScenarioMatrix scenario={scenario} onScenarioChange={setScenario} />
 
       <ProductAnatomy />
 
