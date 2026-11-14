@@ -145,18 +145,14 @@ export default function LiquidAtlasScene() {
       gl.uniform1f(scroll, reduced ? 0 : scrollPosition);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     };
-    let lastFrame = 0;
     let inView = true;
     let pageVisible = !document.hidden;
-    const animate = (now: number) => {
+    const animate = () => {
       if (reduced || !inView || !pageVisible) {
         frame = 0;
         return;
       }
-      if (now - lastFrame >= 0) {
-        draw();
-        lastFrame = now;
-      }
+      draw();
       frame = window.requestAnimationFrame(animate);
     };
     const startAnimation = () => {
