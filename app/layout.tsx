@@ -5,9 +5,9 @@ import "./enterprise-design.css";
 import "./executive-overhaul.css";
 
 export const metadata: Metadata = {
-  title: "EnterpriseOS — Sistema de gestión empresarial",
+  title: "EnterpriseOS — Sistema operativo financiero",
   description:
-    "Sistema de planificación financiera, análisis y control de gestión para empresas en crecimiento.",
+    "El espacio de trabajo financiero para planificar, analizar y dirigir empresas en crecimiento.",
 };
 
 export default function RootLayout({

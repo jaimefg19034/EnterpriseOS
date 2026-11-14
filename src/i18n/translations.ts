@@ -1,6 +1,14 @@
 export type Language = "en" | "es";
 
 const spanish: Record<string, string> = {
+  "EXECUTIVE VIEW": "DIRECCIÓN EJECUTIVA",
+  "FINANCE WORKBENCH": "CENTRO FINANCIERO",
+  "OPERATIONS & INSIGHT": "OPERACIONES E INTELIGENCIA",
+  "Executive navigation": "Navegación ejecutiva",
+  "Finance navigation": "Navegación financiera",
+  "Operations navigation": "Navegación de operaciones",
+  "Local demo environment": "Entorno de demostración local",
+  "FINANCE OPERATING SYSTEM": "SISTEMA OPERATIVO FINANCIERO",
   "Scenario Comparison": "Comparación de escenarios",
   "Download invoice recovery copy": "Descargar copia de recuperación de facturas",
   "Invoice changes could not be saved in this browser. Your current session data is still available; download a recovery copy before leaving this page.": "No se han podido guardar los cambios de facturas en este navegador. Los datos de la sesión siguen disponibles; descarga una copia de recuperación antes de salir de esta página.",
