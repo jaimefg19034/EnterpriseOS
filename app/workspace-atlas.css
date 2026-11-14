@@ -257,8 +257,7 @@
 .app-shell .demo-badge i { background: var(--ws-amber); }
 .app-shell .metric-card, .app-shell .executive-kpi, .app-shell .panel, .app-shell .eos-executive-stage,
 .app-shell .eos-workspace-row, .app-shell .eos-margin-item, .app-shell .eos-data-note,
-.app-shell .three-statement-stat, .app-shell .three-statements-intro, .app-shell .financial-visual-card,
-.app-shell .planning-* {
+.app-shell .three-statement-stat, .app-shell .three-statements-intro, .app-shell .financial-visual-card {
   color: var(--ws-text);
   border-color: var(--ws-line);
   border-radius: 3px;
