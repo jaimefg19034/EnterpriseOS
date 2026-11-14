@@ -6,7 +6,7 @@ import { PLANS, type PlanId } from "@/lib/plans";
 
 export default function AccountPage() {
   const auth = useAuth();
-  const [mode, setMode] = useState<"login" | "signup" | "plans">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "plans" | "manage">("login");
   const [selectedPlan, setSelectedPlan] = useState<PlanId>("professional");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,16 +23,18 @@ export default function AccountPage() {
     }
     if (params.get("mode") === "signup") setMode("signup");
     if (params.get("mode") === "plans") setMode("plans");
+    if (params.get("mode") === "manage") setMode("manage");
     if (params.get("checkout") === "success") setMessage("Pago recibido. Estamos verificando tu suscripción; actualiza esta página en unos segundos.");
     if (params.get("checkout") === "cancel") setMessage("El pago se ha cancelado. No se ha activado ningún plan.");
   }, []);
 
   useEffect(() => {
-    if (!auth.loading && auth.user) {
+    if (!auth.loading && auth.user && mode !== "manage") {
       if (auth.plan) window.location.replace("/EnterpriseOS/");
       else setMode("plans");
     }
-  }, [auth.loading, auth.user, auth.plan]);
+    if (!auth.loading && !auth.user && mode === "manage") setMode("login");
+  }, [auth.loading, auth.user, auth.plan, mode]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -91,6 +93,23 @@ export default function AccountPage() {
             </div>
           ) : auth.loading ? (
             <div className="eos-account-state"><h2>Comprobando tu sesión…</h2></div>
+          ) : mode === "manage" ? (
+            <div className="eos-account-state">
+              <span className="eos-account-kicker">BILLING / ACCOUNT</span>
+              <h2>Gestiona tu suscripción</h2>
+              {auth.plan ? (
+                <>
+                  <p>Tu plan actual es <strong>{PLANS[auth.plan].name}</strong> — {PLANS[auth.plan].monthlyPrice} €/mes. Estado: {auth.subscriptionStatus ?? "verificando"}.</p>
+                  <button className="eos-account-submit" type="button" disabled={busy} onClick={async () => { setBusy(true); setError(""); try { await auth.openBillingPortal(); } catch (cause) { setError(cause instanceof Error ? cause.message : "No se pudo abrir la facturación."); setBusy(false); } }}>{busy ? "Abriendo facturación…" : "Cambiar o cancelar mi plan"}</button>
+                  <button className="eos-account-switch" type="button" onClick={() => window.location.assign("/EnterpriseOS/")}>Volver al workspace</button>
+                </>
+              ) : (
+                <>
+                  <p>No hay una suscripción activa en esta cuenta.</p>
+                  <button className="eos-account-submit" type="button" onClick={() => setMode("plans")}>Ver planes disponibles</button>
+                </>
+              )}
+            </div>
           ) : mode === "plans" ? (
             <div className="eos-account-state">
               <span className="eos-account-kicker">ELIGE TU ACCESO</span>
