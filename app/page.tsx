@@ -139,6 +139,13 @@ function Icon({
   };
 
   switch (name) {
+    case "search":
+      return (
+        <svg {...common}>
+          <circle cx="10.8" cy="10.8" r="6.8" />
+          <path d="m16 16 4.5 4.5" />
+        </svg>
+      );
     case "grid":
       return (
         <svg {...common}>
