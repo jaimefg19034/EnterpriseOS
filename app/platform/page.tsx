@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import "./platform.css";
 import BrandMark from "../components/ui/BrandMark";
 import PlatformHeader from "./components/PlatformHeader";
 import PlatformFooter from "./components/PlatformFooter";
