@@ -121,6 +121,18 @@ export default function AtlasLanding() {
     };
   }, [activeNav]);
 
+  function scrollToAnchor(event: React.MouseEvent<HTMLAnchorElement>) {
+    const href = event.currentTarget.getAttribute("href");
+    if (!href?.startsWith("#")) return;
+    const target = document.querySelector<HTMLElement>(href);
+    if (!target) return;
+    event.preventDefault();
+    const navHeight = (navRef.current?.closest(".eos-home-nav") as HTMLElement | null)?.getBoundingClientRect().height ?? 0;
+    const top = Math.max(0, window.scrollY + target.getBoundingClientRect().top - navHeight - 22);
+    window.history.pushState(null, "", href);
+    window.scrollTo({ top, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  }
+
   function openDemoAccess(event: React.MouseEvent<HTMLAnchorElement>) {
     event.preventDefault();
     setDemoCode("");
@@ -141,7 +153,7 @@ export default function AtlasLanding() {
   return <main className="eos-home" id="top">
     <header className="eos-home-nav">
       <Brand />
-      <nav ref={navRef} aria-label="Navegación principal" onMouseLeave={() => { const nav = navRef.current; const link = nav?.querySelector<HTMLAnchorElement>(`a[href="#${activeNav}"]`); if (link) setNavIndicator((current) => current.left === link.offsetLeft && current.width === link.offsetWidth ? current : { left: link.offsetLeft, width: link.offsetWidth }); }}><span className="eos-home-nav-indicator" aria-hidden="true" style={{ transform: `translate3d(${navIndicator.left}px,0,0)`, width: navIndicator.width }} /><a className={activeNav === "what" ? "is-active" : ""} href="#what" onMouseEnter={() => { setActiveNav("what"); const link = navRef.current?.querySelector<HTMLAnchorElement>('a[href="#what"]'); if (link) setNavIndicator({ left: link.offsetLeft, width: link.offsetWidth }); }}>Qué hacemos</a><a className={activeNav === "how-it-works" ? "is-active" : ""} href="#how-it-works" onMouseEnter={() => { setActiveNav("how-it-works"); const link = navRef.current?.querySelector<HTMLAnchorElement>('a[href="#how-it-works"]'); if (link) setNavIndicator({ left: link.offsetLeft, width: link.offsetWidth }); }}>Cómo funciona</a><a className={activeNav === "pricing" ? "is-active" : ""} href="#pricing" onMouseEnter={() => { setActiveNav("pricing"); const link = navRef.current?.querySelector<HTMLAnchorElement>('a[href="#pricing"]'); if (link) setNavIndicator({ left: link.offsetLeft, width: link.offsetWidth }); }}>Precios</a><details className="eos-home-plan-menu"><summary>Ver paquetes <span aria-hidden="true">⌄</span></summary><div><a href="#plan-essential" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); }}>Essential <small>29 €/mes</small></a><a href="#plan-professional" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); }}>Professional <small>79 €/mes</small></a><a href="#plan-business" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); }}>Business <small>149 €/mes</small></a></div></details></nav>
+      <nav ref={navRef} aria-label="Navegación principal" onMouseLeave={() => { const nav = navRef.current; const link = nav?.querySelector<HTMLAnchorElement>(`a[href="#${activeNav}"]`); if (link) setNavIndicator((current) => current.left === link.offsetLeft && current.width === link.offsetWidth ? current : { left: link.offsetLeft, width: link.offsetWidth }); }}><span className="eos-home-nav-indicator" aria-hidden="true" style={{ transform: `translate3d(${navIndicator.left}px,0,0)`, width: navIndicator.width }} /><a className={activeNav === "what" ? "is-active" : ""} href="#what" onMouseEnter={() => { setActiveNav("what"); const link = navRef.current?.querySelector<HTMLAnchorElement>('a[href="#what"]'); if (link) setNavIndicator({ left: link.offsetLeft, width: link.offsetWidth }); }}>Qué hacemos</a><a className={activeNav === "how-it-works" ? "is-active" : ""} href="#how-it-works" onMouseEnter={() => { setActiveNav("how-it-works"); const link = navRef.current?.querySelector<HTMLAnchorElement>('a[href="#how-it-works"]'); if (link) setNavIndicator({ left: link.offsetLeft, width: link.offsetWidth }); }}>Cómo funciona</a><a className={activeNav === "pricing" ? "is-active" : ""} href="#pricing" onClick={scrollToAnchor} onMouseEnter={() => { setActiveNav("pricing"); const link = navRef.current?.querySelector<HTMLAnchorElement>('a[href="#pricing"]'); if (link) setNavIndicator({ left: link.offsetLeft, width: link.offsetWidth }); }}>Precios</a><details className="eos-home-plan-menu"><summary>Ver paquetes <span aria-hidden="true">⌄</span></summary><div><a href="#plan-essential" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); scrollToAnchor(event); }}>Essential <small>29 €/mes</small></a><a href="#plan-professional" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); scrollToAnchor(event); }}>Professional <small>79 €/mes</small></a><a href="#plan-business" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); scrollToAnchor(event); }}>Business <small>149 €/mes</small></a></div></details></nav>
       <div className="eos-home-nav-actions">
         <a className="eos-home-login" href="/EnterpriseOS/account/">Iniciar sesión</a>
         <a className="eos-home-workspace-link" href="/EnterpriseOS/" onClick={openDemoAccess}>Entrar al workspace <Arrow /></a>
@@ -235,13 +247,13 @@ export default function AtlasLanding() {
       <p className="eos-home-product-disclaimer">VISTA ILUSTRATIVA · CIFRAS SINTÉTICAS · DATOS Y SUPUESTOS INTRODUCIDOS MANUALMENTE · LOS CAMBIOS SE GUARDAN LOCALMENTE EN ESTA VERSIÓN.</p>
     </section>
 
-    <section className="eos-home-pricing" id="pricing">
+    <section className="eos-home-pricing">
       <div className="eos-home-section-top"><span>PRECIOS</span><span>ACCESO AL FINANCIAL ATLAS</span></div>
       <div className="eos-home-pricing-intro">
         <div><div className="eos-home-kicker"><i /> PLANES MENSUALES</div><h2>Elige el nivel de<br /><em>claridad que necesitas.</em></h2></div>
         <p>Empieza con el control financiero esencial y amplía tus capacidades cuando tu empresa lo necesite. Todos los precios son mensuales, sin IVA.</p>
       </div>
-      <div className="eos-home-pricing-grid">
+      <div className="eos-home-pricing-grid" id="pricing">
         <article id="plan-essential" className={"eos-home-tier-card " + (highlightedPlan === "essential" ? "is-selected" : "")} onPointerMove={trackSurfacePointer}>
           <div className="eos-home-tier-top"><span>01 / ESSENTIAL</span><span>START</span></div>
           <h3>Essential</h3><p>Control financiero esencial para empresas pequeñas.</p>
@@ -268,14 +280,17 @@ export default function AtlasLanding() {
     </section>
 
     <section className="eos-home-faq" id="faq">
-      <div className="eos-home-section-top"><span>ANTES DE EMPEZAR</span><span>TRANSPARENCIA SOBRE EL MVP</span></div>
-      <div className="eos-home-faq-heading"><h2>Lo importante,<br /><em>sin letra pequeña.</em></h2><p>Queremos que sepas exactamente qué estás probando y qué está disponible hoy.</p></div>
+      <div className="eos-home-section-top"><span>RESPUESTAS CLARAS</span><span>PRODUCTO · USO · PLANES · ALCANCE</span></div>
+      <div className="eos-home-faq-heading"><h2>Decide con toda<br /><em>la información.</em></h2><p>Qué puedes hacer dentro del workspace, cómo encajan los planes y qué está disponible realmente en esta versión.</p></div>
       <div className="eos-home-faq-list">
-        <details><summary>¿Qué es EnterpriseOS exactamente?</summary><p>Un workspace de análisis y planificación financiera para revisar la cuenta de resultados, comparar presupuestos y escenarios, modelizar de forma simplificada los tres estados financieros y preparar una previsión manual de caja.</p></details>
-        <details><summary>¿Se conecta a mi banco o a mi programa contable?</summary><p>No. En esta versión introduces los datos manualmente. No hay sincronización bancaria ni integración contable activa. No sustituye a tu ERP, programa de contabilidad ni asesoría.</p></details>
-        <details><summary>¿Dónde se guardan mis datos?</summary><p>Los datos de trabajo de esta versión se guardan localmente en el navegador. No hay todavía almacenamiento centralizado por empresa ni copias de seguridad en servidor. No introduzcas información confidencial o datos reales sensibles.</p></details>
-        <details><summary>¿Puedo contratar y pagar un plan ahora?</summary><p>Los precios publicados describen los niveles previstos, pero el registro y el cobro online todavía no están activados. Puedes explorar la demo; no introduzcas datos de tarjeta ni interpretes estos precios como una suscripción ya disponible.</p></details>
-        <details><summary>¿La demo utiliza datos reales?</summary><p>No. Las cifras que aparecen en la demostración son sintéticas y sirven únicamente para enseñar la interfaz y el flujo de trabajo.</p></details>
+        <details><summary><span>01</span> ¿Qué hace EnterpriseOS por mi empresa?</summary><p>Convierte los datos financieros que introduces en una visión de gestión: cuenta de resultados, márgenes, presupuestos, escenarios y previsión de caja. El objetivo es que puedas entender qué está pasando, anticipar tensiones y evaluar decisiones antes de ejecutarlas. No es un programa de contabilidad ni un ERP.</p></details>
+        <details><summary><span>02</span> ¿Cómo se utiliza en el día a día?</summary><p>Empiezas actualizando ingresos, costes, presupuestos, facturas por cobrar y pagos previstos. Después revisas el resultado y los indicadores, ajustas hipótesis para comparar escenarios y consultas la previsión de tesorería de 13 semanas. En el plan Business también puedes registrar proyectos, oportunidades, riesgos y costes por área. Es un flujo de trabajo manual: tú controlas los datos y los supuestos.</p></details>
+        <details><summary><span>03</span> ¿Qué incluye cada paquete y para quién es?</summary><p><b>Essential (29 €/mes):</b> dashboard, cuenta de resultados editable e indicadores de rentabilidad para obtener una lectura financiera básica. <b>Professional (79 €/mes):</b> añade presupuestos, escenarios, modelo simplificado de tres estados, previsión manual de caja a 13 semanas, capital circulante e informes; está pensado para planificar y anticipar. <b>Business (149 €/mes):</b> añade pipeline, proyectos, riesgos, KPIs, centros de coste y exportación operativa para conectar el análisis financiero con el seguimiento del negocio. Precios previstos, mensuales y sin IVA; contratación online aún no activada.</p></details>
+        <details><summary><span>04</span> ¿En qué nos diferenciamos de Fathom, Float o Jirav?</summary><p>No sería honesto afirmar que hoy somos superiores en integraciones, automatización o madurez: esas plataformas tienen capacidades consolidadas que EnterpriseOS todavía no ofrece. Nuestra propuesta actual es un espacio directo para explorar análisis y planificación financiera con supuestos editables, sin exigir una conexión bancaria para probar el flujo. Si necesitas sincronización automática, consolidación o controles empresariales avanzados, compara esas funciones antes de elegir.</p></details>
+        <details><summary><span>05</span> ¿Qué hago para empezar a trabajar en el workspace?</summary><p>Abre la demo, introduce la clave de acceso y explora las áreas disponibles. Puedes recorrer el dashboard, modificar datos de gestión, revisar presupuestos y escenarios y consultar los módulos incluidos en el nivel habilitado. La demostración utiliza cifras ficticias; no representa los resultados de una empresa real.</p></details>
+        <details><summary><span>06</span> ¿Los datos se actualizan automáticamente o se conectan al banco?</summary><p>No en esta versión. Los datos se introducen manualmente y se guardan localmente en el navegador. No hay conexión bancaria, sincronización contable, almacenamiento centralizado por empresa ni copias de seguridad en servidor. No introduzcas información confidencial o datos reales sensibles.</p></details>
+        <details><summary><span>07</span> ¿El modelo financiero sustituye a mi contabilidad?</summary><p>No. La cuenta de resultados y el modelo de tres estados son herramientas simplificadas de gestión y planificación. No generan libros contables oficiales, declaraciones fiscales ni estados estatutarios, y no sustituyen a tu ERP, asesoría o criterio financiero profesional.</p></details>
+        <details><summary><span>08</span> ¿Puedo contratar y pagar ahora?</summary><p>Todavía no. Los precios muestran los niveles comerciales previstos, pero el registro y el cobro online no están activos hasta completar la configuración de Supabase y Stripe. Puedes probar la demo; no introduzcas datos de tarjeta ni interpretes los precios como una suscripción ya disponible.</p></details>
       </div>
     </section>
 
