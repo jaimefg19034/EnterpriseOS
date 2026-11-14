@@ -936,3 +936,13 @@ body {
   .nav-group .primary-nav { display:flex; }
   .nav-item small { display:none; }
 }
+
+.product-overview-link {
+  display:inline-flex; align-items:center; gap:7px; padding:7px 10px;
+  color:#6073bd; border:1px solid #e0e6f0; border-radius:5px;
+  background:#fff; font-size:9px; font-weight:700; text-decoration:none;
+  transition:background .18s ease,border-color .18s ease,transform .18s ease;
+}
+.product-overview-link:hover { background:#f3f5fb; border-color:#cbd5ec; transform:translateY(-1px); }
+.product-overview-link svg { width:13px; height:13px; }
+@media(max-width:800px) { .product-overview-link { font-size:8px; padding:6px 7px; } }
