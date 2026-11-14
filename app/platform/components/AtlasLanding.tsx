@@ -57,7 +57,7 @@ export default function AtlasLanding() {
       <nav aria-label="Navegación principal"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a></nav>
       <div className="eos-home-nav-actions">
         <a className="eos-home-login" href="/EnterpriseOS/account/">Iniciar sesión</a>
-        <a className="eos-home-button eos-home-button-small" href="/EnterpriseOS/">Empezar ahora <Arrow /></a>
+        <a className="eos-home-button eos-home-button-small" href="/EnterpriseOS/account/">Empezar ahora <Arrow /></a>
       </div>
     </header>
 
@@ -67,8 +67,8 @@ export default function AtlasLanding() {
         <h1>La claridad financiera<br />para <em>decidir mejor.</em></h1>
         <p>Conecta rendimiento, planificación y tesorería. Comprende qué ocurre en tu negocio y anticipa lo que viene.</p>
         <div className="eos-home-hero-actions">
-          <a className="eos-home-button" href="/EnterpriseOS/">Crear cuenta / Empezar <Arrow /></a>
-          <a className="eos-home-text-link" href="/EnterpriseOS/">Iniciar sesión <span>↗</span></a>
+          <a className="eos-home-button" href="/EnterpriseOS/account/">Crear cuenta / Empezar <Arrow /></a>
+          <a className="eos-home-text-link" href="/EnterpriseOS/account/">Iniciar sesión <span>↗</span></a>
         </div>
         <div className="eos-home-proof"><span><i /> UNA VISIÓN FINANCIERA CONECTADA</span><span>DISEÑADO PARA DECISORES</span></div>
       </div>
@@ -121,12 +121,12 @@ export default function AtlasLanding() {
       <div className="eos-home-close-orbit" aria-hidden="true"><span /><span /><span /></div>
       <div className="eos-home-kicker"><i /> EL SIGUIENTE PASO</div>
       <h2>Entiende los números.<br /><em>Adelántate a las decisiones.</em></h2>
-      <div className="eos-home-close-bottom"><p>Entra en EnterpriseOS y lleva tu planificación financiera a un lugar más claro.</p><a className="eos-home-button" href="/EnterpriseOS/">Empezar ahora <Arrow /></a></div>
+      <div className="eos-home-close-bottom"><p>Entra en EnterpriseOS y lleva tu planificación financiera a un lugar más claro.</p><a className="eos-home-button" href="/EnterpriseOS/account/">Empezar ahora <Arrow /></a></div>
     </section>
 
     <footer className="eos-home-footer">
       <div className="eos-home-footer-main"><Brand /><p>Financial Decision Intelligence<br />para empresas que quieren decidir con contexto.</p></div>
-      <div className="eos-home-footer-links"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a><a href="/EnterpriseOS/">Iniciar sesión</a><a href="/EnterpriseOS/">Empezar ahora</a></div>
+      <div className="eos-home-footer-links"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a><a href="/EnterpriseOS/account/">Iniciar sesión</a><a href="/EnterpriseOS/account/">Empezar ahora</a></div>
       <div className="eos-home-footer-bottom"><span>© {new Date().getFullYear()} ENTERPRISEOS</span><span>DATOS MANUALES · PERSISTENCIA LOCAL · MVP</span><span>THE FINANCIAL ATLAS</span></div>
     </footer>
   </main>;
