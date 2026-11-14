@@ -69,3 +69,69 @@
  .p-site .p-product-xray>p i{margin-left:6px}
 }
 @media(prefers-reduced-motion:reduce){.p-site .p-product-live{scroll-behavior:auto}}
+
+
+/* SPATIAL PRODUCT ANATOMY / the workspace sits inside a layered instrument chassis. */
+.p-site .p-product-frame{
+  position:relative;
+  isolation:isolate;
+  perspective:1900px;
+  border-color:#c4ccc8;
+  background:linear-gradient(145deg,#eef0e9 0%,#dfe4de 48%,#d4dbd7 100%);
+  box-shadow:0 2px 0 rgba(255,255,255,.8),0 18px 34px rgba(23,38,62,.08),0 44px 100px rgba(23,38,62,.13),inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(23,38,62,.08);
+}
+.p-site .p-product-frame::after{
+  position:absolute;inset:7px;z-index:0;content:"";pointer-events:none;
+  border:1px solid rgba(255,255,255,.56);
+}
+.p-site .p-product-frame-head,.p-site .p-product-frame-foot{z-index:1}
+.p-site .p-product-live{
+  position:relative;
+  z-index:1;
+  transform:translateZ(12px);
+  transform-style:preserve-3d;
+}
+.p-site .p-product-xray{
+  padding:12px 10px;
+  border:1px solid rgba(23,38,62,.12);
+  background:linear-gradient(155deg,rgba(255,255,255,.82),rgba(238,240,233,.64));
+  box-shadow:0 10px 24px rgba(23,38,62,.075),inset 0 1px 0 #fff;
+  transform:translateZ(26px);
+}
+.p-site .p-xray-step{
+  position:relative;
+  padding-left:10px;
+}
+.p-site .p-xray-step::before{
+  position:absolute;top:18px;bottom:18px;left:0;width:2px;content:"";
+  background:linear-gradient(180deg,#657bd0,#5cba99);
+  opacity:.62;
+}
+.p-site .p-product-live-main{
+  min-width:0;
+  padding:12px;
+  border:1px solid rgba(23,38,62,.16);
+  background:linear-gradient(145deg,#fdfdfa,#f0f2ed);
+  box-shadow:0 18px 38px rgba(23,38,62,.11),inset 0 1px 0 #fff,inset 0 -1px 0 rgba(23,38,62,.08);
+  transform:translateZ(18px);
+}
+.p-site .p-live-product-bar{
+  display:flex;justify-content:space-between;gap:12px;
+  margin-bottom:10px;padding:0 2px 9px;
+  border-bottom:1px solid rgba(23,38,62,.13);
+  color:#77838e;font:500 6px/1.4 var(--mono);letter-spacing:.8px;
+}
+.p-site .p-product-live .planning-workspace{
+  position:relative;
+  box-shadow:0 8px 22px rgba(23,38,62,.06);
+}
+@media(max-width:720px){
+  .p-site .p-product-frame{perspective:none;box-shadow:0 16px 36px rgba(23,38,62,.1),inset 0 1px 0 #fff}
+  .p-site .p-product-live,.p-site .p-product-xray,.p-site .p-product-live-main{transform:none}
+  .p-site .p-product-xray{padding:8px}
+  .p-site .p-product-live-main{padding:8px}
+  .p-site .p-live-product-bar{font-size:5px;letter-spacing:.25px}
+}
+@media(prefers-reduced-motion:reduce){
+  .p-site .p-product-live,.p-site .p-product-xray,.p-site .p-product-live-main{transform:none!important}
+}
