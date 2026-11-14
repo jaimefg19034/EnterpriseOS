@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { PlanningWorkspace } from "@/components/planning-workspace";
 import { ThreeStatementsWorkspace } from "@/components/three-statements-workspace";
 import { OperationsWorkspace } from "@/components/operations-workspace";
+import { useAuth } from "@/components/auth-provider";
+import { canAccessView, minimumPlanForView, PLANS } from "@/lib/plans";
 import { translate, type Language } from "@/i18n/translations";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
 import {
@@ -301,6 +303,7 @@ function MetricCard({
 }
 
 export default function Home() {
+  const auth = useAuth();
   const [view, setView] = useState<View>("overview");
   const [showWorkspaceInfo, setShowWorkspaceInfo] = useState(false);
   const [showHelpGuide, setShowHelpGuide] = useState(false);
@@ -318,6 +321,12 @@ export default function Home() {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+
+  useEffect(() => {
+    if (auth.configured && !auth.loading && !auth.user) {
+      window.location.replace("/EnterpriseOS/account/");
+    }
+  }, [auth.configured, auth.loading, auth.user]);
   const [inputs, setInputs] = useState<FinancialInputs>(DEMO_INPUTS);
   const results = useMemo(() => calculateFinancials(inputs), [inputs]);
 
@@ -332,6 +341,7 @@ export default function Home() {
   }
 
   async function exportExcel() {
+    if (auth.configured && auth.plan === "essential") return;
     await downloadExcelWorkbook({
       filename: "enterpriseos-management-pnl-fy2026.xlsx",
       sheets: [{
@@ -361,6 +371,23 @@ export default function Home() {
         ],
       }],
     });
+  }
+
+  if (auth.configured && auth.loading) {
+    return <main className="app-shell"><section className="main-column"><div className="page-heading"><h1>Comprobando acceso…</h1></div></section></main>;
+  }
+
+  if (auth.configured && !auth.user) {
+    return <main className="app-shell"><section className="main-column"><div className="page-heading"><h1>Redirigiendo al inicio de sesión…</h1></div></section></main>;
+  }
+
+  if (auth.configured && auth.user && !auth.plan) {
+    return <main className="eos-plan-required"><section><span>ENTERPRISEOS / SUBSCRIPTION</span><h1>Elige tu plan para acceder al workspace.</h1><p>Tu cuenta está autenticada, pero todavía no tiene una suscripción activa.</p><a href="/EnterpriseOS/account/?mode=plans">Ver Essential, Professional y Business</a><button type="button" onClick={() => void auth.signOut()}>Cerrar sesión</button></section></main>;
+  }
+
+  if (auth.configured && auth.plan && !canAccessView(auth.plan, view)) {
+    const requiredPlan = minimumPlanForView(view);
+    return <main className="eos-plan-required"><section><span>FUNCIÓN INCLUIDA EN {PLANS[requiredPlan].name.toUpperCase()}</span><h1>Desbloquea esta área de EnterpriseOS.</h1><p>Tu plan actual es {PLANS[auth.plan].name}. Esta función requiere {PLANS[requiredPlan].name} ({PLANS[requiredPlan].monthlyPrice} €/mes).</p><a href={"/EnterpriseOS/account/?mode=plans&plan=" + requiredPlan}>Mejorar mi plan</a><button type="button" onClick={() => setView("overview")}>Volver al overview</button></section></main>;
   }
 
   return (
@@ -450,10 +477,10 @@ export default function Home() {
         <div className="sidebar-user">
           <div className="user-avatar">{t("FT")}</div>
           <div className="user-copy">
-            <strong>{t("Finance team")}</strong>
-            <span>{t("Demo account")}</span>
+            <strong>{auth.user?.email ?? t("Finance team")}</strong>
+            <span>{auth.plan ? PLANS[auth.plan].name + " · " + PLANS[auth.plan].monthlyPrice + " €/mes" : t("Demo account")}</span>
           </div>
-          <span className="user-menu">···</span>
+          <button type="button" className="user-menu" onClick={() => void auth.signOut()} aria-label="Cerrar sesión" title="Cerrar sesión">{auth.user ? "Salir" : "···"}</button>
         </div>
       </aside>
 
@@ -470,13 +497,14 @@ export default function Home() {
               <button type="button" className={language === "es" ? "selected" : ""} onClick={() => setLanguage("es")} aria-pressed={language === "es"}>ES</button>
             </div>
             <span className="period-pill"><Icon name="clock" size={14} /> {t("FY 2026")}</span>
+            {auth.plan && <Link className="period-pill" href="/account/?mode=manage" title="Gestionar suscripción">{PLANS[auth.plan].name} · Gestionar</Link>}
             <span className="topbar-divider" />
             <button type="button" className="icon-button" aria-label={t("Workspace information")} title={t("Demo workspace")} onClick={() => setShowWorkspaceInfo(true)}>
               <Icon name="info" size={17} />
             </button>
-            <button className="export-button" onClick={exportExcel}>
+            {(!auth.configured || (auth.plan && auth.plan !== "essential")) && <button className="export-button" onClick={exportExcel}>
               <Icon name="download" size={16} /> <span>{t("Export Excel")}</span>
-            </button>
+            </button>}
             <div className="topbar-avatar">{t("FT")}</div>
           </div>
         </header>
