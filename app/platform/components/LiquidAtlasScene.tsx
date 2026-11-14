@@ -72,6 +72,7 @@ export default function LiquidAtlasScene() {
   useEffect(() => {
     const canvas = canvasRef.current;
     const host = canvas?.parentElement;
+    const pointerHost = host?.closest(".ax-hero") as HTMLElement | null;
     if (!canvas || !host) return;
     const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false, antialias: false, powerPreference: "low-power" });
     if (!gl) return;
@@ -101,13 +102,13 @@ export default function LiquidAtlasScene() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const onPointer = (event: PointerEvent) => {
-      const rect = host.getBoundingClientRect();
+      const rect = (pointerHost ?? host).getBoundingClientRect();
       pointerX = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
       pointerY = 1 - Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
     };
     const onLeave = () => { pointerX = 0.5; pointerY = 0.5; };
-    host.addEventListener("pointermove", onPointer, { passive: true });
-    host.addEventListener("pointerleave", onLeave);
+    (pointerHost ?? host).addEventListener("pointermove", onPointer, { passive: true });
+    (pointerHost ?? host).addEventListener("pointerleave", onLeave);
 
     const resize = () => {
       const rect = host.getBoundingClientRect();
@@ -135,8 +136,8 @@ export default function LiquidAtlasScene() {
     return () => {
       window.cancelAnimationFrame(frame);
       observer.disconnect();
-      host.removeEventListener("pointermove", onPointer);
-      host.removeEventListener("pointerleave", onLeave);
+      (pointerHost ?? host).removeEventListener("pointermove", onPointer);
+      (pointerHost ?? host).removeEventListener("pointerleave", onLeave);
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
       gl.deleteShader(vertex);
