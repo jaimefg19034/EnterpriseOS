@@ -9,6 +9,7 @@ const disciplines = [
     description: "Relaciona ingresos, estructura de costes y márgenes para leer qué está impulsando el rendimiento del negocio.",
     className: "p-discipline-performance",
     visual: "model",
+    modules: [["P&L de gestión", "LECTURA DEL RESULTADO"], ["Centros de coste", "SEGUIMIENTO MANUAL"]],
   },
   {
     number: "02",
@@ -17,6 +18,7 @@ const disciplines = [
     description: "Construye presupuestos y contrasta escenarios para medir el efecto de distintas hipótesis antes de decidir.",
     className: "p-discipline-planning",
     visual: "scenarios",
+    modules: [["Presupuesto", "PLAN Y VARIACIONES"], ["Escenarios", "COMPARACIÓN DE HIPÓTESIS"]],
   },
   {
     number: "03",
@@ -25,14 +27,16 @@ const disciplines = [
     description: "Proyecta cobros, pagos y saldo de tesorería en un horizonte móvil de trece semanas.",
     className: "p-discipline-liquidity",
     visual: "liquidity",
+    modules: [["Caja · 13 semanas", "PREVISIÓN MANUAL"], ["Cobros y pagos", "VENCIMIENTOS Y ANTIGÜEDAD"]],
   },
   {
     number: "04",
     code: "REPORTING / MANAGEMENT",
     title: "Leer el negocio con criterio.",
-    description: "Consulta resultados e indicadores de gestión con una estructura financiera coherente.",
+    description: "Consulta los informes de gestión disponibles y exporta los resultados del modelo.",
     className: "p-discipline-reporting",
     visual: "reporting",
+    modules: [["Informes de gestión", "ALCANCE MVP"], ["Exportación Excel", "DESCARGA DE RESULTADOS"]],
   },
 ];
 
@@ -85,12 +89,12 @@ export default function CapabilityBento() {
     <section className="p-capabilities p-capabilities-editorial" id="capabilities" aria-labelledby="capabilities-title">
       <div className="p-cap-heading">
         <TechnicalLabel number="03">THE FINANCIAL SYSTEM</TechnicalLabel>
-        <span>FOUR CONNECTED DISCIPLINES</span>
+        <span>FOUR DISCIPLINES · EIGHT WORKING MODULES</span>
       </div>
       <div className="p-cap-intro p-cap-intro-editorial">
         <h2 id="capabilities-title">No más números<br />sin <em>contexto.</em></h2>
         <div>
-          <p>La gestión financiera no son cuatro pantallas aisladas. Es una lectura conectada del rendimiento, la planificación, la liquidez y los resultados.</p>
+          <p>Una lectura conectada del rendimiento, la planificación, la liquidez y los resultados. Cada disciplina reúne herramientas concretas, con su alcance claramente identificado.</p>
           <span className="p-cap-intro-index">A SYSTEM FOR BETTER FINANCIAL DECISIONS <b>→</b></span>
         </div>
       </div>
@@ -104,13 +108,16 @@ export default function CapabilityBento() {
               <div>
                 <h3>{discipline.title}</h3>
                 <p>{discipline.description}</p>
+                <ul className="p-discipline-modules">
+                  {discipline.modules.map(([name, scope]) => <li key={name}><strong>{name}</strong><span>{scope}</span></li>)}
+                </ul>
                 <a href="#product">{discipline.number === "01" ? "Ver el modelo en el workspace" : discipline.number === "02" ? "Ver planificación en el workspace" : discipline.number === "03" ? "Ver tesorería en el workspace" : "Ver informes en el workspace"} <Arrow /></a>
               </div>
             </div>
           </article>
         ))}
       </div>
-      <p className="p-disclaimer"><b>DATA NOTE</b> Los elementos gráficos de esta sección son esquemáticos. No representan datos reales ni una conexión bancaria activa.</p>
+      <p className="p-disclaimer"><b>DATA NOTE</b> Los elementos gráficos son esquemáticos. La tesorería y los centros de coste requieren entradas manuales; los informes corresponden al alcance actual del MVP. No hay conexión bancaria activa.</p>
     </section>
   );
 }

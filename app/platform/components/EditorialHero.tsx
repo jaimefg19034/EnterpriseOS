@@ -7,7 +7,7 @@ export default function EditorialHero({ scenario }: { scenario: Scenario }) {
     <section className="p-hero" aria-labelledby="platform-hero-title">
       <div className="p-hero-index">
         <span>ENTERPRISEOS <i aria-hidden="true">/</i> FINANCIAL DECISION INTELLIGENCE</span>
-        <span>INDEPENDENT FINANCE WORKSPACE <b>001—026</b></span>
+        <span>FINANCIAL DECISION INTELLIGENCE <b>FIELD / 01</b></span>
       </div>
 
       <div className="p-hero-copy">
@@ -19,7 +19,7 @@ export default function EditorialHero({ scenario }: { scenario: Scenario }) {
           <a className="p-link" href="#product">Conocer el workspace <span>↓</span></a>
         </div>
         <div className="p-hero-foot">
-          <b>01 / 07</b>
+          <b>00 / 07</b>
           <span>MODELAR LO QUE IMPORTA.<br />ANTICIPAR LO QUE CAMBIA.</span>
         </div>
       </div>

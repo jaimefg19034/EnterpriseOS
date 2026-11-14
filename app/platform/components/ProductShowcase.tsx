@@ -3,10 +3,10 @@ import { PlanningWorkspace } from "@/components/planning-workspace";
 
 export default function ProductShowcase() {
   return (
-    <section className="p-product" id="product" aria-labelledby="product-showcase-title">
+    <section className="p-product" id="product" aria-labelledby="product-showcase-title" aria-describedby="product-demo-note">
       <div className="p-product-heading">
         <TechnicalLabel number="04">INSIDE THE WORKSPACE</TechnicalLabel>
-        <span>ONE MODEL. DIFFERENT QUESTIONS.</span>
+        <span>ONE WORKSPACE. CONNECTED QUESTIONS.</span>
       </div>
 
       <div className="p-product-intro">
@@ -15,8 +15,8 @@ export default function ProductShowcase() {
       </div>
 
       <div className="p-product-demo-note">
-        <span>DEMO ENVIRONMENT</span>
-        <p>Esta vista utiliza un plan de ejemplo. Puedes modificar sus hipótesis y explorar el modelo; los cambios son temporales, no se guardan y no afectan a tus datos del workspace.</p>
+        <span>DEMO ENVIRONMENT · SAMPLE DATA</span>
+        <p id="product-demo-note">Esta vista utiliza un plan de ejemplo. Puedes modificar sus hipótesis y explorar el modelo; los cambios son temporales, no se guardan y no afectan a tus datos del workspace.</p>
       </div>
 
       <div className="p-product-frame">
@@ -28,14 +28,22 @@ export default function ProductShowcase() {
           <div className="p-frame-status"><i /> INTERACTIVE PREVIEW <span>·</span> SAMPLE DATA</div>
         </div>
         <div className="p-product-stage p-product-live">
-          <div className="p-live-product-bar">
-            <span>MODULE 01 — PLANNING WORKSPACE</span>
-            <span>MODEL INPUTS / OUTPUTS / SCENARIOS</span>
+          <aside className="p-product-xray" aria-label="Lectura de la arquitectura del workspace">
+            <div className="p-xray-step"><small>01 / INPUTS</small><b>Supuestos</b><span>Entradas manuales</span></div>
+            <div className="p-xray-step"><small>02 / MODEL</small><b>Plan y escenarios</b><span>Hipótesis y resultados</span></div>
+            <div className="p-xray-step"><small>03 / OUTPUT</small><b>Lectura financiera</b><span>Resultados y caja prevista</span></div>
+            <p>MODEL FLOW <i>01 → 02 → 03</i></p>
+          </aside>
+          <div className="p-product-live-main">
+            <div className="p-live-product-bar">
+              <span>MODULE 01 — PLANNING WORKSPACE</span>
+              <span>MODEL INPUTS / OUTPUTS / SCENARIOS</span>
+            </div>
+            <PlanningWorkspace language="es" previewMode />
           </div>
-          <PlanningWorkspace language="es" previewMode />
         </div>
         <div className="p-product-frame-foot">
-          <span>LIVE COMPONENT · NOT A STATIC MOCKUP</span>
+          <span>INTERACTIVE COMPONENT · NOT A STATIC MOCKUP</span>
           <span>SESSION-ONLY CHANGES <b>↗</b></span>
         </div>
       </div>

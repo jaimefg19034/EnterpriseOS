@@ -1,10 +1,11 @@
 import { scenarios, type Scenario } from "./scenarios";
 
 function TopographicField({ scenario }: { scenario: Scenario }) {
+  const active = scenarios[scenario];
   const shift = scenario === "conservador" ? "field-down" : scenario === "crecimiento" ? "field-up" : "field-base";
   return (
     <div className={`p-field-visual ${shift}`} aria-label={`Visualización ilustrativa del escenario ${scenarios[scenario].label}`}>
-      <div className="p-field-top"><span>EOS / DECISION FIELD</span><span>MODEL OUTPUT · ILLUSTRATIVE</span></div>
+      <div className="p-field-top"><span>EOS / DECISION FIELD</span><span>ILLUSTRATIVE OUTPUT · NO LIVE DATA</span></div>
       <svg className="p-contours" viewBox="0 0 760 520" role="img" aria-label="Líneas topográficas que representan escenarios financieros">
         <defs>
           <linearGradient id="fieldStroke" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#9aafff" stopOpacity=".08" /><stop offset=".48" stopColor="#b8c6ff" stopOpacity=".8" /><stop offset="1" stopColor="#62c4a4" stopOpacity=".3" /></linearGradient>
@@ -31,9 +32,9 @@ function TopographicField({ scenario }: { scenario: Scenario }) {
         <circle cx="315" cy="265" r="7" fill="#b9c7ff" /><circle cx="315" cy="265" r="18" fill="none" stroke="#b9c7ff" strokeOpacity=".35" />
         <circle cx="680" cy="145" r="5" fill="#68c7a5" /><circle cx="680" cy="145" r="14" fill="none" stroke="#68c7a5" strokeOpacity=".35" />
       </svg>
-      <div className="p-field-coordinate p-coordinate-a"><small>01 / MODEL</small><b>Revenue drivers</b><span>Volume · Price · Mix</span></div>
-      <div className="p-field-coordinate p-coordinate-b"><small>02 / OUTLOOK</small><b>{scenarios[scenario].label}</b><span>{scenarios[scenario].delta}</span></div>
-      <div className="p-field-coordinate p-coordinate-c"><small>03 / LIQUIDITY</small><b>13-week view</b><span>Cash position</span></div>
+      <div className="p-field-coordinate p-coordinate-a"><small>01 / REVENUE</small><b>{active.revenue}</b><span>Proyección anual</span></div>
+      <div className="p-field-coordinate p-coordinate-b"><small>02 / EBITDA</small><b>{active.ebitda}</b><span>Escenario {active.label.toLowerCase()}</span></div>
+      <div className="p-field-coordinate p-coordinate-c"><small>03 / CASH</small><b>{active.cash}</b><span>Posición estimada</span></div>
       <div className="p-field-legend"><i /> SCENARIO PATH <span>↗</span></div>
       <div className="p-field-bottom"><span>FINANCIAL TERRITORY / 001</span><span>MOVE THE ASSUMPTION. READ THE CONSEQUENCE.</span></div>
     </div>

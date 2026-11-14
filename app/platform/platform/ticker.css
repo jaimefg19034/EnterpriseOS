@@ -1,0 +1,7 @@
+/* Editorial ticker — product vocabulary, never fabricated authority */
+.p-site .p-ticker{overflow:hidden;padding:15px 0;border-top:1px solid #ffffff1c;border-bottom:1px solid #ffffff1c;background:#17263e;color:#dce2eb}
+.p-site .p-ticker-track{display:flex;width:max-content;align-items:center;gap:clamp(24px,4vw,64px);animation:p-ticker-travel 38s linear infinite}
+.p-site .p-ticker-track span{display:flex;align-items:center;gap:clamp(24px,4vw,64px);font:500 8px/1.4 var(--mono);letter-spacing:1.2px;white-space:nowrap}
+.p-site .p-ticker-track i{color:#a6b6ff;font-style:normal;font-size:11px}
+@keyframes p-ticker-travel{to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.p-site .p-ticker-track{animation:none}}
