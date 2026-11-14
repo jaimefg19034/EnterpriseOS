@@ -4,7 +4,7 @@ import TechnicalLabel from "../../components/ui/TechnicalLabel";
 export default function CapabilityBento() {
   return (
     <section className="p-capabilities" id="capabilities">
-        <div className="p-cap-heading"><TechnicalLabel number="03">THE FINANCIAL SYSTEM</SectionLabel><span>FOUR CONNECTED DISCIPLINES</span></div>
+        <div className="p-cap-heading"><TechnicalLabel number="03">THE FINANCIAL SYSTEM</TechnicalLabel><span>FOUR CONNECTED DISCIPLINES</span></div>
         <div className="p-cap-intro"><h2>No más números<br />sin <em>contexto.</em></h2><p>Un espacio de trabajo que relaciona hipótesis, rendimiento y liquidez. Cada vista responde a una pregunta distinta del negocio.</p></div>
         <div className="p-cap-grid">
           <article className="p-cap p-cap-model"><div className="p-cap-meta"><span>01 / PERFORMANCE</span><b>MODEL</b></div><div className="p-cap-visual p-visual-model"><div className="p-mini-stat"><small>REVENUE / FY</small><strong>248.000<span> €</span></strong></div><div className="p-mini-bars">{[28,42,36,57,48,69,62,78,71,88,78,96].map((v,i)=><i key={i} style={{height:`${v}%`}} />)}</div><div className="p-mini-axis"><span>JAN</span><span>APR</span><span>JUL</span><span>OCT</span><span>DEC</span></div></div><div className="p-cap-copy"><h3>Modelización financiera</h3><p>Comprende cómo ingresos, costes, márgenes y supuestos construyen el resultado del negocio.</p><a href="/EnterpriseOS/">Explorar el modelo <Arrow /></a></div></article>
