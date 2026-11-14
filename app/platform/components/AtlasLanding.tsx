@@ -57,13 +57,6 @@ function AtlasHeader() {
 }
 
 function Preloader() {
-  const [visible, setVisible] = useState(true);
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setVisible(false); return; }
-    const timer = window.setTimeout(() => setVisible(false), 650);
-    return () => window.clearTimeout(timer);
-  }, []);
-  if (!visible) return null;
   return <div className="ax-preloader" aria-hidden="true"><div className="ax-preloader-mark">E<span>O</span>S</div><div className="ax-preloader-track"><i /></div><small>INITIALISING FINANCIAL ATLAS / 001</small></div>;
 }
 
@@ -80,7 +73,7 @@ function Hero({ scenario }: { scenario: Scenario }) {
       <div className="ax-hero-grid" aria-hidden="true" />
       <div className="ax-hero-atmosphere" aria-hidden="true" />
       <div className="ax-hero-sculpture" aria-hidden="true"><LiquidAtlasScene /></div>
-      <div className="ax-hero-topline"><span>FIG. 001 — THE FINANCIAL ATLAS</span><span>40° 25' N / 03° 42' W</span><span>BUILT FOR DECISION MAKERS</span></div>
+      <div className="ax-hero-topline"><span>FIG. 001 — THE FINANCIAL ATLAS</span><span>40° 25&apos; N / 03° 42&apos; W</span><span>BUILT FOR DECISION MAKERS</span></div>
       <div className="ax-hero-title-wrap">
         <div className="ax-hero-side-index"><span>01</span><i /> <span>SEE THE SYSTEM</span></div>
         <h1><span className="ax-title-a">FINANCE</span><span className="ax-title-b">IN <em>FOCUS.</em></span></h1>
@@ -90,7 +83,7 @@ function Hero({ scenario }: { scenario: Scenario }) {
       <div className="ax-hero-telemetry ax-telemetry-two"><small>OPERATING RESULT</small><b>{active.ebitda}</b><span>EBITDA · ILLUSTRATIVE</span></div>
       <div className="ax-hero-telemetry ax-telemetry-three"><small>LIQUIDITY POSITION</small><b>{active.cash}</b><span>CASH · ILLUSTRATIVE</span></div>
       <div className="ax-hero-bottom"><span><i className="ax-live-dot" /> SYSTEM READY / SAMPLE ENVIRONMENT</span><span>SCROLL TO CHANGE PERSPECTIVE ↓</span><span>01 / 10</span></div>
-      <div className="ax-hero-orbit-label">A CLEARER VIEW<br /><em>OF WHAT'S NEXT.</em></div>
+      <div className="ax-hero-orbit-label">A CLEARER VIEW<br /><em>OF WHAT&apos;S NEXT.</em></div>
     </section>
   );
 }
@@ -188,7 +181,7 @@ function Comparison() {
   ];
   return <section className="ax-comparison">
     <div className="ax-section-stamp"><Eyebrow>07 / POSITIONING, NOT POSTURING</Eyebrow><span>PRODUCT SCOPE MATRIX</span></div>
-    <div className="ax-comparison-heading"><h2>KNOW WHAT<br />YOU'RE <em>CHOOSING.</em></h2><p>EnterpriseOS no pretende sustituir una suite contable o un FP&A maduro. Su foco actual es una capa ligera de planificación y lectura financiera.</p></div>
+    <div className="ax-comparison-heading"><h2>KNOW WHAT<br />YOU&apos;RE <em>CHOOSING.</em></h2><p>EnterpriseOS no pretende sustituir una suite contable o un FP&A maduro. Su foco actual es una capa ligera de planificación y lectura financiera.</p></div>
     <div className="ax-matrix-wrap"><table className="ax-matrix"><thead><tr><th>CAPABILITY</th><th>ENTERPRISEOS / MVP</th><th>SME BUSINESS SUITE</th><th>DEDICATED FP&A</th></tr></thead><tbody>{rows.map(row=><tr key={row[0]}>{row.map((cell,i)=><td key={i}>{cell}</td>)}</tr>)}</tbody></table></div>
     <div className="ax-comparison-foot"><span>POSITIONING GUIDE / NOT A VERIFIED VENDOR-BY-VENDOR AUDIT</span><span>PRODUCT SCOPE REVIEW / NOV 2026</span></div>
   </section>;
