@@ -26,7 +26,7 @@ export default function EditorialHero({ scenario }: { scenario: Scenario }) {
       <div className="p-hero-radical-main">
         <div className="p-hero-copy">
           <div className="p-kicker"><i /> FINANCE, SEEN IN A DIFFERENT DIMENSION</div>
-          <h1 id="platform-hero-title"><span className="p-hero-line-one">SEE THE</span><span className="p-hero-line-two">UNSEEN<span className="p-hero-period">.</span></span><span className="p-hero-line-three">MODEL <em>WHAT'S</em> NEXT.</span></h1>
+          <h1 id="platform-hero-title"><span className="p-hero-line-one">SEE THE</span><span className="p-hero-line-two">UNSEEN<span className="p-hero-period">.</span></span><span className="p-hero-line-three">MODEL <em>WHAT&apos;S</em> NEXT.</span></h1>
           <p>El futuro financiero de una empresa no es una cifra. Es un territorio de decisiones, hipótesis y consecuencias.</p>
           <div className="p-actions">
             <a className="p-button" href="/EnterpriseOS/">Entrar en el atlas <span aria-hidden="true">↗</span></a>
@@ -43,7 +43,7 @@ export default function EditorialHero({ scenario }: { scenario: Scenario }) {
 
       <div className="p-hero-radical-bottom">
         <div className="p-hero-scroll"><span>SCROLL TO ENTER THE SYSTEM</span><i /></div>
-        <div className="p-hero-coordinate">40° 25' N <b>·</b> 03° 42' W <b>·</b> FINANCIAL TERRITORY / 001</div>
+        <div className="p-hero-coordinate">40° 25&apos; N <b>·</b> 03° 42&apos; W <b>·</b> FINANCIAL TERRITORY / 001</div>
         <div className="p-hero-status"><i /> MANUAL INPUTS <b>·</b> ILLUSTRATIVE DATA</div>
       </div>
     </section>
