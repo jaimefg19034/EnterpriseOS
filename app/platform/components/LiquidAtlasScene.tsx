@@ -147,26 +147,47 @@ export default function LiquidAtlasScene() {
     let inView = true;
     let pageVisible = !document.hidden;
     const animate = (now: number) => {
-      if (!reduced && inView && pageVisible && now - lastFrame >= 50) {
+      if (reduced || !inView || !pageVisible) {
+        frame = 0;
+        return;
+      }
+      if (now - lastFrame >= 50) {
         draw();
         lastFrame = now;
       }
       frame = window.requestAnimationFrame(animate);
     };
+    const startAnimation = () => {
+      if (!reduced && inView && pageVisible && frame === 0) {
+        frame = window.requestAnimationFrame(animate);
+      }
+    };
     const visibilityObserver = new IntersectionObserver(([entry]) => {
       inView = entry.isIntersecting;
-      if (inView && !reduced && pageVisible) draw();
-    }, { rootMargin: "120px" });
+      if (inView) {
+        draw();
+        startAnimation();
+      } else if (frame) {
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    }, { rootMargin: "80px" });
     const onVisibility = () => {
       pageVisible = !document.hidden;
-      if (pageVisible && inView && !reduced) draw();
+      if (pageVisible && inView) {
+        draw();
+        startAnimation();
+      } else if (frame) {
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+      }
     };
     document.addEventListener("visibilitychange", onVisibility);
     visibilityObserver.observe(host);
     const observer = new ResizeObserver(resize);
     observer.observe(host);
     resize();
-    if (!reduced) frame = window.requestAnimationFrame(animate);
+    startAnimation();
 
     return () => {
       window.cancelAnimationFrame(frame);
