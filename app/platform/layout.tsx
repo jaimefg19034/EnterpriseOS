@@ -11,6 +11,7 @@ import "./platform/scenario-matrix.css";
 import "./platform/ticker.css";
 import "./platform/motion-mobile.css";
 import "./radical-art-direction.css";
+import "./atlas-rebuild.css";
 
 const platformUrl = "https://jaimefg19034.github.io/EnterpriseOS/platform/";
 
