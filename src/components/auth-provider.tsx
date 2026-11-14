@@ -104,11 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [saveSession]);
 
   useEffect(() => {
-    if (!session) {
-      setPlan(null);
-      setSubscriptionStatus(null);
-      return;
-    }
+    if (!session) return;
     void refreshPlan().catch(() => {
       setPlan(null);
       setSubscriptionStatus(null);
