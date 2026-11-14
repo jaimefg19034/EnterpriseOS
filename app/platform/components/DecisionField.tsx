@@ -1,5 +1,22 @@
+import type { PointerEvent } from "react";
 import TechnicalLabel from "../../components/ui/TechnicalLabel";
 import { scenarios, type Scenario } from "./scenarios";
+
+function trackDecisionLight(event: PointerEvent<HTMLDivElement>) {
+  if (event.pointerType === "touch") return;
+  const bounds = event.currentTarget.getBoundingClientRect();
+  if (!bounds.width || !bounds.height) return;
+  const x = Math.max(0, Math.min(100, ((event.clientX - bounds.left) / bounds.width) * 100));
+  const y = Math.max(0, Math.min(100, ((event.clientY - bounds.top) / bounds.height) * 100));
+  event.currentTarget.style.setProperty("--decision-x", `${x}%`);
+  event.currentTarget.style.setProperty("--decision-y", `${y}%`);
+  event.currentTarget.style.setProperty("--decision-tilt-x", `${((50 - y) / 50) * 1.1}deg`);
+  event.currentTarget.style.setProperty("--decision-tilt-y", `${((x - 50) / 50) * 1.4}deg`);
+}
+
+function resetDecisionLight(event: PointerEvent<HTMLDivElement>) {
+  ["--decision-x", "--decision-y", "--decision-tilt-x", "--decision-tilt-y"].forEach(property => event.currentTarget.style.removeProperty(property));
+}
 
 export default function DecisionField({ scenario, onScenarioChange }: { scenario: Scenario; onScenarioChange: (scenario: Scenario) => void }) {
   const active = scenarios[scenario];
@@ -29,7 +46,7 @@ export default function DecisionField({ scenario, onScenarioChange }: { scenario
         </div>
       </div>
 
-      <div className="p-sim-panel" role="group" aria-label={`Resultados ilustrativos del escenario ${active.label}`} aria-describedby="decision-field-disclaimer">
+      <div className="p-sim-panel" onPointerMove={trackDecisionLight} onPointerLeave={resetDecisionLight} onPointerCancel={resetDecisionLight} role="group" aria-label={`Resultados ilustrativos del escenario ${active.label}`} aria-describedby="decision-field-disclaimer">
         <div className="p-sim-top">
           <span>ILLUSTRATIVE MODEL / 2026</span>
           <b><i aria-hidden="true" /> SCENARIO ACTIVE</b>
