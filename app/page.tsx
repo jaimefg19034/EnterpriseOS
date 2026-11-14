@@ -283,7 +283,7 @@ function MetricCard({
 }) {
   const t = (value: string) => translate(value, language);
   return (
-    <article className="metric-card">
+    <article className="executive-kpi">
       <div className="metric-topline">
         <span className="metric-label">{label}</span>
         <span className={`metric-icon ${tone}`}><Icon name={icon} size={17} /></span>
@@ -503,30 +503,30 @@ export default function Home() {
 
         <div className="content-area">
           {view === "overview" && (
-            <>
-              <div className="page-heading">
-                <div>
+            <div className="executive-overview">
+              <section className="executive-heading">
+                <div className="executive-heading-copy">
                   <div className="eyebrow">{t("MONDAY, 9 NOVEMBER 2026")} <span className="eyebrow-dot" /> {t("FINANCIAL OVERVIEW")}</div>
                   <h1>{t("Good morning, team")} <span className="heading-wave">✳</span></h1>
                   <p>{t("Here's how Aster & Co. is performing across the current reporting period.")}</p>
                 </div>
-                <div className="heading-actions">
+                <div className="executive-heading-actions">
                   <span className="demo-badge"><i /> {t("SAMPLE DATA")}</span>
                   <button className="secondary-button" onClick={() => setInputs(DEMO_INPUTS)}>
                     <Icon name="refresh" size={15} /> {t("Reset demo")}
                   </button>
                 </div>
-              </div>
+              </section>
 
-              <div className="metrics-grid">
+              <section className="executive-kpi-grid" aria-label={t("Financial key performance indicators")}>
                 <MetricCard label={t("Total revenue")} value={formatCurrency(results.revenue, true)} change="+7.4%" tone="blue" icon="wallet" language={language} />
                 <MetricCard label={t("EBITDA")} value={formatCurrency(results.ebitda, true)} change="+11.2%" tone="green" icon="trend" language={language} />
                 <MetricCard label={t("EBITDA margin")} value={formatPercent(results.ebitdaMarginPercent)} change="+1.8 pp" tone="violet" icon="chart" language={language} />
                 <MetricCard label={t("Net income")} value={formatCurrency(results.netIncome, true)} change="+5.6%" tone="amber" icon="building" language={language} />
-              </div>
+              </section>
 
-              <div className="dashboard-grid">
-                <section className="panel performance-panel">
+              <div className="executive-analysis-grid">
+                <section className="panel performance-panel executive-performance">
                   <div className="panel-header">
                     <div>
                       <div className="panel-kicker">{t("PERFORMANCE")}</div>
@@ -543,7 +543,7 @@ export default function Home() {
                   </div>
                 </section>
 
-                <section className="panel breakdown-panel">
+                <section className="panel breakdown-panel executive-breakdown">
                   <div className="panel-header">
                     <div>
                       <div className="panel-kicker">{t("AT A GLANCE")}</div>
@@ -566,18 +566,18 @@ export default function Home() {
                 </section>
               </div>
 
-              <section className="panel quick-model-panel">
+              <section className="panel executive-action-band">
+                <div className="executive-action-symbol"><Icon name="chart" size={22} /></div>
                 <div className="quick-model-copy">
                   <div className="panel-kicker">{t("INTERACTIVE WORKSPACE")}</div>
                   <h2>{t("Your numbers, always connected.")}</h2>
                   <p>{t("Update six operating assumptions and see every key P&L metric recalculate instantly. No formulas to maintain.")}</p>
                 </div>
                 <button className="primary-button" onClick={() => setView("model")}>{t("Open financial model")} <Icon name="arrow" size={16} /></button>
-                <div className="quick-model-decoration"><span>∑</span></div>
               </section>
 
-              <div className="bottom-grid">
-                <section className="panel activity-panel">
+              <div className="executive-lower-grid">
+                <section className="panel activity-panel executive-activity">
                   <div className="panel-header">
                     <div><div className="panel-kicker">{t("WORKSPACE ACTIVITY")}</div><h2>{t("Recent updates")}</h2></div>
                     <span className="activity-period">{t("This period")}</span>
@@ -593,13 +593,13 @@ export default function Home() {
                     <span className="activity-tag">{t("SYSTEM")}</span>
                   </div>
                 </section>
-                <section className="panel integrity-panel">
+                <section className="panel integrity-panel executive-integrity">
                   <div className="integrity-icon"><Icon name="check" size={19} /></div>
                   <div><strong>{t("Model is calculating")}</strong><p>{t("All displayed figures are derived from the current assumptions. Sample data only.")}</p></div>
                   <span className="integrity-status">{t("READY")}</span>
                 </section>
               </div>
-            </>
+            </div>
           )}
 
           {view === "model" && (
