@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./platform.css";
+import "./platform/tokens.css";
 import "./platform/design-system.css";
 import "./platform/hero.css";
 import "./platform/capabilities.css";
@@ -8,6 +9,7 @@ import "./platform/product.css";
 import "./platform/interactions.css";
 import "./platform/scenario-matrix.css";
 import "./platform/ticker.css";
+import "./platform/motion-mobile.css";
 
 const platformUrl = "https://jaimefg19034.github.io/EnterpriseOS/platform/";
 
