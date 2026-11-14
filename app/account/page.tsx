@@ -13,6 +13,7 @@ export default function AccountPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [routeReady, setRouteReady] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -26,15 +27,17 @@ export default function AccountPage() {
     if (params.get("mode") === "manage") setMode("manage");
     if (params.get("checkout") === "success") setMessage("Pago recibido. Estamos verificando tu suscripción; actualiza esta página en unos segundos.");
     if (params.get("checkout") === "cancel") setMessage("El pago se ha cancelado. No se ha activado ningún plan.");
+    setRouteReady(true);
   }, []);
 
   useEffect(() => {
+    if (!routeReady) return;
     if (!auth.loading && auth.user && mode !== "manage") {
       if (auth.plan) window.location.replace("/EnterpriseOS/");
       else setMode("plans");
     }
     if (!auth.loading && !auth.user && mode === "manage") setMode("login");
-  }, [auth.loading, auth.user, auth.plan, mode]);
+  }, [routeReady, auth.loading, auth.user, auth.plan, mode]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
