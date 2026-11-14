@@ -151,3 +151,8 @@ The “From input to decision” section now presents the four-stage model as a 
 - Decision: management performance and exposure.
 
 The four stages are semantic ordered-list items. Each carries a stage index, operating mode and representative output vocabulary. Their staggered Z-depth, restrained elevation, inset highlights, connecting markers and material frame reinforce the direction of financial reasoning without implying an automated data pipeline or capabilities outside the current MVP. The mobile layout flattens the depth and becomes a two-column sequence; reduced-motion preferences remove transforms and transitions.
+
+
+### Product chassis pointer response
+
+The real workspace showcase now has a pointer-local key light and very low-amplitude X/Y micro-parallax. Pointer coordinates are written directly to CSS custom properties on the chassis; no React state is involved. The stage returns to neutral on pointer leave/cancel. Touch layouts remain static, and reduced-motion preferences disable the transform and transition. The effect is CSS perspective, not a 3D/WebGL renderer.
