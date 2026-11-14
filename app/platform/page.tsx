@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import "./platform.css";
 
 type Scenario = "conservador" | "base" | "crecimiento";
@@ -16,7 +16,7 @@ function Arrow() {
 function Mark() {
   return <span className="p-mark" aria-hidden="true"><i /><b /><em /></span>;
 }
-function SectionLabel({ number, children }: { number: string; children: React.ReactNode }) {
+function SectionLabel({ number, children }: { number: string; children: ReactNode }) {
   return <div className="p-section-label"><span>{number}</span><i />{children}</div>;
 }
 function DecisionField({ scenario }: { scenario: Scenario }) {
@@ -61,9 +61,12 @@ function DecisionField({ scenario }: { scenario: Scenario }) {
 
 export default function PlatformPage() {
   const [scenario, setScenario] = useState<Scenario>("base");
+  const [introReady, setIntroReady] = useState(false);
+  useEffect(() => { const timer = window.setTimeout(() => setIntroReady(true), 520); return () => window.clearTimeout(timer); }, []);
   const active = scenarios[scenario];
   return (
-    <main className="p-site">
+    <main className={introReady ? "p-site p-loaded" : "p-site"}>
+      <div className="p-preloader" aria-hidden={introReady}><Mark /><span>ENTERPRISEOS</span><i /></div>
       <header className="p-nav">
         <a className="p-brand" href="/EnterpriseOS/" aria-label="EnterpriseOS, abrir workspace"><Mark /><span>Enterprise<span>OS</span><small>FINANCE OPERATING SYSTEM</small></span></a>
         <nav aria-label="Navegación principal"><a href="#manifesto">Enfoque</a><a href="#capabilities">Capacidades</a><a href="#product">Producto</a><a href="#simulator">Escenarios</a></nav>
