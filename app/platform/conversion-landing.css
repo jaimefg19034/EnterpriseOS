@@ -940,3 +940,10 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}
 @media(prefers-reduced-motion:reduce) {
   html { scroll-behavior:auto!important; }
 }
+
+
+/* The pricing navigation target is the main heading, not the plan cards. */
+.eos-home-pricing-intro h2#pricing { scroll-margin-top: 112px; }
+@media(max-width:760px) {
+  .eos-home-pricing-intro h2#pricing { scroll-margin-top: 142px; }
+}
