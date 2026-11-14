@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react";
 import "./platform.css";
-import Arrow from "../components/ui/Arrow";
 import BrandMark from "../components/ui/BrandMark";
-import TechnicalLabel from "../components/ui/TechnicalLabel";
 import PlatformHeader from "./components/PlatformHeader";
 import PlatformFooter from "./components/PlatformFooter";
 import EditorialHero from "./components/EditorialHero";
