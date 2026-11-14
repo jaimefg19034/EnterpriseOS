@@ -640,7 +640,7 @@ export default function Home() {
           </div>
         )}
 
-        <div className="content-area">
+        <div className="content-area" data-view={view}>
           <section className="workspace-utility-rail" aria-label={t("Workspace controls")}>
             <div className="utility-status"><span className="utility-pulse" /><div><strong>{t("LOCAL MODEL ENGINE")}</strong><small>{t("READY · SYNCHRONOUS CALCULATIONS")}</small></div></div>
             <div className="utility-metric"><span>{t("REVENUE MODEL")}</span><strong>{formatCurrency(results.revenue, true)}</strong></div>
