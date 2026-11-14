@@ -6,7 +6,7 @@ export default function ProductShowcase() {
     <section className="p-product" id="product" aria-labelledby="product-showcase-title" aria-describedby="product-demo-note">
       <div className="p-product-heading">
         <TechnicalLabel number="04">INSIDE THE WORKSPACE</TechnicalLabel>
-        <span>ONE MODEL. DIFFERENT QUESTIONS.</span>
+        <span>ONE WORKSPACE. CONNECTED QUESTIONS.</span>
       </div>
 
       <div className="p-product-intro">
