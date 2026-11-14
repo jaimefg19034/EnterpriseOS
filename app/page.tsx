@@ -369,7 +369,7 @@ export default function Home() {
           <div className="brand-mark brand-monogram" aria-hidden="true"><span>E</span><i /> </div>
           <div>
             <div className="brand-name">{t("enterprise")}<span>{t("os")}</span></div>
-            <div className="brand-caption">{t("BUSINESS CONTROL SYSTEM")}</div>
+            <div className="brand-caption">{t("FINANCE OPERATING SYSTEM")}</div>
           </div>
         </div>
 
