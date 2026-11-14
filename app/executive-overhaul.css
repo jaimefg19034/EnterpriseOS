@@ -908,3 +908,31 @@ body {
   .eos-executive-stage { border-radius:7px; }
   .eos-workspace-row { grid-template-columns:22px 34px minmax(0,1fr) 16px; }
 }
+
+
+/* Navigation is organized by the decisions it supports, not a flat feature list. */
+.nav-system { display:flex; flex-direction:column; gap:19px; }
+.nav-group { min-width:0; }
+.nav-group-heading {
+  display:flex; align-items:center; gap:8px; padding:0 10px;
+  margin-bottom:7px; color:#8798b3;
+}
+.nav-group-heading span {
+  color:#647ba9; font:800 8px/1 "Manrope",sans-serif; letter-spacing:.5px;
+}
+.nav-group-heading strong {
+  color:#7f90ab; font-size:7px; font-weight:850; letter-spacing:1.25px;
+}
+.nav-group .primary-nav { margin-top:0; }
+.nav-item small {
+  margin-left:auto; color:#7284a2; font:700 7px/1 "Manrope",sans-serif;
+  letter-spacing:.3px; opacity:.75;
+}
+.nav-item.active small { color:#b4c3ff; opacity:1; }
+@media(max-width:800px) {
+  .nav-system { flex-direction:row; gap:12px; overflow-x:auto; }
+  .nav-group { flex:0 0 auto; }
+  .nav-group-heading { padding:0 7px; margin-bottom:5px; }
+  .nav-group .primary-nav { display:flex; }
+  .nav-item small { display:none; }
+}
