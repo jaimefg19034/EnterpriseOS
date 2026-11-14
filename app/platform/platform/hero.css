@@ -67,3 +67,11 @@
   .p-hero-baseline span:last-child{max-width:120px}
 }
 
+
+/* Spatial depth and material response */
+.p-hero-visual-column{perspective:1500px}
+.p-hero .p-field-visual{transform:rotateY(-1.6deg) rotateX(.8deg);transform-style:preserve-3d;transition:transform .8s cubic-bezier(.16,1,.3,1),box-shadow .8s}
+.p-hero .p-field-visual:hover{transform:rotateY(0) rotateX(0) translateY(-3px);box-shadow:0 36px 90px #0005}
+.p-hero .p-field-coordinate{transform:translateZ(22px)}
+@media(max-width:720px){.p-hero-visual-column{perspective:none}.p-hero .p-field-visual,.p-hero .p-field-visual:hover{transform:none}.p-hero .p-field-coordinate{transform:none}}
+@media(prefers-reduced-motion:reduce){.p-hero .p-field-visual{transition:none}}
