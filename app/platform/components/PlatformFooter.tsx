@@ -26,6 +26,7 @@ export default function PlatformFooter() {
           </div>
         ))}
       </div>
+      <div className="p-footer-wordmark" aria-hidden="true">THE FINANCIAL<br /><em>ATLAS.</em></div>
       <div className="p-footer-bottom">
         <span>© {new Date().getFullYear()} ENTERPRISEOS</span>
         <span>PLAN / MODEL / ANTICIPATE / DECIDE</span>
