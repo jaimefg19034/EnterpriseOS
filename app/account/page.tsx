@@ -3,6 +3,7 @@
 import { useEffect, useState, useSyncExternalStore, type FormEvent } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { PLANS, type PlanId } from "@/lib/plans";
+import BrandMark from "../components/ui/BrandMark";
 
 type AccountMode = "login" | "signup" | "plans" | "manage";
 
@@ -124,7 +125,7 @@ export default function AccountPage() {
 
   return (
     <main className="eos-account">
-      <a className="eos-account-brand" href="/EnterpriseOS/platform/"><span>EO</span><b>ENTERPRISEOS</b></a>
+      <a className="eos-account-brand" href="/EnterpriseOS/platform/"><BrandMark /><b>ENTERPRISEOS</b></a>
       <div className="eos-account-shell">
         <section className="eos-account-intro">
           <span className="eos-account-kicker">THE FINANCIAL ATLAS</span>
