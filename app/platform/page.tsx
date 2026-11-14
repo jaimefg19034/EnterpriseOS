@@ -17,6 +17,7 @@ export default function PlatformPage() {
   const [scenario, setScenario] = useState<Scenario>("base");
   return (
     <main className="p-site" id="main-content">
+      <a className="p-skip-link" href="#platform-hero-title">Saltar al contenido principal</a>
       <PlatformHeader />
 
       <EditorialHero scenario={scenario} />
