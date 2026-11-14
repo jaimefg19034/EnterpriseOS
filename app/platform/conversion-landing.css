@@ -912,3 +912,31 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}
 @media(prefers-reduced-motion:reduce) {
   .eos-home-faq-list details,.eos-home-faq-list summary:after { transition:none!important; }
 }
+
+
+/* Section navigation: remove redundant eyebrow strips and land on the content itself. */
+.eos-home-section-top { display:none!important; }
+.eos-home-what,.eos-home-product,.eos-home-pricing,.eos-home-faq {
+  scroll-margin-top:120px;
+}
+.eos-home-what-heading,.eos-home-product-heading,.eos-home-pricing-intro,.eos-home-faq-heading,
+.eos-home-pricing-grid,.eos-home-tier-card[id^="plan-"] {
+  scroll-margin-top:120px;
+}
+.eos-home-faq-list details { scroll-margin-top:120px; }
+.eos-home-nav nav>a { white-space:nowrap; }
+.eos-home-faq-list summary>span {
+  color:#ddff70;
+  background:rgba(221,255,112,.055);
+}
+@media(max-width:1000px) {
+  .eos-home-nav nav { gap:10px; }
+  .eos-home-nav nav>a { font-size:10px; }
+}
+@media(max-width:760px) {
+  .eos-home-nav nav { gap:14px; }
+  .eos-home-nav nav>a { font-size:10px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto!important; }
+}
