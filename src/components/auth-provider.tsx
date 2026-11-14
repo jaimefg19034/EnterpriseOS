@@ -44,8 +44,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const saveSession = useCallback((next: StoredSession | null) => {
-    setPlan(null);
-    setSubscriptionStatus(null);
     setSession(next);
     if (next) window.localStorage.setItem(SESSION_KEY, JSON.stringify(next));
     else window.localStorage.removeItem(SESSION_KEY);
@@ -112,6 +110,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(async (email: string, password: string) => {
     const result = await authRequest("token?grant_type=password", { email, password });
+    setPlan(null);
+    setSubscriptionStatus(null);
     saveSession({
       access_token: result.access_token,
       refresh_token: result.refresh_token,
@@ -124,6 +124,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = useCallback(async (email: string, password: string) => {
     const result = await authRequest("signup", { email, password });
     if (result.access_token && result.user) {
+      setPlan(null);
+      setSubscriptionStatus(null);
       saveSession({
         access_token: result.access_token,
         refresh_token: result.refresh_token,
