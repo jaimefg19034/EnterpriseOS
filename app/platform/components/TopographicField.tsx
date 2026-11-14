@@ -1,78 +1,53 @@
 "use client";
 
-import { useState, type CSSProperties, type PointerEvent } from "react";
+import type { PointerEvent } from "react";
 import { scenarios, type Scenario } from "./scenarios";
 
-type FieldPointer = {
-  x: number;
-  y: number;
-  rotateX: number;
-  rotateY: number;
-  shiftX: number;
-  shiftY: number;
-  active: boolean;
-};
-
-const RESTING_POINTER: FieldPointer = {
-  x: 50,
-  y: 50,
-  rotateX: 0,
-  rotateY: 0,
-  shiftX: 0,
-  shiftY: 0,
-  active: false,
-};
-
-type SpatialStyle = CSSProperties & {
-  "--field-x": string;
-  "--field-y": string;
-  "--field-rotate-x": string;
-  "--field-rotate-y": string;
-  "--field-shift-x": string;
-  "--field-shift-y": string;
-};
 
 function TopographicField({ scenario }: { scenario: Scenario }) {
   const active = scenarios[scenario];
   const shift = scenario === "conservador" ? "field-down" : scenario === "crecimiento" ? "field-up" : "field-base";
-  const [pointer, setPointer] = useState<FieldPointer>(RESTING_POINTER);
-
   function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
     if (event.pointerType === "touch") return;
-    const bounds = event.currentTarget.getBoundingClientRect();
+    const field = event.currentTarget;
+    const bounds = field.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return;
+
     const x = Math.max(0, Math.min(100, ((event.clientX - bounds.left) / bounds.width) * 100));
     const y = Math.max(0, Math.min(100, ((event.clientY - bounds.top) / bounds.height) * 100));
     const normalizedX = (x - 50) / 50;
     const normalizedY = (y - 50) / 50;
 
-    setPointer({
-      x,
-      y,
-      rotateX: normalizedY * -3.2,
-      rotateY: normalizedX * 4.2,
-      shiftX: (50 - x) * 0.11,
-      shiftY: (50 - y) * 0.09,
-      active: true,
-    });
+    // Update compositor-facing CSS variables directly: pointer movement should not
+    // re-render the SVG, financial labels, or the surrounding React tree.
+    field.style.setProperty("--field-x", `${x}%`);
+    field.style.setProperty("--field-y", `${y}%`);
+    field.style.setProperty("--field-rotate-x", `${normalizedY * -3.2}deg`);
+    field.style.setProperty("--field-rotate-y", `${normalizedX * 4.2}deg`);
+    field.style.setProperty("--field-shift-x", `${(50 - x) * 0.11}px`);
+    field.style.setProperty("--field-shift-y", `${(50 - y) * 0.09}px`);
+    field.classList.add("is-pointer-active");
   }
 
-  const spatialStyle: SpatialStyle = {
-    "--field-x": `${pointer.x}%`,
-    "--field-y": `${pointer.y}%`,
-    "--field-rotate-x": `${pointer.rotateX}deg`,
-    "--field-rotate-y": `${pointer.rotateY}deg`,
-    "--field-shift-x": `${pointer.shiftX}px`,
-    "--field-shift-y": `${pointer.shiftY}px`,
-  };
+  function resetPointer(event: PointerEvent<HTMLDivElement>) {
+    const field = event.currentTarget;
+    field.classList.remove("is-pointer-active");
+    field.style.removeProperty("--field-x");
+    field.style.removeProperty("--field-y");
+    field.style.removeProperty("--field-rotate-x");
+    field.style.removeProperty("--field-rotate-y");
+    field.style.removeProperty("--field-shift-x");
+    field.style.removeProperty("--field-shift-y");
+  }
 
   return (
     <div
-      className={`p-field-visual ${shift}${pointer.active ? " is-pointer-active" : ""}`}
-      style={spatialStyle}
+      className={`p-field-visual ${shift}`}
       onPointerMove={handlePointerMove}
-      onPointerLeave={() => setPointer(RESTING_POINTER)}
+      onPointerLeave={resetPointer}
+      onPointerCancel={resetPointer}
       role="group"
-      aria-label={`Visualización ilustrativa del escenario ${active.label}. Mueve el puntero para explorar la profundidad del campo.`}
+      aria-label={`Visualización ilustrativa del escenario ${active.label}. Mueve el puntero para explorar la profundidad del campo en dispositivos compatibles.`}
     >
       <div className="p-field-top"><span>EOS / DECISION FIELD</span><span>ILLUSTRATIVE OUTPUT · NO LIVE DATA</span></div>
       <svg className="p-contours" viewBox="0 0 760 520" role="img" aria-label="Líneas topográficas que representan escenarios financieros">
