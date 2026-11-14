@@ -16,7 +16,7 @@ import { type Scenario } from "./components/scenarios";
 export default function PlatformPage() {
   const [scenario, setScenario] = useState<Scenario>("base");
   return (
-    <main className="p-site">
+    <main className="p-site" id="main-content">
       <PlatformHeader />
 
       <EditorialHero scenario={scenario} />
