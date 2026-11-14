@@ -6,6 +6,8 @@ import "./platform/hero.css";
 import "./platform/capabilities.css";
 import "./platform/product.css";
 import "./platform/interactions.css";
+import "./platform/scenario-matrix.css";
+import "./platform/ticker.css";
 
 export const metadata: Metadata = {
   title: "EnterpriseOS — The Financial Atlas",
