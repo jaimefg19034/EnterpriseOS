@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type PointerEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import LiquidAtlasScene from "./LiquidAtlasScene";
 import { scenarios, type Scenario } from "./scenarios";
 import { PlanningWorkspace } from "@/components/planning-workspace";
@@ -56,7 +56,7 @@ function AtlasHeader() {
   );
 }
 
-function Preloader() {
+function AtlasCursor() {\n  const cursorRef = useRef<HTMLDivElement>(null);\n  useEffect(() => {\n    if (window.matchMedia("(pointer: coarse)").matches) return;\n    const onMove = (event: PointerEvent) => {\n      const node = cursorRef.current;\n      if (!node) return;\n      node.style.left = event.clientX + "px";\n      node.style.top = event.clientY + "px";\n      const target = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-cursor],a,button") : null;\n      const label = target?.dataset.cursor ?? (target ? "OPEN" : "");\n      node.textContent = label;\n      node.classList.toggle("is-active", Boolean(label));\n    };\n    window.addEventListener("pointermove", onMove, { passive: true });\n    return () => window.removeEventListener("pointermove", onMove);\n  }, []);\n  return <div className="ax-cursor-lens" ref={cursorRef} aria-hidden="true" />;\n}\n\nfunction Preloader() {
   return <div className="ax-preloader" aria-hidden="true"><div className="ax-preloader-mark">E<span>O</span>S</div><div className="ax-preloader-track"><i /></div><small>INITIALISING FINANCIAL ATLAS / 001</small></div>;
 }
 
@@ -72,12 +72,12 @@ function Hero({ scenario }: { scenario: Scenario }) {
     <section className="ax-hero" id="top" onPointerMove={move}>
       <div className="ax-hero-grid" aria-hidden="true" />
       <div className="ax-hero-atmosphere" aria-hidden="true" />
-      <div className="ax-hero-sculpture" aria-hidden="true"><LiquidAtlasScene /></div>
+      <div className="ax-hero-sculpture" aria-hidden="true" data-cursor="ROTATE 3D"><LiquidAtlasScene /></div>
       <div className="ax-hero-topline"><span>FIG. 001 — THE FINANCIAL ATLAS</span><span>40° 25&apos; N / 03° 42&apos; W</span><span>BUILT FOR DECISION MAKERS</span></div>
       <div className="ax-hero-title-wrap">
         <div className="ax-hero-side-index"><span>01</span><i /> <span>SEE THE SYSTEM</span></div>
         <h1><span className="ax-title-a">FINANCE</span><span className="ax-title-b">IN <em>FOCUS.</em></span></h1>
-        <div className="ax-hero-deck"><p>Deja de perseguir cifras aisladas. Conecta rendimiento, planificación y caja para entender qué puede pasar después.</p><a className="ax-round-cta" href="#system"><span>EXPLORE<br />THE ATLAS</span><b>↘</b></a></div>
+        <div className="ax-hero-deck"><p>Deja de perseguir cifras aisladas. Conecta rendimiento, planificación y caja para entender qué puede pasar después.</p><a className="ax-round-cta" href="#system" data-cursor="EXPLORE"><span>EXPLORE<br />THE ATLAS</span><b>↘</b></a></div>
       </div>
       <div className="ax-hero-telemetry ax-telemetry-one"><small>MODEL / {active.label.toUpperCase()}</small><b>{active.revenue}</b><span>REVENUE · ILLUSTRATIVE</span></div>
       <div className="ax-hero-telemetry ax-telemetry-two"><small>OPERATING RESULT</small><b>{active.ebitda}</b><span>EBITDA · ILLUSTRATIVE</span></div>
