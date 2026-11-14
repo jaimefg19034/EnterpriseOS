@@ -197,3 +197,11 @@
 .p-ticker-secondary .p-ticker-track span { color:#697582; }
 .p-ticker-secondary .p-ticker-track i { color:#657bd0; }
 @media(prefers-reduced-motion:reduce) { .p-ticker-track { animation:none!important; transform:none!important; } }
+
+/* Navigation selectors are deliberately scoped so the overlay remains visible on mobile. */
+.p-mega-menu .p-mega-links { display:flex!important; flex-direction:column; margin:18px 0 0; }
+.p-mega-menu .p-mega-links a { display:grid; margin:0; }
+@media(max-width:720px) {
+  .p-nav .p-desktop-nav { display:none!important; }
+  .p-nav .p-mega-menu .p-mega-links { display:flex!important; }
+}
