@@ -44,6 +44,12 @@ function HeroVisual() {
         <radialGradient id="eos-core"><stop stopColor="#DFFF83" stopOpacity=".38"/><stop offset="1" stopColor="#8BD8D1" stopOpacity="0"/></radialGradient>
       </defs>
       <circle cx="310" cy="250" r="176" stroke="url(#eos-line)" strokeOpacity=".26"/>
+      <circle cx="310" cy="250" r="202" stroke="#BDECE1" strokeOpacity=".13" strokeDasharray="1 9"/>
+      <circle cx="310" cy="250" r="150" stroke="#DFFF83" strokeOpacity=".18" strokeDasharray="38 18"/>
+      <path className="eos-home-orbit-sweep" d="M310 48a202 202 0 0 1 174 99" stroke="url(#eos-line)" strokeWidth="2.4" strokeLinecap="round"/>
+      <path d="M82 250h456M310 22v456" stroke="#BDECE1" strokeOpacity=".075" strokeDasharray="2 9"/>
+      <path d="M180 112l22 22m236 232 22 22M440 112l-22 22M180 388l22-22" stroke="#DFFF83" strokeOpacity=".28"/>
+      <circle cx="310" cy="250" r="88" stroke="#BDECE1" strokeOpacity=".17" strokeDasharray="2 6"/>
       <ellipse cx="310" cy="250" rx="235" ry="92" stroke="#9DE7DC" strokeOpacity=".35" transform="rotate(-28 310 250)"/>
       <ellipse cx="310" cy="250" rx="230" ry="105" stroke="#DFFF83" strokeOpacity=".45" transform="rotate(42 310 250)"/>
       <circle cx="310" cy="250" r="126" fill="url(#eos-core)"/>
@@ -75,6 +81,13 @@ export default function AtlasLanding() {
   const [navIndicator, setNavIndicator] = useState({ left: 0, width: 0 });
   const navRef = useRef<HTMLElement | null>(null);
   const highlightedPlan = useSyncExternalStore(subscribeToPlanHash, getPlanHashSnapshot, getServerPlanHashSnapshot);
+
+  function trackSurfacePointer(event: React.PointerEvent<HTMLElement>) {
+    if (event.pointerType === "touch") return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    event.currentTarget.style.setProperty("--pointer-x", `${event.clientX - bounds.left}px`);
+    event.currentTarget.style.setProperty("--pointer-y", `${event.clientY - bounds.top}px`);
+  }
 
   useEffect(() => {
     const nav = navRef.current;
@@ -169,7 +182,7 @@ export default function AtlasLanding() {
         <p>EnterpriseOS reúne herramientas de análisis y planificación para que puedas entender el presente, probar decisiones y ver sus posibles consecuencias.</p>
       </div>
       <div className="eos-home-product-grid">
-        <article className="eos-home-product-card eos-home-product-card-wide">
+        <article className="eos-home-product-card eos-home-product-card-wide" onPointerMove={trackSurfacePointer}>
           <div className="eos-home-product-visual eos-home-visual-dashboard">
             <div className="eos-home-mini-top"><span>EXECUTIVE OVERVIEW</span><i>FY 2026 · DEMO</i></div>
             <div className="eos-home-mini-kpis"><div><small>REVENUE</small><b>€248k</b><i>↗ 8.4%</i></div><div><small>EBITDA</small><b>€51k</b><i>↗ 6.2%</i></div><div><small>CASH</small><b>€112k</b><i>↗ 4.1%</i></div></div>
@@ -177,14 +190,14 @@ export default function AtlasLanding() {
           </div>
           <div className="eos-home-product-copy"><span>01 / VISIÓN EJECUTIVA</span><h3>Entiende cómo va tu empresa.</h3><p>Visualiza ingresos, costes, márgenes y resultados en un dashboard pensado para detectar lo importante de un vistazo.</p></div>
         </article>
-        <article className="eos-home-product-card">
+        <article className="eos-home-product-card" onPointerMove={trackSurfacePointer}>
           <div className="eos-home-product-visual eos-home-visual-scenarios">
             <div className="eos-home-scenario-lines"><span>BASE <b>€248k</b><i style={{width:"72%"}}/></span><span>GROWTH <b>€286k</b><i style={{width:"91%"}}/></span><span>CONSERVATIVE <b>€218k</b><i style={{width:"58%"}}/></span></div>
             <div className="eos-home-scenario-note">3 ESCENARIOS COMPARABLES</div>
           </div>
           <div className="eos-home-product-copy"><span>02 / PLANIFICACIÓN</span><h3>Prueba antes de decidir.</h3><p>Modifica presupuestos y supuestos para comparar escenarios y medir su impacto en ingresos y rentabilidad.</p></div>
         </article>
-        <article className="eos-home-product-card">
+        <article className="eos-home-product-card" onPointerMove={trackSurfacePointer}>
           <div className="eos-home-product-visual eos-home-visual-cash">
             <div className="eos-home-cash-head"><span>13-WEEK CASH VIEW</span><b>€112,400</b></div>
             <div className="eos-home-cash-bars">{[68,54,78,48,85,63,92,72,58,88,67,96,78].map((h,i)=><i key={i} style={{height:h+"%"}} />)}</div>
@@ -192,7 +205,7 @@ export default function AtlasLanding() {
           </div>
           <div className="eos-home-product-copy"><span>03 / TESORERÍA</span><h3>Anticipa tus necesidades de caja.</h3><p>Prepara una previsión manual de 13 semanas y sigue cobros, pagos y vencimientos pendientes.</p></div>
         </article>
-        <article className="eos-home-product-card">
+        <article className="eos-home-product-card" onPointerMove={trackSurfacePointer}>
           <div className="eos-home-product-visual eos-home-visual-statements">
             <div className="eos-home-statement-row"><span>Income statement</span><b>EBITDA</b><i>€51.0k</i></div>
             <div className="eos-home-statement-row"><span>Balance sheet</span><b>ASSETS</b><i>€184.2k</i></div>
@@ -201,7 +214,7 @@ export default function AtlasLanding() {
           </div>
           <div className="eos-home-product-copy"><span>04 / MODELO FINANCIERO</span><h3>Conecta los tres estados.</h3><p>Relaciona cuenta de resultados, balance y flujo de caja mediante supuestos editables en un modelo simplificado.</p></div>
         </article>
-        <article className="eos-home-product-card">
+        <article className="eos-home-product-card" onPointerMove={trackSurfacePointer}>
           <div className="eos-home-product-visual eos-home-visual-operations">
             <div className="eos-home-ops-center">COSTES<br/><b>POR ÁREA</b></div>
             <div className="eos-home-ops-node node-a">SALES</div><div className="eos-home-ops-node node-b">OPS</div><div className="eos-home-ops-node node-c">ADMIN</div>
@@ -209,7 +222,7 @@ export default function AtlasLanding() {
           </div>
           <div className="eos-home-product-copy"><span>05 / OPERACIONES</span><h3>Localiza dónde se consume el margen.</h3><p>Registra y analiza costes por centro o área para añadir contexto operativo a la lectura financiera.</p></div>
         </article>
-        <article className="eos-home-product-card">
+        <article className="eos-home-product-card" onPointerMove={trackSurfacePointer}>
           <div className="eos-home-product-visual eos-home-visual-reports">
             <div className="eos-home-report-sheet"><div/><div/><div/><div/><div/></div>
             <div className="eos-home-report-export"><b> XLSX </b><span>MANAGEMENT REPORT</span><i>READY TO EXPORT ↗</i></div>
@@ -229,21 +242,21 @@ export default function AtlasLanding() {
         <p>Empieza con el control financiero esencial y amplía tus capacidades cuando tu empresa lo necesite. Todos los precios son mensuales, sin IVA.</p>
       </div>
       <div className="eos-home-pricing-grid">
-        <article id="plan-essential" className={"eos-home-tier-card " + (highlightedPlan === "essential" ? "is-selected" : "")}>
+        <article id="plan-essential" className={"eos-home-tier-card " + (highlightedPlan === "essential" ? "is-selected" : "")} onPointerMove={trackSurfacePointer}>
           <div className="eos-home-tier-top"><span>01 / ESSENTIAL</span><span>START</span></div>
           <h3>Essential</h3><p>Control financiero esencial para empresas pequeñas.</p>
           <div className="eos-home-tier-price"><strong>29 €</strong><span>/ mes</span></div>
           <div className="eos-home-feature-list"><div><b>Dashboard financiero</b><p>Ingresos, costes, EBITDA, márgenes y resultado neto en una vista ejecutiva.</p></div><div><b>Cuenta de resultados editable</b><p>Introduce ventas, costes directos, gastos, amortización, intereses e impuestos; los resultados se recalculan al instante.</p></div><div><b>Indicadores de rentabilidad</b><p>Consulta margen bruto, margen EBITDA y margen neto calculados a partir de tus datos.</p></div><div><b>Modelo de gestión</b><p>Trabaja con una vista anual en euros y supuestos modificables, sin contabilidad conectada.</p></div></div>
           <a className="eos-home-tier-link" href="/EnterpriseOS/" onClick={openDemoAccess}>Ver funciones en la demo <Arrow /></a>
         </article>
-        <article id="plan-professional" className={"eos-home-tier-card is-recommended " + (highlightedPlan === "professional" ? "is-selected" : "")}>
+        <article id="plan-professional" className={"eos-home-tier-card is-recommended " + (highlightedPlan === "professional" ? "is-selected" : "")} onPointerMove={trackSurfacePointer}>
           <div className="eos-home-tier-top"><span>02 / PROFESSIONAL</span><span className="eos-home-recommended">RECOMENDADO</span></div>
           <h3>Professional</h3><p>Planificación y modelización para anticipar decisiones.</p>
           <div className="eos-home-tier-price"><strong>79 €</strong><span>/ mes</span></div>
           <div className="eos-home-feature-list"><div><b>Todo Essential</b><p>Dashboard, cuenta de resultados editable e indicadores de rentabilidad.</p></div><div><b>Presupuestos y escenarios</b><p>Define objetivos e hipótesis de ingresos y costes; compara escenarios y evolución mensual.</p></div><div><b>Modelo de tres estados</b><p>Relaciona cuenta de resultados, balance y flujo de caja con supuestos financieros editables.</p></div><div><b>Previsión de tesorería a 13 semanas</b><p>Proyecta manualmente entradas y salidas para anticipar tensiones de liquidez.</p></div><div><b>Capital circulante</b><p>Analiza plazos de cobro, inventario y pago a proveedores para entender el ciclo de caja.</p></div><div><b>Informes y Excel</b><p>Consulta el informe de gestión y exporta la cuenta de resultados para seguir trabajando.</p></div></div>
           <a className="eos-home-button eos-home-tier-cta" href="/EnterpriseOS/" onClick={openDemoAccess}>Probar Professional en la demo <Arrow /></a>
         </article>
-        <article id="plan-business" className={"eos-home-tier-card " + (highlightedPlan === "business" ? "is-selected" : "")}>
+        <article id="plan-business" className={"eos-home-tier-card " + (highlightedPlan === "business" ? "is-selected" : "")} onPointerMove={trackSurfacePointer}>
           <div className="eos-home-tier-top"><span>03 / BUSINESS</span><span>ADVANCED</span></div>
           <h3>Business</h3><p>Visión financiera y operativa ampliada.</p>
           <div className="eos-home-tier-price"><strong>149 €</strong><span>/ mes</span></div>
