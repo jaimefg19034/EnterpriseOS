@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./platform.css";
-import "./platform/platform/design-system.css";
-import "./platform/platform/hero.css";
-import "./platform/platform/capabilities.css";
-import "./platform/platform/product.css";
-import "./platform/platform/interactions.css";
+import "./platform/design-system.css";
+import "./platform/hero.css";
+import "./platform/capabilities.css";
+import "./platform/product.css";
+import "./platform/interactions.css";
 
 export const metadata: Metadata = {
   title: "EnterpriseOS — The Financial Atlas",
