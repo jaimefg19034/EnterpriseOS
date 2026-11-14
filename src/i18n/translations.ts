@@ -1,6 +1,12 @@
 export type Language = "en" | "es";
 
 const spanish: Record<string, string> = {
+  "EXECUTIVE VIEW": "DIRECCIÓN EJECUTIVA",
+  "FINANCE WORKBENCH": "CENTRO FINANCIERO",
+  "OPERATIONS & INSIGHT": "OPERACIONES E INTELIGENCIA",
+  "Executive navigation": "Navegación ejecutiva",
+  "Finance navigation": "Navegación financiera",
+  "Operations navigation": "Navegación de operaciones",
   "Local demo environment": "Entorno de demostración local",
   "FINANCE OPERATING SYSTEM": "SISTEMA OPERATIVO FINANCIERO",
   "Scenario Comparison": "Comparación de escenarios",
