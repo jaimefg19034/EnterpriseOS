@@ -522,3 +522,156 @@
 @media (prefers-reduced-motion: reduce) {
   .app-shell *, .app-shell *::before, .app-shell *::after { transition-duration: .01ms !important; }
 }
+
+
+/* Planning, operations and liquidity modules share the same working surface. */
+.app-shell .planning-section-nav, .app-shell .operations-tabs, .app-shell .working-capital-tabs {
+  border-color: var(--ws-line);
+  background: rgba(9,18,31,.34);
+}
+.app-shell .planning-section-nav a, .app-shell .operations-tabs button, .app-shell .working-capital-tabs button {
+  color: #a9b6c7;
+  border-color: transparent;
+  border-radius: 2px;
+  background: transparent;
+  font: 500 9px var(--ws-mono);
+}
+.app-shell .planning-section-nav a:hover, .app-shell .operations-tabs button:hover, .app-shell .working-capital-tabs button:hover {
+  color: #f3f5f9;
+  background: rgba(255,255,255,.045);
+}
+.app-shell .operations-tabs button.active, .app-shell .working-capital-tabs button.active,
+.app-shell .planning-section-nav a[aria-current="location"] {
+  color: #111d30;
+  border-color: var(--ws-accent);
+  background: var(--ws-accent);
+}
+.app-shell .planning-scenario-panel, .app-shell .scenario-comparison-panel,
+.app-shell .planning-assumptions-panel, .app-shell .planning-performance-panel,
+.app-shell .monthly-plan-panel, .app-shell .planning-profit-panel,
+.app-shell .cash-forecast-chart-card, .app-shell .cash-forecast-invoice-panel,
+.app-shell .cash-forecast-table-card, .app-shell .working-capital-ageing,
+.app-shell .working-capital-form, .app-shell .working-capital-register,
+.app-shell .working-capital-import-preview, .app-shell .operations-risk-card,
+.app-shell .operations-kpi-card {
+  color: var(--ws-text);
+  border: 1px solid var(--ws-line);
+  border-radius: 3px;
+  background: linear-gradient(145deg, #1b2e47, #15263d);
+  box-shadow: 0 8px 24px rgba(3,10,20,.14), inset 0 1px 0 rgba(255,255,255,.025);
+}
+.app-shell .planning-scenario-intro h2, .app-shell .operations-section-heading h2,
+.app-shell .cash-forecast-heading h2, .app-shell .working-capital-heading h2,
+.app-shell .planning-profit-heading h3, .app-shell .cash-forecast-table-heading h3,
+.app-shell .working-capital-subhead h3 {
+  color: #f0f3f8;
+  font-family: var(--ws-display);
+}
+.app-shell .planning-scenario-intro p, .app-shell .operations-section-heading p,
+.app-shell .scenario-description, .app-shell .custom-scenario-copy span,
+.app-shell .planning-assumption-note, .app-shell .planning-disclaimer,
+.app-shell .operations-note, .app-shell .operations-storage-note,
+.app-shell .cash-forecast-footnote, .app-shell .cash-forecast-invoice-note,
+.app-shell .working-capital-disclaimer, .app-shell .working-capital-empty {
+  color: #9aa9bc;
+}
+.app-shell .scenario-option {
+  color: #d8e0eb;
+  border: 1px solid var(--ws-line);
+  border-radius: 3px;
+  background: #14243a;
+}
+.app-shell .scenario-option:hover, .app-shell .scenario-option.selected {
+  color: #f4f6fa;
+  border-color: rgba(166,182,255,.55);
+  background: rgba(166,182,255,.09);
+}
+.app-shell .scenario-option small, .app-shell .scenario-option-top strong { color: inherit; }
+.app-shell .scenario-selected-dot { background: var(--ws-accent); box-shadow: 0 0 0 3px rgba(166,182,255,.13); }
+.app-shell .custom-scenario-controls, .app-shell .scenario-description,
+.app-shell .planning-model-logic, .app-shell .planning-assumption-note,
+.app-shell .planning-disclaimer, .app-shell .scenario-comparison-note,
+.app-shell .cash-forecast-warning, .app-shell .cash-forecast-invoice-note,
+.app-shell .working-capital-disclaimer, .app-shell .operations-note,
+.app-shell .operations-storage-note {
+  border-color: var(--ws-line);
+  border-radius: 2px;
+  background: rgba(8,17,29,.3);
+}
+.app-shell .planning-assumption-field { border-color: var(--ws-line); }
+.app-shell .planning-field-number { color: #8192a9; font-family: var(--ws-mono); }
+.app-shell .planning-field-label strong { color: #e3e9f1; }
+.app-shell .planning-field-label small { color: #91a0b4; }
+.app-shell .planning-input-wrap, .app-shell .custom-scenario-number-input,
+.app-shell .operations-form input, .app-shell .operations-form select,
+.app-shell .working-capital-form input, .app-shell .working-capital-form select,
+.app-shell .cash-forecast-input-wrap, .app-shell .operations-table input,
+.app-shell .operations-table select {
+  color: #f1f4f8;
+  border-color: var(--ws-line-strong);
+  border-radius: 2px;
+  background: #0f1c2e;
+}
+.app-shell :where(.planning-input-wrap input, .custom-scenario-number-input, .operations-form input, .operations-form select,
+.working-capital-form input, .working-capital-form select, .cash-forecast-input-wrap input,
+.operations-table input, .operations-table select) { color: #f1f4f8; }
+.app-shell :where(.planning-input-wrap input, .custom-scenario-number-input, .operations-form input,
+.working-capital-form input, .cash-forecast-input-wrap input, .operations-table input) {
+  accent-color: var(--ws-accent);
+}
+.app-shell .planning-chart-legend, .app-shell .planning-chart-unit,
+.app-shell .planning-chart-summary, .app-shell .forecast-label,
+.app-shell .forecast-divider, .app-shell .cash-forecast-table-heading p,
+.app-shell .cash-forecast-invoice-summary, .app-shell .working-capital-subhead span {
+  color: #9aa9bc;
+}
+.app-shell .planning-chart .chart-gridline { stroke: rgba(221,232,247,.13); }
+.app-shell .planning-chart .chart-month { fill: #9aa9bc; }
+.app-shell .planning-chart-summary, .app-shell .planning-chart-summary strong,
+.app-shell .planning-metric, .app-shell .planning-metric strong { color: #edf1f7; }
+.app-shell .planning-chart-summary { border-color: var(--ws-line); }
+.app-shell .scenario-comparison-table, .app-shell .monthly-plan-table,
+.app-shell .operations-table, .app-shell .cash-forecast-table {
+  color: #c6d0de;
+  border-color: var(--ws-line);
+  background: transparent;
+}
+.app-shell :where(.scenario-comparison-table th, .monthly-plan-table th, .operations-table th, .cash-forecast-table th) {
+  color: #9cacc0;
+  border-color: var(--ws-line);
+  background: rgba(9,18,31,.42);
+  font: 500 8px var(--ws-mono);
+  letter-spacing: .045em;
+}
+.app-shell :where(.scenario-comparison-table td, .monthly-plan-table td, .operations-table td, .cash-forecast-table td) {
+  color: #c5cfdd;
+  border-color: var(--ws-line);
+}
+.app-shell :where(.scenario-comparison-table td strong, .monthly-plan-table td strong, .operations-table td strong, .cash-forecast-table td strong) { color: #f0f3f8; }
+.app-shell :where(.scenario-comparison-table tbody tr:hover, .monthly-plan-table tbody tr:hover, .operations-table tbody tr:hover, .cash-forecast-table tbody tr:hover) { background: rgba(166,182,255,.045); }
+.app-shell .scenario-comparison-table .active-scenario-column { background: rgba(166,182,255,.075); }
+.app-shell .operations-form, .app-shell .working-capital-form-grid { border-color: var(--ws-line); }
+.app-shell .operations-form label, .app-shell .working-capital-form-grid label { color: #d3dce8; }
+.app-shell .operations-form input::placeholder, .app-shell .working-capital-form input::placeholder { color: #75869d; }
+.app-shell .operations-delete, .app-shell .working-capital-delete { color: #d9a1a1; border-color: var(--ws-line); background: rgba(239,142,142,.06); }
+.app-shell .operations-empty, .app-shell .cash-forecast-invoice-empty { color: #9aa9bc; border-color: var(--ws-line); }
+.app-shell .operations-risk-top, .app-shell .operations-kpi-heading { color: #e3e9f1; }
+.app-shell .operations-risk-card p, .app-shell .operations-kpi-foot { color: #9aa9bc; }
+.app-shell .operations-kpi-track, .app-shell .cash-forecast-track { background: #0e1b2c; }
+.app-shell .operations-kpi-track i { background: linear-gradient(90deg, #7187d5, #a6b6ff); }
+.app-shell .working-capital-kpis .panel { border-color: var(--ws-line); }
+.app-shell .working-capital-kpis .panel > span, .app-shell .working-capital-kpis .panel > small { color: #9aa9bc; }
+.app-shell .working-capital-kpis .panel > strong { color: #f2f5fa; font-family: var(--ws-display); }
+.app-shell .working-capital-tabs { border-radius: 3px; }
+.app-shell .cash-forecast-invoice-toggle { color: #c0cbda; border-color: var(--ws-line); background: rgba(255,255,255,.025); }
+.app-shell .cash-forecast-invoice-row, .app-shell .cash-forecast-invoice-schedule-title { border-color: var(--ws-line); color: #d0d9e5; }
+.app-shell .cash-forecast-chart-head, .app-shell .cash-forecast-table-heading { color: #e5ebf3; }
+.app-shell .cash-forecast-chart-card svg text { fill: #94a4b9; }
+.app-shell .cash-forecast-chart-card svg line { stroke: rgba(221,232,247,.14); }
+.app-shell .three-statements-workspace :where(.panel, .three-statement-stat) { border-radius: 3px; }
+.app-shell .three-statement-row { color: #c4cfdd; border-color: var(--ws-line); }
+.app-shell .three-statement-row strong { color: #f1f4f8; }
+.app-shell .three-statement-row.emphasis { color: #f5f6fa; }
+.app-shell .three-statements-intro-copy p { color: #9aa9bc; }
+.app-shell .operations-negative, .app-shell .negative-value { color: #ef9b9b !important; }
+.app-shell .operations-subline { color: #8f9fb3; }
