@@ -1,0 +1,78 @@
+/* Financial Atlas — editorial capability system */
+.p-site .p-capabilities-editorial{padding:clamp(88px,10vw,156px) clamp(24px,7vw,112px) clamp(72px,8vw,120px);background:var(--surface);color:var(--ink)}
+.p-site .p-capabilities-editorial .p-cap-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:18px;border-bottom:1px solid var(--line);font:500 9px/1.4 var(--mono);letter-spacing:1.1px}
+.p-site .p-cap-intro-editorial{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(260px,.65fr);align-items:end;gap:8vw;margin:clamp(55px,8vw,112px) 0 clamp(42px,6vw,76px)}
+.p-site .p-cap-intro-editorial h2{margin:0;font-size:clamp(3.8rem,8.2vw,8.5rem);line-height:.88;letter-spacing:-.085em;font-weight:500}
+.p-site .p-cap-intro-editorial h2 em{font-family:var(--editorial);font-weight:400;letter-spacing:-.055em}
+.p-site .p-cap-intro-editorial>div{max-width:390px;padding-bottom:8px}
+.p-site .p-cap-intro-editorial p{margin:0 0 24px;font-size:clamp(13px,1.1vw,16px);line-height:1.65;color:#566171}
+.p-site .p-cap-intro-index{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid var(--line);font:500 8px/1.4 var(--mono);letter-spacing:.8px}
+.p-site .p-cap-intro-index b{font-size:15px;color:#596bd1}
+.p-site .p-disciplines{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}
+.p-site .p-discipline{position:relative;display:flex;flex-direction:column;min-height:440px;padding:clamp(20px,2.5vw,34px);overflow:hidden;background:#e9e8e1}
+.p-site .p-discipline-performance{grid-column:span 7;background:#e7e8e3}
+.p-site .p-discipline-planning{grid-column:span 5;background:#dfe3ed}
+.p-site .p-discipline-liquidity{grid-column:span 5;background:#e5e9e3}
+.p-site .p-discipline-reporting{grid-column:span 7;background:#e9e5df}
+.p-site .p-discipline-meta{display:flex;justify-content:space-between;gap:12px;color:#68717c;font:500 8px/1.4 var(--mono);letter-spacing:.9px}
+.p-site .p-discipline-visual{position:relative;display:flex;flex:1;flex-direction:column;justify-content:center;min-height:205px;margin:25px 0 28px}
+.p-site .p-model-equation{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:19px 0;border-top:1px solid #121b2a35;border-bottom:1px solid #121b2a35;font:500 clamp(9px,1vw,13px)/1 var(--mono);letter-spacing:.3px}
+.p-site .p-model-equation i{font-style:normal;color:#727b87;font-size:17px}
+.p-site .p-model-equation b{color:#5264c9;font-weight:600}
+.p-site .p-model-flow{display:grid;grid-template-columns:repeat(12,1fr);align-items:end;gap:7px;height:88px;padding:0 2px}
+.p-site .p-model-flow i{display:block;height:var(--h,50%);background:#9ba6bd}
+.p-site .p-model-flow i:nth-child(3n){height:72%;background:#6678cf}
+.p-site .p-model-flow i:nth-child(4n){height:42%}
+.p-site .p-model-flow i:nth-child(5n){height:88%;background:#5cba99}
+.p-site .p-model-axis,.p-site .p-scenario-axis{display:flex;justify-content:space-between;color:#737d88;font:500 7px/1.4 var(--mono);letter-spacing:.7px}
+.p-site .p-scenario-legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:15px;color:#606b7b;font:500 7px/1.4 var(--mono);letter-spacing:.7px}
+.p-site .p-scenario-legend span{display:flex;align-items:center;gap:6px}
+.p-site .p-scenario-legend i{display:block;width:16px;height:2px;background:#6979d1}
+.p-site .p-scenario-legend span:nth-child(2) i{background:#4b947b}
+.p-site .p-scenario-legend span:nth-child(3) i{background:#b47d66}
+.p-site .p-discipline-scenarios svg{width:100%;overflow:visible}
+.p-site .p-discipline-scenarios svg path{fill:none;stroke:#6979d1;stroke-width:2.5;vector-effect:non-scaling-stroke}
+.p-site .p-discipline-scenarios svg path:nth-child(2){stroke:#4b947b;stroke-width:2}
+.p-site .p-discipline-scenarios svg path:nth-child(3){stroke:#b47d66;stroke-width:2}
+.p-site .p-discipline-scenarios svg .p-scenario-origin{stroke:#121b2a30;stroke-width:1;stroke-dasharray:3 5}
+.p-site .p-scenario-axis{margin-top:7px}
+.p-site .p-liquidity-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;color:#67717c;font:500 8px/1.4 var(--mono);letter-spacing:.8px}
+.p-site .p-liquidity-label b{color:#121b2a;font:500 27px/1 var(--display);letter-spacing:-1px}
+.p-site .p-liquidity-label small{font:500 8px/1 var(--mono);letter-spacing:.5px}
+.p-site .p-liquidity-bars{display:grid;grid-template-columns:repeat(13,1fr);align-items:end;gap:6px;height:110px;border-bottom:1px solid #121b2a35}
+.p-site .p-liquidity-bars i{display:block;min-height:12px;background:#9ab4a6}
+.p-site .p-liquidity-bars i:nth-child(3n){background:#5cba99}
+.p-site .p-discipline-report{justify-content:center}
+.p-site .p-report-row{display:grid;grid-template-columns:minmax(100px,1fr) minmax(45px,1.2fr) 26px;align-items:center;gap:15px;padding:12px 0;border-bottom:1px solid #121b2a24;color:#45515f;font-size:12px}
+.p-site .p-report-row i{height:1px;background:#121b2a20}
+.p-site .p-report-row b{color:#6978c9;text-align:right;font:500 9px/1 var(--mono)}
+.p-site .p-report-head{padding:0 0 12px;color:#727b87;font:500 7px/1.4 var(--mono);letter-spacing:.8px}
+.p-site .p-report-emphasis{color:#121b2a;font-weight:600}
+.p-site .p-discipline-copy{display:grid;grid-template-columns:32px 1fr;gap:15px;align-items:start}
+.p-site .p-discipline-index{padding-top:5px;color:#7b8590;font:500 9px/1 var(--mono)}
+.p-site .p-discipline-copy h3{margin:0 0 9px;font-size:clamp(22px,2.2vw,31px);line-height:1.05;letter-spacing:-1.1px;font-weight:500}
+.p-site .p-discipline-copy p{max-width:440px;margin:0;color:#606b78;font-size:12px;line-height:1.6}
+.p-site .p-discipline-copy a{display:inline-flex;align-items:center;gap:10px;margin-top:18px;color:#3549a9;text-decoration:none;font:600 9px/1.4 var(--mono);letter-spacing:.3px}
+.p-site .p-disclaimer{margin:22px 0 0;color:#7a838c;font:500 8px/1.6 var(--mono);letter-spacing:.25px}
+.p-site .p-disclaimer b{margin-right:10px;color:#4d5968}
+@media(max-width:900px){
+ .p-site .p-capabilities-editorial{padding:86px 28px 76px}
+ .p-site .p-discipline{min-height:410px;padding:22px}
+ .p-site .p-cap-intro-editorial{gap:5vw}
+}
+@media(max-width:640px){
+ .p-site .p-capabilities-editorial{padding:72px 18px 58px}
+ .p-site .p-capabilities-editorial .p-cap-heading{font-size:7px}
+ .p-site .p-cap-intro-editorial{grid-template-columns:1fr;gap:24px;margin:52px 0 34px}
+ .p-site .p-cap-intro-editorial h2{font-size:clamp(3.7rem,15vw,5.7rem)}
+ .p-site .p-cap-intro-editorial>div{max-width:100%}
+ .p-site .p-cap-intro-editorial p{font-size:13px}
+ .p-site .p-disciplines{grid-template-columns:1fr;gap:10px}
+ .p-site .p-discipline-performance,.p-site .p-discipline-planning,.p-site .p-discipline-liquidity,.p-site .p-discipline-reporting{grid-column:1}
+ .p-site .p-discipline{min-height:390px;padding:20px}
+ .p-site .p-discipline-visual{min-height:170px;margin:20px 0 23px}
+ .p-site .p-discipline-copy h3{font-size:25px}
+ .p-site .p-discipline-copy p{font-size:12px}
+}
+
+
