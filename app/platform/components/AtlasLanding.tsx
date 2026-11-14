@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 const benefits = [
   { number: "01", title: "Entiende el rendimiento", copy: "Lee ingresos, costes y márgenes desde una única perspectiva.", icon: "performance" },
@@ -18,6 +18,21 @@ function Brand() {
 
 function Arrow() {
   return <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13M10 4l6 6-6 6" /></svg>;
+}
+
+function subscribeToPlanHash(onChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("hashchange", onChange);
+  return () => window.removeEventListener("hashchange", onChange);
+}
+
+function getPlanHashSnapshot() {
+  const match = window.location.hash.match(/^#plan-(essential|professional|business)$/);
+  return match?.[1] ?? "";
+}
+
+function getServerPlanHashSnapshot() {
+  return "";
 }
 
 function HeroVisual() {
@@ -56,17 +71,7 @@ export default function AtlasLanding() {
   const [demoAccessOpen, setDemoAccessOpen] = useState(false);
   const [demoCode, setDemoCode] = useState("");
   const [demoError, setDemoError] = useState("");
-  const [highlightedPlan, setHighlightedPlan] = useState("");
-
-  useEffect(() => {
-    const syncPlanFromHash = () => {
-      const match = window.location.hash.match(/^#plan-(essential|professional|business)$/);
-      setHighlightedPlan(match?.[1] ?? "");
-    };
-    syncPlanFromHash();
-    window.addEventListener("hashchange", syncPlanFromHash);
-    return () => window.removeEventListener("hashchange", syncPlanFromHash);
-  }, []);
+  const highlightedPlan = useSyncExternalStore(subscribeToPlanHash, getPlanHashSnapshot, getServerPlanHashSnapshot);
 
   function openDemoAccess(event: React.MouseEvent<HTMLAnchorElement>) {
     event.preventDefault();
@@ -88,7 +93,7 @@ export default function AtlasLanding() {
   return <main className="eos-home" id="top">
     <header className="eos-home-nav">
       <Brand />
-      <nav aria-label="Navegación principal"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a><details className="eos-home-plan-menu"><summary>Ver paquetes <span aria-hidden="true">⌄</span></summary><div><a href="#plan-essential" onClick={(event) => { setHighlightedPlan("essential"); event.currentTarget.closest("details")?.removeAttribute("open"); }}>Essential <small>29 €/mes</small></a><a href="#plan-professional" onClick={(event) => { setHighlightedPlan("professional"); event.currentTarget.closest("details")?.removeAttribute("open"); }}>Professional <small>79 €/mes</small></a><a href="#plan-business" onClick={(event) => { setHighlightedPlan("business"); event.currentTarget.closest("details")?.removeAttribute("open"); }}>Business <small>149 €/mes</small></a></div></details></nav>
+      <nav aria-label="Navegación principal"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a><details className="eos-home-plan-menu"><summary>Ver paquetes <span aria-hidden="true">⌄</span></summary><div><a href="#plan-essential" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); }}>Essential <small>29 €/mes</small></a><a href="#plan-professional" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); }}>Professional <small>79 €/mes</small></a><a href="#plan-business" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); }}>Business <small>149 €/mes</small></a></div></details></nav>
       <div className="eos-home-nav-actions">
         <a className="eos-home-login" href="/EnterpriseOS/account/">Iniciar sesión</a>
         <a className="eos-home-workspace-link" href="/EnterpriseOS/" onClick={openDemoAccess}>Entrar al workspace <Arrow /></a>
