@@ -201,7 +201,7 @@ function navigateToPlanningSection(event: MouseEvent<HTMLAnchorElement>) {
   window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
 }
 
-export function PlanningWorkspace({ language }: { language: Language }) {
+export function PlanningWorkspace({ language, previewMode = false }: { language: Language; previewMode?: boolean }) {
   const t = (value: string) => translate(value, language);
   const [savedState, setSavedState] = useState<SavedPlanningState>(INITIAL_PLANNING_STATE);
   const [storageReady, setStorageReady] = useState(false);
@@ -220,6 +220,11 @@ export function PlanningWorkspace({ language }: { language: Language }) {
   const canAddYear = isValidPlanningYear(Number(newYear)) && !savedState.years[String(Number(newYear))];
 
   useEffect(() => {
+    if (previewMode) {
+      setStorageMessage("PREVIEW MODE · Changes are temporary and are not saved.");
+      setStorageReady(true);
+      return;
+    }
     let restored: ReturnType<typeof parseSavedPlanningState> = null;
     let message = "";
     try {
@@ -250,9 +255,10 @@ export function PlanningWorkspace({ language }: { language: Language }) {
       if (message) setStorageMessage(message);
       setStorageReady(true);
     }, 0);
-  }, []);
+  }, [previewMode]);
 
   useEffect(() => {
+    if (previewMode) return;
     const restoreAfterBackup = () => {
       try {
         const raw = window.localStorage.getItem(PLANNING_STORAGE_KEY) ??
@@ -269,10 +275,10 @@ export function PlanningWorkspace({ language }: { language: Language }) {
     };
     window.addEventListener("enterpriseos:planning-updated", restoreAfterBackup);
     return () => window.removeEventListener("enterpriseos:planning-updated", restoreAfterBackup);
-  }, []);
+  }, [previewMode]);
 
   useEffect(() => {
-    if (!storageReady) return;
+    if (!storageReady || previewMode) return;
     let message = "Plan saved automatically in this browser.";
     try {
       window.localStorage.setItem(PLANNING_STORAGE_KEY, serialisePlanningState(savedState));
@@ -280,7 +286,7 @@ export function PlanningWorkspace({ language }: { language: Language }) {
       message = "Browser storage is unavailable. Changes will remain in this session only.";
     }
     window.setTimeout(() => setStorageMessage(message), 0);
-  }, [savedState, storageReady]);
+  }, [savedState, storageReady, previewMode]);
 
   const result = useMemo(
     () => buildPlanningResult(assumptions, actualRevenue, scenario, customRevenueGrowthPercent),
