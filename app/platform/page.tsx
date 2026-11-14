@@ -31,7 +31,13 @@ export default function PlatformPage() {
 
       <div className="p-ticker" aria-hidden="true"><div className="p-ticker-track" aria-hidden="true">{["MODEL / DECIDE","SCENARIOS / OUTLOOK","LIQUIDITY / 13 WEEKS","MANAGEMENT P&L","PLAN / ACTUAL / VARIANCE","MODEL / DECIDE","SCENARIOS / OUTLOOK","LIQUIDITY / 13 WEEKS","MANAGEMENT P&L","PLAN / ACTUAL / VARIANCE"].map((item, index) => <span key={index}>{item}<i>✳</i></span>)}</div></div>
 
-      <ManifestoSection />
+
+      <div className="p-ticker p-ticker-secondary" aria-label="Principios del producto">
+        <div className="p-ticker-track" aria-hidden="true">
+          {["MANUAL INPUTS · CLEARLY MARKED","ILLUSTRATIVE DATA · NOT LIVE","LOCAL PERSISTENCE · MVP","NO BANK FEED · NO FALSE PROMISES","MODEL / EXPLAIN / DECIDE","MANUAL INPUTS · CLEARLY MARKED","ILLUSTRATIVE DATA · NOT LIVE","LOCAL PERSISTENCE · MVP","NO BANK FEED · NO FALSE PROMISES","MODEL / EXPLAIN / DECIDE"].map((item, index) => <span key={index}>{item}<i>✳</i></span>)}
+        </div>
+      </div>
+\n      <ManifestoSection />
 
       <TrustSection />
 
