@@ -1,6 +1,6 @@
 # EnterpriseOS — Financial Atlas Visual System
 
-**Version:** Omega / visual system increment  
+**Version:** Spatial field increment  
 **Scope:** Public-facing Financial Atlas landing page  
 **Status:** Design specification aligned with the implemented CSS and React components. Values marked as aspirational are not presented as shipped behavior.
 
@@ -66,6 +66,16 @@ Do not apply expanded tracking to every label indiscriminately. Use uppercase tr
 - Hairlines use 1px CSS borders with low-opacity ink. Crosshair intersections are decorative only; they must not resemble controls.
 - Dense composition means purposeful relationships between modules, not filling every pixel. Preserve breathing room around headlines, live product controls and financial figures.
 
+### Spatial field interaction (implemented)
+
+The hero's topographic field now responds to mouse and pen input:
+- Pointer coordinates map to a restrained X/Y rotation, capped at approximately 3.2° / 4.2°.
+- A localized radial specular highlight follows the pointer; the contour layer shifts independently to create differential parallax.
+- Coordinate readouts and telemetry labels occupy a higher transform layer than the contour SVG.
+- The field uses CSS perspective and transforms. It is **not WebGL**, does not contain a physically simulated glass shader and does not claim 360° object manipulation.
+- Touch devices receive a static, readable composition rather than simulated pointer tracking.
+- Pointer state resets on exit. Reduced-motion preferences remove transforms and transitions.
+
 ## 5. Motion and interaction
 
 | Interaction | Treatment | Constraint |
@@ -74,7 +84,7 @@ Do not apply expanded tracking to every label indiscriminately. Use uppercase tr
 | Bento spotlight | Soft radial edge light on hover | Pointer-capable devices only |
 | Card lift | 2px elevation with long deceleration | No scaling or bouncing |
 | CTA response | Restrained highlight sweep and arrow translation | No cursor-following movement |
-| Hero field | Slow contour drift / scenario-linked visual shift | Never imply live market data |
+| Hero field | Pointer-driven perspective, localized light and contour parallax | CSS spatial effect, not WebGL; no live-data implication |
 | Mobile dock | Fixed instrument rail with translucent paper surface | Safe-area inset and keyboard focus preserved |
 
 The native pointer is intentionally retained. A custom cursor that replaces browser affordances, follows the pointer on touch devices or advertises nonexistent 360° interactions is not part of the current implementation. A true magnetic interaction should only be introduced with pointer-capability detection, reduced-motion handling and keyboard-equivalent behavior.
@@ -89,6 +99,7 @@ At widths up to 720px:
 - Scenario cards stack vertically to keep metrics readable; no essential figures are hidden in swipe-only carousels.
 - The footer receives extra bottom clearance so the dock does not cover the last line of content.
 - Reduced-motion preferences disable transitions and reveal animations.
+- The hero field does not tilt or track touch input.
 
 ## 7. Product truth and visual integrity
 
