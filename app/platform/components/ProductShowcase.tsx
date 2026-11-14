@@ -10,7 +10,7 @@ export default function ProductShowcase() {
           <div className="p-live-product-bar"><span>LIVE PRODUCT COMPONENT / PLANNING WORKSPACE</span><span>DEMO DATA · TEMPORARY SESSION</span></div>
           <PlanningWorkspace language="es" previewMode />
         </div>
-        <div className="p-product-caption"><span>FIG. 04 — MANAGEMENT WORKSPACE</span><span>VISUAL REPRESENTATION OF THE CURRENT MVP SCOPE</span></div>
+        <div className="p-product-caption"><span>FIG. 04 — MANAGEMENT WORKSPACE</span><span>REAL PRODUCT COMPONENT · TEMPORARY DEMO DATA</span></div>
       </section>
   );
 }
