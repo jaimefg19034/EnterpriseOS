@@ -130,3 +130,8 @@ The product showcase treats the actual planning workspace as an instrument mount
 ## Spatial conversion and footer
 
 The conversion surface uses a restrained radial key light, a layered dark chassis, and a raised glass-like brand seal. The footer receives a low-contrast architectural grid and recessed typographic treatment. The CTA remains readable and functional without requiring pointer interaction; mobile removes the spatial transforms and reduced-motion disables them. No fake live telemetry, awards, customer marks, or unsupported contact form has been introduced.
+
+
+## Scenario matrix — pointer materiality
+
+The three scenario selectors use pointer-local CSS variables for a restrained 3D tilt and radial key light on fine pointers. Coordinates are written directly to the selected button (no React state or rerender); touch input remains static. Pointer leave/cancel clears the transient variables. The selected state, scenario values, keyboard operation, and live-region feedback remain the source of truth. Reduced-motion disables the transform. This is CSS perspective/compositing, not WebGL or physically simulated material.
