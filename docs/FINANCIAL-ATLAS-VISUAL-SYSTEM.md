@@ -118,3 +118,10 @@ Before merge or publication:
 ## Spatial Field — pointer performance and accessibility
 
 The hero field updates its six spatial CSS custom properties directly on the pointer target. Pointer movement does not trigger React state updates or re-render the contour SVG and financial labels. Pointer leave and cancellation remove the active class and restore the CSS defaults. Touch input is intentionally ignored; the mobile composition remains static. The reduced-motion mode disables the moving spotlight and spatial transforms rather than merely shortening their duration. This is a CSS 3D interaction, not a WebGL scene or a physically based refraction simulation.
+
+
+## Spatial bento and product chassis
+
+Capability modules use a shared 3D perspective context with restrained elevation, a machined hairline rim, layered shadows, and distinct Z positions for metadata, visual instrument, and copy. Their miniature diagrams sit on inset translucent surfaces; module labels remain readable and disclose manual or MVP scope. Hover elevation is limited to fine pointers, while touch layouts remain static and reduced-motion removes transforms.
+
+The product showcase treats the actual planning workspace as an instrument mounted inside a layered chassis. The X-ray rail, workspace surface, and outer frame occupy separate visual planes. This is CSS perspective and layered compositing, not a WebGL model. The live workspace remains the real application component and keeps its existing temporary sample-data behavior.
