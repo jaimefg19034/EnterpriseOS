@@ -130,7 +130,7 @@ export default function LiquidAtlasScene() {
 
     const resize = () => {
       const rect = host.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 0.85 : 1.15);
       canvas.width = Math.max(1, Math.floor(rect.width * dpr));
       canvas.height = Math.max(1, Math.floor(rect.height * dpr));
       gl.viewport(0, 0, canvas.width, canvas.height);
@@ -144,7 +144,7 @@ export default function LiquidAtlasScene() {
       gl.uniform1f(time, reduced ? 0 : (performance.now() - start) / 1000);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     };
-    const animate = () => { draw(); frame = window.requestAnimationFrame(animate); };
+    let lastFrame = 0;\n    const animate = (now: number) => { if (now - lastFrame >= 33) { draw(); lastFrame = now; } frame = window.requestAnimationFrame(animate); };
     const observer = new ResizeObserver(resize);
     observer.observe(host);
     resize();
