@@ -30,7 +30,7 @@ Deno.serve(async (request) => {
       .maybeSingle();
     if (error || !row?.stripe_customer_id) return Response.json({ error: "No existe una suscripción gestionable." }, { status: 404, headers: cors });
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
+    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, { httpClient: Stripe.createFetchHttpClient() });
     const portal = await stripe.billingPortal.sessions.create({
       customer: row.stripe_customer_id,
       return_url: Deno.env.get("APP_URL") + "/EnterpriseOS/account/?mode=manage",
