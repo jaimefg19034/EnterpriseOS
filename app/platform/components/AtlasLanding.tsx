@@ -97,7 +97,7 @@ export default function AtlasLanding() {
       <div className="eos-home-nav-actions">
         <a className="eos-home-login" href="/EnterpriseOS/account/">Iniciar sesión</a>
         <a className="eos-home-workspace-link" href="/EnterpriseOS/" onClick={openDemoAccess}>Entrar al workspace <Arrow /></a>
-        <a className="eos-home-button eos-home-button-small" href="#pricing">Ver planes <Arrow /></a>
+        <a className="eos-home-button eos-home-button-small" href="/EnterpriseOS/" onClick={openDemoAccess}>Empezar ahora <Arrow /></a>
       </div>
     </header>
 
