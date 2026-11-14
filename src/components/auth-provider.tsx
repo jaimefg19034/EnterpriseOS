@@ -107,10 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!session) return;
-    void refreshPlan().catch(() => {
-      setPlan(null);
-      setSubscriptionStatus(null);
-    });
+    void refreshPlan().catch(() => undefined);
   }, [session, refreshPlan]);
 
   const signIn = useCallback(async (email: string, password: string) => {
