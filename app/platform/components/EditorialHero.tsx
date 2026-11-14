@@ -1,5 +1,5 @@
 import Arrow from "../../components/ui/Arrow";
-import DecisionField from "./DecisionField";
+import TopographicField from "./TopographicField";
 import type { Scenario } from "./scenarios";
 
 export default function EditorialHero({ scenario }: { scenario: Scenario }) {
@@ -13,7 +13,7 @@ export default function EditorialHero({ scenario }: { scenario: Scenario }) {
           <div className="p-actions"><a className="p-button" href="/EnterpriseOS/">Explorar EnterpriseOS <Arrow /></a><a className="p-link" href="#product">Ver el producto <span>↓</span></a></div>
           <div className="p-hero-foot"><b>01 / 07</b><span>UN ESPACIO PARA PENSAR LAS FINANZAS<br />ANTES DE QUE DECIDAN POR TI.</span></div>
         </div>
-        <DecisionField scenario={scenario} />
+        <TopographicField scenario={scenario} />
         <div className="p-hero-baseline"><span>MODEL / PLAN / ANTICIPATE / DECIDE</span><span>BUILT FOR CLEARER BUSINESS DECISIONS</span></div>
       </section>
   );
