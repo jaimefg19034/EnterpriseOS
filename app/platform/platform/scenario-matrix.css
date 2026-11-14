@@ -35,3 +35,6 @@
  .p-site .p-scenario-card-metrics strong{font-size:clamp(16px,5vw,21px)}
  .p-site .p-scenario-matrix-note{flex-direction:column;gap:5px}
 }
+
+/* Keep live scenario feedback available to screen readers without altering the editorial layout. */
+.p-scenario-sr-status{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
