@@ -3,7 +3,7 @@
 const benefits = [
   { number: "01", title: "Entiende el rendimiento", copy: "Lee ingresos, costes y márgenes desde una única perspectiva.", icon: "performance" },
   { number: "02", title: "Anticipa escenarios", copy: "Compara hipótesis y entiende cómo afectan al resultado.", icon: "scenarios" },
-  { number: "03", title: "Vigila la caja", copy: "Proyecta tesorería a 13 semanas con tus propios datos.", icon: "cash" },
+  { number: "03", title: "Conecta los estados financieros", copy: "Relaciona resultado, balance y flujo de caja con supuestos editables.", icon: "cash" },
   { number: "04", title: "Decide con contexto", copy: "Conecta planificación, operaciones y reporting de gestión.", icon: "decision" },
 ] as const;
 
