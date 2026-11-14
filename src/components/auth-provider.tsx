@@ -44,6 +44,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const saveSession = useCallback((next: StoredSession | null) => {
+    setPlan(null);
+    setSubscriptionStatus(null);
     setSession(next);
     if (next) window.localStorage.setItem(SESSION_KEY, JSON.stringify(next));
     else window.localStorage.removeItem(SESSION_KEY);
