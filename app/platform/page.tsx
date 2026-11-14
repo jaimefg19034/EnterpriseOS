@@ -13,6 +13,7 @@ import ScenarioMatrix from "./components/ScenarioMatrix";
 import ProductAnatomy from "./components/ProductAnatomy";
 import ConversionSection from "./components/ConversionSection";
 import { type Scenario } from "./components/scenarios";
+import MobileDock from "./components/MobileDock";
 
 export default function PlatformPage() {
   const [scenario, setScenario] = useState<Scenario>("base");
@@ -47,6 +48,7 @@ export default function PlatformPage() {
       <ConversionSection />
 
       <PlatformFooter />
+      <MobileDock />
     </main>
   );
 }
