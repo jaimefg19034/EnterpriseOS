@@ -514,3 +514,16 @@ html{scroll-behavior:smooth}
  .ax-hero:after,.ax-hero-sculpture,.ax-dossier-orbit,.ax-dossier-visual i,.ax-ribbon-track,.ax-final-orbit,.ax-contour,.ax-contour-b,.ax-contour-c{animation:none!important}
  .ax-module:before,.ax-dossier:after{display:none!important}
 }
+
+/* Re-enable only the crisp, compositor-friendly motion above legacy kill-switches. */
+.ax-site .ax-hero-sculpture{animation:ax-sculpture-drift 10s ease-in-out infinite alternate!important;filter:none!important;transform:translate3d(0,0,0)!important}
+.ax-site .ax-ribbon-track{animation:ax-ribbon-glide 42s linear infinite!important}
+.ax-site .ax-module:before,.ax-site .ax-dossier:after{display:block!important;filter:none!important}
+.ax-site .ax-module:hover:before,.ax-site .ax-dossier:hover:after{animation:ax-card-sheen .9s ease-out both!important}
+.ax-site .ax-dossier-orbit{animation:ax-orbit-turn 18s linear infinite!important}
+.ax-site .ax-dossier-visual i{animation:ax-node-pulse 2.8s ease-in-out infinite!important}
+.ax-site .ax-final-orbit{animation:ax-orbit-turn 28s linear infinite!important;filter:none!important}
+.ax-site .ax-contour,.ax-site .ax-contour-b,.ax-site .ax-contour-c{animation:ax-contour-flow 18s ease-in-out infinite alternate!important;filter:none!important}
+@media(prefers-reduced-motion:reduce){
+ .ax-site .ax-hero-sculpture,.ax-site .ax-ribbon-track,.ax-site .ax-module:before,.ax-site .ax-dossier:after,.ax-site .ax-dossier-orbit,.ax-site .ax-dossier-visual i,.ax-site .ax-final-orbit,.ax-site .ax-contour,.ax-site .ax-contour-b,.ax-site .ax-contour-c{animation:none!important}
+}
