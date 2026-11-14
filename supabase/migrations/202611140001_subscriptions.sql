@@ -27,3 +27,6 @@ create policy "Users can read their own subscription"
 
 -- All writes are performed by the Stripe webhook with the service-role key.
 -- No INSERT, UPDATE or DELETE policy is granted to browser clients.
+
+grant select on public.subscriptions to authenticated;
+revoke all on public.subscriptions from anon;
