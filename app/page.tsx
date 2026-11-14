@@ -501,9 +501,9 @@ export default function Home() {
             <button type="button" className="icon-button" aria-label={t("Workspace information")} title={t("Demo workspace")} onClick={() => setShowWorkspaceInfo(true)}>
               <Icon name="info" size={17} />
             </button>
-            <button className="export-button" onClick={exportExcel}>
+            {(!auth.configured || (auth.plan && auth.plan !== "essential")) && <button className="export-button" onClick={exportExcel}>
               <Icon name="download" size={16} /> <span>{t("Export Excel")}</span>
-            </button>
+            </button>}
             <div className="topbar-avatar">{t("FT")}</div>
           </div>
         </header>
