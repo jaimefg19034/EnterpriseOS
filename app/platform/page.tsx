@@ -7,7 +7,9 @@ import BrandMark from "../components/ui/BrandMark";
 import TechnicalLabel from "../components/ui/TechnicalLabel";
 import PlatformHeader from "./components/PlatformHeader";
 import PlatformFooter from "./components/PlatformFooter";
-import DecisionField from "./components/DecisionField";
+import EditorialHero from "./components/EditorialHero";
+import ManifestoSection from "./components/ManifestoSection";
+import TrustSection from "./components/TrustSection";
 import { scenarios, type Scenario } from "./components/scenarios";
 
 export default function PlatformPage() {
@@ -20,40 +22,16 @@ export default function PlatformPage() {
       <div className="p-preloader" aria-hidden={introReady}><BrandMark /><span>ENTERPRISEOS</span><i /></div>
       <PlatformHeader />
 
-      <section className="p-hero">
-        <div className="p-hero-index"><span>FINANCIAL DECISION INTELLIGENCE</span><span>EST. / 001</span></div>
-        <div className="p-hero-copy">
-          <div className="p-kicker"><i /> FINANZAS · PLANIFICACIÓN · DIRECCIÓN</div>
-          <h1>El futuro<br />no se <em>adivina.</em><br /><span>Se modela.</span></h1>
-          <p>Conecta planificación, resultados y tesorería para entender qué está ocurriendo y qué puede ocurrir después.</p>
-          <div className="p-actions"><a className="p-button" href="/EnterpriseOS/">Explorar EnterpriseOS <Arrow /></a><a className="p-link" href="#product">Ver el producto <span>↓</span></a></div>
-          <div className="p-hero-foot"><b>01 / 07</b><span>UN ESPACIO PARA PENSAR LAS FINANZAS<br />ANTES DE QUE DECIDAN POR TI.</span></div>
-        </div>
-        <DecisionField scenario={scenario} />
-        <div className="p-hero-baseline"><span>MODEL / PLAN / ANTICIPATE / DECIDE</span><span>BUILT FOR CLEARER BUSINESS DECISIONS</span></div>
-      </section>
+      <EditorialHero scenario={scenario} />
 
       <section className="p-principles" aria-label="Principios de EnterpriseOS">
         <div className="p-principle-lead">UNA MEJOR LECTURA<br /><b>CAMBIA LA DECISIÓN.</b></div>
         {[[ "01", "Modelar", "Entender los motores del negocio" ], [ "02", "Planificar", "Contrastar hipótesis y escenarios" ], [ "03", "Anticipar", "Leer el impacto en caja" ], [ "04", "Decidir", "Actuar con contexto" ]].map(item => <div className="p-principle" key={item[0]}><small>{item[0]}</small><b>{item[1]}</b><span>{item[2]}</span></div>)}
       </section>
 
-      <section className="p-manifesto" id="manifesto">
-        <div className="p-manifesto-meta"><TechnicalLabel number="01">THE POINT OF VIEW</SectionLabel><span>AN ENTERPRISEOS PRINCIPLE</span></div>
-        <h2>Una empresa genera<br />miles de cifras.<br /><em>Pero no todas</em><br /><span>cuentan la misma historia.</span></h2>
-        <div className="p-manifesto-bottom"><p>El valor está en entender cómo se conectan: sus supuestos, su evolución, sus consecuencias y el margen de decisión que todavía existe.</p><span>01 — 04<br />CONTEXT OVER NOISE</span></div>
-        <svg className="p-manifesto-lines" viewBox="0 0 520 520" aria-hidden="true"><g fill="none" stroke="currentColor"><path d="M260 5 C450 80 470 200 260 260 S70 440 260 515" /><path d="M260 30 C425 95 445 205 260 260 S95 425 260 490" /><path d="M260 55 C400 110 420 210 260 260 S120 410 260 465" /><path d="M260 80 C375 125 395 215 260 260 S145 395 260 440" /><path d="M260 105 C350 140 370 220 260 260 S170 380 260 415" /></g></svg>
-      </section>
+      <ManifestoSection />
 
-      <section className="p-proof">
-        <div className="p-proof-heading"><TechnicalLabel number="02">A CLEARER STANDARD</SectionLabel><span>NO FICTION. JUST THE PRODUCT.</span></div>
-        <div className="p-proof-grid">
-          <div className="p-proof-intro"><h2>La confianza<br />empieza por<br /><em>la transparencia.</em></h2><p>Una herramienta financiera debe dejar claro qué sabe, qué estima y qué necesita que introduzcas.</p></div>
-          <div className="p-proof-item"><span>01 / MODEL</span><b>Supuestos visibles</b><p>Las entradas del modelo y los resultados calculados se distinguen de forma explícita.</p><i>INPUTS → OUTPUTS</i></div>
-          <div className="p-proof-item"><span>02 / FORECAST</span><b>Previsiones identificadas</b><p>Los escenarios y la tesorería proyectada se presentan como estimaciones, no como movimientos bancarios reales.</p><i>PLAN → OUTLOOK</i></div>
-          <div className="p-proof-item"><span>03 / SCOPE</span><b>Alcance honesto</b><p>EnterpriseOS es actualmente un MVP de planificación y análisis, no un ERP ni una contabilidad conectada.</p><i>CLARITY → TRUST</i></div>
-        </div>
-      </section>
+      <TrustSection />
 
       <section className="p-capabilities" id="capabilities">
         <div className="p-cap-heading"><TechnicalLabel number="03">THE FINANCIAL SYSTEM</SectionLabel><span>FOUR CONNECTED DISCIPLINES</span></div>
