@@ -37,11 +37,11 @@ vec3 normalAt(vec3 p){vec2 e=vec2(.0015,0.);return normalize(vec3(mapScene(p+e.x
 void main(){
  vec2 uv=(v_uv-.5)*vec2(u_resolution.x/u_resolution.y,1.);
  vec3 ro=vec3(0.,0.,3.35),rd=normalize(vec3(uv,-1.72)),pos=ro;
- float travel=0.,hit=0.,glow=0.;
- for(int i=0;i<128;i++){pos=ro+rd*travel;float d=mapScene(pos);glow+=.0021/(.028+abs(d)*abs(d)*24.);if(d<.0015){hit=1.;break;}travel+=max(d*.72,.004);if(travel>7.5)break;}
+ float travel=0.,hit=0.;
+ for(int i=0;i<76;i++){pos=ro+rd*travel;float d=mapScene(pos);if(d<.0015){hit=1.;break;}travel+=max(d*.72,.004);if(travel>7.5)break;}
  vec3 deep=vec3(.018,.035,.047),haze=vec3(.11,.22,.23);
  float halo=exp(-length(uv-vec2(-.08,.04))*2.8);
- vec3 color=mix(deep,haze,halo*.45)+vec3(.18,.55,.48)*glow*.28;
+ vec3 color=mix(deep,haze,halo*.36);
  if(hit>.5){
   vec3 n=normalAt(pos),v=normalize(ro-pos),l1=normalize(vec3(-.62,.88,1.2)),l2=normalize(vec3(.9,-.4,.7));
   float diffuse=max(dot(n,l1),0.),rim=pow(1.-max(dot(n,v),0.),2.6);
@@ -57,13 +57,11 @@ void main(){
   float broadSpec=pow(max(dot(n,normalize(l1+v)),0.0),22.0);
   color=mix(material*(.12+diffuse*.3),environment,.32+fresnel*.62);
   color+=vec3(.86,.97,.83)*spec*1.85+vec3(.4,.85,.79)*spec2*.72+vec3(.25,.8,.68)*rim*.95;
-  color+=environment*fresnel*.72+thinFilm*fresnel*.16+vec3(.55,.82,.77)*broadSpec*.28;
-  color+=vec3(.1,.32,.28)*glow*.2;
+  color+=environment*fresnel*.48+thinFilm*fresnel*.10+vec3(.55,.82,.77)*broadSpec*.20;
+  
   float spectralFringe=fresnel*.16+u_scroll*.12;color.r+=spectralFringe;color.b-=spectralFringe*.7;
  }
- float beam=pow(max(0.0,sin(uv.x*4.7+uv.y*2.2+u_time*.11)),18.0)*exp(-abs(uv.y)*1.5);
- float dust=step(.9988,hash(vec3(floor(v_uv*vec2(260.0,160.0)),floor(u_time*.18))));
- color+=vec3(.19,.55,.5)*beam*.12+vec3(.7,.92,.78)*dust*.24;
+ 
  float vignette=1.-smoothstep(.45,1.05,length(uv));color*=.62+.38*vignette;
  gl_FragColor=vec4(color,hit>.5?1.0:.93);
 }`;
@@ -130,7 +128,7 @@ export default function LiquidAtlasScene() {
 
     const resize = () => {
       const rect = host.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 0.85 : 1.15);
+      const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 0.58 : 0.78);
       canvas.width = Math.max(1, Math.floor(rect.width * dpr));
       canvas.height = Math.max(1, Math.floor(rect.height * dpr));
       gl.viewport(0, 0, canvas.width, canvas.height);
@@ -146,7 +144,25 @@ export default function LiquidAtlasScene() {
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     };
     let lastFrame = 0;
-    const animate = (now: number) => { if (now - lastFrame >= 16) { draw(); lastFrame = now; } frame = window.requestAnimationFrame(animate); };
+    let inView = true;
+    let pageVisible = !document.hidden;
+    const animate = (now: number) => {
+      if (!reduced && inView && pageVisible && now - lastFrame >= 33) {
+        draw();
+        lastFrame = now;
+      }
+      frame = window.requestAnimationFrame(animate);
+    };
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      if (inView && !reduced && pageVisible) draw();
+    }, { rootMargin: "120px" });
+    const onVisibility = () => {
+      pageVisible = !document.hidden;
+      if (pageVisible && inView && !reduced) draw();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    visibilityObserver.observe(host);
     const observer = new ResizeObserver(resize);
     observer.observe(host);
     resize();
@@ -154,6 +170,8 @@ export default function LiquidAtlasScene() {
 
     return () => {
       window.cancelAnimationFrame(frame);
+      visibilityObserver.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
       observer.disconnect();
       (pointerHost ?? host).removeEventListener("pointermove", onPointer);
       (pointerHost ?? host).removeEventListener("pointerleave", onLeave);
