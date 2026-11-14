@@ -4,6 +4,7 @@ const isGitHubPages = process.env.GITHUB_PAGES === "true";
 
 const nextConfig: NextConfig = {
   output: "export",
+  trailingSlash: true,
   reactStrictMode: true,
   poweredByHeader: false,
   ...(isGitHubPages ? { basePath: "/EnterpriseOS" } : {}),
