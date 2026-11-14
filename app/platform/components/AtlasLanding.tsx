@@ -24,6 +24,20 @@ const modules = [
   { n: "08", code: "CONTROL", title: "Trazabilidad", desc: "Supuestos identificables y separación entre datos y estimaciones.", stat: "INPUT → OUTPUT", type: "control" },
 ];
 
+function PrecisionMark() {
+  return <svg className="ax-precision-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M12 2.5v19M2.5 12h19M5.3 5.3l13.4 13.4M18.7 5.3 5.3 18.7" />
+    <circle cx="12" cy="12" r="3.2" />
+  </svg>;
+}
+
+function trackSurfacePointer(event: ReactPointerEvent<HTMLElement>) {
+  if (event.pointerType === "touch") return;
+  const rect = event.currentTarget.getBoundingClientRect();
+  event.currentTarget.style.setProperty("--mx", ((event.clientX - rect.left) / rect.width * 100) + "%");
+  event.currentTarget.style.setProperty("--my", ((event.clientY - rect.top) / rect.height * 100) + "%");
+}
+
 function Eyebrow({ children }: { children: ReactNode }) {
   return <span className="ax-eyebrow"><i />{children}</span>;
 }
@@ -110,7 +124,7 @@ function Hero({ scenario }: { scenario: Scenario }) {
 
 function Ribbon() {
   const words = ["MODEL THE FUTURE", "READ THE SIGNAL", "UNDERSTAND CASH", "DECIDE WITH CONTEXT"];
-  return <section className="ax-ribbon" aria-label="Principios del producto"><div className="ax-ribbon-track">{[...words, ...words, ...words].map((word, i) => <span key={i}>{word}<b>✳</b></span>)}</div><div className="ax-ribbon-caption"><span>ENTERPRISEOS / OPERATING PRINCIPLES</span><span>NOT AN ERP. A FINANCIAL DECISION LAYER.</span></div></section>;
+  return <section className="ax-ribbon" aria-label="Principios del producto"><div className="ax-ribbon-track">{[...words, ...words, ...words].map((word, i) => <span key={i}>{word}<b><PrecisionMark /></b></span>)}</div><div className="ax-ribbon-caption"><span>ENTERPRISEOS / OPERATING PRINCIPLES</span><span>NOT AN ERP. A FINANCIAL DECISION LAYER.</span></div></section>;
 }
 
 function Manifesto() {
@@ -143,7 +157,7 @@ function SystemGrid() {
   return <section className="ax-system" id="system">
     <div className="ax-section-stamp"><Eyebrow>03 / THE FINANCIAL SYSTEM</Eyebrow><span>8 MODULES / 4 DISCIPLINES</span></div>
     <div className="ax-system-heading"><h2>ONE SYSTEM.<br /><em>MULTIPLE LENSES.</em></h2><p>Una capa de planificación y análisis para conectar las preguntas financieras que importan. Cada módulo muestra su alcance actual, sin promesas ficticias.</p></div>
-    <div className="ax-module-grid">{modules.map((m, i)=><article className={"ax-module ax-module-"+(i+1)} key={m.n}><div className="ax-module-top"><span>{m.n} / {m.code}</span><span>EOS FIELD</span></div><MiniVisual type={m.type}/><div className="ax-module-copy"><h3>{m.title}</h3><p>{m.desc}</p></div><div className="ax-module-bottom"><span>{m.stat}</span><b>↗</b></div></article>)}</div>
+    <div className="ax-module-grid">{modules.map((m, i)=><article className={"ax-module ax-module-"+(i+1)} key={m.n} onPointerMove={trackSurfacePointer} onPointerLeave={(event)=>{event.currentTarget.style.removeProperty("--mx");event.currentTarget.style.removeProperty("--my");}}><div className="ax-module-top"><span>{m.n} / {m.code}</span><span>EOS FIELD</span></div><MiniVisual type={m.type}/><div className="ax-module-copy"><h3>{m.title}</h3><p>{m.desc}</p></div><div className="ax-module-bottom"><span>{m.stat}</span><b>↗</b></div></article>)}</div>
     <div className="ax-system-note"><span>CAPABILITY NOTE / 003</span><p>Los centros de coste, cobros, pagos y la previsión de tesorería dependen de datos introducidos manualmente. No existe conexión bancaria activa.</p></div>
   </section>;
 }
@@ -186,7 +200,7 @@ function Dossiers() {
   return <section className="ax-dossiers" id="evidence">
     <div className="ax-section-stamp"><Eyebrow>06 / DECISION DOSSIERS</Eyebrow><span>ILLUSTRATIVE QUESTIONS / NOT CUSTOMER CASES</span></div>
     <div className="ax-dossiers-heading"><h2>BETTER QUESTIONS.<br /><em>BETTER DECISIONS.</em></h2><p>No publicamos logos, testimonios ni resultados de clientes que todavía no podemos demostrar. Empezamos por preguntas reales de dirección financiera.</p></div>
-    <div className="ax-dossier-stack">{items.map(item=><article className={"ax-dossier ax-dossier-"+item.color} key={item.n}><div className="ax-dossier-visual"><span>{item.n}</span><div className="ax-dossier-orbit" /><i /><small>SCENARIO STUDY / 0{item.n.charCodeAt(0)-64}</small></div><div className="ax-dossier-copy"><span>{item.tag}</span><h3>{item.title}</h3><p>{item.desc}</p><a href="#studio">EXPLORE THE MODEL ↗</a></div></article>)}</div>
+    <div className="ax-dossier-stack">{items.map(item=><article className={"ax-dossier ax-dossier-"+item.color} key={item.n} onPointerMove={trackSurfacePointer} onPointerLeave={(event)=>{event.currentTarget.style.removeProperty("--mx");event.currentTarget.style.removeProperty("--my");}}><div className="ax-dossier-visual"><span>{item.n}</span><div className="ax-dossier-orbit" /><i /><small>SCENARIO STUDY / 0{item.n.charCodeAt(0)-64}</small></div><div className="ax-dossier-copy"><span>{item.tag}</span><h3>{item.title}</h3><p>{item.desc}</p><a href="#studio">EXPLORE THE MODEL ↗</a></div></article>)}</div>
   </section>;
 }
 
@@ -226,7 +240,7 @@ function FinalPortal() {
 function Footer() {
   const [easter, setEaster] = useState(false);
   return <footer className="ax-footer">
-    <div className="ax-footer-top"><a className="ax-wordmark" href="#top"><span className="ax-mark">E<span>O</span></span><span>ENTERPRISE<span>OS</span><small>FINANCIAL DECISION INTELLIGENCE</small></span></a><p>A clearer view of business performance, planning and cash.</p><button onClick={()=>setEaster(!easter)} aria-label="Mostrar mensaje oculto" className="ax-easter">✳</button></div>
+    <div className="ax-footer-top"><a className="ax-wordmark" href="#top"><span className="ax-mark">E<span>O</span></span><span>ENTERPRISE<span>OS</span><small>FINANCIAL DECISION INTELLIGENCE</small></span></a><p>A clearer view of business performance, planning and cash.</p><button onClick={()=>setEaster(!easter)} aria-label="Mostrar mensaje oculto" className="ax-easter"><PrecisionMark /></button></div>
     {easter && <div className="ax-easter-message">THE BEST FORECAST IS THE ONE YOU QUESTION. / EOS-001</div>}
     <div className="ax-footer-links"><a href="#signal">THE SIGNAL</a><a href="#system">THE SYSTEM</a><a href="#studio">SCENARIO STUDIO</a><a href="/EnterpriseOS/">OPEN WORKSPACE ↗</a></div>
     <div className="ax-footer-word">FINANCIAL<br /><em>CLARITY.</em></div>
