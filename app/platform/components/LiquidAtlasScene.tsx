@@ -38,7 +38,7 @@ void main(){
  vec2 uv=(v_uv-.5)*vec2(u_resolution.x/u_resolution.y,1.);
  vec3 ro=vec3(0.,0.,3.35),rd=normalize(vec3(uv,-1.72)),pos=ro;
  float travel=0.,hit=0.;
- for(int i=0;i<28;i++){pos=ro+rd*travel;float d=mapScene(pos);if(d<.0015){hit=1.;break;}travel+=max(d*.72,.004);if(travel>7.5)break;}
+ for(int i=0;i<24;i++){pos=ro+rd*travel;float d=mapScene(pos);if(d<.0015){hit=1.;break;}travel+=max(d*.72,.004);if(travel>7.5)break;}
  vec3 deep=vec3(.018,.035,.047),haze=vec3(.11,.22,.23);
  float halo=exp(-length(uv-vec2(-.08,.04))*2.8);
  vec3 color=mix(deep,haze,halo*.36);
@@ -130,7 +130,7 @@ export default function LiquidAtlasScene() {
 
     const resize = () => {
       const rect = host.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 0.85 : 1);
+      const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 1.5 : 2);
       canvas.width = Math.max(1, Math.floor(rect.width * dpr));
       canvas.height = Math.max(1, Math.floor(rect.height * dpr));
       gl.viewport(0, 0, canvas.width, canvas.height);
