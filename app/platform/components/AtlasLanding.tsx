@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 const benefits = [
   { number: "01", title: "Entiende el rendimiento", copy: "Lee ingresos, costes y márgenes desde una única perspectiva.", icon: "performance" },
@@ -71,7 +71,42 @@ export default function AtlasLanding() {
   const [demoAccessOpen, setDemoAccessOpen] = useState(false);
   const [demoCode, setDemoCode] = useState("");
   const [demoError, setDemoError] = useState("");
+  const [activeNav, setActiveNav] = useState("what");
+  const [navIndicator, setNavIndicator] = useState({ left: 0, width: 0 });
+  const navRef = useRef<HTMLElement | null>(null);
   const highlightedPlan = useSyncExternalStore(subscribeToPlanHash, getPlanHashSnapshot, getServerPlanHashSnapshot);
+
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    let frame = 0;
+    const updateIndicator = (section?: string) => {
+      const target = section || activeNav;
+      const link = nav.querySelector<HTMLAnchorElement>(`a[href="#${target}"]`);
+      if (link) setNavIndicator((current) => current.left === link.offsetLeft && current.width === link.offsetWidth ? current : { left: link.offsetLeft, width: link.offsetWidth });
+    };
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (visible) setActiveNav(visible.target.id);
+    }, { rootMargin: "-24% 0px -58% 0px", threshold: [0, .15, .35, .6] });
+    ["what", "how-it-works", "pricing"].forEach((id) => {
+      const section = document.getElementById(id);
+      if (section) observer.observe(section);
+    });
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => updateIndicator());
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    updateIndicator();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, [activeNav]);
 
   function openDemoAccess(event: React.MouseEvent<HTMLAnchorElement>) {
     event.preventDefault();
@@ -93,7 +128,7 @@ export default function AtlasLanding() {
   return <main className="eos-home" id="top">
     <header className="eos-home-nav">
       <Brand />
-      <nav aria-label="Navegación principal"><a href="#what">Qué hacemos</a><a href="#how-it-works">Cómo funciona</a><a href="#pricing">Precios</a><details className="eos-home-plan-menu"><summary>Ver paquetes <span aria-hidden="true">⌄</span></summary><div><a href="#plan-essential" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); }}>Essential <small>29 €/mes</small></a><a href="#plan-professional" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); }}>Professional <small>79 €/mes</small></a><a href="#plan-business" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); }}>Business <small>149 €/mes</small></a></div></details></nav>
+      <nav ref={navRef} aria-label="Navegación principal" onMouseLeave={() => { const nav = navRef.current; const link = nav?.querySelector<HTMLAnchorElement>(`a[href="#${activeNav}"]`); if (link) setNavIndicator((current) => current.left === link.offsetLeft && current.width === link.offsetWidth ? current : { left: link.offsetLeft, width: link.offsetWidth }); }}><span className="eos-home-nav-indicator" aria-hidden="true" style={{ transform: `translate3d(${navIndicator.left}px,0,0)`, width: navIndicator.width }} /><a className={activeNav === "what" ? "is-active" : ""} href="#what" onMouseEnter={() => { setActiveNav("what"); const link = navRef.current?.querySelector<HTMLAnchorElement>('a[href="#what"]'); if (link) setNavIndicator({ left: link.offsetLeft, width: link.offsetWidth }); }}>Qué hacemos</a><a className={activeNav === "how-it-works" ? "is-active" : ""} href="#how-it-works" onMouseEnter={() => { setActiveNav("how-it-works"); const link = navRef.current?.querySelector<HTMLAnchorElement>('a[href="#how-it-works"]'); if (link) setNavIndicator({ left: link.offsetLeft, width: link.offsetWidth }); }}>Cómo funciona</a><a className={activeNav === "pricing" ? "is-active" : ""} href="#pricing" onMouseEnter={() => { setActiveNav("pricing"); const link = navRef.current?.querySelector<HTMLAnchorElement>('a[href="#pricing"]'); if (link) setNavIndicator({ left: link.offsetLeft, width: link.offsetWidth }); }}>Precios</a><details className="eos-home-plan-menu"><summary>Ver paquetes <span aria-hidden="true">⌄</span></summary><div><a href="#plan-essential" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); }}>Essential <small>29 €/mes</small></a><a href="#plan-professional" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); }}>Professional <small>79 €/mes</small></a><a href="#plan-business" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); }}>Business <small>149 €/mes</small></a></div></details></nav>
       <div className="eos-home-nav-actions">
         <a className="eos-home-login" href="/EnterpriseOS/account/">Iniciar sesión</a>
         <a className="eos-home-workspace-link" href="/EnterpriseOS/" onClick={openDemoAccess}>Entrar al workspace <Arrow /></a>
