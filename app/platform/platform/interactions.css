@@ -26,6 +26,7 @@
 /* OMEGA / ACCESSIBILITY AND NAVIGATION FINISHING */
 .p-site .p-skip-link{position:absolute;top:10px;left:10px;z-index:1000;padding:12px 16px;transform:translateY(-160%);background:#17263e;color:#fff;font-size:12px}
 .p-site .p-skip-link:focus{transform:translateY(0)}
+.p-site .p-nav{position:relative;z-index:30}
 .p-site .p-mobile-menu{display:none}
 .p-site .p-mobile-menu-toggle{display:flex;min-height:38px;align-items:center;gap:9px;padding:0 10px;border:1px solid #cbd0ca;background:transparent;color:#334154;cursor:pointer;font:500 7px/1 var(--mono);letter-spacing:1px}
 .p-site .p-mobile-menu-toggle i,.p-site .p-mobile-menu-toggle i:before,.p-site .p-mobile-menu-toggle i:after{display:block;width:12px;height:1px;background:#526078;content:"";transition:transform .2s ease}
