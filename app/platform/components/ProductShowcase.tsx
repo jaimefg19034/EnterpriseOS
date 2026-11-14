@@ -3,7 +3,7 @@ import { PlanningWorkspace } from "@/components/planning-workspace";
 
 export default function ProductShowcase() {
   return (
-    <section className="p-product" id="product" aria-labelledby="product-showcase-title">
+    <section className="p-product" id="product" aria-labelledby="product-showcase-title" aria-describedby="product-demo-note">
       <div className="p-product-heading">
         <TechnicalLabel number="04">INSIDE THE WORKSPACE</TechnicalLabel>
         <span>ONE MODEL. DIFFERENT QUESTIONS.</span>
@@ -15,8 +15,8 @@ export default function ProductShowcase() {
       </div>
 
       <div className="p-product-demo-note">
-        <span>DEMO ENVIRONMENT</span>
-        <p>Esta vista utiliza un plan de ejemplo. Puedes modificar sus hipótesis y explorar el modelo; los cambios son temporales, no se guardan y no afectan a tus datos del workspace.</p>
+        <span>DEMO ENVIRONMENT · SAMPLE DATA</span>
+        <p id="product-demo-note">Esta vista utiliza un plan de ejemplo. Puedes modificar sus hipótesis y explorar el modelo; los cambios son temporales, no se guardan y no afectan a tus datos del workspace.</p>
       </div>
 
       <div className="p-product-frame">
@@ -35,7 +35,7 @@ export default function ProductShowcase() {
           <PlanningWorkspace language="es" previewMode />
         </div>
         <div className="p-product-frame-foot">
-          <span>LIVE COMPONENT · NOT A STATIC MOCKUP</span>
+          <span>INTERACTIVE COMPONENT · NOT A STATIC MOCKUP</span>
           <span>SESSION-ONLY CHANGES <b>↗</b></span>
         </div>
       </div>
