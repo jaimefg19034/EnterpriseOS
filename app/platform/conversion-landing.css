@@ -620,3 +620,7 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}
   .eos-home-nav-indicator,.eos-home-button,.eos-home-product-card,.eos-home-tier-card { transition:none!important; }
   .eos-home-hero .eos-home-orbit-svg,.eos-home-core,.eos-home-data,.eos-home-close-orbit { animation:none!important; }
 }
+
+
+/* Keep the sticky glass navigation attached to the viewport scrollport. */
+.eos-home { overflow:clip; }
