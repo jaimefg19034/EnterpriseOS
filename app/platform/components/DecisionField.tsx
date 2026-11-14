@@ -29,7 +29,7 @@ export default function DecisionField({ scenario, onScenarioChange }: { scenario
         </div>
       </div>
 
-      <div className="p-sim-panel" aria-label={`Resultados ilustrativos del escenario ${active.label}`}>
+      <div className="p-sim-panel" role="group" aria-label={`Resultados ilustrativos del escenario ${active.label}`}>
         <div className="p-sim-top">
           <span>ILLUSTRATIVE MODEL / 2026</span>
           <b><i aria-hidden="true" /> SCENARIO ACTIVE</b>
