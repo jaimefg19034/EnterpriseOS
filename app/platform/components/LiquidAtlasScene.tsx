@@ -24,8 +24,8 @@ float sdTorus(vec3 p,vec2 t){return length(vec2(length(p.xz)-t.x,p.y))-t.y;}
 float smin(float a,float b,float k){float h=max(k-abs(a-b),0.0)/k;return min(a,b)-h*h*k*.25;}
 float mapScene(vec3 p){
  vec3 q=p;q.xz=rot(.34+u_pointer.x*.42+sin(u_time*.17)*.08+u_scroll*.28)*q.xz;q.xy=rot(-.32+(u_pointer.y-.5)*.26)*q.xy;
- float warp=noise(q*3.4+vec3(0.,u_time*.13,0.))-.5;
- q.y+=u_scroll*.045+sin(q.x*3.2+u_time*.38)*.045+cos(q.z*4.0-u_time*.28)*.035+warp*.035;
+ float warp=sin(q.x*2.1+u_time*.12)*cos(q.z*2.0-u_time*.1)*.18;
+ q.y+=u_scroll*.045+sin(q.x*3.2+u_time*.38)*.045+cos(q.z*4.0-u_time*.28)*.035+warp*.018;
  vec3 a=q;a.xy=rot(.48+sin(u_time*.13)*.12)*a.xy;
  vec3 b=q;b.yz=rot(1.12+u_pointer.x*.18)*b.yz;b.xz=rot(-.58+u_time*.09)*b.xz;
  float ringA=sdTorus(a,vec2(.72,.145)),ringB=sdTorus(b,vec2(.55,.095));
@@ -38,7 +38,7 @@ void main(){
  vec2 uv=(v_uv-.5)*vec2(u_resolution.x/u_resolution.y,1.);
  vec3 ro=vec3(0.,0.,3.35),rd=normalize(vec3(uv,-1.72)),pos=ro;
  float travel=0.,hit=0.;
- for(int i=0;i<76;i++){pos=ro+rd*travel;float d=mapScene(pos);if(d<.0015){hit=1.;break;}travel+=max(d*.72,.004);if(travel>7.5)break;}
+ for(int i=0;i<42;i++){pos=ro+rd*travel;float d=mapScene(pos);if(d<.0015){hit=1.;break;}travel+=max(d*.72,.004);if(travel>7.5)break;}
  vec3 deep=vec3(.018,.035,.047),haze=vec3(.11,.22,.23);
  float halo=exp(-length(uv-vec2(-.08,.04))*2.8);
  vec3 color=mix(deep,haze,halo*.36);
@@ -128,7 +128,7 @@ export default function LiquidAtlasScene() {
 
     const resize = () => {
       const rect = host.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 0.58 : 0.78);
+      const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 0.42 : 0.58);
       canvas.width = Math.max(1, Math.floor(rect.width * dpr));
       canvas.height = Math.max(1, Math.floor(rect.height * dpr));
       gl.viewport(0, 0, canvas.width, canvas.height);
@@ -147,7 +147,7 @@ export default function LiquidAtlasScene() {
     let inView = true;
     let pageVisible = !document.hidden;
     const animate = (now: number) => {
-      if (!reduced && inView && pageVisible && now - lastFrame >= 33) {
+      if (!reduced && inView && pageVisible && now - lastFrame >= 50) {
         draw();
         lastFrame = now;
       }
