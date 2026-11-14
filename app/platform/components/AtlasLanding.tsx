@@ -127,7 +127,7 @@ export default function AtlasLanding() {
     const target = document.querySelector<HTMLElement>(href);
     if (!target) return;
     event.preventDefault();
-    const navHeight = navRef.current?.getBoundingClientRect().height ?? 0;
+    const navHeight = (navRef.current?.closest(".eos-home-nav") as HTMLElement | null)?.getBoundingClientRect().height ?? 0;
     const top = Math.max(0, window.scrollY + target.getBoundingClientRect().top - navHeight - 22);
     window.history.pushState(null, "", href);
     window.scrollTo({ top, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
