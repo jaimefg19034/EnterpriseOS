@@ -1,7 +1,5 @@
 "use client";
 
-import type { CSSProperties } from "react";
-
 const benefits = [
   { number: "01", title: "Entiende el rendimiento", copy: "Lee ingresos, costes y márgenes desde una única perspectiva.", icon: "performance" },
   { number: "02", title: "Anticipa escenarios", copy: "Compara hipótesis y entiende cómo afectan al resultado.", icon: "scenarios" },
