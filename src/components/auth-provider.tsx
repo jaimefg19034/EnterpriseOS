@@ -103,6 +103,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { cancelled = true; };
   }, [saveSession]);
 
+  // This effect synchronizes the current authenticated session with Supabase subscription state.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (!session) return;
     void refreshPlan().catch(() => undefined);
