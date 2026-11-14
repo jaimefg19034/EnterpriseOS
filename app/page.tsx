@@ -119,18 +119,6 @@ const TREND = [
   { month: "Jul", revenue: 248, ebitda: 63.3 },
 ];
 
-function AtlasMark({ className }: { className: string }) {
-  return (
-    <span className={className} aria-hidden="true">
-      <svg viewBox="0 0 40 40" role="presentation" focusable="false">
-        <path d="M20 3.2 35 11.7v16.6L20 36.8 5 28.3V11.7L20 3.2Z" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round" />
-        <path d="m11.4 27.2 8.6-16.1 8.6 16.1M14.8 21.4h10.4" fill="none" stroke="#A6B6FF" strokeWidth="1.65" strokeLinecap="square" strokeLinejoin="miter" />
-        <path d="M20 3.2v7.9M20 28v8.8" fill="none" stroke="currentColor" strokeWidth="1.1" />
-      </svg>
-    </span>
-  );
-}
-
 function Icon({
   name,
   size = 18,
@@ -433,9 +421,9 @@ export default function Home() {
   if (!auth.configured && !demoAccessGranted) {
     return (
       <main className="eos-demo-gate">
-        <div className="eos-demo-gate-top"><a href="/EnterpriseOS/platform/" className="eos-demo-brand"><AtlasMark className="eos-demo-symbol" /><span>ENTERPRISEOS</span></a><span className="eos-demo-tag">THE FINANCIAL ATLAS</span></div>
+        <div className="eos-demo-gate-top"><a href="/EnterpriseOS/platform/" className="eos-demo-brand"><span>EO</span> ENTERPRISEOS</a><span className="eos-demo-tag">THE FINANCIAL ATLAS</span></div>
         <section className="eos-demo-gate-card">
-          <AtlasMark className="eos-demo-gate-icon" />
+          <div className="eos-demo-gate-icon" aria-hidden="true">EO</div>
           <span className="eos-demo-kicker">DEMO WORKSPACE / ACCESS</span>
           <h1>Entra en tu espacio financiero.</h1>
           <p>Introduce la clave de demostración para explorar el workspace interactivo de EnterpriseOS con datos ficticios.</p>
@@ -457,7 +445,7 @@ export default function Home() {
     <main className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <AtlasMark className="brand-mark brand-monogram" />
+          <div className="brand-mark brand-monogram" aria-hidden="true"><span>E</span><i /> </div>
           <div>
             <div className="brand-name">{t("enterprise")}<span>{t("os")}</span></div>
             <div className="brand-caption">{t("FINANCE OPERATING SYSTEM")}</div>

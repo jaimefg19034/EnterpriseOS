@@ -239,24 +239,3 @@
 @media(prefers-reduced-motion:reduce) {
   .p-liquid-atlas { filter:none!important; }
 }
-
-
-/* Precision Atlas symbol — shared identity with the workspace. */
-.p-mark {
-  position:relative;
-  display:grid;
-  place-items:center;
-  width:38px;
-  height:38px;
-  flex:0 0 38px;
-  overflow:hidden;
-  border:1px solid rgba(15,23,42,.18);
-  border-radius:9px;
-  background:linear-gradient(145deg,#17263E 0%,#0B1424 100%);
-  box-shadow:0 6px 16px rgba(15,23,42,.18),inset 0 1px 0 rgba(255,255,255,.2),inset 0 -1px 0 rgba(0,0,0,.2);
-}
-.p-mark:before,.p-mark i,.p-mark b,.p-mark em { display:none !important; content:none !important; }
-.p-mark svg { display:block; width:29px; height:29px; color:#F8FAFC; }
-.p-brand>span:last-child { color:#09090B; font-family:"Clash Display","Cabinet Grotesk",sans-serif; font-weight:700; }
-.p-brand>span:last-child>span { color:#2949B0; }
-.p-brand small { color:#334155; }
