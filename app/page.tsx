@@ -382,27 +382,47 @@ export default function Home() {
           <span className="switch-chevron">⌄</span>
         </button>
 
-        <div className="nav-label">{t("WORKSPACE")}</div>
-        <nav className="primary-nav" aria-label={t("Main navigation")}>
-          <button
-            className={`nav-item ${view === "overview" ? "active" : ""}`}
-            onClick={() => setView("overview")}
-            aria-current={view === "overview" ? "page" : undefined}
-          >
-            <Icon name="grid" size={18} /><span>{t("Overview")}</span>
-          </button>
-          {([
-            { id: "model", label: t("Financial model"), icon: "chart" },
-            { id: "planning", label: t("Budget & scenarios"), icon: "trend" },
-            { id: "statements", label: t("3 statements"), icon: "chart" },
-            { id: "reports", label: t("Reports & exports"), icon: "file" },
-            { id: "operations", label: t("Operations & intelligence"), icon: "building" },
-          ] as { id: View; label: string; icon: string }[]).map((item) => (
-            <button key={item.id} className={`nav-item ${view === item.id ? "active" : ""}`} onClick={() => setView(item.id)} aria-current={view === item.id ? "page" : undefined}>
-              <Icon name={item.icon} size={18} /><span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
+        <div className="nav-system">
+          <div className="nav-group">
+            <div className="nav-group-heading"><span>01</span><strong>{t("EXECUTIVE VIEW")}</strong></div>
+            <nav className="primary-nav" aria-label={t("Executive navigation")}>
+              <button
+                className={`nav-item ${view === "overview" ? "active" : ""}`}
+                onClick={() => setView("overview")}
+                aria-current={view === "overview" ? "page" : undefined}
+              >
+                <Icon name="grid" size={18} /><span>{t("Overview")}</span><small>01</small>
+              </button>
+            </nav>
+          </div>
+          <div className="nav-group">
+            <div className="nav-group-heading"><span>02</span><strong>{t("FINANCE WORKBENCH")}</strong></div>
+            <nav className="primary-nav" aria-label={t("Finance navigation")}>
+              {([
+                { id: "model", label: t("Financial model"), icon: "chart", index: "02.1" },
+                { id: "planning", label: t("Budget & scenarios"), icon: "trend", index: "02.2" },
+                { id: "statements", label: t("3 statements"), icon: "chart", index: "02.3" },
+              ] as { id: View; label: string; icon: string; index: string }[]).map((item) => (
+                <button key={item.id} className={`nav-item ${view === item.id ? "active" : ""}`} onClick={() => setView(item.id)} aria-current={view === item.id ? "page" : undefined}>
+                  <Icon name={item.icon} size={18} /><span>{item.label}</span><small>{item.index}</small>
+                </button>
+              ))}
+            </nav>
+          </div>
+          <div className="nav-group">
+            <div className="nav-group-heading"><span>03</span><strong>{t("OPERATIONS & INSIGHT")}</strong></div>
+            <nav className="primary-nav" aria-label={t("Operations navigation")}>
+              {([
+                { id: "operations", label: t("Operations & intelligence"), icon: "building", index: "03.1" },
+                { id: "reports", label: t("Reports & exports"), icon: "file", index: "03.2" },
+              ] as { id: View; label: string; icon: string; index: string }[]).map((item) => (
+                <button key={item.id} className={`nav-item ${view === item.id ? "active" : ""}`} onClick={() => setView(item.id)} aria-current={view === item.id ? "page" : undefined}>
+                  <Icon name={item.icon} size={18} /><span>{item.label}</span><small>{item.index}</small>
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
 
         <div className="sidebar-divider" />
         <div className="nav-label">{t("TOOLS")}</div>
