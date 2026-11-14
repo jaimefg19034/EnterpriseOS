@@ -1,0 +1,18 @@
+import Arrow from "../../components/ui/Arrow";
+import TechnicalLabel from "../../components/ui/TechnicalLabel";
+
+export default function CapabilityBento() {
+  return (
+    <section className="p-capabilities" id="capabilities">
+        <div className="p-cap-heading"><TechnicalLabel number="03">THE FINANCIAL SYSTEM</SectionLabel><span>FOUR CONNECTED DISCIPLINES</span></div>
+        <div className="p-cap-intro"><h2>No más números<br />sin <em>contexto.</em></h2><p>Un espacio de trabajo que relaciona hipótesis, rendimiento y liquidez. Cada vista responde a una pregunta distinta del negocio.</p></div>
+        <div className="p-cap-grid">
+          <article className="p-cap p-cap-model"><div className="p-cap-meta"><span>01 / PERFORMANCE</span><b>MODEL</b></div><div className="p-cap-visual p-visual-model"><div className="p-mini-stat"><small>REVENUE / FY</small><strong>248.000<span> €</span></strong></div><div className="p-mini-bars">{[28,42,36,57,48,69,62,78,71,88,78,96].map((v,i)=><i key={i} style={{height:`${v}%`}} />)}</div><div className="p-mini-axis"><span>JAN</span><span>APR</span><span>JUL</span><span>OCT</span><span>DEC</span></div></div><div className="p-cap-copy"><h3>Modelización financiera</h3><p>Comprende cómo ingresos, costes, márgenes y supuestos construyen el resultado del negocio.</p><a href="/EnterpriseOS/">Explorar el modelo <Arrow /></a></div></article>
+          <article className="p-cap p-cap-planning"><div className="p-cap-meta"><span>02 / PLANNING</span><b>SCENARIOS</b></div><div className="p-cap-visual p-visual-planning"><div className="p-scenario-lines"><span>GROWTH <i /></span><span>BASE <i /></span><span>DOWNSIDE <i /></span></div><div className="p-scenario-axis"><span>NOW</span><span>FY 2026</span><span>OUTLOOK</span></div></div><div className="p-cap-copy"><h3>Presupuestos y escenarios</h3><p>Compara hipótesis y entiende cómo cambian las previsiones antes de comprometer recursos.</p><a href="/EnterpriseOS/">Explorar planificación <Arrow /></a></div></article>
+          <article className="p-cap p-cap-cash"><div className="p-cap-meta"><span>03 / LIQUIDITY</span><b>13 WEEKS</b></div><div className="p-cap-visual p-visual-cash"><div className="p-cash-heading"><small>WEEKLY CASH OUTLOOK</small><strong>13 <i>WEEKS</i></strong></div><div className="p-cash-track">{[54,67,49,76,62,82,69,73,57,88,72,94,81].map((v,i)=><i key={i} style={{height:`${v}%`}} />)}</div><div className="p-cash-axis"><span>W01</span><span>W06</span><span>W13</span></div></div><div className="p-cap-copy"><h3>Previsión de tesorería</h3><p>Visualiza cobros, pagos y evolución prevista de caja para anticipar tensiones de liquidez.</p><a href="/EnterpriseOS/">Explorar tesorería <Arrow /></a></div></article>
+          <article className="p-cap p-cap-report"><div className="p-cap-meta"><span>04 / REPORTING</span><b>STATEMENTS</b></div><div className="p-cap-visual p-visual-report"><div className="p-report-sheet"><small>MANAGEMENT P&L <span>FY / 2026</span></small>{[[ "Revenue", "248,000" ],[ "Operating costs", "(184,700)" ],[ "EBITDA", "63,300" ],[ "Net income", "35,100" ]].map(row=><div key={row[0]}><span>{row[0]}</span><b>{row[1]}</b></div>)}<small>MODEL OUTPUT <span>EUR</span></small></div></div><div className="p-cap-copy"><h3>Estados e informes</h3><p>Lee estados financieros y métricas de gestión desde una estructura común.</p><a href="/EnterpriseOS/">Explorar informes <Arrow /></a></div></article>
+        </div>
+        <p className="p-disclaimer"><b>DATA NOTE</b> Las visualizaciones y cifras de esta página son ilustrativas; no representan datos de una empresa conectada.</p>
+      </section>
+  );
+}
