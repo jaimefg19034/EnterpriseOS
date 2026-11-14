@@ -60,3 +60,7 @@
 .p-product-live .planning-toolbar{flex-wrap:wrap}
 .p-product-live .planning-section-nav{position:static;overflow-x:auto}
 @media(max-width:720px){.p-product-live{padding:13px}.p-live-product-bar{flex-direction:column;gap:5px;font-size:6px}.p-product-live .planning-heading{display:block}.p-product-live .planning-heading-controls{margin-top:18px}}
+
+.p-site .p-footer-wordmark{overflow:hidden;padding:clamp(42px,7vw,96px) 0 clamp(30px,4vw,52px);color:#e7edf5;font:500 clamp(4.2rem,13.7vw,13.5rem)/.74 var(--display);letter-spacing:-.105em;white-space:nowrap}
+.p-site .p-footer-wordmark em{color:#a6b6ff;font:italic 400 1.02em/.7 var(--editorial);letter-spacing:-.075em}
+@media(max-width:640px){.p-site .p-footer-wordmark{padding:45px 0 32px;font-size:clamp(4rem,18vw,6.8rem);letter-spacing:-.1em}}
