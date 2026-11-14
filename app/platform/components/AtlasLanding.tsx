@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useSyncExternalStore } from "react";
+
 const benefits = [
   { number: "01", title: "Entiende el rendimiento", copy: "Lee ingresos, costes y márgenes desde una única perspectiva.", icon: "performance" },
   { number: "02", title: "Anticipa escenarios", copy: "Compara hipótesis y entiende cómo afectan al resultado.", icon: "scenarios" },
@@ -16,6 +18,21 @@ function Brand() {
 
 function Arrow() {
   return <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13M10 4l6 6-6 6" /></svg>;
+}
+
+function subscribeToPlanHash(onChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("hashchange", onChange);
+  return () => window.removeEventListener("hashchange", onChange);
+}
+
+function getPlanHashSnapshot() {
+  const match = window.location.hash.match(/^#plan-(essential|professional|business)$/);
+  return match?.[1] ?? "";
+}
+
+function getServerPlanHashSnapshot() {
+  return "";
 }
 
 function HeroVisual() {
@@ -51,14 +68,36 @@ function BenefitIcon({ type }: { type: string }) {
 }
 
 export default function AtlasLanding() {
+  const [demoAccessOpen, setDemoAccessOpen] = useState(false);
+  const [demoCode, setDemoCode] = useState("");
+  const [demoError, setDemoError] = useState("");
+  const highlightedPlan = useSyncExternalStore(subscribeToPlanHash, getPlanHashSnapshot, getServerPlanHashSnapshot);
+
+  function openDemoAccess(event: React.MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
+    setDemoCode("");
+    setDemoError("");
+    setDemoAccessOpen(true);
+  }
+
+  function submitDemoAccess(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (demoCode.trim().toUpperCase() !== "ATLAS-DEMO-2026") {
+      setDemoError("La clave no es correcta. Comprueba el código e inténtalo de nuevo.");
+      return;
+    }
+    window.sessionStorage.setItem("enterpriseos:demo-access", "granted");
+    window.location.assign("/EnterpriseOS/");
+  }
+
   return <main className="eos-home" id="top">
     <header className="eos-home-nav">
       <Brand />
-      <nav aria-label="Navegación principal"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a></nav>
+      <nav aria-label="Navegación principal"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a><details className="eos-home-plan-menu"><summary>Ver paquetes <span aria-hidden="true">⌄</span></summary><div><a href="#plan-essential" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); }}>Essential <small>29 €/mes</small></a><a href="#plan-professional" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); }}>Professional <small>79 €/mes</small></a><a href="#plan-business" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); }}>Business <small>149 €/mes</small></a></div></details></nav>
       <div className="eos-home-nav-actions">
         <a className="eos-home-login" href="/EnterpriseOS/account/">Iniciar sesión</a>
-        <a className="eos-home-workspace-link" href="/EnterpriseOS/">Entrar al workspace <Arrow /></a>
-        <a className="eos-home-button eos-home-button-small" href="/EnterpriseOS/account/?mode=signup">Crear cuenta <Arrow /></a>
+        <a className="eos-home-workspace-link" href="/EnterpriseOS/" onClick={openDemoAccess}>Entrar al workspace <Arrow /></a>
+        <a className="eos-home-button eos-home-button-small" href="/EnterpriseOS/account/?mode=signup">Empezar <Arrow /></a>
       </div>
     </header>
 
@@ -68,7 +107,7 @@ export default function AtlasLanding() {
         <h1>La claridad financiera<br />para <em>decidir mejor.</em></h1>
         <p>Conecta rendimiento, planificación y tesorería. Comprende qué ocurre en tu negocio y anticipa lo que viene.</p>
         <div className="eos-home-hero-actions">
-          <a className="eos-home-button" href="/EnterpriseOS/">Explorar workspace demo <Arrow /></a>
+          <a className="eos-home-button" href="/EnterpriseOS/" onClick={openDemoAccess}>Probar demo <Arrow /></a>
           <a className="eos-home-text-link" href="/EnterpriseOS/account/">Ya tengo cuenta · Iniciar sesión <span>↗</span></a>
         </div>
         <div className="eos-home-proof"><span><i /> UNA VISIÓN FINANCIERA CONECTADA</span><span>DISEÑADO PARA DECISORES</span></div>
@@ -78,8 +117,9 @@ export default function AtlasLanding() {
     </section>
 
     <section className="eos-home-what" id="what">
-      <div className="eos-home-section-top"><span>QUÉ HACEMOS</span><span>UNA PLATAFORMA. CUATRO RESULTADOS.</span></div>
-      <div className="eos-home-what-heading"><h2>Menos ruido.<br /><em>Más perspectiva.</em></h2><p>Todo lo esencial para entender la salud financiera de tu empresa, sin convertir tu día a día en otro laberinto de hojas de cálculo.</p></div>
+      <div className="eos-home-section-top"><span>QUÉ HACEMOS</span><span>DEL DATO A UNA DECISIÓN MEJOR</span></div>
+      <div className="eos-home-what-heading"><h2>De hojas dispersas<br /><em>a una visión clara.</em></h2><p>Reunimos los números clave de tu empresa en un espacio de gestión: ves cómo rinde, pruebas escenarios y anticipas la caja antes de decidir.</p></div>
+      <div className="eos-home-process"><article><span>01 / INTRODUCE</span><h3>Parte de tus datos</h3><p>Añade ingresos, costes, presupuestos, cobros y pagos con tus propios supuestos.</p></article><div className="eos-home-process-line" aria-hidden="true"><svg viewBox="0 0 100 16"><path d="M1 8h96m-7-6 7 6-7 6"/></svg></div><article><span>02 / ANALIZA</span><h3>Entiende el impacto</h3><p>Consulta márgenes, compara escenarios y relaciona resultado, balance y caja.</p></article><div className="eos-home-process-line" aria-hidden="true"><svg viewBox="0 0 100 16"><path d="M1 8h96m-7-6 7 6-7 6"/></svg></div><article><span>03 / DECIDE</span><h3>Actúa con contexto</h3><p>Detecta necesidades de liquidez, revisa costes y comparte informes de gestión.</p></article></div>
       <div className="eos-home-benefits">{benefits.map((item) => <article className="eos-home-benefit" key={item.number}>
         <div className="eos-home-benefit-top"><span>{item.number}</span><BenefitIcon type={item.icon}/></div>
         <h3>{item.title}</h3><p>{item.copy}</p><div className="eos-home-benefit-line" />
@@ -143,7 +183,7 @@ export default function AtlasLanding() {
         </article>
       </div>
       <div className="eos-home-product-foot"><span>UN FLUJO DE TRABAJO SENCILLO</span><div><b>01</b> Entender <i>→</i> <b>02</b> Planificar <i>→</i> <b>03</b> Anticipar <i>→</i> <b>04</b> Decidir</div></div>
-      <div className="eos-home-product-cta"><p>¿Quieres verlo funcionando? Entra y explora el entorno de demostración.</p><a className="eos-home-button" href="/EnterpriseOS/">Abrir workspace demo <Arrow /></a></div>
+      <div className="eos-home-product-cta"><p>¿Quieres verlo funcionando? Entra y explora el entorno de demostración.</p><a className="eos-home-button" href="/EnterpriseOS/" onClick={openDemoAccess}>Abrir workspace demo <Arrow /></a></div>
       <p className="eos-home-product-disclaimer">VISTA ILUSTRATIVA · CIFRAS SINTÉTICAS · DATOS Y SUPUESTOS INTRODUCIDOS MANUALMENTE · LOS CAMBIOS SE GUARDAN LOCALMENTE EN ESTA VERSIÓN.</p>
     </section>
 
@@ -154,42 +194,59 @@ export default function AtlasLanding() {
         <p>Empieza con el control financiero esencial y amplía tus capacidades cuando tu empresa lo necesite. Todos los precios son mensuales, sin IVA.</p>
       </div>
       <div className="eos-home-pricing-grid">
-        <article className="eos-home-tier-card">
+        <article id="plan-essential" className={"eos-home-tier-card " + (highlightedPlan === "essential" ? "is-selected" : "")}>
           <div className="eos-home-tier-top"><span>01 / ESSENTIAL</span><span>START</span></div>
           <h3>Essential</h3><p>Control financiero esencial para empresas pequeñas.</p>
           <div className="eos-home-tier-price"><strong>29 €</strong><span>/ mes</span></div>
-          <ul><li>Dashboard ejecutivo</li><li>Cuenta de resultados (P&amp;L)</li><li>Indicadores financieros básicos</li></ul>
-          <a className="eos-home-tier-link" href="/EnterpriseOS/account/?mode=signup&plan=essential">Elegir Essential <Arrow /></a>
+          <div className="eos-home-feature-list"><div><b>Dashboard financiero</b><p>Ingresos, costes, EBITDA, márgenes y resultado neto en una vista ejecutiva.</p></div><div><b>Cuenta de resultados editable</b><p>Introduce ventas, costes directos, gastos, amortización, intereses e impuestos; los resultados se recalculan al instante.</p></div><div><b>Indicadores de rentabilidad</b><p>Consulta margen bruto, margen EBITDA y margen neto calculados a partir de tus datos.</p></div><div><b>Modelo de gestión</b><p>Trabaja con una vista anual en euros y supuestos modificables, sin contabilidad conectada.</p></div></div>
+          <a className="eos-home-tier-link" href="/EnterpriseOS/account/?mode=signup&plan=essential">Empezar con Essential <Arrow /></a>
         </article>
-        <article className="eos-home-tier-card is-recommended">
+        <article id="plan-professional" className={"eos-home-tier-card is-recommended " + (highlightedPlan === "professional" ? "is-selected" : "")}>
           <div className="eos-home-tier-top"><span>02 / PROFESSIONAL</span><span className="eos-home-recommended">RECOMENDADO</span></div>
           <h3>Professional</h3><p>Planificación y modelización para anticipar decisiones.</p>
           <div className="eos-home-tier-price"><strong>79 €</strong><span>/ mes</span></div>
-          <ul><li>Todo lo incluido en Essential</li><li>Presupuestos y escenarios</li><li>Modelo financiero de tres estados</li><li>Informes y exportaciones</li></ul>
-          <a className="eos-home-button eos-home-tier-cta" href="/EnterpriseOS/account/?mode=signup&plan=professional">Elegir Professional <Arrow /></a>
+          <div className="eos-home-feature-list"><div><b>Todo Essential</b><p>Dashboard, cuenta de resultados editable e indicadores de rentabilidad.</p></div><div><b>Presupuestos y escenarios</b><p>Define objetivos e hipótesis de ingresos y costes; compara escenarios y evolución mensual.</p></div><div><b>Modelo de tres estados</b><p>Relaciona cuenta de resultados, balance y flujo de caja con supuestos financieros editables.</p></div><div><b>Previsión de tesorería a 13 semanas</b><p>Proyecta manualmente entradas y salidas para anticipar tensiones de liquidez.</p></div><div><b>Capital circulante</b><p>Analiza plazos de cobro, inventario y pago a proveedores para entender el ciclo de caja.</p></div><div><b>Informes y Excel</b><p>Consulta el informe de gestión y exporta la cuenta de resultados para seguir trabajando.</p></div></div>
+          <a className="eos-home-button eos-home-tier-cta" href="/EnterpriseOS/account/?mode=signup&plan=professional">Empezar con Professional <Arrow /></a>
         </article>
-        <article className="eos-home-tier-card">
+        <article id="plan-business" className={"eos-home-tier-card " + (highlightedPlan === "business" ? "is-selected" : "")}>
           <div className="eos-home-tier-top"><span>03 / BUSINESS</span><span>ADVANCED</span></div>
           <h3>Business</h3><p>Visión financiera y operativa ampliada.</p>
           <div className="eos-home-tier-price"><strong>149 €</strong><span>/ mes</span></div>
-          <ul><li>Todo lo incluido en Professional</li><li>Operaciones y centros de coste</li><li>Análisis operativo ampliado</li><li>Acceso a todas las áreas actuales</li></ul>
-          <a className="eos-home-tier-link" href="/EnterpriseOS/account/?mode=signup&plan=business">Elegir Business <Arrow /></a>
+          <div className="eos-home-feature-list"><div><b>Todo Professional</b><p>Incluye planificación, tres estados financieros, tesorería, capital circulante e informes.</p></div><div><b>Pipeline comercial</b><p>Registra oportunidades, importes, fases y fechas previstas de cierre.</p></div><div><b>Seguimiento de proyectos</b><p>Controla responsables, presupuestos, gasto acumulado, fechas y estado.</p></div><div><b>Riesgos y KPIs</b><p>Documenta riesgos con su valoración y sigue indicadores frente a objetivos.</p></div><div><b>Centros de coste y gastos</b><p>Registra presupuestos, gasto y movimientos por área para entender dónde se consume el margen.</p></div><div><b>Exportación operativa</b><p>Descarga los registros operativos en CSV para analizarlos fuera de la plataforma.</p></div></div>
+          <a className="eos-home-tier-link" href="/EnterpriseOS/account/?mode=signup&plan=business">Empezar con Business <Arrow /></a>
         </article>
       </div>
-      <p className="eos-home-pricing-disclaimer">PRECIOS PROPUESTOS · SIN IVA · CONTRATACIÓN ONLINE PENDIENTE DE ACTIVAR SUPABASE Y STRIPE. LOS DATOS DE ESTA VERSIÓN SIGUEN EN ALMACENAMIENTO LOCAL.</p>
+      <div className="eos-home-pricing-foot"><p>Todos los planes son mensuales y se muestran sin IVA.</p><p><b>Alcance actual:</b> los datos se introducen manualmente y se guardan en el navegador. No hay conexión bancaria, sincronización contable, multiempresa ni almacenamiento centralizado activo. El alta y el cobro online se activarán al completar la configuración de Supabase y Stripe.</p></div>
     </section>
 
     <section className="eos-home-close">
       <div className="eos-home-close-orbit" aria-hidden="true"><span /><span /><span /></div>
       <div className="eos-home-kicker"><i /> EL SIGUIENTE PASO</div>
       <h2>Entiende los números.<br /><em>Adelántate a las decisiones.</em></h2>
-      <div className="eos-home-close-bottom"><p>Entra en EnterpriseOS y lleva tu planificación financiera a un lugar más claro.</p><a className="eos-home-button" href="/EnterpriseOS/">Entrar al workspace <Arrow /></a></div>
+      <div className="eos-home-close-bottom"><p>Entra en EnterpriseOS y lleva tu planificación financiera a un lugar más claro.</p><a className="eos-home-button" href="/EnterpriseOS/" onClick={openDemoAccess}>Probar demo <Arrow /></a></div>
     </section>
 
     <footer className="eos-home-footer">
       <div className="eos-home-footer-main"><Brand /><p>Financial Decision Intelligence<br />para empresas que quieren decidir con contexto.</p></div>
-      <div className="eos-home-footer-links"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a><a href="/EnterpriseOS/account/">Iniciar sesión</a><a href="/EnterpriseOS/">Workspace demo</a></div>
+      <div className="eos-home-footer-links"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a><a href="/EnterpriseOS/account/">Iniciar sesión</a><a href="/EnterpriseOS/" onClick={openDemoAccess}>Workspace demo</a></div>
       <div className="eos-home-footer-bottom"><span>© {new Date().getFullYear()} ENTERPRISEOS</span><span>DATOS MANUALES · PERSISTENCIA LOCAL · MVP</span><span>THE FINANCIAL ATLAS</span></div>
     </footer>
+    {demoAccessOpen && <div className="eos-home-demo-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDemoAccessOpen(false); }}>
+      <section className="eos-home-demo-dialog" role="dialog" aria-modal="true" aria-labelledby="eos-home-demo-title">
+        <button className="eos-home-demo-close" type="button" onClick={() => setDemoAccessOpen(false)} aria-label="Cerrar">×</button>
+        <span className="eos-home-demo-kicker">ENTERPRISEOS / DEMO ACCESS</span>
+        <div className="eos-home-demo-mark">EO</div>
+        <h2 id="eos-home-demo-title">Explora el workspace.</h2>
+        <p>Introduce la clave de demostración para acceder al entorno financiero interactivo con datos ficticios.</p>
+        <form onSubmit={submitDemoAccess}>
+          <label htmlFor="eos-home-demo-code">Clave de acceso</label>
+          <input id="eos-home-demo-code" type="password" autoComplete="off" value={demoCode} onChange={(event) => { setDemoCode(event.target.value); setDemoError(""); }} placeholder="Introduce tu clave" required autoFocus />
+          {demoError && <span className="eos-home-demo-error" role="alert">{demoError}</span>}
+          <button type="submit">Acceder al workspace <Arrow /></button>
+        </form>
+        <div className="eos-home-demo-foot">DEMO CON DATOS SINTÉTICOS <i /> SIN CONEXIÓN BANCARIA</div>
+        <a href="/EnterpriseOS/account/">¿Ya tienes una cuenta? Iniciar sesión</a>
+      </section>
+    </div>}
   </main>;
 }

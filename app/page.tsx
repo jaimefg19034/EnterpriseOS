@@ -41,6 +41,20 @@ function getServerLanguageSnapshot(): Language {
   return "es";
 }
 
+function subscribeDemoAccess(onStoreChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("enterpriseos-demo-access-change", onStoreChange);
+  return () => window.removeEventListener("enterpriseos-demo-access-change", onStoreChange);
+}
+
+function getDemoAccessSnapshot() {
+  return window.sessionStorage.getItem("enterpriseos:demo-access") === "granted";
+}
+
+function getServerDemoAccessSnapshot() {
+  return false;
+}
+
 const DEMO_INPUTS: FinancialInputs = {
   revenue: 248000,
   costOfGoodsSold: 96300,
@@ -307,19 +321,15 @@ export default function Home() {
   const [view, setView] = useState<View>("overview");
   const [showWorkspaceInfo, setShowWorkspaceInfo] = useState(false);
   const [showHelpGuide, setShowHelpGuide] = useState(false);
-  const [demoAccessGranted, setDemoAccessGranted] = useState(false);
+  const demoAccessGranted = useSyncExternalStore(subscribeDemoAccess, getDemoAccessSnapshot, getServerDemoAccessSnapshot);
   const [demoCode, setDemoCode] = useState("");
   const [demoCodeError, setDemoCodeError] = useState("");
-
-  useEffect(() => {
-    setDemoAccessGranted(window.sessionStorage.getItem("enterpriseos:demo-access") === "granted");
-  }, []);
 
   function submitDemoAccess(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (demoCode.trim().toUpperCase() === "ATLAS-DEMO-2026") {
       window.sessionStorage.setItem("enterpriseos:demo-access", "granted");
-      setDemoAccessGranted(true);
+      window.dispatchEvent(new Event("enterpriseos-demo-access-change"));
       setDemoCodeError("");
       return;
     }
