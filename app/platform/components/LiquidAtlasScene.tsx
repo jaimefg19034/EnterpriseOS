@@ -17,51 +17,61 @@ uniform vec2 u_resolution;
 uniform vec2 u_pointer;
 uniform float u_time;
 
-float hash(vec2 p) {
-  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+mat2 rot(float a) { float c=cos(a), s=sin(a); return mat2(c,-s,s,c); }
+float hash(vec3 p) { return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453); }
+float noise(vec3 p) {
+  vec3 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
+  return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),
+             mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);
 }
-float noise(vec2 p) {
-  vec2 i = floor(p), f = fract(p);
-  f = f * f * (3.0 - 2.0 * f);
-  return mix(mix(hash(i), hash(i + vec2(1.0,0.0)), f.x),
-             mix(hash(i + vec2(0.0,1.0)), hash(i + vec2(1.0,1.0)), f.x), f.y);
+float scene(vec3 p) {
+  p.xz=rot(0.36+u_pointer.x*0.42+sin(u_time*0.18)*0.07)*p.xz;
+  p.xy=rot(-0.38+(u_pointer.y-0.5)*0.28)*p.xy;
+  float n=noise(p*3.8+vec3(0.0,u_time*0.12,0.0));
+  p.y += sin(p.x*3.4+u_time*0.45)*0.035 + cos(p.z*4.2-u_time*0.34)*0.025 + (n-0.5)*0.045;
+  float major=0.78 + 0.035*sin(atan(p.z,p.x)*3.0+u_time*0.24);
+  return length(vec2(length(p.xz)-major,p.y))-0.205;
 }
-mat2 rotate2d(float a) {
-  float c = cos(a), s = sin(a);
-  return mat2(c, -s, s, c);
+vec3 normalAt(vec3 p) {
+  vec2 e=vec2(0.0015,0.0);
+  return normalize(vec3(scene(p+e.xyy)-scene(p-e.xyy),scene(p+e.yxy)-scene(p-e.yxy),scene(p+e.yyx)-scene(p-e.yyx)));
 }
 void main() {
-  vec2 uv = v_uv;
-  vec2 p = (uv - 0.5) * vec2(u_resolution.x / max(u_resolution.y, 1.0), 1.0);
-  vec2 pointer = (u_pointer - 0.5) * vec2(1.7, 1.0);
-  float t = u_time * 0.16;
-  p -= pointer * 0.10;
-  float n = noise(p * 3.0 + vec2(t, -t)) - 0.5;
-  vec2 q = p;
-  q += 0.12 * vec2(sin(p.y * 5.0 + t * 2.0), cos(p.x * 4.0 - t)) + n * 0.09;
-  q = rotate2d(-0.24 + sin(t) * 0.07) * q;
-  float radius = length(q * vec2(0.92, 1.18));
-  float angle = atan(q.y, q.x);
-  float wave = sin(angle * 3.0 + t * 2.1 + n * 3.0) * 0.045;
-  float ring = abs(radius - (0.245 + wave));
-  float inner = smoothstep(0.105, 0.0, ring);
-  float outer = exp(-ring * 18.0) * 0.30;
-  float filament = exp(-abs(radius - (0.34 + sin(angle * 2.0 - t) * 0.035)) * 42.0) * 0.28;
-  float core = exp(-length(q - vec2(-0.035, 0.025)) * 7.0) * 0.34;
-  float light = max(inner * 0.42, max(outer, filament)) + core;
-  float hue = 0.5 + 0.5 * sin(angle * 1.4 + t * 2.0 + n * 5.0);
-  vec3 deep = vec3(0.12, 0.24, 0.43);
-  vec3 ice = vec3(0.55, 0.72, 1.0);
-  vec3 teal = vec3(0.22, 0.83, 0.72);
-  vec3 violet = vec3(0.62, 0.52, 0.98);
-  vec3 metal = mix(mix(ice, teal, smoothstep(0.15, 0.85, hue)), violet, smoothstep(0.72, 1.0, hue) * 0.52);
-  float specular = pow(max(0.0, dot(normalize(vec3(q.x, q.y, 0.16)), normalize(vec3(-0.5, 0.7, 0.9)))), 22.0);
-  vec3 color = deep * (0.12 + light * 0.5) + metal * light * 0.92 + ice * specular * 0.24;
-  float halo = exp(-length(q) * 3.2) * 0.13;
-  color += mix(teal, violet, hue) * halo;
-  float vignette = smoothstep(0.88, 0.18, length((uv - 0.5) * vec2(1.1, 1.0)));
-  float alpha = clamp((light * 0.9 + halo) * vignette, 0.0, 0.88);
-  gl_FragColor = vec4(color, alpha);
+  vec2 uv=(v_uv-0.5)*vec2(u_resolution.x/u_resolution.y,1.0);
+  vec3 ro=vec3(0.0,0.0,3.25);
+  vec3 rd=normalize(vec3(uv,-1.72));
+  float travel=0.0; float hit=0.0; vec3 pos=ro;
+  for(int i=0;i<76;i++) {
+    pos=ro+rd*travel;
+    float d=scene(pos);
+    if(d<0.0018) { hit=1.0; break; }
+    travel+=max(d*0.72,0.006);
+    if(travel>7.0) break;
+  }
+  vec3 bgA=vec3(0.035,0.075,0.13);
+  vec3 bgB=vec3(0.12,0.22,0.34);
+  float halo=exp(-length(uv-vec2(-0.05,0.02))*3.0);
+  vec3 color=mix(bgA,bgB,halo*0.42);
+  float alpha=halo*0.18;
+  if(hit>0.5) {
+    vec3 n=normalAt(pos);
+    vec3 viewDir=normalize(ro-pos);
+    vec3 lightDir=normalize(vec3(-0.55,0.8,1.2));
+    vec3 halfDir=normalize(lightDir+viewDir);
+    float diffuse=max(dot(n,lightDir),0.0);
+    float spec=pow(max(dot(n,halfDir),0.0),72.0);
+    float fresnel=pow(1.0-max(dot(n,viewDir),0.0),2.4);
+    float bands=0.5+0.5*sin(pos.y*8.0+atan(pos.z,pos.x)*2.0+u_time*0.3);
+    vec3 titanium=vec3(0.42,0.62,0.82);
+    vec3 cyan=vec3(0.18,0.86,0.78);
+    vec3 violet=vec3(0.66,0.53,1.0);
+    vec3 iridescence=mix(cyan,violet,smoothstep(0.12,0.9,bands));
+    vec3 material=mix(titanium,iridescence,0.48+fresnel*0.4);
+    color=material*(0.22+diffuse*0.72)+vec3(0.68,0.82,1.0)*spec*1.35+iridescence*fresnel*0.72;
+    color+=vec3(0.22,0.55,0.95)*pow(max(dot(reflect(-lightDir,n),viewDir),0.0),18.0)*0.22;
+    alpha=0.96;
+  }
+  gl_FragColor=vec4(color,alpha);
 }`;
 
 function compile(gl: WebGLRenderingContext, type: number, source: string) {
