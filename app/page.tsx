@@ -139,6 +139,13 @@ function Icon({
   };
 
   switch (name) {
+    case "search":
+      return (
+        <svg {...common}>
+          <circle cx="10.8" cy="10.8" r="6.8" />
+          <path d="m16 16 4.5 4.5" />
+        </svg>
+      );
     case "grid":
       return (
         <svg {...common}>
@@ -237,17 +244,6 @@ function Icon({
 
 function TrendChart({ language }: { language: Language }) {
   const t = (value: string) => translate(value, language);
-  const commandItems: { label: string; detail: string; run: () => void }[] = [
-    { label: t("Overview"), detail: "01 · Executive view", run: () => setView("overview") },
-    { label: t("Financial model"), detail: "02.1 · Management P&L", run: () => setView("model") },
-    { label: t("Budget & scenarios"), detail: "02.2 · Planning", run: () => setView("planning") },
-    { label: t("3 statements"), detail: "02.3 · Financial statements", run: () => setView("statements") },
-    { label: t("Operations & intelligence"), detail: "03.1 · Operations", run: () => setView("operations") },
-    { label: t("Reports & exports"), detail: "03.2 · Reporting", run: () => setView("reports") },
-    { label: t("Reset demo"), detail: "Restore illustrative model assumptions", run: () => { setInputs(DEMO_INPUTS); setView("overview"); } },
-    { label: t("Export Excel"), detail: "Download current management P&L", run: () => { void exportExcel(); } },
-  ];
-  const filteredCommands = commandItems.filter((item) => (item.label + " " + item.detail).toLowerCase().includes(commandQuery.toLowerCase()));
   const max = 270;
   const points = TREND.map((point, index) => ({
     x: 30 + index * 102,
@@ -358,6 +354,17 @@ export default function Home() {
     window.dispatchEvent(new Event(LANGUAGE_CHANGE_EVENT));
   };
   const t = (value: string) => translate(value, language);
+  const commandItems: { label: string; detail: string; run: () => void }[] = [
+    { label: t("Overview"), detail: "01 · Executive view", run: () => setView("overview") },
+    { label: t("Financial model"), detail: "02.1 · Management P&L", run: () => setView("model") },
+    { label: t("Budget & scenarios"), detail: "02.2 · Planning", run: () => setView("planning") },
+    { label: t("3 statements"), detail: "02.3 · Financial statements", run: () => setView("statements") },
+    { label: t("Operations & intelligence"), detail: "03.1 · Operations", run: () => setView("operations") },
+    { label: t("Reports & exports"), detail: "03.2 · Reporting", run: () => setView("reports") },
+    { label: t("Reset demo"), detail: "Restore illustrative model assumptions", run: () => { setInputs(DEMO_INPUTS); setView("overview"); } },
+    { label: t("Export Excel"), detail: "Download current management P&L", run: () => { void exportExcel(); } },
+  ];
+  const filteredCommands = commandItems.filter((item) => (item.label + " " + item.detail).toLowerCase().includes(commandQuery.toLowerCase()));
 
   useEffect(() => {
     document.documentElement.lang = language;
