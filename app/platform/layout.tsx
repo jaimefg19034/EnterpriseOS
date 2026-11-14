@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import "./platform.css";
 
 export const metadata: Metadata = {
-  title: "EnterpriseOS — Claridad financiera para decidir mejor",
+  title: "EnterpriseOS — The Financial Atlas",
   description:
-    "Un espacio de trabajo para modelización financiera, presupuestos, escenarios, previsión de tesorería y análisis de gestión.",
+    "Conecta planificación, resultados y tesorería para entender qué está ocurriendo y qué puede ocurrir después.",
   openGraph: {
     title: "EnterpriseOS — Claridad financiera para decidir mejor",
     description:
-      "Modela, planifica y entiende las finanzas de tu empresa desde un espacio de trabajo conectado.",
+      "Un atlas financiero para modelar escenarios, leer la tesorería y decidir con contexto.",
     type: "website",
   },
 };
