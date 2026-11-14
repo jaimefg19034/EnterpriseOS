@@ -1398,3 +1398,29 @@ button:focus-visible, input:focus-visible {
 .scenario-comparison-table .scenario-negative { color: #b85b60; }
 .scenario-comparison-note { margin: 11px 0 0; color: #8793a5; font-size: 9px; line-height: 1.55; }
 @media(max-width:680px) { .scenario-comparison-panel { padding: 14px 12px; } .scenario-comparison-table { min-width: 700px; } .scenario-comparison-table th,.scenario-comparison-table td { padding: 10px 9px; } }
+
+
+/* Demo access gate */
+.eos-demo-gate{min-height:100vh;display:flex;flex-direction:column;padding:26px clamp(20px,6vw,84px) 20px;color:#f2f5ef;background:radial-gradient(ellipse at 50% 40%,rgba(190,224,107,.09),transparent 38%),#080d11;font-family:Arial,sans-serif}
+.eos-demo-gate-top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.eos-demo-brand{display:flex;align-items:center;gap:11px;color:#f4f7f1;text-decoration:none;font-size:11px;font-weight:800;letter-spacing:.14em}
+.eos-demo-brand span,.eos-demo-gate-icon{display:grid;place-items:center;width:38px;height:38px;border:1px solid #ddff70;color:#ddff70;font-size:13px;font-weight:800}
+.eos-demo-tag,.eos-demo-kicker{color:#dfff82;font:10px monospace;letter-spacing:.15em}
+.eos-demo-gate-card{width:min(470px,100%);margin:auto;padding:clamp(28px,5vw,46px);border:1px solid rgba(221,255,112,.25);background:linear-gradient(145deg,#121d20,#0e171a);box-shadow:0 28px 90px rgba(0,0,0,.38)}
+.eos-demo-gate-icon{width:48px;height:48px;margin-bottom:28px;font-size:15px}
+.eos-demo-gate-card h1{margin:15px 0 12px;color:#f4f7f1;font-size:clamp(34px,5vw,46px);line-height:1.04;letter-spacing:-.06em}
+.eos-demo-gate-card>p{margin:0;color:#aebbb8;font-size:13px;line-height:1.8}
+.eos-demo-form{display:grid;gap:10px;margin-top:27px}
+.eos-demo-form label{color:#dce5df;font-size:11px;font-weight:700}
+.eos-demo-form input{width:100%;height:49px;padding:0 14px;border:1px solid #344247;background:#0a1114;color:#fff;font-size:13px;outline:none}
+.eos-demo-form input:focus{border-color:#ddff70;box-shadow:0 0 0 2px rgba(221,255,112,.1)}
+.eos-demo-form button{display:flex;align-items:center;justify-content:space-between;min-height:49px;margin-top:4px;padding:0 16px;border:1px solid #ddff70;background:#ddff70;color:#11170b;font-size:12px;font-weight:800;cursor:pointer}
+.eos-demo-form button span{font-size:18px}
+.eos-demo-error{margin:12px 0 0!important;padding:10px 12px;border:1px solid rgba(255,130,130,.2);background:rgba(255,100,100,.08);color:#ffb5b5!important;font-size:11px!important}
+.eos-demo-gate-note{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:23px;color:#9eadaa;font:9px monospace;letter-spacing:.03em}
+.eos-demo-gate-note span{width:6px;height:6px;border-radius:50%;background:#ddff70;box-shadow:0 0 10px #ddff70}
+.eos-demo-gate-note b{color:#596761}
+.eos-demo-account-link{display:inline-block;margin-top:25px;color:#dfff82;text-decoration:none;font-size:11px}
+.eos-demo-account-link:hover{text-decoration:underline}
+.eos-demo-gate-footer{display:flex;justify-content:space-between;gap:16px;padding-top:18px;border-top:1px solid #263236;color:#7e8c8b;font:8px monospace;letter-spacing:.1em}
+@media(max-width:600px){.eos-demo-tag{font-size:8px}.eos-demo-gate-card{margin:60px auto}.eos-demo-gate-footer{font-size:7px}}
