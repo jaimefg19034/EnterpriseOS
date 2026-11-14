@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
   title: "EnterpriseOS — Claridad financiera para decidir mejor",
@@ -14,6 +15,6 @@ export const metadata: Metadata = {
 
 export default function PlatformLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: Readonly<{ children: ReactNode }>) {
   return children;
 }
