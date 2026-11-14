@@ -55,6 +55,7 @@
   .p-hero-visual-column{padding:10px 0 4px}
   .p-hero-visual-note b{font-size:10px}
   .p-hero .p-field-visual{min-height:420px}
+  .p-hero .p-field-legend{top:17%;bottom:auto}
   .p-hero-visual-caption{font-size:6px}
   .p-hero-baseline{margin-top:21px;font-size:5.5px;gap:16px}
   .p-hero-baseline span:last-child{text-align:right}
