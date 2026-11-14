@@ -337,3 +337,34 @@
 @media(prefers-reduced-motion:reduce){
  .p-switch button{transition:none}
 }
+
+
+/* OMEGA refinement — remove simulated loading and give small screens a real navigation system. */
+.p-site .p-desktop-nav{display:flex}
+.p-site .p-mobile-menu{display:none}
+.p-site .p-nav{position:relative;z-index:30}
+.p-site :where(a,button,summary,[role="button"]):focus-visible{outline:2px solid #687fd0;outline-offset:4px}
+@media(max-width:720px){
+  .p-site .p-nav{height:68px;gap:12px;padding:0 18px}
+  .p-site .p-desktop-nav{display:none}
+  .p-site .p-mobile-menu{position:relative;display:block;margin-left:auto}
+  .p-site .p-mobile-menu>summary{display:flex;min-height:38px;align-items:center;gap:9px;padding:0 10px;border:1px solid #cbd0ca;color:#334154;cursor:pointer;list-style:none;font:500 7px/1 var(--mono);letter-spacing:1px}
+  .p-site .p-mobile-menu>summary::-webkit-details-marker{display:none}
+  .p-site .p-mobile-menu>summary i,.p-site .p-mobile-menu>summary i:before,.p-site .p-mobile-menu>summary i:after{display:block;width:12px;height:1px;background:#526078;content:"";transition:transform .2s ease}
+  .p-site .p-mobile-menu>summary i{position:relative}
+  .p-site .p-mobile-menu>summary i:before,.p-site .p-mobile-menu>summary i:after{position:absolute;left:0}
+  .p-site .p-mobile-menu>summary i:before{transform:translateY(-4px)}
+  .p-site .p-mobile-menu>summary i:after{transform:translateY(4px)}
+  .p-site .p-mobile-menu[open]>summary i{background:transparent}
+  .p-site .p-mobile-menu[open]>summary i:before{transform:rotate(45deg)}
+  .p-site .p-mobile-menu[open]>summary i:after{transform:rotate(-45deg)}
+  .p-site .p-mobile-menu>nav{position:absolute;top:calc(100% + 12px);right:-52px;display:flex;width:min(290px,calc(100vw - 36px));flex-direction:column;gap:0;margin:0;padding:8px 18px;border:1px solid #d4d8d1;background:#faf9f5;box-shadow:0 20px 50px #121b2a20}
+  .p-site .p-mobile-menu>nav a{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid #e1e3dc;color:#26364a;font-size:12px}
+  .p-site .p-mobile-menu>nav a:last-child{border-bottom:0}
+  .p-site .p-mobile-menu>nav a span{color:#687fd0}
+  .p-site .p-nav-cta{display:flex;width:38px;height:38px;flex:0 0 38px;align-items:center;justify-content:center;overflow:hidden;padding:0;border:1px solid #d4d8d1;font-size:0}
+  .p-site .p-nav-cta svg{width:15px}
+}
+@media(prefers-reduced-motion:reduce){
+  .p-site .p-mobile-menu>summary i,.p-site .p-mobile-menu>summary i:before,.p-site .p-mobile-menu>summary i:after{transition:none}
+}
