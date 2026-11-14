@@ -456,3 +456,61 @@ html{scroll-behavior:smooth}
 @media(prefers-reduced-motion:reduce){
  .ax-site *,.ax-site *:before,.ax-site *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
+
+
+/* CRISP MOTION SYSTEM — vector-led, GPU-composited, no blur-dependent visuals */
+.ax-hero{--pointer-x:50%;--pointer-y:45%;isolation:isolate}
+.ax-hero-atmosphere{
+  background:
+    radial-gradient(560px circle at var(--pointer-x) var(--pointer-y),rgba(214,255,98,.13),transparent 70%),
+    radial-gradient(ellipse at 72% 42%,rgba(91,205,190,.12),transparent 42%),
+    linear-gradient(90deg,rgba(5,8,12,.82),transparent 70%),
+    linear-gradient(0deg,#07090d 0,transparent 23%,transparent 84%,rgba(5,8,12,.4));
+  transition:background-position .12s linear;
+}
+.ax-hero:after{
+  content:"";position:absolute;inset:-25% -12%;z-index:0;pointer-events:none;
+  background:linear-gradient(112deg,transparent 35%,rgba(214,255,98,.035) 47%,rgba(139,216,209,.09) 50%,rgba(255,255,255,.025) 53%,transparent 65%);
+  transform:translate3d(-48%,0,0) rotate(0.001deg);
+  animation:ax-scan-sweep 13s cubic-bezier(.4,0,.2,1) infinite;
+  will-change:transform;opacity:.9;
+}
+.ax-hero-grid{opacity:.2;transform:translateZ(0)}
+.ax-hero-sculpture{filter:none!important;mix-blend-mode:screen;transform:translate3d(0,0,0);animation:ax-sculpture-drift 10s ease-in-out infinite alternate!important}
+.ax-hero-sculpture:after{display:none!important}
+.ax-hero-telemetry{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:inset 0 1px rgba(255,255,255,.22),0 12px 30px rgba(0,0,0,.28)!important}
+.ax-module,.ax-dossier{position:relative;overflow:hidden;transition:transform .22s ease,box-shadow .22s ease!important}
+.ax-module:before,.ax-dossier:after{
+  content:"";position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.0;
+  background:linear-gradient(112deg,transparent 25%,rgba(255,255,255,.48) 48%,rgba(214,255,98,.18) 51%,transparent 72%);
+  transform:translate3d(-115%,0,0);transition:opacity .2s ease;
+}
+.ax-module:hover:before,.ax-dossier:hover:after{opacity:.8;animation:ax-card-sheen .9s ease-out both}
+.ax-module:hover,.ax-dossier:hover{transform:translate3d(0,-4px,0)!important;box-shadow:inset 0 1px rgba(255,255,255,.7),0 14px 28px rgba(0,0,0,.14)!important}
+.ax-dossier-orbit{animation:ax-orbit-turn 18s linear infinite;box-shadow:none!important}
+.ax-dossier-visual i{animation:ax-node-pulse 2.8s ease-in-out infinite}
+.ax-ribbon{transform:none!important;overflow:hidden}
+.ax-ribbon-track{animation:ax-ribbon-glide 42s linear infinite!important;will-change:transform}
+.ax-ribbon-track .ax-precision-mark{transition:transform .25s ease}
+.ax-layer{transform:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;transition:transform .22s ease!important}
+.ax-layer-output,.ax-layer-forecast,.ax-layer-model,.ax-layer-input{transform:none!important}
+.ax-layer:hover{transform:translate3d(0,-3px,0)!important}
+.ax-final-orbit{animation:ax-orbit-turn 28s linear infinite!important;filter:none!important}
+.ax-contour,.ax-contour-b,.ax-contour-c{animation:ax-contour-flow 18s ease-in-out infinite alternate!important;filter:none!important}
+.ax-site :is(.ax-module,.ax-dossier,.ax-layer,.ax-final-cta,.ax-round-cta){backface-visibility:hidden}
+@keyframes ax-scan-sweep{0%,12%{transform:translate3d(-48%,0,0)}68%,100%{transform:translate3d(48%,0,0)}}
+@keyframes ax-sculpture-drift{from{transform:translate3d(0,-7px,0)}to{transform:translate3d(0,7px,0)}}
+@keyframes ax-card-sheen{0%{transform:translate3d(-115%,0,0)}100%{transform:translate3d(115%,0,0)}}
+@keyframes ax-orbit-turn{from{transform:rotate(0deg) scaleY(.4)}to{transform:rotate(360deg) scaleY(.4)}}
+@keyframes ax-node-pulse{0%,100%{opacity:.65;transform:translate3d(90px,-38px,0) scale(.85)}50%{opacity:1;transform:translate3d(90px,-38px,0) scale(1.15)}}
+@keyframes ax-ribbon-glide{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+@keyframes ax-contour-flow{from{transform:translate3d(-5px,0,0)}to{transform:translate3d(5px,-8px,0)}}
+@media(max-width:700px){
+ .ax-hero:after{opacity:.45;animation-duration:18s}
+ .ax-hero-sculpture{opacity:.78!important}
+ .ax-module:hover,.ax-dossier:hover{transform:translate3d(0,-2px,0)!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .ax-hero:after,.ax-hero-sculpture,.ax-dossier-orbit,.ax-dossier-visual i,.ax-ribbon-track,.ax-final-orbit,.ax-contour,.ax-contour-b,.ax-contour-c{animation:none!important}
+ .ax-module:before,.ax-dossier:after{display:none!important}
+}
