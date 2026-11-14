@@ -197,7 +197,7 @@ export default function AtlasLanding() {
           </div>
           <div className="eos-home-product-copy"><span>02 / PLANIFICACIÓN</span><h3>Prueba antes de decidir.</h3><p>Modifica presupuestos y supuestos para comparar escenarios y medir su impacto en ingresos y rentabilidad.</p></div>
         </article>
-        <article className="eos-home-product-card">
+        <article className="eos-home-product-card" onPointerMove={trackSurfacePointer}>
           <div className="eos-home-product-visual eos-home-visual-cash">
             <div className="eos-home-cash-head"><span>13-WEEK CASH VIEW</span><b>€112,400</b></div>
             <div className="eos-home-cash-bars">{[68,54,78,48,85,63,92,72,58,88,67,96,78].map((h,i)=><i key={i} style={{height:h+"%"}} />)}</div>
@@ -205,7 +205,7 @@ export default function AtlasLanding() {
           </div>
           <div className="eos-home-product-copy"><span>03 / TESORERÍA</span><h3>Anticipa tus necesidades de caja.</h3><p>Prepara una previsión manual de 13 semanas y sigue cobros, pagos y vencimientos pendientes.</p></div>
         </article>
-        <article className="eos-home-product-card">
+        <article className="eos-home-product-card" onPointerMove={trackSurfacePointer}>
           <div className="eos-home-product-visual eos-home-visual-statements">
             <div className="eos-home-statement-row"><span>Income statement</span><b>EBITDA</b><i>€51.0k</i></div>
             <div className="eos-home-statement-row"><span>Balance sheet</span><b>ASSETS</b><i>€184.2k</i></div>
@@ -214,7 +214,7 @@ export default function AtlasLanding() {
           </div>
           <div className="eos-home-product-copy"><span>04 / MODELO FINANCIERO</span><h3>Conecta los tres estados.</h3><p>Relaciona cuenta de resultados, balance y flujo de caja mediante supuestos editables en un modelo simplificado.</p></div>
         </article>
-        <article className="eos-home-product-card">
+        <article className="eos-home-product-card" onPointerMove={trackSurfacePointer}>
           <div className="eos-home-product-visual eos-home-visual-operations">
             <div className="eos-home-ops-center">COSTES<br/><b>POR ÁREA</b></div>
             <div className="eos-home-ops-node node-a">SALES</div><div className="eos-home-ops-node node-b">OPS</div><div className="eos-home-ops-node node-c">ADMIN</div>
@@ -222,7 +222,7 @@ export default function AtlasLanding() {
           </div>
           <div className="eos-home-product-copy"><span>05 / OPERACIONES</span><h3>Localiza dónde se consume el margen.</h3><p>Registra y analiza costes por centro o área para añadir contexto operativo a la lectura financiera.</p></div>
         </article>
-        <article className="eos-home-product-card">
+        <article className="eos-home-product-card" onPointerMove={trackSurfacePointer}>
           <div className="eos-home-product-visual eos-home-visual-reports">
             <div className="eos-home-report-sheet"><div/><div/><div/><div/><div/></div>
             <div className="eos-home-report-export"><b> XLSX </b><span>MANAGEMENT REPORT</span><i>READY TO EXPORT ↗</i></div>
