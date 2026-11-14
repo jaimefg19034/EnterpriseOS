@@ -2,7 +2,7 @@
 .p-site .p-discipline,.p-site .p-scenario-card{isolation:isolate}
 .p-site .p-discipline::after,.p-site .p-scenario-card::after{
   position:absolute;inset:0;z-index:0;content:"";pointer-events:none;opacity:0;
-  background:radial-gradient(420px circle at 50% 35%,rgba(255,255,255,.72),rgba(166,182,255,.12) 34%,transparent 72%);
+  background:radial-gradient(420px circle at var(--card-x,50%) var(--card-y,35%),rgba(255,255,255,.72),rgba(166,182,255,.12) 34%,transparent 72%);
   transition:opacity .55s var(--atlas-ease);
 }
 .p-site .p-discipline>* ,.p-site .p-scenario-card>*{position:relative;z-index:1}
@@ -42,4 +42,14 @@
 }
 @media(prefers-reduced-motion:reduce){
   .p-site .p-discipline,.p-site .p-discipline::after,.p-site .p-scenario-card::after,.p-site .p-button,.p-site .p-button svg{animation:none!important;transition:none!important;transform:none!important}
+}
+
+
+/* Keep the bento's authored spatial lift after the shared tactile hover layer. */
+@media(hover:hover) and (pointer:fine){
+  .p-site .p-discipline:hover{
+    transform:translateY(-5px) rotateX(.35deg);
+    border-color:rgba(101,123,208,.42);
+    box-shadow:0 2px 0 rgba(18,27,42,.04),0 18px 34px rgba(18,27,42,.09),0 42px 76px rgba(18,27,42,.12),inset 0 1px 0 rgba(255,255,255,.95);
+  }
 }

@@ -1,7 +1,24 @@
+import type { PointerEvent } from "react";
 import TechnicalLabel from "../../components/ui/TechnicalLabel";
 import { scenarios, type Scenario } from "./scenarios";
 
 const order: Scenario[] = ["conservador", "base", "crecimiento"];
+function trackScenarioLight(event: PointerEvent<HTMLButtonElement>) {
+  if (event.pointerType === "touch") return;
+  const bounds = event.currentTarget.getBoundingClientRect();
+  if (!bounds.width || !bounds.height) return;
+  const x = Math.max(0, Math.min(100, ((event.clientX - bounds.left) / bounds.width) * 100));
+  const y = Math.max(0, Math.min(100, ((event.clientY - bounds.top) / bounds.height) * 100));
+  event.currentTarget.style.setProperty("--scenario-x", `${x}%`);
+  event.currentTarget.style.setProperty("--scenario-y", `${y}%`);
+  event.currentTarget.style.setProperty("--scenario-tilt-x", `${((50 - y) / 50) * 1.8}deg`);
+  event.currentTarget.style.setProperty("--scenario-tilt-y", `${((x - 50) / 50) * 2.2}deg`);
+}
+
+function resetScenarioLight(event: PointerEvent<HTMLButtonElement>) {
+  ["--scenario-x", "--scenario-y", "--scenario-tilt-x", "--scenario-tilt-y"].forEach(property => event.currentTarget.style.removeProperty(property));
+}
+
 const codes: Record<Scenario, string> = {
   conservador: "DOWNSIDE",
   base: "REFERENCE",
@@ -37,15 +54,18 @@ export default function ScenarioMatrix({
               aria-pressed={selected}
               aria-label={`Seleccionar escenario ${item.label}`}
               onClick={() => onScenarioChange(key)}
+              onPointerMove={trackScenarioLight}
+              onPointerLeave={resetScenarioLight}
+              onPointerCancel={resetScenarioLight}
             >
-              <div className="p-scenario-card-top"><span>0{index + 1} / {codes[key]}</span><b>{item.delta}</b></div>
-              <h3>{item.label}</h3>
-              <div className="p-scenario-card-metrics">
-                <div><small>INGRESOS</small><strong>{item.revenue}</strong></div>
-                <div><small>EBITDA</small><strong>{item.ebitda}</strong></div>
-                <div><small>CAJA</small><strong>{item.cash}</strong></div>
-              </div>
-              <div className="p-scenario-card-foot"><span>ILLUSTRATIVE MODEL</span><span>{selected ? "SELECTED ✓" : "SELECT TO EXPLORE"}</span></div>
+              <span className="p-scenario-card-top"><span>0{index + 1} / {codes[key]}</span><b>{item.delta}</b></span>
+              <span className="p-scenario-card-title">{item.label}</span>
+              <span className="p-scenario-card-metrics">
+                <span><small>INGRESOS</small><strong>{item.revenue}</strong></span>
+                <span><small>EBITDA</small><strong>{item.ebitda}</strong></span>
+                <span><small>CAJA</small><strong>{item.cash}</strong></span>
+              </span>
+              <span className="p-scenario-card-foot"><span>ILLUSTRATIVE MODEL</span><span>{selected ? "SELECTED ✓" : "SELECT TO EXPLORE"}</span></span>
             </button>
           );
         })}

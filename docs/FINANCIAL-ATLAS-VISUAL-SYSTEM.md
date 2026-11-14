@@ -1,6 +1,6 @@
 # EnterpriseOS — Financial Atlas Visual System
 
-**Version:** Omega / visual system increment  
+**Version:** Spatial field increment  
 **Scope:** Public-facing Financial Atlas landing page  
 **Status:** Design specification aligned with the implemented CSS and React components. Values marked as aspirational are not presented as shipped behavior.
 
@@ -66,6 +66,16 @@ Do not apply expanded tracking to every label indiscriminately. Use uppercase tr
 - Hairlines use 1px CSS borders with low-opacity ink. Crosshair intersections are decorative only; they must not resemble controls.
 - Dense composition means purposeful relationships between modules, not filling every pixel. Preserve breathing room around headlines, live product controls and financial figures.
 
+### Spatial field interaction (implemented)
+
+The hero's topographic field now responds to mouse and pen input:
+- Pointer coordinates map to a restrained X/Y rotation, capped at approximately 3.2° / 4.2°.
+- A localized radial specular highlight follows the pointer; the contour layer shifts independently to create differential parallax.
+- Coordinate readouts and telemetry labels occupy a higher transform layer than the contour SVG.
+- The field uses CSS perspective and transforms. It is **not WebGL**, does not contain a physically simulated glass shader and does not claim 360° object manipulation.
+- Touch devices receive a static, readable composition rather than simulated pointer tracking.
+- Pointer state resets on exit. Reduced-motion preferences remove transforms and transitions.
+
 ## 5. Motion and interaction
 
 | Interaction | Treatment | Constraint |
@@ -74,7 +84,7 @@ Do not apply expanded tracking to every label indiscriminately. Use uppercase tr
 | Bento spotlight | Soft radial edge light on hover | Pointer-capable devices only |
 | Card lift | 2px elevation with long deceleration | No scaling or bouncing |
 | CTA response | Restrained highlight sweep and arrow translation | No cursor-following movement |
-| Hero field | Slow contour drift / scenario-linked visual shift | Never imply live market data |
+| Hero field | Pointer-driven perspective, localized light and contour parallax | CSS spatial effect, not WebGL; no live-data implication |
 | Mobile dock | Fixed instrument rail with translucent paper surface | Safe-area inset and keyboard focus preserved |
 
 The native pointer is intentionally retained. A custom cursor that replaces browser affordances, follows the pointer on touch devices or advertises nonexistent 360° interactions is not part of the current implementation. A true magnetic interaction should only be introduced with pointer-capability detection, reduced-motion handling and keyboard-equivalent behavior.
@@ -89,6 +99,7 @@ At widths up to 720px:
 - Scenario cards stack vertically to keep metrics readable; no essential figures are hidden in swipe-only carousels.
 - The footer receives extra bottom clearance so the dock does not cover the last line of content.
 - Reduced-motion preferences disable transitions and reveal animations.
+- The hero field does not tilt or track touch input.
 
 ## 7. Product truth and visual integrity
 
@@ -102,3 +113,46 @@ Before merge or publication:
 3. Verify dock clearance, focus visibility, contrast, text wrapping and no horizontal overflow.
 4. Verify keyboard navigation and `prefers-reduced-motion`.
 5. Capture browser screenshots for visual QA; a passing build alone is not proof of visual correctness.
+
+
+## Spatial Field — pointer performance and accessibility
+
+The hero field updates its six spatial CSS custom properties directly on the pointer target. Pointer movement does not trigger React state updates or re-render the contour SVG and financial labels. Pointer leave and cancellation remove the active class and restore the CSS defaults. Touch input is intentionally ignored; the mobile composition remains static. The reduced-motion mode disables the moving spotlight and spatial transforms rather than merely shortening their duration. This is a CSS 3D interaction, not a WebGL scene or a physically based refraction simulation.
+
+
+## Spatial bento and product chassis
+
+Capability modules use a shared 3D perspective context with restrained elevation, a machined hairline rim, layered shadows, and distinct Z positions for metadata, visual instrument, and copy. Their miniature diagrams sit on inset translucent surfaces; module labels remain readable and disclose manual or MVP scope. Hover elevation is limited to fine pointers, while touch layouts remain static and reduced-motion removes transforms.
+
+The product showcase treats the actual planning workspace as an instrument mounted inside a layered chassis. The X-ray rail, workspace surface, and outer frame occupy separate visual planes. This is CSS perspective and layered compositing, not a WebGL model. The live workspace remains the real application component and keeps its existing temporary sample-data behavior.
+
+
+## Spatial conversion and footer
+
+The conversion surface uses a restrained radial key light, a layered dark chassis, and a raised glass-like brand seal. The footer receives a low-contrast architectural grid and recessed typographic treatment. The CTA remains readable and functional without requiring pointer interaction; mobile removes the spatial transforms and reduced-motion disables them. No fake live telemetry, awards, customer marks, or unsupported contact form has been introduced.
+
+
+## Scenario matrix — pointer materiality
+
+The three scenario selectors use pointer-local CSS variables for a restrained 3D tilt and radial key light on fine pointers. Coordinates are written directly to the selected button (no React state or rerender); touch input remains static. Pointer leave/cancel clears the transient variables. The selected state, scenario values, keyboard operation, and live-region feedback remain the source of truth. Reduced-motion disables the transform. This is CSS perspective/compositing, not WebGL or physically simulated material.
+
+
+## Decision field — instrumented financial output
+
+The decision simulator's result surface uses pointer-local CSS variables for a low-amplitude perspective response and radial key light on fine pointers. It writes directly to the panel element, avoiding React state churn; touch remains static and pointer leave/cancel clears transient state. Existing scenario selection, illustrative figures, relative-index bars, and synthetic-data disclosure are unchanged. Reduced-motion removes transforms and transitions. The effect is CSS perspective and compositing, not WebGL or physically simulated optics.
+
+
+## Financial reasoning architecture — spatial instrument
+
+The “From input to decision” section now presents the four-stage model as a layered instrument rather than a flat row of labels:
+- Inputs: manual drivers and assumptions.
+- Model: financial relationships, P&L, budget and variance.
+- Outlook: scenarios and the 13-week cash view.
+- Decision: management performance and exposure.
+
+The four stages are semantic ordered-list items. Each carries a stage index, operating mode and representative output vocabulary. Their staggered Z-depth, restrained elevation, inset highlights, connecting markers and material frame reinforce the direction of financial reasoning without implying an automated data pipeline or capabilities outside the current MVP. The mobile layout flattens the depth and becomes a two-column sequence; reduced-motion preferences remove transforms and transitions.
+
+
+### Product chassis pointer response
+
+The real workspace showcase now has a pointer-local key light and very low-amplitude X/Y micro-parallax. Pointer coordinates are written directly to CSS custom properties on the chassis; no React state is involved. The stage returns to neutral on pointer leave/cancel. Touch layouts remain static, and reduced-motion preferences disable the transform and transition. The effect is CSS perspective, not a 3D/WebGL renderer.

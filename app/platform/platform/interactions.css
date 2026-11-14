@@ -48,3 +48,16 @@
 @media(prefers-reduced-motion:reduce){
   .p-site .p-mobile-menu-toggle i,.p-site .p-mobile-menu-toggle i:before,.p-site .p-mobile-menu-toggle i:after{transition:none}
 }
+
+
+/* DECISION FIELD / financial output as a cursor-lit instrument. */
+@media (hover:hover) and (pointer:fine) {
+ .p-site .p-sim-panel{transform:perspective(1500px) rotateX(var(--decision-tilt-x,0deg)) rotateY(var(--decision-tilt-y,0deg));transform-style:preserve-3d;transition:transform .32s cubic-bezier(.2,.8,.2,1),box-shadow .32s;box-shadow:0 22px 55px #17263e12,0 2px 7px #17263e0a}
+ .p-site .p-sim-panel:before{z-index:0;opacity:.3;background-image:radial-gradient(520px circle at var(--decision-x,50%) var(--decision-y,30%),rgba(166,182,255,.24),transparent 66%),linear-gradient(#b8c8e015 1px,transparent 1px),linear-gradient(90deg,#b8c8e015 1px,transparent 1px);background-size:auto,34px 34px,34px 34px}
+ .p-site .p-sim-panel:after{box-shadow:0 0 18px #a6b6ff70}
+ .p-site .p-values>div{transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+ .p-site .p-sim-panel:hover .p-values>div{transform:translateY(-2px)}
+ .p-site .p-sim-bars i{overflow:hidden}
+ .p-site .p-sim-bars i b{transform-origin:left center;transition:width .55s cubic-bezier(.2,.8,.2,1)}
+}
+@media(prefers-reduced-motion:reduce){.p-site .p-sim-panel,.p-site .p-values>div,.p-site .p-sim-bars i b{transform:none!important;transition:none!important}}

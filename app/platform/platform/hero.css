@@ -67,11 +67,74 @@
   .p-hero-baseline span:last-child{max-width:120px}
 }
 
-
-/* Spatial depth and material response */
+/* SPATIAL FIELD / pointer-driven parallax, layered light and restrained physical response. */
 .p-hero-visual-column{perspective:1500px}
-.p-hero .p-field-visual{transform:rotateY(-1.6deg) rotateX(.8deg);transform-style:preserve-3d;transition:transform .8s cubic-bezier(.16,1,.3,1),box-shadow .8s}
-.p-hero .p-field-visual:hover{transform:rotateY(0) rotateX(0) translateY(-3px);box-shadow:0 36px 90px #0005}
-.p-hero .p-field-coordinate{transform:translateZ(22px)}
-@media(max-width:720px){.p-hero-visual-column{perspective:none}.p-hero .p-field-visual,.p-hero .p-field-visual:hover{transform:none}.p-hero .p-field-coordinate{transform:none}}
-@media(prefers-reduced-motion:reduce){.p-hero .p-field-visual{transition:none}}
+.p-hero .p-field-visual{
+  --field-x:50%;
+  --field-y:50%;
+  --field-rotate-x:0deg;
+  --field-rotate-y:0deg;
+  --field-shift-x:0px;
+  --field-shift-y:0px;
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  transform:perspective(1200px) rotateX(var(--field-rotate-x)) rotateY(var(--field-rotate-y)) translateZ(0);
+  transform-style:preserve-3d;
+  transition:transform .42s cubic-bezier(.2,.75,.25,1),box-shadow .55s cubic-bezier(.16,1,.3,1);
+  will-change:transform;
+}
+.p-hero .p-field-visual::before{
+  position:absolute;
+  inset:-1px;
+  z-index:1;
+  content:"";
+  pointer-events:none;
+  opacity:0;
+  background:radial-gradient(360px circle at var(--field-x) var(--field-y),rgba(206,218,255,.19),rgba(166,182,255,.055) 32%,transparent 70%);
+  transition:opacity .35s ease;
+}
+.p-hero .p-field-visual::after{
+  position:absolute;
+  inset:0;
+  z-index:4;
+  content:"";
+  pointer-events:none;
+  border:1px solid rgba(205,218,255,.2);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(5,12,23,.55);
+}
+.p-hero .p-field-visual.is-pointer-active::before{opacity:1}
+.p-hero .p-field-visual.is-pointer-active{
+  box-shadow:0 42px 100px rgba(0,0,0,.38),0 0 0 1px rgba(166,182,255,.12);
+}
+.p-hero .p-contours{
+  position:relative;
+  z-index:0;
+  transform:translate3d(var(--field-shift-x),var(--field-shift-y),18px) scale(1.015);
+  transform-origin:center;
+  transition:transform .7s cubic-bezier(.16,1,.3,1),filter .7s ease;
+  filter:drop-shadow(0 12px 24px rgba(4,10,20,.18));
+}
+.p-hero .p-field-coordinate{
+  transform:translate3d(0,0,42px);
+  transition:transform .7s cubic-bezier(.16,1,.3,1);
+}
+.p-hero .p-field-top,.p-hero .p-field-bottom,.p-hero .p-field-legend{
+  transform:translateZ(28px);
+}
+.p-hero .p-field-route{filter:drop-shadow(0 0 7px rgba(166,182,255,.55))}
+@media(hover:hover) and (pointer:fine){
+  .p-hero .p-field-visual:not(.is-pointer-active):hover{transform:perspective(1200px) rotateX(-.7deg) rotateY(1deg) translateY(-3px)}
+}
+@media(max-width:720px){
+  .p-hero-visual-column{perspective:none}
+  .p-hero .p-field-visual,.p-hero .p-field-visual.is-pointer-active{transform:none;will-change:auto}
+  .p-hero .p-contours{transform:none}
+  .p-hero .p-field-coordinate,.p-hero .p-field-top,.p-hero .p-field-bottom,.p-hero .p-field-legend{transform:none}
+  .p-hero .p-field-visual::before{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .p-hero .p-field-visual,.p-hero .p-contours,.p-hero .p-field-coordinate,.p-hero .p-field-visual::before{transition:none!important;transform:none!important}
+  .p-hero .p-field-visual{will-change:auto;box-shadow:none!important}
+  .p-hero .p-field-visual::before{display:none!important}
+}

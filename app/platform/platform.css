@@ -64,3 +64,54 @@
 .p-site .p-footer-wordmark{overflow:hidden;padding:clamp(42px,7vw,96px) 0 clamp(30px,4vw,52px);color:#e7edf5;font:500 clamp(4.2rem,10vw,10rem)/.74 var(--display);letter-spacing:-.105em;white-space:nowrap}
 .p-site .p-footer-wordmark em{color:#a6b6ff;font:italic 400 1.02em/.7 var(--editorial);letter-spacing:-.075em}
 @media(max-width:640px){.p-site .p-footer-wordmark{padding:45px 0 32px;font-size:clamp(2.6rem,12vw,4.2rem);letter-spacing:-.1em}}
+
+
+/* SPATIAL CONVERSION / the final decision surface is a lit, recessed architectural plate. */
+.p-site .p-cta{
+  isolation:isolate;
+  perspective:1600px;
+  background:radial-gradient(ellipse at 76% 44%,rgba(89,111,161,.32),transparent 42%),linear-gradient(135deg,#1a2b45 0%,#14243b 54%,#101b2b 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -1px 0 rgba(0,0,0,.28);
+}
+.p-site .p-cta::before{
+  position:absolute;inset:0;z-index:0;content:"";pointer-events:none;
+  background:linear-gradient(115deg,transparent 28%,rgba(166,182,255,.07) 49%,transparent 68%),radial-gradient(ellipse at 18% 0%,rgba(255,255,255,.075),transparent 38%);
+}
+.p-site .p-cta-meta,.p-site .p-cta-main{position:relative;z-index:2}
+.p-site .p-cta-main{transform:translateZ(24px)}
+.p-site .p-cta-seal{
+  z-index:1;
+  padding:20px 24px;
+  border:1px solid rgba(166,182,255,.22);
+  background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.018));
+  box-shadow:0 22px 55px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.16);
+  backdrop-filter:blur(12px) saturate(1.2);
+  transform:translateZ(42px) rotateY(-8deg) rotateX(3deg);
+}
+.p-site .p-cta-contours{z-index:0;filter:drop-shadow(0 0 12px rgba(166,182,255,.16))}
+.p-site .p-cta .p-button-light{
+  box-shadow:0 2px 0 rgba(255,255,255,.55),0 10px 24px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.8);
+}
+.p-site .p-footer{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  background:radial-gradient(ellipse at 82% 18%,rgba(68,91,132,.18),transparent 34%),linear-gradient(155deg,#121f32,#0d1725);
+}
+.p-site .p-footer::before{
+  position:absolute;inset:0;z-index:-1;content:"";pointer-events:none;opacity:.18;
+  background-image:linear-gradient(rgba(166,182,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(166,182,255,.12) 1px,transparent 1px);
+  background-size:72px 72px;
+  mask-image:linear-gradient(135deg,#000,transparent 72%);
+}
+.p-site .p-footer-wordmark{
+  position:relative;
+  text-shadow:0 1px 0 rgba(255,255,255,.12),0 12px 35px rgba(0,0,0,.18);
+}
+@media(max-width:640px){
+  .p-site .p-cta-main,.p-site .p-cta-seal{transform:none}
+  .p-site .p-cta-seal{padding:12px 14px}
+}
+@media(prefers-reduced-motion:reduce){
+  .p-site .p-cta-main,.p-site .p-cta-seal{transform:none!important}
+}
