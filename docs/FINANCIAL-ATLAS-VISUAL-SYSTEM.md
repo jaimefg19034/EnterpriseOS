@@ -135,3 +135,8 @@ The conversion surface uses a restrained radial key light, a layered dark chassi
 ## Scenario matrix — pointer materiality
 
 The three scenario selectors use pointer-local CSS variables for a restrained 3D tilt and radial key light on fine pointers. Coordinates are written directly to the selected button (no React state or rerender); touch input remains static. Pointer leave/cancel clears the transient variables. The selected state, scenario values, keyboard operation, and live-region feedback remain the source of truth. Reduced-motion disables the transform. This is CSS perspective/compositing, not WebGL or physically simulated material.
+
+
+## Decision field — instrumented financial output
+
+The decision simulator's result surface uses pointer-local CSS variables for a low-amplitude perspective response and radial key light on fine pointers. It writes directly to the panel element, avoiding React state churn; touch remains static and pointer leave/cancel clears transient state. Existing scenario selection, illustrative figures, relative-index bars, and synthetic-data disclosure are unchanged. Reduced-motion removes transforms and transitions. The effect is CSS perspective and compositing, not WebGL or physically simulated optics.
