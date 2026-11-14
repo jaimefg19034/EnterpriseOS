@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 const benefits = [
   { number: "01", title: "Entiende el rendimiento", copy: "Lee ingresos, costes y márgenes desde una única perspectiva.", icon: "performance" },
   { number: "02", title: "Anticipa escenarios", copy: "Compara hipótesis y entiende cómo afectan al resultado.", icon: "scenarios" },
@@ -51,13 +53,34 @@ function BenefitIcon({ type }: { type: string }) {
 }
 
 export default function AtlasLanding() {
+  const [demoAccessOpen, setDemoAccessOpen] = useState(false);
+  const [demoCode, setDemoCode] = useState("");
+  const [demoError, setDemoError] = useState("");
+
+  function openDemoAccess(event: React.MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
+    setDemoCode("");
+    setDemoError("");
+    setDemoAccessOpen(true);
+  }
+
+  function submitDemoAccess(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (demoCode.trim().toUpperCase() !== "ATLAS-DEMO-2026") {
+      setDemoError("La clave no es correcta. Comprueba el código e inténtalo de nuevo.");
+      return;
+    }
+    window.sessionStorage.setItem("enterpriseos:demo-access", "granted");
+    window.location.href = "/EnterpriseOS/";
+  }
+
   return <main className="eos-home" id="top">
     <header className="eos-home-nav">
       <Brand />
       <nav aria-label="Navegación principal"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a></nav>
       <div className="eos-home-nav-actions">
         <a className="eos-home-login" href="/EnterpriseOS/account/">Iniciar sesión</a>
-        <a className="eos-home-workspace-link" href="/EnterpriseOS/">Entrar al workspace <Arrow /></a>
+        <a className="eos-home-workspace-link" href="/EnterpriseOS/" onClick={openDemoAccess}>Entrar al workspace <Arrow /></a>
         <a className="eos-home-button eos-home-button-small" href="/EnterpriseOS/account/?mode=signup">Crear cuenta <Arrow /></a>
       </div>
     </header>
@@ -68,7 +91,7 @@ export default function AtlasLanding() {
         <h1>La claridad financiera<br />para <em>decidir mejor.</em></h1>
         <p>Conecta rendimiento, planificación y tesorería. Comprende qué ocurre en tu negocio y anticipa lo que viene.</p>
         <div className="eos-home-hero-actions">
-          <a className="eos-home-button" href="/EnterpriseOS/">Explorar workspace demo <Arrow /></a>
+          <a className="eos-home-button" href="/EnterpriseOS/" onClick={openDemoAccess}>Probar demo <Arrow /></a>
           <a className="eos-home-text-link" href="/EnterpriseOS/account/">Ya tengo cuenta · Iniciar sesión <span>↗</span></a>
         </div>
         <div className="eos-home-proof"><span><i /> UNA VISIÓN FINANCIERA CONECTADA</span><span>DISEÑADO PARA DECISORES</span></div>
@@ -143,7 +166,7 @@ export default function AtlasLanding() {
         </article>
       </div>
       <div className="eos-home-product-foot"><span>UN FLUJO DE TRABAJO SENCILLO</span><div><b>01</b> Entender <i>→</i> <b>02</b> Planificar <i>→</i> <b>03</b> Anticipar <i>→</i> <b>04</b> Decidir</div></div>
-      <div className="eos-home-product-cta"><p>¿Quieres verlo funcionando? Entra y explora el entorno de demostración.</p><a className="eos-home-button" href="/EnterpriseOS/">Abrir workspace demo <Arrow /></a></div>
+      <div className="eos-home-product-cta"><p>¿Quieres verlo funcionando? Entra y explora el entorno de demostración.</p><a className="eos-home-button" href="/EnterpriseOS/" onClick={openDemoAccess}>Abrir workspace demo <Arrow /></a></div>
       <p className="eos-home-product-disclaimer">VISTA ILUSTRATIVA · CIFRAS SINTÉTICAS · DATOS Y SUPUESTOS INTRODUCIDOS MANUALMENTE · LOS CAMBIOS SE GUARDAN LOCALMENTE EN ESTA VERSIÓN.</p>
     </section>
 
@@ -183,13 +206,30 @@ export default function AtlasLanding() {
       <div className="eos-home-close-orbit" aria-hidden="true"><span /><span /><span /></div>
       <div className="eos-home-kicker"><i /> EL SIGUIENTE PASO</div>
       <h2>Entiende los números.<br /><em>Adelántate a las decisiones.</em></h2>
-      <div className="eos-home-close-bottom"><p>Entra en EnterpriseOS y lleva tu planificación financiera a un lugar más claro.</p><a className="eos-home-button" href="/EnterpriseOS/">Entrar al workspace <Arrow /></a></div>
+      <div className="eos-home-close-bottom"><p>Entra en EnterpriseOS y lleva tu planificación financiera a un lugar más claro.</p><a className="eos-home-button" href="/EnterpriseOS/" onClick={openDemoAccess}>Probar demo <Arrow /></a></div>
     </section>
 
     <footer className="eos-home-footer">
       <div className="eos-home-footer-main"><Brand /><p>Financial Decision Intelligence<br />para empresas que quieren decidir con contexto.</p></div>
-      <div className="eos-home-footer-links"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a><a href="/EnterpriseOS/account/">Iniciar sesión</a><a href="/EnterpriseOS/">Workspace demo</a></div>
+      <div className="eos-home-footer-links"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a><a href="/EnterpriseOS/account/">Iniciar sesión</a><a href="/EnterpriseOS/" onClick={openDemoAccess}>Workspace demo</a></div>
       <div className="eos-home-footer-bottom"><span>© {new Date().getFullYear()} ENTERPRISEOS</span><span>DATOS MANUALES · PERSISTENCIA LOCAL · MVP</span><span>THE FINANCIAL ATLAS</span></div>
     </footer>
+    {demoAccessOpen && <div className="eos-home-demo-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDemoAccessOpen(false); }}>
+      <section className="eos-home-demo-dialog" role="dialog" aria-modal="true" aria-labelledby="eos-home-demo-title">
+        <button className="eos-home-demo-close" type="button" onClick={() => setDemoAccessOpen(false)} aria-label="Cerrar">×</button>
+        <span className="eos-home-demo-kicker">ENTERPRISEOS / DEMO ACCESS</span>
+        <div className="eos-home-demo-mark">EO</div>
+        <h2 id="eos-home-demo-title">Explora el workspace.</h2>
+        <p>Introduce la clave de demostración para acceder al entorno financiero interactivo con datos ficticios.</p>
+        <form onSubmit={submitDemoAccess}>
+          <label htmlFor="eos-home-demo-code">Clave de acceso</label>
+          <input id="eos-home-demo-code" type="password" autoComplete="off" value={demoCode} onChange={(event) => { setDemoCode(event.target.value); setDemoError(""); }} placeholder="Introduce tu clave" required autoFocus />
+          {demoError && <span className="eos-home-demo-error" role="alert">{demoError}</span>}
+          <button type="submit">Acceder al workspace <Arrow /></button>
+        </form>
+        <div className="eos-home-demo-foot">DEMO CON DATOS SINTÉTICOS <i /> SIN CONEXIÓN BANCARIA</div>
+        <a href="/EnterpriseOS/account/">¿Ya tienes una cuenta? Iniciar sesión</a>
+      </section>
+    </div>}
   </main>;
 }
