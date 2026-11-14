@@ -1,3 +1,4 @@
+import type { PointerEvent } from "react";
 import Arrow from "../../components/ui/Arrow";
 import TechnicalLabel from "../../components/ui/TechnicalLabel";
 
@@ -84,6 +85,21 @@ function DisciplineVisual({ type }: { type: string }) {
   );
 }
 
+function trackDisciplineLight(event: PointerEvent<HTMLElement>) {
+  if (event.pointerType === "touch") return;
+  const bounds = event.currentTarget.getBoundingClientRect();
+  if (!bounds.width || !bounds.height) return;
+  const x = Math.max(0, Math.min(100, ((event.clientX - bounds.left) / bounds.width) * 100));
+  const y = Math.max(0, Math.min(100, ((event.clientY - bounds.top) / bounds.height) * 100));
+  event.currentTarget.style.setProperty("--card-x", `${x}%`);
+  event.currentTarget.style.setProperty("--card-y", `${y}%`);
+}
+
+function resetDisciplineLight(event: PointerEvent<HTMLElement>) {
+  event.currentTarget.style.removeProperty("--card-x");
+  event.currentTarget.style.removeProperty("--card-y");
+}
+
 export default function CapabilityBento() {
   return (
     <section className="p-capabilities p-capabilities-editorial" id="capabilities" aria-labelledby="capabilities-title">
@@ -100,7 +116,7 @@ export default function CapabilityBento() {
       </div>
       <div className="p-disciplines">
         {disciplines.map((discipline) => (
-          <article className={`p-discipline ${discipline.className}`} key={discipline.number}>
+          <article className={`p-discipline ${discipline.className}`} key={discipline.number} onPointerMove={trackDisciplineLight} onPointerLeave={resetDisciplineLight} onPointerCancel={resetDisciplineLight}>
             <div className="p-discipline-meta"><span>{discipline.number} / {discipline.code}</span><span>FINANCIAL ATLAS</span></div>
             <DisciplineVisual type={discipline.visual} />
             <div className="p-discipline-copy">
