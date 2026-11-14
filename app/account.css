@@ -44,7 +44,7 @@
 
 
 /* Account, login and plan selection — luminous high-contrast Atlas system. */
-.eos-account {
+.eos-account { --ws-mono:"Fragment Mono",monospace;
   color:#09090B!important;
   background-color:#F1F5F9!important;
   background-image:radial-gradient(ellipse at 76% 5%,rgba(126,148,220,.12),transparent 36%),linear-gradient(rgba(71,85,105,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(71,85,105,.035) 1px,transparent 1px)!important;
