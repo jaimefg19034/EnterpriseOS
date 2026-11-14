@@ -503,102 +503,86 @@ export default function Home() {
 
         <div className="content-area">
           {view === "overview" && (
-            <div className="executive-overview">
-              <section className="executive-heading">
-                <div className="executive-heading-copy">
-                  <div className="eyebrow">{t("MONDAY, 9 NOVEMBER 2026")} <span className="eyebrow-dot" /> {t("FINANCIAL OVERVIEW")}</div>
-                  <h1>{t("Good morning, team")} <span className="heading-wave">✳</span></h1>
-                  <p>{t("Here's how Aster & Co. is performing across the current reporting period.")}</p>
+            <div className="command-center">
+              <section className="command-hero">
+                <div className="command-hero-copy">
+                  <div className="eyebrow">{t("FINANCE COMMAND CENTRE")} <span className="eyebrow-dot" /> {t("FY 2026")}</div>
+                  <h1>{t("The business, in one view.")}</h1>
+                  <p>{t("A decision-ready view of performance, profitability and the assumptions behind the numbers.")}</p>
+                  <div className="command-hero-meta"><span className="demo-badge"><i /> {t("ILLUSTRATIVE WORKSPACE")}</span><span>{t("Aster & Co. · EUR")}</span></div>
                 </div>
-                <div className="executive-heading-actions">
-                  <span className="demo-badge"><i /> {t("SAMPLE DATA")}</span>
-                  <button className="secondary-button" onClick={() => setInputs(DEMO_INPUTS)}>
-                    <Icon name="refresh" size={15} /> {t("Reset demo")}
-                  </button>
+                <div className="command-hero-actions">
+                  <button className="primary-button" onClick={() => setView("model")}>{t("Edit financial model")} <Icon name="arrow" size={16} /></button>
+                  <button className="secondary-button" onClick={() => setInputs(DEMO_INPUTS)}><Icon name="refresh" size={15} /> {t("Reset demo")}</button>
                 </div>
               </section>
 
-              <section className="executive-kpi-grid" aria-label={t("Financial key performance indicators")}>
-                <MetricCard label={t("Total revenue")} value={formatCurrency(results.revenue, true)} change="+7.4%" tone="blue" icon="wallet" language={language} />
-                <MetricCard label={t("EBITDA")} value={formatCurrency(results.ebitda, true)} change="+11.2%" tone="green" icon="trend" language={language} />
-                <MetricCard label={t("EBITDA margin")} value={formatPercent(results.ebitdaMarginPercent)} change="+1.8 pp" tone="violet" icon="chart" language={language} />
-                <MetricCard label={t("Net income")} value={formatCurrency(results.netIncome, true)} change="+5.6%" tone="amber" icon="building" language={language} />
+              <section className="command-kpi-strip" aria-label={t("Financial performance summary")}>
+                <article className="command-kpi command-kpi-primary">
+                  <span>{t("Revenue")}</span><strong>{formatCurrency(results.revenue, true)}</strong>
+                  <small>{t("Reported period")}</small>
+                </article>
+                <article className="command-kpi">
+                  <span>{t("Gross profit")}</span><strong>{formatCurrency(results.grossProfit, true)}</strong>
+                  <small>{formatPercent(results.grossMarginPercent)} {t("gross margin")}</small>
+                </article>
+                <article className="command-kpi">
+                  <span>{t("EBITDA")}</span><strong>{formatCurrency(results.ebitda, true)}</strong>
+                  <small>{formatPercent(results.ebitdaMarginPercent)} {t("EBITDA margin")}</small>
+                </article>
+                <article className="command-kpi">
+                  <span>{t("Net income")}</span><strong className={results.netIncome < 0 ? "negative-value" : ""}>{formatCurrency(results.netIncome, true)}</strong>
+                  <small>{formatPercent(results.netMarginPercent)} {t("net margin")}</small>
+                </article>
               </section>
 
-              <div className="executive-analysis-grid">
-                <section className="panel performance-panel executive-performance">
-                  <div className="panel-header">
-                    <div>
-                      <div className="panel-kicker">{t("PERFORMANCE")}</div>
-                      <h2>{t("Revenue & profitability")}</h2>
-                      <p>{t("Six-month operating performance")}</p>
-                    </div>
-                    <button className="text-action" onClick={() => setView("model")}>{t("View model")} <Icon name="arrow" size={14} /></button>
+              <div className="command-main-grid">
+                <section className="panel command-performance">
+                  <div className="command-section-heading">
+                    <div><div className="panel-kicker">{t("PERFORMANCE INTELLIGENCE")}</div><h2>{t("Revenue & operating performance")}</h2><p>{t("Six-month trend alongside the live management model.")}</p></div>
+                    <button className="text-action" onClick={() => setView("model")}>{t("Open model")} <Icon name="arrow" size={14} /></button>
                   </div>
                   <TrendChart language={language} />
-                  <div className="chart-summary">
-                    <div><span>{t("Latest revenue")}</span><strong>{formatCurrency(results.revenue)}</strong></div>
-                    <div><span>{t("Latest EBITDA")}</span><strong>{formatCurrency(results.ebitda)}</strong></div>
-                    <div><span>{t("Net margin")}</span><strong>{formatPercent(results.netMarginPercent)}</strong></div>
+                  <div className="command-chart-foot">
+                    <div><span>{t("Current EBITDA")}</span><strong>{formatCurrency(results.ebitda)}</strong></div>
+                    <div><span>{t("Operating cost base")}</span><strong>{formatCurrency(results.costOfGoodsSold + results.operatingExpenses + results.depreciationAndAmortisation)}</strong></div>
+                    <div><span>{t("Net result")}</span><strong className={results.netIncome < 0 ? "negative-value" : ""}>{formatCurrency(results.netIncome)}</strong></div>
                   </div>
                 </section>
 
-                <section className="panel breakdown-panel executive-breakdown">
-                  <div className="panel-header">
-                    <div>
-                      <div className="panel-kicker">{t("AT A GLANCE")}</div>
-                      <h2>{t("Profit breakdown")}</h2>
-                      <p>{t("Current period · EUR")}</p>
+                <aside className="command-side-stack">
+                  <section className="panel command-profit-panel">
+                    <div className="panel-kicker">{t("PROFITABILITY BRIDGE")}</div>
+                    <h2>{t("From sales to net result")}</h2>
+                    <div className="command-profit-rows">
+                      <div><span>{t("Revenue")}</span><strong>{formatCurrency(results.revenue)}</strong></div>
+                      <div><span>{t("Gross profit")}</span><strong>{formatCurrency(results.grossProfit)}</strong></div>
+                      <div><span>{t("EBITDA")}</span><strong>{formatCurrency(results.ebitda)}</strong></div>
+                      <div><span>{t("EBIT")}</span><strong>{formatCurrency(results.ebit)}</strong></div>
+                      <div className="command-profit-total"><span>{t("Net income")}</span><strong className={results.netIncome < 0 ? "negative-value" : ""}>{formatCurrency(results.netIncome)}</strong></div>
                     </div>
-                    <span className="tiny-status"><i /> {t("LIVE MODEL")}</span>
-                  </div>
-                  <div className="breakdown-list">
-                    <div className="breakdown-row"><span>{t("Gross profit")}</span><strong>{formatCurrency(results.grossProfit)}</strong></div>
-                    <div className="breakdown-track"><i style={{ width: `${Math.min(100, Math.max(0, results.grossMarginPercent))}%` }} /></div>
-                    <div className="breakdown-row"><span>{t("EBITDA")}</span><strong>{formatCurrency(results.ebitda)}</strong></div>
-                    <div className="breakdown-track green-track"><i style={{ width: `${Math.min(100, Math.max(0, results.ebitdaMarginPercent))}%` }} /></div>
-                    <div className="breakdown-row"><span>{t("EBIT")}</span><strong>{formatCurrency(results.ebit)}</strong></div>
-                    <div className="breakdown-track violet-track"><i style={{ width: `${Math.min(100, Math.max(0, results.ebitMarginPercent))}%` }} /></div>
-                    <div className="breakdown-row"><span>{t("Net income")}</span><strong className={results.netIncome < 0 ? "negative-value" : ""}>{formatCurrency(results.netIncome)}</strong></div>
-                    <div className="breakdown-track amber-track"><i style={{ width: `${Math.min(100, Math.max(0, results.netMarginPercent))}%` }} /></div>
-                  </div>
-                  <div className="breakdown-note"><Icon name="info" size={14} /> {t("Margins are calculated against reported revenue.")}</div>
-                </section>
+                    <button className="text-action" onClick={() => setView("model")}>{t("Inspect calculations")} <Icon name="arrow" size={14} /></button>
+                  </section>
+                  <section className="command-model-status">
+                    <span className="command-status-icon"><Icon name="check" size={18} /></span>
+                    <div><strong>{t("Model recalculates live")}</strong><p>{t("Displayed results are derived from the six editable operating assumptions.")}</p></div>
+                  </section>
+                </aside>
               </div>
 
-              <section className="panel executive-action-band">
-                <div className="executive-action-symbol"><Icon name="chart" size={22} /></div>
-                <div className="quick-model-copy">
-                  <div className="panel-kicker">{t("INTERACTIVE WORKSPACE")}</div>
-                  <h2>{t("Your numbers, always connected.")}</h2>
-                  <p>{t("Update six operating assumptions and see every key P&L metric recalculate instantly. No formulas to maintain.")}</p>
+              <section className="command-workspaces">
+                <div className="command-section-heading">
+                  <div><div className="panel-kicker">{t("WORKING AREAS")}</div><h2>{t("Move from insight to action")}</h2><p>{t("Open a dedicated workspace to plan, test and manage the business.")}</p></div>
                 </div>
-                <button className="primary-button" onClick={() => setView("model")}>{t("Open financial model")} <Icon name="arrow" size={16} /></button>
+                <div className="command-workspace-grid">
+                  <button className="command-workspace-card" onClick={() => setView("planning")}><span className="command-workspace-icon"><Icon name="trend" size={19} /></span><span className="command-workspace-copy"><strong>{t("Budget & scenarios")}</strong><small>{t("Build a plan, compare scenarios and track actuals.")}</small></span><Icon name="arrow" size={16} /></button>
+                  <button className="command-workspace-card" onClick={() => setView("statements")}><span className="command-workspace-icon"><Icon name="chart" size={19} /></span><span className="command-workspace-copy"><strong>{t("Three financial statements")}</strong><small>{t("Connect profit, balance sheet and cash flow assumptions.")}</small></span><Icon name="arrow" size={16} /></button>
+                  <button className="command-workspace-card" onClick={() => setView("operations")}><span className="command-workspace-icon"><Icon name="building" size={19} /></span><span className="command-workspace-copy"><strong>{t("Business operations")}</strong><small>{t("Track projects, pipeline, risks, KPIs and cost centres.")}</small></span><Icon name="arrow" size={16} /></button>
+                  <button className="command-workspace-card" onClick={() => setView("reports")}><span className="command-workspace-icon"><Icon name="file" size={19} /></span><span className="command-workspace-copy"><strong>{t("Reports & exports")}</strong><small>{t("Prepare and export the current management view.")}</small></span><Icon name="arrow" size={16} /></button>
+                </div>
               </section>
 
-              <div className="executive-lower-grid">
-                <section className="panel activity-panel executive-activity">
-                  <div className="panel-header">
-                    <div><div className="panel-kicker">{t("WORKSPACE ACTIVITY")}</div><h2>{t("Recent updates")}</h2></div>
-                    <span className="activity-period">{t("This period")}</span>
-                  </div>
-                  <div className="activity-row">
-                    <span className="activity-icon blue"><Icon name="check" size={15} /></span>
-                    <div><strong>{t("Management P&L recalculated")}</strong><span>{t("Live model · Just now")}</span></div>
-                    <span className="activity-tag">{t("UPDATED")}</span>
-                  </div>
-                  <div className="activity-row">
-                    <span className="activity-icon violet"><Icon name="file" size={15} /></span>
-                    <div><strong>{t("FY 2026 reporting period selected")}</strong><span>{t("Workspace settings · Demo")}</span></div>
-                    <span className="activity-tag">{t("SYSTEM")}</span>
-                  </div>
-                </section>
-                <section className="panel integrity-panel executive-integrity">
-                  <div className="integrity-icon"><Icon name="check" size={19} /></div>
-                  <div><strong>{t("Model is calculating")}</strong><p>{t("All displayed figures are derived from the current assumptions. Sample data only.")}</p></div>
-                  <span className="integrity-status">{t("READY")}</span>
-                </section>
-              </div>
+              <div className="command-disclaimer"><Icon name="info" size={16} /><p><strong>{t("Data scope")}</strong> {t("This workspace currently uses illustrative sample figures. It is a management-planning MVP, not a connected accounting ledger or statutory reporting system.")}</p></div>
             </div>
           )}
 
