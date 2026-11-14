@@ -32,9 +32,11 @@ export default function AccountPage() {
 
   useEffect(() => {
     if (!routeReady) return;
-    if (!auth.loading && auth.user && mode !== "manage") {
-      if (auth.plan) window.location.replace("/EnterpriseOS/");
-      else setMode("plans");
+    if (!auth.loading && auth.user && auth.plan) {
+      if (mode === "plans") setMode("manage");
+      else if (mode !== "manage") window.location.replace("/EnterpriseOS/");
+    } else if (!auth.loading && auth.user && !auth.plan && mode !== "manage") {
+      setMode("plans");
     }
     if (!auth.loading && !auth.user && mode === "manage") setMode("login");
   }, [routeReady, auth.loading, auth.user, auth.plan, mode]);
