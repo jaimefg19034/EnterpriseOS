@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import LiquidAtlasScene from "./LiquidAtlasScene";
 import { scenarios, type Scenario } from "./scenarios";
 import { PlanningWorkspace } from "@/components/planning-workspace";
@@ -60,7 +60,7 @@ function AtlasCursor() {
   const cursorRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) return;
-    const onMove = (event: PointerEvent) => {
+    const onMove = (event: globalThis.PointerEvent) => {
       const node = cursorRef.current;
       if (!node) return;
       node.style.left = event.clientX + "px";
@@ -82,7 +82,7 @@ function Preloader() {
 
 function Hero({ scenario }: { scenario: Scenario }) {
   const active = scenarios[scenario];
-  const move = (event: PointerEvent<HTMLElement>) => {
+  const move = (event: ReactPointerEvent<HTMLElement>) => {
     if (event.pointerType === "touch") return;
     const rect = event.currentTarget.getBoundingClientRect();
     event.currentTarget.style.setProperty("--px", ((event.clientX - rect.left) / rect.width * 100) + "%");
