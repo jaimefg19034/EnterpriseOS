@@ -140,3 +140,14 @@ The three scenario selectors use pointer-local CSS variables for a restrained 3D
 ## Decision field — instrumented financial output
 
 The decision simulator's result surface uses pointer-local CSS variables for a low-amplitude perspective response and radial key light on fine pointers. It writes directly to the panel element, avoiding React state churn; touch remains static and pointer leave/cancel clears transient state. Existing scenario selection, illustrative figures, relative-index bars, and synthetic-data disclosure are unchanged. Reduced-motion removes transforms and transitions. The effect is CSS perspective and compositing, not WebGL or physically simulated optics.
+
+
+## Financial reasoning architecture — spatial instrument
+
+The “From input to decision” section now presents the four-stage model as a layered instrument rather than a flat row of labels:
+- Inputs: manual drivers and assumptions.
+- Model: financial relationships, P&L, budget and variance.
+- Outlook: scenarios and the 13-week cash view.
+- Decision: management performance and exposure.
+
+The four stages are semantic ordered-list items. Each carries a stage index, operating mode and representative output vocabulary. Their staggered Z-depth, restrained elevation, inset highlights, connecting markers and material frame reinforce the direction of financial reasoning without implying an automated data pipeline or capabilities outside the current MVP. The mobile layout flattens the depth and becomes a two-column sequence; reduced-motion preferences remove transforms and transitions.
