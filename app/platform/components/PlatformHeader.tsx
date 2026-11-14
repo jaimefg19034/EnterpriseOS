@@ -88,7 +88,7 @@ export default function PlatformHeader() {
               <div className="p-mega-menu-main">
                 <span className="p-mega-kicker">NAVEGACIÓN / 01—05</span>
                 <nav className="p-mega-links" aria-label="Secciones del sitio">
-                  {navigation.map(([href, label, description, code], index) => (
+                  {navigation.map(([href, label, description], index) => (
                     <a href={href} key={href} onClick={closeMenu}>
                       <small>0{index + 1}</small><strong>{label}</strong><span>{description}</span><i aria-hidden="true">↗</i>
                     </a>
