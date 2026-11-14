@@ -104,7 +104,7 @@ export default function CapabilityBento() {
               <div>
                 <h3>{discipline.title}</h3>
                 <p>{discipline.description}</p>
-                <a href="/EnterpriseOS/">{discipline.number === "01" ? "Explorar el modelo" : discipline.number === "02" ? "Explorar planificación" : discipline.number === "03" ? "Explorar tesorería" : "Explorar informes"} <Arrow /></a>
+                <a href="#product">{discipline.number === "01" ? "Ver el modelo en el workspace" : discipline.number === "02" ? "Ver planificación en el workspace" : discipline.number === "03" ? "Ver tesorería en el workspace" : "Ver informes en el workspace"} <Arrow /></a>
               </div>
             </div>
           </article>
