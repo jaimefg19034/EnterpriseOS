@@ -19,10 +19,6 @@
  .p-switch button{transition:none}
 }
 
-
-}
-
-
 /* OMEGA / ACCESSIBILITY AND NAVIGATION FINISHING */
 .p-site .p-skip-link{position:absolute;top:10px;left:10px;z-index:1000;padding:12px 16px;transform:translateY(-160%);background:#17263e;color:#fff;font-size:12px}
 .p-site .p-skip-link:focus{transform:translateY(0)}
