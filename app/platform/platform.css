@@ -267,3 +267,17 @@
  .p-site .p-discipline-copy h3{font-size:25px}
  .p-site .p-discipline-copy p{font-size:12px}
 }
+
+
+/* DEMO INTEGRITY — distinguish the live product component from illustrative sample data. */
+.p-product-demo-note{display:grid;grid-template-columns:150px minmax(0,1fr);gap:20px;align-items:start;margin:30px 0 18px;padding:17px 20px;border:1px solid rgba(18,27,42,.16);background:rgba(250,249,245,.72)}
+.p-product-demo-note>span{color:#586bd0;font:600 8px/1.5 var(--mono);letter-spacing:1px}
+.p-product-demo-note p{max-width:690px;margin:0;color:#65717e;font-size:11px;line-height:1.7}
+.p-sim-disclaimer{margin:16px 0 0;padding-top:13px;border-top:1px solid #ffffff20;color:#91a3bb;font:400 8px/1.65 var(--mono);letter-spacing:.1px}
+.p-site .p-discipline-copy a{transition:color .2s ease,gap .2s ease}
+.p-site .p-discipline-copy a:hover{color:#17263e;gap:14px}
+@media(max-width:640px){
+ .p-product-demo-note{grid-template-columns:1fr;gap:6px;margin:22px 0 14px;padding:14px}
+ .p-product-demo-note p{font-size:10px}
+ .p-sim-disclaimer{font-size:7px}
+}
