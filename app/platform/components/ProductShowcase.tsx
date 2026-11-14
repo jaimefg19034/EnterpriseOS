@@ -1,5 +1,27 @@
+import type { PointerEvent } from "react";
 import TechnicalLabel from "../../components/ui/TechnicalLabel";
 import { PlanningWorkspace } from "@/components/planning-workspace";
+
+function trackProductFrame(event: PointerEvent<HTMLDivElement>) {
+  if (event.pointerType === "touch") return;
+  const frame = event.currentTarget;
+  const bounds = frame.getBoundingClientRect();
+  if (!bounds.width || !bounds.height) return;
+  const x = Math.max(0, Math.min(100, ((event.clientX - bounds.left) / bounds.width) * 100));
+  const y = Math.max(0, Math.min(100, ((event.clientY - bounds.top) / bounds.height) * 100));
+  frame.style.setProperty("--product-light-x", `${x}%`);
+  frame.style.setProperty("--product-light-y", `${y}%`);
+  frame.style.setProperty("--product-tilt-x", `${((50 - y) / 50) * 0.65}deg`);
+  frame.style.setProperty("--product-tilt-y", `${((x - 50) / 50) * 0.85}deg`);
+  frame.classList.add("is-pointer-active");
+}
+
+function resetProductFrame(event: PointerEvent<HTMLDivElement>) {
+  const frame = event.currentTarget;
+  frame.classList.remove("is-pointer-active");
+  ["--product-light-x", "--product-light-y", "--product-tilt-x", "--product-tilt-y"]
+    .forEach(property => frame.style.removeProperty(property));
+}
 
 export default function ProductShowcase() {
   return (
@@ -19,7 +41,7 @@ export default function ProductShowcase() {
         <p id="product-demo-note">Esta vista utiliza un plan de ejemplo. Puedes modificar sus hipótesis y explorar el modelo; los cambios son temporales, no se guardan y no afectan a tus datos del workspace.</p>
       </div>
 
-      <div className="p-product-frame">
+      <div className="p-product-frame" onPointerMove={trackProductFrame} onPointerLeave={resetProductFrame} onPointerCancel={resetProductFrame}>
         <div className="p-product-frame-head">
           <div className="p-frame-identity">
             <span className="p-frame-index">04 / A</span>
