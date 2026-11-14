@@ -16,15 +16,16 @@ varying vec2 v_uv;
 uniform vec2 u_resolution;
 uniform vec2 u_pointer;
 uniform float u_time;
+uniform float u_scroll;
 mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}
 float hash(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
 float noise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
 float sdTorus(vec3 p,vec2 t){return length(vec2(length(p.xz)-t.x,p.y))-t.y;}
 float smin(float a,float b,float k){float h=max(k-abs(a-b),0.0)/k;return min(a,b)-h*h*k*.25;}
 float mapScene(vec3 p){
- vec3 q=p;q.xz=rot(.34+u_pointer.x*.42+sin(u_time*.17)*.08)*q.xz;q.xy=rot(-.32+(u_pointer.y-.5)*.26)*q.xy;
+ vec3 q=p;q.xz=rot(.34+u_pointer.x*.42+sin(u_time*.17)*.08+u_scroll*.28)*q.xz;q.xy=rot(-.32+(u_pointer.y-.5)*.26)*q.xy;
  float warp=noise(q*3.4+vec3(0.,u_time*.13,0.))-.5;
- q.y+=sin(q.x*3.2+u_time*.38)*.045+cos(q.z*4.0-u_time*.28)*.035+warp*.035;
+ q.y+=u_scroll*.045+sin(q.x*3.2+u_time*.38)*.045+cos(q.z*4.0-u_time*.28)*.035+warp*.035;
  vec3 a=q;a.xy=rot(.48+sin(u_time*.13)*.12)*a.xy;
  vec3 b=q;b.yz=rot(1.12+u_pointer.x*.18)*b.yz;b.xz=rot(-.58+u_time*.09)*b.xz;
  float ringA=sdTorus(a,vec2(.72,.145)),ringB=sdTorus(b,vec2(.55,.095));
@@ -48,7 +49,7 @@ void main(){
   float ir=sin(pos.y*7.+atan(pos.z,pos.x)*3.+u_time*.24)*.5+.5;
   vec3 jade=vec3(.23,.78,.69),acid=vec3(.78,.96,.42),silver=vec3(.64,.76,.78);
   vec3 material=mix(silver,mix(jade,acid,smoothstep(.25,.9,ir)),.58+rim*.28);
-  color=material*(.18+diffuse*.75)+vec3(.86,.97,.83)*spec*1.45+vec3(.4,.85,.79)*spec2*.52+vec3(.25,.8,.68)*rim*.72+vec3(.1,.32,.28)*glow*.16;
+  color=material*(.18+diffuse*.75)+vec3(.86,.97,.83)*spec*1.45+vec3(.4,.85,.79)*spec2*.52+vec3(.25,.8,.68)*rim*.72+vec3(.1,.32,.28)*glow*.16;\n  float spectralFringe=u_scroll*.12+rim*.08;color.r+=spectralFringe;color.b-=spectralFringe*.7;
  }
  float vignette=1.-smoothstep(.45,1.05,length(uv));color*=.62+.38*vignette;
  gl_FragColor=vec4(color,hit>.5?1.0:.93);
@@ -96,7 +97,7 @@ export default function LiquidAtlasScene() {
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
     const resolution = gl.getUniformLocation(program, "u_resolution");
     const pointer = gl.getUniformLocation(program, "u_pointer");
-    const time = gl.getUniformLocation(program, "u_time");
+    const time = gl.getUniformLocation(program, "u_time");\n    const scroll = gl.getUniformLocation(program, "u_scroll");\n    let scrollPosition = Math.min(1, window.scrollY / Math.max(1, window.innerHeight * 4));\n    const onScroll = () => { scrollPosition = Math.min(1, window.scrollY / Math.max(1, window.innerHeight * 4)); };\n    window.addEventListener("scroll", onScroll, { passive: true });
     let pointerX = 0.5, pointerY = 0.5, frame = 0;
     const start = performance.now();
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -123,7 +124,7 @@ export default function LiquidAtlasScene() {
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.uniform2f(pointer, pointerX, pointerY);
-      gl.uniform1f(time, reduced ? 0 : (performance.now() - start) / 1000);
+      gl.uniform1f(time, reduced ? 0 : (performance.now() - start) / 1000);\n      gl.uniform1f(scroll, reduced ? 0 : scrollPosition);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     };
     let lastFrame = 0;
@@ -137,7 +138,7 @@ export default function LiquidAtlasScene() {
       window.cancelAnimationFrame(frame);
       observer.disconnect();
       (pointerHost ?? host).removeEventListener("pointermove", onPointer);
-      (pointerHost ?? host).removeEventListener("pointerleave", onLeave);
+      (pointerHost ?? host).removeEventListener("pointerleave", onLeave);\n      window.removeEventListener("scroll", onScroll);
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
       gl.deleteShader(vertex);
