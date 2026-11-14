@@ -307,6 +307,24 @@ export default function Home() {
   const [view, setView] = useState<View>("overview");
   const [showWorkspaceInfo, setShowWorkspaceInfo] = useState(false);
   const [showHelpGuide, setShowHelpGuide] = useState(false);
+  const [demoAccessGranted, setDemoAccessGranted] = useState(false);
+  const [demoCode, setDemoCode] = useState("");
+  const [demoCodeError, setDemoCodeError] = useState("");
+
+  useEffect(() => {
+    setDemoAccessGranted(window.sessionStorage.getItem("enterpriseos:demo-access") === "granted");
+  }, []);
+
+  function submitDemoAccess(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (demoCode.trim().toUpperCase() === "ATLAS-DEMO-2026") {
+      window.sessionStorage.setItem("enterpriseos:demo-access", "granted");
+      setDemoAccessGranted(true);
+      setDemoCodeError("");
+      return;
+    }
+    setDemoCodeError("La clave no es correcta. Comprueba el código e inténtalo de nuevo.");
+  }
   const language = useSyncExternalStore(
     subscribeToLanguage,
     getLanguageSnapshot,
@@ -388,6 +406,29 @@ export default function Home() {
   if (auth.configured && auth.plan && !canAccessView(auth.plan, view)) {
     const requiredPlan = minimumPlanForView(view);
     return <main className="eos-plan-required"><section><span>FUNCIÓN INCLUIDA EN {PLANS[requiredPlan].name.toUpperCase()}</span><h1>Desbloquea esta área de EnterpriseOS.</h1><p>Tu plan actual es {PLANS[auth.plan].name}. Esta función requiere {PLANS[requiredPlan].name} ({PLANS[requiredPlan].monthlyPrice} €/mes).</p><a href={"/EnterpriseOS/account/?mode=plans&plan=" + requiredPlan}>Mejorar mi plan</a><button type="button" onClick={() => setView("overview")}>Volver al overview</button></section></main>;
+  }
+
+  if (!auth.configured && !demoAccessGranted) {
+    return (
+      <main className="eos-demo-gate">
+        <div className="eos-demo-gate-top"><a href="/EnterpriseOS/platform/" className="eos-demo-brand"><span>EO</span> ENTERPRISEOS</a><span className="eos-demo-tag">THE FINANCIAL ATLAS</span></div>
+        <section className="eos-demo-gate-card">
+          <div className="eos-demo-gate-icon" aria-hidden="true">EO</div>
+          <span className="eos-demo-kicker">DEMO WORKSPACE / ACCESS</span>
+          <h1>Entra en tu espacio financiero.</h1>
+          <p>Introduce la clave de demostración para explorar el workspace interactivo de EnterpriseOS con datos ficticios.</p>
+          <form className="eos-demo-form" onSubmit={submitDemoAccess}>
+            <label htmlFor="eos-demo-code">Clave de acceso</label>
+            <input id="eos-demo-code" type="password" autoComplete="off" value={demoCode} onChange={(event) => { setDemoCode(event.target.value); setDemoCodeError(""); }} placeholder="Introduce tu clave" required />
+            <button type="submit">Acceder al workspace <span aria-hidden="true">→</span></button>
+          </form>
+          {demoCodeError && <p className="eos-demo-error" role="alert">{demoCodeError}</p>}
+          <div className="eos-demo-gate-note"><span /> Demo privada de producto <b>·</b> Datos sintéticos <b>·</b> Sin conexión bancaria</div>
+          <a className="eos-demo-account-link" href="/EnterpriseOS/account/">¿Ya tienes una cuenta? Iniciar sesión</a>
+        </section>
+        <footer className="eos-demo-gate-footer"><span>© 2026 ENTERPRISEOS</span><span>FINANCIAL DECISION INTELLIGENCE</span></footer>
+      </main>
+    );
   }
 
   return (
