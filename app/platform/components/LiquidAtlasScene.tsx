@@ -49,7 +49,8 @@ void main(){
   float ir=sin(pos.y*7.+atan(pos.z,pos.x)*3.+u_time*.24)*.5+.5;
   vec3 jade=vec3(.23,.78,.69),acid=vec3(.78,.96,.42),silver=vec3(.64,.76,.78);
   vec3 material=mix(silver,mix(jade,acid,smoothstep(.25,.9,ir)),.58+rim*.28);
-  color=material*(.18+diffuse*.75)+vec3(.86,.97,.83)*spec*1.45+vec3(.4,.85,.79)*spec2*.52+vec3(.25,.8,.68)*rim*.72+vec3(.1,.32,.28)*glow*.16;\n  float spectralFringe=u_scroll*.12+rim*.08;color.r+=spectralFringe;color.b-=spectralFringe*.7;
+  color=material*(.18+diffuse*.75)+vec3(.86,.97,.83)*spec*1.45+vec3(.4,.85,.79)*spec2*.52+vec3(.25,.8,.68)*rim*.72+vec3(.1,.32,.28)*glow*.16;
+  float spectralFringe=u_scroll*.12+rim*.08;color.r+=spectralFringe;color.b-=spectralFringe*.7;
  }
  float vignette=1.-smoothstep(.45,1.05,length(uv));color*=.62+.38*vignette;
  gl_FragColor=vec4(color,hit>.5?1.0:.93);
