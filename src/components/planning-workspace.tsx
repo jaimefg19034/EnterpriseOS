@@ -204,8 +204,8 @@ function navigateToPlanningSection(event: MouseEvent<HTMLAnchorElement>) {
 export function PlanningWorkspace({ language, previewMode = false }: { language: Language; previewMode?: boolean }) {
   const t = (value: string) => translate(value, language);
   const [savedState, setSavedState] = useState<SavedPlanningState>(INITIAL_PLANNING_STATE);
-  const [storageReady, setStorageReady] = useState(false);
-  const [storageMessage, setStorageMessage] = useState("");
+  const [storageReady, setStorageReady] = useState(previewMode);
+  const [storageMessage, setStorageMessage] = useState(previewMode ? "PREVIEW MODE · Changes are temporary and are not saved." : "");
   const [newYear, setNewYear] = useState("2027");
   const [yearMessage, setYearMessage] = useState("");
   const [newYearPanelOpen, setNewYearPanelOpen] = useState(false);
@@ -220,11 +220,7 @@ export function PlanningWorkspace({ language, previewMode = false }: { language:
   const canAddYear = isValidPlanningYear(Number(newYear)) && !savedState.years[String(Number(newYear))];
 
   useEffect(() => {
-    if (previewMode) {
-      setStorageMessage("PREVIEW MODE · Changes are temporary and are not saved.");
-      setStorageReady(true);
-      return;
-    }
+    if (previewMode) return;
     let restored: ReturnType<typeof parseSavedPlanningState> = null;
     let message = "";
     try {
