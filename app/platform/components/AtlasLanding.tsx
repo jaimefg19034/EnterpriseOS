@@ -1,268 +1,116 @@
 "use client";
 
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
-import LiquidAtlasScene from "./LiquidAtlasScene";
-import { scenarios, type Scenario } from "./scenarios";
-import { PlanningWorkspace } from "@/components/planning-workspace";
-
-const nav = [
-  ["#signal", "01", "La señal"],
-  ["#system", "02", "El sistema"],
-  ["#anatomy", "03", "Anatomía"],
-  ["#studio", "04", "Escenarios"],
-  ["#evidence", "05", "Alcance"],
+const benefits = [
+  { number: "01", title: "Entiende el rendimiento", copy: "Lee ingresos, costes y márgenes desde una única perspectiva.", icon: "performance" },
+  { number: "02", title: "Anticipa escenarios", copy: "Compara hipótesis y entiende cómo afectan al resultado.", icon: "scenarios" },
+  { number: "03", title: "Vigila la caja", copy: "Proyecta tesorería a 13 semanas con tus propios datos.", icon: "cash" },
+  { number: "04", title: "Decide con contexto", copy: "Conecta planificación, operaciones y reporting de gestión.", icon: "decision" },
 ] as const;
 
-const modules = [
-  { n: "01", code: "PERFORMANCE", title: "Resultado", desc: "P&L de gestión, estructura de costes y lectura de desviaciones.", stat: "P&L / PLAN / ACTUAL", type: "bars" },
-  { n: "02", code: "PLANNING", title: "Planificación", desc: "Presupuestos y escenarios para poner a prueba hipótesis.", stat: "BUDGET / SCENARIOS", type: "curves" },
-  { n: "03", code: "LIQUIDITY", title: "Tesorería", desc: "Previsión directa de caja a trece semanas con entradas manuales.", stat: "13-WEEK CASH VIEW", type: "wave" },
-  { n: "04", code: "WORKING CAPITAL", title: "Capital circulante", desc: "Seguimiento de cobros, pagos, vencimientos y antigüedad.", stat: "AR / AP / AGEING", type: "ledger" },
-  { n: "05", code: "OPERATIONS", title: "Centros de coste", desc: "Lectura operativa y seguimiento manual por centro de coste.", stat: "COST CENTRES", type: "nodes" },
-  { n: "06", code: "REPORTING", title: "Reporting", desc: "Informes de gestión disponibles y exportación de resultados.", stat: "MANAGEMENT REPORTS", type: "report" },
-  { n: "07", code: "MODEL", title: "Modelo financiero", desc: "Relaciones simplificadas entre resultados, balance y caja.", stat: "3-STATEMENT MODEL", type: "model" },
-  { n: "08", code: "CONTROL", title: "Trazabilidad", desc: "Supuestos identificables y separación entre datos y estimaciones.", stat: "INPUT → OUTPUT", type: "control" },
-];
-
-function PrecisionMark() {
-  return <svg className="ax-precision-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path d="M12 2.5v19M2.5 12h19M5.3 5.3l13.4 13.4M18.7 5.3 5.3 18.7" />
-    <circle cx="12" cy="12" r="3.2" />
-  </svg>;
+function Brand() {
+  return <a className="eos-home-brand" href="#top" aria-label="EnterpriseOS, inicio">
+    <span className="eos-home-mark">E<span>O</span></span>
+    <span className="eos-home-brand-name">ENTERPRISE<span>OS</span><small>FINANCIAL DECISION INTELLIGENCE</small></span>
+  </a>;
 }
 
-function trackSurfacePointer(event: ReactPointerEvent<HTMLElement>) {
-  if (event.pointerType === "touch") return;
-  const rect = event.currentTarget.getBoundingClientRect();
-  event.currentTarget.style.setProperty("--mx", ((event.clientX - rect.left) / rect.width * 100) + "%");
-  event.currentTarget.style.setProperty("--my", ((event.clientY - rect.top) / rect.height * 100) + "%");
+function Arrow() {
+  return <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13M10 4l6 6-6 6" /></svg>;
 }
 
-function Eyebrow({ children }: { children: ReactNode }) {
-  return <span className="ax-eyebrow"><i />{children}</span>;
-}
-
-function AtlasHeader() {
-  const [open, setOpen] = useState(false);
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
-  }, [open]);
-  return (
-    <>
-      <header className="ax-header">
-        <a className="ax-wordmark" href="#top" aria-label="EnterpriseOS, inicio"><span className="ax-mark">E<span>O</span></span><span>ENTERPRISE<span>OS</span><small>FINANCIAL DECISION INTELLIGENCE</small></span></a>
-        <div className="ax-header-center"><span>INDEPENDENT FINANCE SYSTEMS</span><i /> <span>FIELD NOTES / 2026</span></div>
-        <div className="ax-header-actions">
-          <a className="ax-workspace-link" href="/EnterpriseOS/">OPEN WORKSPACE <b>↗</b></a>
-          <button className={open ? "ax-menu-button is-open" : "ax-menu-button"} onClick={() => setOpen(!open)} aria-expanded={open} aria-label={open ? "Cerrar menú" : "Abrir menú"}><span /><span /></button>
-        </div>
-      </header>
-      {open && <div className="ax-menu-overlay" role="dialog" aria-modal="true" aria-label="Navegación principal">
-        <div className="ax-menu-top"><span>EOS / INDEX 001—005</span><button onClick={() => setOpen(false)}>CLOSE ×</button></div>
-        <nav>{nav.map(([href, n, label]) => <a href={href} key={href} onClick={() => setOpen(false)}><small>{n}</small><strong>{label}</strong><i>↗</i></a>)}</nav>
-        <div className="ax-menu-bottom"><span>MODEL WHAT MATTERS.</span><a href="/EnterpriseOS/" onClick={() => setOpen(false)}>ENTRAR EN WORKSPACE ↗</a></div>
-      </div>}
-    </>
-  );
-}
-
-function AtlasCursor() {
-  const cursorRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (window.matchMedia("(pointer: coarse)").matches) return;
-    const onMove = (event: MouseEvent) => {
-      const node = cursorRef.current;
-      if (!node) return;
-      node.style.left = event.clientX + "px";
-      node.style.top = event.clientY + "px";
-      const target = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-cursor],a,button") : null;
-      const label = target?.dataset.cursor ?? (target ? "OPEN" : "");
-      node.textContent = label;
-      node.classList.toggle("is-active", Boolean(label));
-    };
-    window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
-  }, []);
-  return <div className="ax-cursor-lens" ref={cursorRef} aria-hidden="true" />;
-}
-
-function Preloader() {
-  return <div className="ax-preloader" aria-hidden="true"><div className="ax-preloader-mark">E<span>O</span>S</div><div className="ax-preloader-track"><i /></div><small>INITIALISING FINANCIAL ATLAS / 001</small></div>;
-}
-
-function Hero({ scenario }: { scenario: Scenario }) {
-  const active = scenarios[scenario];
-  const move = (event: ReactPointerEvent<HTMLElement>) => {
-    if (event.pointerType === "touch") return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    event.currentTarget.style.setProperty("--px", ((event.clientX - rect.left) / rect.width * 100) + "%");
-    event.currentTarget.style.setProperty("--py", ((event.clientY - rect.top) / rect.height * 100) + "%");
-  };
-  return (
-    <section className="ax-hero" id="top" onPointerMove={move}>
-      <div className="ax-hero-grid" aria-hidden="true" />
-      <div className="ax-hero-atmosphere" aria-hidden="true" />
-      <div className="ax-hero-sculpture" aria-hidden="true" data-cursor="ROTATE 3D"><LiquidAtlasScene /></div>
-      <div className="ax-hero-topline"><span>FIG. 001 — THE FINANCIAL ATLAS</span><span>40° 25&apos; N / 03° 42&apos; W</span><span>BUILT FOR DECISION MAKERS</span></div>
-      <div className="ax-hero-title-wrap">
-        <div className="ax-hero-side-index"><span>01</span><i /> <span>SEE THE SYSTEM</span></div>
-        <h1><span className="ax-title-a">FINANCE</span><span className="ax-title-b">IN <em>FOCUS.</em></span></h1>
-        <div className="ax-hero-deck"><p>Deja de perseguir cifras aisladas. Conecta rendimiento, planificación y caja para entender qué puede pasar después.</p><a className="ax-round-cta" href="#system" data-cursor="EXPLORE"><span>EXPLORE<br />THE ATLAS</span><b>↘</b></a></div>
-      </div>
-      <div className="ax-hero-telemetry ax-telemetry-one"><small>MODEL / {active.label.toUpperCase()}</small><b>{active.revenue}</b><span>REVENUE · ILLUSTRATIVE</span></div>
-      <div className="ax-hero-telemetry ax-telemetry-two"><small>OPERATING RESULT</small><b>{active.ebitda}</b><span>EBITDA · ILLUSTRATIVE</span></div>
-      <div className="ax-hero-telemetry ax-telemetry-three"><small>LIQUIDITY POSITION</small><b>{active.cash}</b><span>CASH · ILLUSTRATIVE</span></div>
-      <div className="ax-hero-bottom"><span><i className="ax-live-dot" /> SYSTEM READY / SAMPLE ENVIRONMENT</span><span>SCROLL TO CHANGE PERSPECTIVE ↓</span><span>01 / 10</span></div>
-      <div className="ax-hero-orbit-label">A CLEARER VIEW<br /><em>OF WHAT&apos;S NEXT.</em></div>
-    </section>
-  );
-}
-
-function Ribbon() {
-  const words = ["MODEL THE FUTURE", "READ THE SIGNAL", "UNDERSTAND CASH", "DECIDE WITH CONTEXT"];
-  return <section className="ax-ribbon" aria-label="Principios del producto"><div className="ax-ribbon-track">{[...words, ...words, ...words].map((word, i) => <span key={i}>{word}<b><PrecisionMark /></b></span>)}</div><div className="ax-ribbon-caption"><span>ENTERPRISEOS / OPERATING PRINCIPLES</span><span>NOT AN ERP. A FINANCIAL DECISION LAYER.</span></div></section>;
-}
-
-function Manifesto() {
-  return <section className="ax-manifesto" id="signal">
-    <div className="ax-section-stamp"><Eyebrow>02 / A DIFFERENT POINT OF VIEW</Eyebrow><span>THE SIGNAL / 001</span></div>
-    <div className="ax-manifesto-layout">
-      <div className="ax-manifesto-index">THE<br />NOISE<br /><i>↓</i><br />THE<br />SIGNAL</div>
-      <h2>THE NUMBERS<br />ARE NOT THE<br /><em>WHOLE STORY.</em></h2>
-      <div className="ax-manifesto-copy"><p>Una empresa produce miles de cifras. La ventaja aparece cuando entiendes cómo se relacionan: qué impulsa el resultado, qué cambia el plan y cuándo la caja empieza a tensionarse.</p><span>LESS REPORTING. MORE UNDERSTANDING.</span></div>
-    </div>
-    <div className="ax-manifesto-visual" aria-hidden="true"><div className="ax-contour ax-contour-a" /><div className="ax-contour ax-contour-b" /><div className="ax-contour ax-contour-c" /><div className="ax-signal-core"><span>EOS</span><i>MODEL<br />→ DECIDE</i></div><div className="ax-signal-coord">DATA / CONTEXT / CONSEQUENCE</div></div>
-    <div className="ax-manifesto-foot"><span>01 — CONTEXT OVER NOISE</span><span>SCROLL-LED EDITORIAL FIELD</span></div>
-  </section>;
-}
-
-function MiniVisual({ type }: { type: string }) {
-  return <div className={"ax-mini-visual ax-mini-" + type} aria-hidden="true">
-    {type === "bars" && <>{[38, 68, 48, 84, 58, 92, 73, 100].map((v, i) => <i key={i} style={{ height: v + "%" }} />)}</>}
-    {type === "curves" && <svg viewBox="0 0 300 110"><path d="M0 90 C60 88 80 40 140 50 S220 8 300 12" /><path d="M0 90 C70 86 90 66 150 68 S230 48 300 54" /><path d="M0 90 C60 100 100 92 160 96 S240 88 300 98" /></svg>}
-    {type === "wave" && <><div className="ax-wave-line" /><div className="ax-wave-bars">{[42,55,39,70,62,85,56,76,92,69,80,58,88].map((v,i)=><i key={i} style={{height:v+"%"}} />)}</div></>}
-    {type === "ledger" && <>{["INVOICE  /  014","RECEIVABLE / 021","PAYABLE / 009","AGEING / 030"].map((x,i)=><span key={x}>{x}<b>{["€ 8.4k","€ 3.2k","€ 1.9k","14 d"][i]}</b></span>)}</>}
-    {type === "nodes" && <><i /><i /><i /><i /><i /><i /></>}
-    {type === "report" && <>{["REVENUE","OPERATING COST","EBITDA","CASH"].map((x,i)=><span key={x}>{x}<b>{["01","02","03","04"][i]}</b></span>)}</>}
-    {type === "model" && <><b> P&L </b><i>↔</i><b>B/S</b><i>↔</i><b>CASH</b></>}
-    {type === "control" && <><div className="ax-control-ring" /><span>INPUT</span><span>MODEL</span><span>OUTPUT</span></>}
+function HeroVisual() {
+  return <div className="eos-home-visual" aria-hidden="true">
+    <div className="eos-home-visual-grid" />
+    <svg className="eos-home-orbit-svg" viewBox="0 0 620 500" fill="none">
+      <defs>
+        <linearGradient id="eos-line" x1="70" y1="50" x2="540" y2="450" gradientUnits="userSpaceOnUse"><stop stopColor="#E4FF75"/><stop offset="1" stopColor="#67D9D1"/></linearGradient>
+        <radialGradient id="eos-core"><stop stopColor="#DFFF83" stopOpacity=".38"/><stop offset="1" stopColor="#8BD8D1" stopOpacity="0"/></radialGradient>
+      </defs>
+      <circle cx="310" cy="250" r="176" stroke="url(#eos-line)" strokeOpacity=".26"/>
+      <ellipse cx="310" cy="250" rx="235" ry="92" stroke="#9DE7DC" strokeOpacity=".35" transform="rotate(-28 310 250)"/>
+      <ellipse cx="310" cy="250" rx="230" ry="105" stroke="#DFFF83" strokeOpacity=".45" transform="rotate(42 310 250)"/>
+      <circle cx="310" cy="250" r="126" fill="url(#eos-core)"/>
+      <path d="M118 332C173 223 236 170 310 170s137 53 192 162" stroke="url(#eos-line)" strokeWidth="1.5"/>
+      <path d="M128 178c75 118 145 177 210 177s135-59 210-177" stroke="#DFFF83" strokeOpacity=".5"/>
+      <circle cx="310" cy="250" r="64" stroke="#DFFF83" strokeOpacity=".7"/>
+      <path d="M282 250h56M310 222v56" stroke="#E9F2E5" strokeOpacity=".65"/>
+      <circle cx="102" cy="303" r="5" fill="#DFFF83"/><circle cx="511" cy="167" r="5" fill="#8BD8D1"/><circle cx="400" cy="402" r="4" fill="#DFFF83"/>
+    </svg>
+    <div className="eos-home-core"><span>EOS</span><small>MODEL / DECIDE</small></div>
+    <div className="eos-home-data eos-home-data-a"><small>FINANCIAL VIEW</small><strong>360°</strong><i><b /></i></div>
+    <div className="eos-home-data eos-home-data-b"><small>SCENARIO ENGINE</small><strong>LIVE MODEL</strong><i><b /></i></div>
+    <div className="eos-home-visual-caption">PLAN <i /> MODEL <i /> ANTICIPATE <i /> DECIDE</div>
   </div>;
 }
 
-function SystemGrid() {
-  return <section className="ax-system" id="system">
-    <div className="ax-section-stamp"><Eyebrow>03 / THE FINANCIAL SYSTEM</Eyebrow><span>8 MODULES / 4 DISCIPLINES</span></div>
-    <div className="ax-system-heading"><h2>ONE SYSTEM.<br /><em>MULTIPLE LENSES.</em></h2><p>Una capa de planificación y análisis para conectar las preguntas financieras que importan. Cada módulo muestra su alcance actual, sin promesas ficticias.</p></div>
-    <div className="ax-module-grid">{modules.map((m, i)=><article className={"ax-module ax-module-"+(i+1)} key={m.n} onPointerMove={trackSurfacePointer} onPointerLeave={(event)=>{event.currentTarget.style.removeProperty("--mx");event.currentTarget.style.removeProperty("--my");}}><div className="ax-module-top"><span>{m.n} / {m.code}</span><span>EOS FIELD</span></div><MiniVisual type={m.type}/><div className="ax-module-copy"><h3>{m.title}</h3><p>{m.desc}</p></div><div className="ax-module-bottom"><span>{m.stat}</span><b>↗</b></div></article>)}</div>
-    <div className="ax-system-note"><span>CAPABILITY NOTE / 003</span><p>Los centros de coste, cobros, pagos y la previsión de tesorería dependen de datos introducidos manualmente. No existe conexión bancaria activa.</p></div>
-  </section>;
-}
-
-function Anatomy() {
-  return <section className="ax-anatomy" id="anatomy">
-    <div className="ax-section-stamp"><Eyebrow>04 / UNDER THE SURFACE</Eyebrow><span>MODEL ANATOMY / EXPLODED VIEW</span></div>
-    <div className="ax-anatomy-heading"><h2>FROM RAW INPUT<br />TO <em>BETTER JUDGEMENT.</em></h2><p>El valor no está en añadir otra pantalla. Está en hacer visible el recorrido entre una hipótesis y sus consecuencias.</p></div>
-    <div className="ax-exploded">
-      <div className="ax-exploded-axis"><span>Z / 04</span><i /><span>Z / 00</span></div>
-      <div className="ax-layer ax-layer-output"><small>04 / DECISION LAYER</small><strong>READ THE OUTCOME</strong><span>Management view · Variance · Cash exposure</span><div className="ax-layer-glyph">↗</div></div>
-      <div className="ax-layer ax-layer-forecast"><small>03 / FORECAST LAYER</small><strong>PROJECT THE FUTURE</strong><span>Scenarios · 13-week cash · Assumptions</span><div className="ax-layer-bars">{[25,48,38,72,55,88,68].map((h,i)=><i key={i} style={{height:h+"%"}} />)}</div></div>
-      <div className="ax-layer ax-layer-model"><small>02 / MODEL LAYER</small><strong>CONNECT THE DRIVERS</strong><span>Revenue · Costs · Margins · Working capital</span><div className="ax-layer-grid" /></div>
-      <div className="ax-layer ax-layer-input"><small>01 / INPUT LAYER</small><strong>DEFINE THE ASSUMPTIONS</strong><span>Manual inputs · Plans · Operating drivers</span><div className="ax-layer-dots">{Array.from({length:16},(_,i)=><i key={i}/>)}</div></div>
-      <div className="ax-exploded-center">ENTERPRISE<span>OS</span><small>FINANCIAL LOGIC / MVP</small></div>
-    </div>
-    <div className="ax-anatomy-caption"><span>FIG 04.01 — CONCEPTUAL PRODUCT ARCHITECTURE</span><span>NOT A CLAIM OF AUTOMATED DATA INGESTION</span></div>
-    <WorkspacePreview />
-  </section>;
-}
-
-function Studio({ scenario, onChange }: { scenario: Scenario; onChange: (value: Scenario) => void }) {
-  const active = scenarios[scenario];
-  return <section className="ax-studio" id="studio">
-    <div className="ax-section-stamp"><Eyebrow>05 / THE SCENARIO STUDIO</Eyebrow><span>INTERACTIVE / SYNTHETIC MODEL</span></div>
-    <div className="ax-studio-heading"><h2>CHANGE THE<br /><em>ASSUMPTION.</em></h2><p>Una misma empresa de ejemplo. Tres hipótesis distintas. Explora cómo cambian ingresos, EBITDA y caja prevista.</p></div>
-    <div className="ax-studio-console">
-      <div className="ax-console-left"><div className="ax-console-label">SELECT A MODEL / 2026</div><div className="ax-scenario-selector">{(["conservador","base","crecimiento"] as Scenario[]).map((key,i)=><button key={key} className={scenario===key?"is-active":""} onClick={()=>onChange(key)} aria-pressed={scenario===key}><small>0{i+1}</small><span>{scenarios[key].label}</span><b>{scenario===key?"ACTIVE":"SELECT"}</b></button>)}</div><div className="ax-console-note"><span>MODEL NOTE</span><p>{active.note}</p></div><div className="ax-console-disclaimer">SYNTHETIC EXAMPLE · NOT CUSTOMER DATA · NOT LIVE CONNECTED</div></div>
-      <div className="ax-console-right"><div className="ax-console-right-top"><span>OUTPUT / SCENARIO {active.label.toUpperCase()}</span><span><i /> MODEL UPDATED</span></div><div className="ax-output-metrics"><div><small>REVENUE</small><strong>{active.revenue}</strong><span>Annual projection</span></div><div><small>EBITDA</small><strong>{active.ebitda}</strong><span>Operating result</span></div><div><small>CASH POSITION</small><strong>{active.cash}</strong><span>Estimated position</span></div></div><div className="ax-output-chart"><div className="ax-chart-head"><span>RELATIVE INDEX / BASE = 100</span><span>ILLUSTRATIVE</span></div>{(["Ingresos","EBITDA","Caja"] as const).map((label,i)=><div className="ax-chart-row" key={label}><span>{label}</span><div><i style={{width:(active.bars[i]/140*100)+"%"}} /></div><b>{active.bars[i]}</b></div>)}</div><div className="ax-console-foot"><span>SCENARIO ENGINE / LOCAL DEMO</span><span>NO BANK FEED ACTIVE</span></div></div>
-    </div>
-  </section>;
-}
-
-function Dossiers() {
-  const items = [
-    { n:"A", title:"Revenue slows", desc:"¿Qué ocurre con el margen y la caja si las ventas crecen menos de lo previsto?", tag:"DOWNSIDE / PLANNING", color:"warm" },
-    { n:"B", title:"Costs move first", desc:"¿Cuánto margen queda si la estructura de costes cambia antes que los ingresos?", tag:"COST BASE / SENSITIVITY", color:"cool" },
-    { n:"C", title:"Cash gets tighter", desc:"¿Qué tensión aparece si los cobros se retrasan y los pagos mantienen su calendario?", tag:"WORKING CAPITAL / CASH", color:"violet" },
-  ];
-  return <section className="ax-dossiers" id="evidence">
-    <div className="ax-section-stamp"><Eyebrow>06 / DECISION DOSSIERS</Eyebrow><span>ILLUSTRATIVE QUESTIONS / NOT CUSTOMER CASES</span></div>
-    <div className="ax-dossiers-heading"><h2>BETTER QUESTIONS.<br /><em>BETTER DECISIONS.</em></h2><p>No publicamos logos, testimonios ni resultados de clientes que todavía no podemos demostrar. Empezamos por preguntas reales de dirección financiera.</p></div>
-    <div className="ax-dossier-stack">{items.map(item=><article className={"ax-dossier ax-dossier-"+item.color} key={item.n} onPointerMove={trackSurfacePointer} onPointerLeave={(event)=>{event.currentTarget.style.removeProperty("--mx");event.currentTarget.style.removeProperty("--my");}}><div className="ax-dossier-visual"><span>{item.n}</span><div className="ax-dossier-orbit" /><i /><small>SCENARIO STUDY / 0{item.n.charCodeAt(0)-64}</small></div><div className="ax-dossier-copy"><span>{item.tag}</span><h3>{item.title}</h3><p>{item.desc}</p><a href="#studio">EXPLORE THE MODEL ↗</a></div></article>)}</div>
-  </section>;
-}
-
-function Comparison() {
-  const rows = [
-    ["Management P&L", "Core workflow", "Accounting-led", "Planning-led"],
-    ["Scenario modelling", "Available", "Varies by product", "Core capability"],
-    ["13-week cash forecast", "Manual projection", "Depends on setup", "Often available"],
-    ["Bank feeds", "Not available", "Available in some suites", "Depends on integration"],
-    ["General ledger", "Not included", "Core accounting", "Usually connected"],
-    ["Multi-entity controls", "Not available", "Product-dependent", "Advanced options"],
-  ];
-  return <section className="ax-comparison">
-    <div className="ax-section-stamp"><Eyebrow>07 / POSITIONING, NOT POSTURING</Eyebrow><span>PRODUCT SCOPE MATRIX</span></div>
-    <div className="ax-comparison-heading"><h2>KNOW WHAT<br />YOU&apos;RE <em>CHOOSING.</em></h2><p>EnterpriseOS no pretende sustituir una suite contable o un FP&A maduro. Su foco actual es una capa ligera de planificación y lectura financiera.</p></div>
-    <div className="ax-matrix-wrap"><table className="ax-matrix"><thead><tr><th>CAPABILITY</th><th>ENTERPRISEOS / MVP</th><th>SME BUSINESS SUITE</th><th>DEDICATED FP&A</th></tr></thead><tbody>{rows.map(row=><tr key={row[0]}>{row.map((cell,i)=><td key={i}>{cell}</td>)}</tr>)}</tbody></table></div>
-    <div className="ax-comparison-foot"><span>POSITIONING GUIDE / NOT A VERIFIED VENDOR-BY-VENDOR AUDIT</span><span>PRODUCT SCOPE REVIEW / NOV 2026</span></div>
-  </section>;
-}
-
-function WorkspacePreview() {
-  return <section className="ax-workspace-section" id="workspace-preview">
-    <div className="ax-section-stamp"><Eyebrow>08 / INSIDE THE PRODUCT</Eyebrow><span>REAL INTERACTIVE COMPONENT / SAMPLE DATA</span></div>
-    <div className="ax-workspace-heading"><h2>NOT A RENDER.<br /><em>THE ACTUAL WORKSPACE.</em></h2><p>Esta vista utiliza el componente real de planificación. Puedes explorar sus controles; los cambios de la demo son temporales y no se guardan en tus datos.</p></div>
-    <div className="ax-workspace-frame"><div className="ax-workspace-frame-top"><span>EOS / PLANNING WORKSPACE</span><span><i /> INTERACTIVE PREVIEW · SAMPLE DATA</span></div><PlanningWorkspace language="es" previewMode /><div className="ax-workspace-frame-bottom"><span>SESSION-ONLY CHANGES</span><span>MANUAL INPUTS · LOCAL DEMO</span></div></div>
-  </section>;
-}
-
-function FinalPortal() {
-  return <section className="ax-final">
-    <div className="ax-final-orbit" aria-hidden="true"><div /><div /><div /><span>EOS</span></div>
-    <div className="ax-final-content"><Eyebrow>09 / THE NEXT DECISION</Eyebrow><h2>SEE CLEARER.<br /><em>MOVE EARLIER.</em></h2><p>Explora el workspace y descubre cómo conectar planificación, rendimiento y tesorería en una sola lectura.</p><a href="/EnterpriseOS/" className="ax-final-cta"><span>ENTER THE WORKSPACE</span><b>↗</b></a></div>
-    <div className="ax-final-bottom"><span>ENTERPRISEOS / THE FINANCIAL ATLAS</span><span>PLAN / MODEL / ANTICIPATE / DECIDE</span></div>
-  </section>;
-}
-
-function Footer() {
-  const [easter, setEaster] = useState(false);
-  return <footer className="ax-footer">
-    <div className="ax-footer-top"><a className="ax-wordmark" href="#top"><span className="ax-mark">E<span>O</span></span><span>ENTERPRISE<span>OS</span><small>FINANCIAL DECISION INTELLIGENCE</small></span></a><p>A clearer view of business performance, planning and cash.</p><button onClick={()=>setEaster(!easter)} aria-label="Mostrar mensaje oculto" className="ax-easter"><PrecisionMark /></button></div>
-    {easter && <div className="ax-easter-message">THE BEST FORECAST IS THE ONE YOU QUESTION. / EOS-001</div>}
-    <div className="ax-footer-links"><a href="#signal">THE SIGNAL</a><a href="#system">THE SYSTEM</a><a href="#studio">SCENARIO STUDIO</a><a href="/EnterpriseOS/">OPEN WORKSPACE ↗</a></div>
-    <div className="ax-footer-word">FINANCIAL<br /><em>CLARITY.</em></div>
-    <div className="ax-footer-bottom"><span>© {new Date().getFullYear()} ENTERPRISEOS</span><span>MANUAL INPUTS / LOCAL PERSISTENCE / MVP SCOPE</span><span>MADE FOR BETTER DECISIONS.</span></div>
-  </footer>;
+function BenefitIcon({ type }: { type: string }) {
+  if (type === "performance") return <svg viewBox="0 0 40 40"><path d="M5 32V8M5 32h30M11 26l7-8 6 4 10-13"/><path d="M27 9h7v7"/></svg>;
+  if (type === "scenarios") return <svg viewBox="0 0 40 40"><path d="M5 31c7-1 8-19 15-19s8 16 15 17M5 31c7-1 10-9 15-9s8 7 15 7"/><circle cx="20" cy="12" r="2"/></svg>;
+  if (type === "cash") return <svg viewBox="0 0 40 40"><rect x="5" y="9" width="30" height="22" rx="3"/><path d="M5 16h30M12 25h7M27 22v6"/></svg>;
+  return <svg viewBox="0 0 40 40"><path d="M7 20h8l5-10 6 20 5-10h3"/><circle cx="20" cy="20" r="16"/></svg>;
 }
 
 export default function AtlasLanding() {
-  const [scenario, setScenario] = useState<Scenario>("base");
-  return <main className="ax-site" id="main-content">
-    <a className="ax-skip" href="#signal">Saltar al contenido</a>
-    <Preloader />
-    <AtlasHeader />
-    <Hero scenario={scenario} />
-    <Ribbon />
-    <Manifesto />
-    <SystemGrid />
-    <Anatomy />
-    <Studio scenario={scenario} onChange={setScenario} />
-    <Dossiers />
-    <Comparison />
-    <FinalPortal />
-    <Footer />
+  return <main className="eos-home" id="top">
+    <header className="eos-home-nav">
+      <Brand />
+      <nav aria-label="Navegación principal"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a></nav>
+      <div className="eos-home-nav-actions">
+        <a className="eos-home-login" href="/EnterpriseOS/">Iniciar sesión</a>
+        <a className="eos-home-button eos-home-button-small" href="/EnterpriseOS/">Empezar ahora <Arrow /></a>
+      </div>
+    </header>
+
+    <section className="eos-home-hero">
+      <div className="eos-home-hero-copy">
+        <div className="eos-home-kicker"><i /> FINANCIAL DECISION INTELLIGENCE</div>
+        <h1>La claridad financiera<br />para <em>decidir mejor.</em></h1>
+        <p>Conecta rendimiento, planificación y tesorería. Comprende qué ocurre en tu negocio y anticipa lo que viene.</p>
+        <div className="eos-home-hero-actions">
+          <a className="eos-home-button" href="/EnterpriseOS/">Crear cuenta / Empezar <Arrow /></a>
+          <a className="eos-home-text-link" href="/EnterpriseOS/">Iniciar sesión <span>↗</span></a>
+        </div>
+        <div className="eos-home-proof"><span><i /> UNA VISIÓN FINANCIERA CONECTADA</span><span>DISEÑADO PARA DECISORES</span></div>
+      </div>
+      <HeroVisual />
+      <div className="eos-home-hero-index">01 <span /> FINANCIAL ATLAS</div>
+    </section>
+
+    <section className="eos-home-what" id="what">
+      <div className="eos-home-section-top"><span>QUÉ HACEMOS</span><span>UNA PLATAFORMA. CUATRO RESULTADOS.</span></div>
+      <div className="eos-home-what-heading"><h2>Menos ruido.<br /><em>Más perspectiva.</em></h2><p>Todo lo esencial para entender la salud financiera de tu empresa, sin convertir tu día a día en otro laberinto de hojas de cálculo.</p></div>
+      <div className="eos-home-benefits">{benefits.map((item) => <article className="eos-home-benefit" key={item.number}>
+        <div className="eos-home-benefit-top"><span>{item.number}</span><BenefitIcon type={item.icon}/></div>
+        <h3>{item.title}</h3><p>{item.copy}</p><div className="eos-home-benefit-line" />
+      </article>)}</div>
+    </section>
+
+    <section className="eos-home-pricing" id="pricing">
+      <div className="eos-home-section-top"><span>PRECIOS</span><span>ACCESO AL FINANCIAL ATLAS</span></div>
+      <div className="eos-home-pricing-layout">
+        <div className="eos-home-pricing-copy"><div className="eos-home-kicker"><i /> EARLY ACCESS</div><h2>Empieza a decidir<br /><em>con perspectiva.</em></h2><p>Accede al workspace financiero de EnterpriseOS y explora sus herramientas de planificación, análisis y tesorería.</p><div className="eos-home-price-note"><span>PRECIO</span><strong>Tarifa de lanzamiento</strong><small>Solicita la tarifa actual. No hay un precio público confirmado todavía.</small></div></div>
+        <article className="eos-home-price-card">
+          <div className="eos-home-price-card-top"><span>ENTERPRISEOS / ACCESS</span><span className="eos-home-recommended">ACCESO DISPONIBLE</span></div>
+          <div className="eos-home-price-title"><h3>Financial Atlas</h3><p>El espacio de trabajo para modelar, planificar y anticipar.</p></div>
+          <div className="eos-home-price-value"><strong>Precio bajo solicitud</strong><span>Tarifa de lanzamiento</span></div>
+          <ul><li>Planificación y escenarios</li><li>Modelo financiero y reporting</li><li>Previsión de tesorería a 13 semanas</li><li>Seguimiento de capital circulante</li></ul>
+          <a className="eos-home-button eos-home-price-cta" href="/EnterpriseOS/">Solicitar acceso <Arrow /></a>
+          <small className="eos-home-price-foot">MVP · DATOS INTRODUCIDOS MANUALMENTE · SIN CONEXIÓN BANCARIA ACTIVA</small>
+        </article>
+      </div>
+    </section>
+
+    <section className="eos-home-close">
+      <div className="eos-home-close-orbit" aria-hidden="true"><span /><span /><span /></div>
+      <div className="eos-home-kicker"><i /> EL SIGUIENTE PASO</div>
+      <h2>Entiende los números.<br /><em>Adelántate a las decisiones.</em></h2>
+      <div className="eos-home-close-bottom"><p>Entra en EnterpriseOS y lleva tu planificación financiera a un lugar más claro.</p><a className="eos-home-button" href="/EnterpriseOS/">Empezar ahora <Arrow /></a></div>
+    </section>
+
+    <footer className="eos-home-footer">
+      <div className="eos-home-footer-main"><Brand /><p>Financial Decision Intelligence<br />para empresas que quieren decidir con contexto.</p></div>
+      <div className="eos-home-footer-links"><a href="#what">Qué hacemos</a><a href="#pricing">Precios</a><a href="/EnterpriseOS/">Iniciar sesión</a><a href="/EnterpriseOS/">Empezar ahora</a></div>
+      <div className="eos-home-footer-bottom"><span>© {new Date().getFullYear()} ENTERPRISEOS</span><span>DATOS MANUALES · PERSISTENCIA LOCAL · MVP</span><span>THE FINANCIAL ATLAS</span></div>
+    </footer>
   </main>;
 }
