@@ -1430,3 +1430,111 @@ body { overflow:hidden; }
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after { scroll-behavior:auto !important; transition-duration:.01ms !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; }
 }
+
+
+/* Definitive mobile width reset.
+   The tablet rule above assigns .main-column width: calc(100% - 205px).
+   At the mobile breakpoint the sidebar becomes a full-width top row, so that
+   desktop subtraction leaves the workspace only a few pixels wide. */
+@media (max-width:760px) {
+  html, body {
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    overflow-x:hidden;
+  }
+  .app-shell {
+    display:flex;
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    min-height:100dvh;
+    height:auto;
+    flex-direction:column;
+    align-items:stretch;
+    overflow:visible;
+  }
+  .app-shell > .sidebar {
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    flex:0 0 auto;
+  }
+  .app-shell > .main-column {
+    display:flex;
+    width:100% !important;
+    min-width:0;
+    max-width:100%;
+    flex:1 1 auto;
+    height:auto;
+    min-height:0;
+    flex-direction:column;
+    overflow:visible;
+  }
+  .app-shell > .main-column > .topbar,
+  .app-shell > .main-column > .content-area {
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    box-sizing:border-box;
+  }
+  .app-shell > .main-column > .content-area {
+    flex:0 1 auto;
+    margin:0;
+    padding:14px 16px 28px;
+    overflow:visible;
+  }
+  .content-area[data-view="overview"] > .eos-command {
+    display:flex;
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    height:auto;
+    min-height:0;
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .content-area[data-view="overview"] > .eos-command > *,
+  .content-area[data-view="overview"] .eos-executive-stage,
+  .content-area[data-view="overview"] .eos-margin-section,
+  .content-area[data-view="overview"] .eos-workspace-section,
+  .content-area[data-view="overview"] .eos-data-note {
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    grid-column:auto;
+    grid-row:auto;
+    box-sizing:border-box;
+  }
+  .content-area[data-view="overview"] .eos-executive-stage {
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+  }
+  .content-area[data-view="overview"] .eos-margin-grid {
+    display:grid;
+    width:100%;
+    min-width:0;
+    grid-template-columns:minmax(0,1fr);
+  }
+  .content-area[data-view="overview"] .eos-margin-item {
+    display:grid;
+    width:100%;
+    min-width:0;
+    grid-template-columns:minmax(0,1fr) auto;
+    border-left:1px solid var(--line);
+  }
+  .content-area[data-view="overview"] .eos-margin-item > strong {
+    grid-column:2;
+    grid-row:1 / span 2;
+    align-self:center;
+  }
+  .content-area[data-view="overview"] .eos-margin-item small {
+    grid-column:1 / -1;
+  }
+  .content-area[data-view="overview"] .eos-workspace-list {
+    grid-template-columns:minmax(0,1fr);
+  }
+  .content-area[data-view="model"] .model-layout {
+    grid-template-columns:minmax(0,1fr);
+  }
+}
