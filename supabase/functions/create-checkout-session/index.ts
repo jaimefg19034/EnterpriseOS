@@ -45,7 +45,7 @@ Deno.serve(async (request) => {
       return Response.json({ error: "Ya tienes una suscripción activa. Gestiona los cambios desde el portal de facturación." }, { status: 409, headers: cors });
     }
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
+    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, { httpClient: Stripe.createFetchHttpClient() });
     const appUrl = Deno.env.get("APP_URL")!;
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
