@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import BrandMark from "../components/ui/BrandMark";
+import { useState } from "react";
 import PlatformHeader from "./components/PlatformHeader";
 import PlatformFooter from "./components/PlatformFooter";
 import EditorialHero from "./components/EditorialHero";
@@ -16,11 +15,8 @@ import { type Scenario } from "./components/scenarios";
 
 export default function PlatformPage() {
   const [scenario, setScenario] = useState<Scenario>("base");
-  const [introReady, setIntroReady] = useState(false);
-  useEffect(() => { const timer = window.setTimeout(() => setIntroReady(true), 520); return () => window.clearTimeout(timer); }, []);
   return (
-    <main className={introReady ? "p-site p-loaded" : "p-site"}>
-      <div className="p-preloader" aria-hidden={introReady}><BrandMark /><span>ENTERPRISEOS</span><i /></div>
+    <main className="p-site">
       <PlatformHeader />
 
       <EditorialHero scenario={scenario} />
