@@ -174,10 +174,10 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
     const exact=normaliseText(q).includes(normaliseText(candidate.label));
     const overlap=candidate.tokens.filter(token=>queryTokens.some(queryToken=>queryToken===token||queryToken.startsWith(token)||token.startsWith(queryToken))).length;
     const score=exact?10:overlap/(candidate.tokens.length||1);
-    return {...candidate,score,overlap,exact};
-  }).filter(candidate=>candidate.exact||(candidate.overlap>=2&&candidate.score>=0.6)||(candidate.tokens.length===1&&candidate.overlap===1&&candidate.tokens[0].length>=6))
+    return {candidate,score,overlap,exact};
+  }).filter(match=>match.exact||(match.overlap>=2&&match.score>=0.6)||(match.candidate.tokens.length===1&&match.overlap===1&&match.candidate.tokens[0].length>=6))
     .sort((a,b)=>b.score-a.score);
-  const matchedRecord=recordMatches[0];
+  const matchedRecord=recordMatches[0]?.candidate;
   if(matchedRecord){
     const item=matchedRecord.item;
     let response="";
