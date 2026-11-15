@@ -18,14 +18,14 @@ export type LinguisticAnalysis = {
 const STOP = new Set(("a al algo algun alguna algunos algunas ante antes asi aunque bajo bien cada casi como con contra cual cuales cuando cuanto cuantos de del desde donde durante e el ella ellas ello ellos en entre era es esa esas ese eso esos esta estaba estas este esto estos fue ha hacia hasta hay la las le les lo los mas me mi mis muy ni no nos o os otra otras otro otros para pero poco por porque que quien quienes se sea ser si sin sobre su sus te tener tiene todo todos tu tus un una unas uno unos y ya the a an and are as at be been but by can could did do does doing for from had has have he her here hers him his how i if in into is it its may me might more most my of on one or our ours she should so some such than that the their them then there these they this those to up us was we were what when where which who why will with would you your yours").split(" "));
 const SUFFIXES = ["amientos","imientos","aciones","uciones","adoras","adores","amiento","imiento","acion","ucion","mente","idades","idad","anzas","anza","ismos","istas","ando","iendo","ieron","arian","aria","ados","adas","idos","idas","es","os","as","s"];
 const LEXICON: Record<string,string[]> = {
- creative:["idea","ideas","inventar","creativo","creatividad","innovar","innovacion","alternativa","alternativas","propuesta","propuestas","brainstorm","brainstorming","diferenciar","captar","atraer","clientes","crecer","growth","acquisition","marketing"],
+ creative:["idea","ideas","inventar","creativo","creatividad","innovar","innovacion","alternativa","alternativas","propuesta","propuestas","brainstorm","brainstorming","improve","improvement","mejorar","mejora","consejo","consejos","recommendation","suggest","diferenciar","captar","atraer","clientes","crecer","growth","acquisition","marketing"],
  plan:["plan","pasos","paso a paso","empezar","comenzar","implementar","ejecutar","poner en marcha","roadmap","hoja de ruta","proceso","fases","priorizar","prioridad","objetivo","plazo","planificar"],
  management:["equipo","personas","empleados","trabajo","organizar","organizacion","gestionar","gestion","liderar","liderazgo","delegar","delegacion","productividad","reuniones","responsable","responsabilidades","operaciones","procesos","workflow","coordinar","team","manage","organise","organize"],
  explain:["explica","explicar","explicacion","significa","concepto","por que","como funciona","define","definicion","diferencia","what is","why does","how does","meaning"],
  casual:["hola","buenas","hey","hello","hi","gracias","thanks","thank you","perfecto","genial","vale","ok","okay","buenos dias","buenas tardes","buenas noches"],
  finance:["ingreso","ingresos","facturacion","ventas","venta","gasto","gastos","coste","costes","costo","costos","ebitda","margen","rentabilidad","presupuesto","caja","liquidez","deuda","factura","facturas","cobro","cobros","pago","pagos","inversion","roi","cash","revenue","expense","expenses","cost","costs","profit","margin","budget","forecast","invoice","receivable","payable","balance","financial","financiero","financiera","dinero","euros","eur","ahorro","ahorrar"]
 };
-const FINANCE = /\b(ingresos?|facturacion|ventas?|gastos?|costes?|costos?|ebitda|margen|rentabilidad|presupuesto|tesoreria|caja|liquidez|deuda|facturas?|cobros?|pagos?|inversion(?:es)?|roi|cash flow|cash|revenue|expenses?|costs?|profit|margin|budget|forecast|invoice|receivables?|payables?|financial|financiero|financiera|dinero|euros?|ahorro|ahorrar)\b/;
+const FINANCE = /\b(ingresos?|facturacion|gastos?|costes?|costos?|ebitda|margen|rentabilidad|presupuesto|tesoreria|caja|liquidez|deuda|facturas?|cobros?|pagos?|inversion(?:es)?|roi|cash flow|cash|revenue|expenses?|costs?|profit|margin|budget|forecast|invoice|receivables?|payables?|financial|financiero|financiera|dinero|euros?|ahorro|ahorrar)\b/;
 const FOLLOW = /\b(mas detalles|amplia|desarrolla|profundiza|el punto|punto [123]|el segundo|el primero|eso|esto|lo anterior|hazlo|cambialo|mas agresivo|mas conservador|por donde empiezo|y ahora|siguiente paso|paso a paso|aplica eso|en mi empresa|that|this|it|the second|the first|more detail|expand|go deeper|make it|what next|next step|step by step|apply that|in my company)\b/;
 const normalise=(s:string)=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9€%.,!?'\s-]/g," ").replace(/\s+/g," ").trim();
 function stem(w:string):string{for(const suffix of SUFFIXES)if(w.length>suffix.length+3&&w.endsWith(suffix))return w.slice(0,-suffix.length);if(w.length>5&&w.endsWith("ing"))return w.slice(0,-3);if(w.length>4&&w.endsWith("ed"))return w.slice(0,-2);return w;}
@@ -34,17 +34,21 @@ function hash(s:string):number{let h=2166136261;for(let i=0;i<s.length;i++){h^=s
 function score(tokens:string[],terms:string[]):number{let total=0;for(const term of terms){const n=normalise(term);if(n.includes(" ")){if(tokens.join(" ").includes(n))total+=3.8;}else if(tokens.some(t=>t===n||stem(t)===stem(n)))total+=1.15;}return total;}
 function topicOf(question:string,context?:NeuralContext):string{
  const all=Object.values(LEXICON).flat().filter(x=>!x.includes(" "));
- const ignored=new Set(["quiero","necesito","puedo","debo","deberia","dame","haz","hacer","hoy","manana","semana","mes","empresa","negocio","mejor","mejorar","como","que","cual","donde","cuando","por","favor","propones","proponer","recomiendas","recomendar","sugieres","sugiero","haria","harias","please","today","week","business","company","need","want","help","give","make","should","could","would"]);
+ const ignored=new Set(["quiero","necesito","puedo","debo","deberia","dame","haz","hacer","hoy","manana","mes","empresa","negocio","mejor","mejorar","como","que","cual","donde","cuando","por","favor","propones","proponer","recomiendas","recomendar","sugieres","sugiero","haria","harias","please","today","week","business","company","need","want","help","give","make","should","could","would"]);
  const follow=FOLLOW.test(normalise(question));
- if(follow&&context?.previousQuestion)return topicOf(context.previousQuestion);\n const words=tokensOf(question).filter(t=>!ignored.has(t)&&!all.some(x=>stem(x)===stem(t)));
+ if(follow&&context?.previousQuestion)return topicOf(context.previousQuestion);
+ const words=tokensOf(question).filter(t=>!ignored.has(t)&&!all.some(x=>stem(x)===stem(t))&&!/^(organiz|propon|recomend|suger|capt|atra|crec|planific|gest|lider|explic|mejor|dame|quier|necesit)\w*$/.test(t));
  if(words.length)return words.slice(0,5).join(" ");
  const phrase=normalise(question).match(/\b(?:para|sobre|acerca de|regarding|for)\s+(.{3,45})$/);
  if(phrase)return phrase[1].replace(/[?.!,].*$/,"").trim();
+ const possessive=normalise(question).match(/\b(?:mi|my)\s+([a-z\s]{3,35})$/);
+ if(possessive)return possessive[1].trim();
  const previous=tokensOf(context?.previousQuestion??"").filter(t=>!STOP.has(t));
  return previous.slice(0,5).join(" ")||"el objetivo que quieres conseguir";
 }
 function modeOf(q:string,tokens:string[],context?:NeuralContext):LinguisticAnalysis["mode"]{
- if(FINANCE.test(q))return "finance";
+ const explicitSalesMetrics=/\b(cuanto vendimos|cuantas ventas|ventas del mes|analiza las ventas|como van las ventas|sales figures|sales performance|sales revenue)\b/.test(q);
+ if(FINANCE.test(q)||explicitSalesMetrics)return "finance";
  if(/^(hola|buenas|hey|hello|hi|gracias|thanks|thank you|perfecto|genial|vale|ok|okay|buenos dias|buenas tardes|buenas noches)\b/.test(q))return "casual";
  const follow=FOLLOW.test(q)&&!!(context?.previousQuestion||context?.history?.length);
  if(follow&&tokens.length<=8){
@@ -58,7 +62,7 @@ function modeOf(q:string,tokens:string[],context?:NeuralContext):LinguisticAnaly
  const ranked=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
  if(ranked[0][1]>=2.2)return ranked[0][0] as LinguisticAnalysis["mode"];
  if(/\b(idea|ideas|propuesta|alternativa|innovar|captar|atraer|crecer|brainstorm)\w*/.test(q))return "creative";
- if(/\b(plan|pasos|empezar|comenzar|implementar|ejecutar|priorizar|roadmap|por donde)\w*/.test(q))return "plan";
+ if(/\b(plan|pasos|empezar|comenzar|implementar|ejecutar|priorizar|roadmap|por donde|hoy|today)\w*/.test(q))return "plan";
  if(/\b(equipo|empleados|delegar|liderazgo|productividad|reuniones|procesos|gestionar|organiz)\w*/.test(q))return "management";
  if(/\b(explica|explicar|significa|por que|como funciona|define|what is|why|how does)\b/.test(q))return "explain";
  return "open";
@@ -84,6 +88,17 @@ function answer(question:string,language:Language,a:LinguisticAnalysis,context?:
  ];
  if(a.mode==="casual")return {intent:"social",response:spanish?"¡Buenas! Podemos pensar ideas, resolver un problema, ordenar prioridades o analizar el workspace cuando tenga sentido. ¿Qué tienes entre manos?":"Hi. We can brainstorm, work through a problem, organise priorities, or analyse the workspace when it is relevant. What are you working on?",calculations:{},matchedData:["conversation"],confidence:a.confidence};
  const out=[pick(intro,seed)];
+ const pointMatch=normalise(question).match(/\b(?:punto|apartado|point|item)\s*(1|2|3|uno|dos|tres)\b/);
+ if(a.isFollowUp&&pointMatch&&context?.previousResponse){
+  const number=({uno:"1",dos:"2",tres:"3"} as Record<string,string>)[pointMatch[1]]??pointMatch[1];
+  const selected=context.previousResponse.split(/\n+/).find(line=>new RegExp("^\\s*"+number+"[.)]").test(line.trim()));
+  if(selected){
+   const detail=selected.replace(/^\s*\d+[.)]\s*/,"").replace(/\*\*/g,"");
+   const response=spanish?"El punto "+number+" al que te refieres es: "+detail+"\n\nPara desarrollarlo, concreta el cliente o usuario al que afecta, define la acción exacta, prueba una versión pequeña y revisa qué resultado produce.":"The point "+number+" you mean is: "+detail+"\n\nTo develop it, define the customer or user it affects, specify the exact action, test a small version, and review the result.";
+   const steps=spanish?["Define el resultado específico que debe producir este punto.","Asigna un responsable y prepara una primera prueba acotada.","Recoge feedback y objeciones de las personas afectadas.","Decide qué ajustar antes de ampliar la iniciativa."]:["Define the specific outcome this point should produce.","Assign an owner and prepare a tightly scoped first test.","Collect feedback and objections from the people affected.","Decide what to adjust before scaling the initiative."];
+   return {intent:"advice",response,calculations:{},matchedData:["conversation.previousResponse"],steps,action:"implement",confidence:0.94};
+  }
+ }
  let steps:string[]=[];
  if(a.mode==="creative"){
   out.push(spanish?"Para "+topic+", exploraría tres vías que ponen a prueba hipótesis distintas:":"For "+topic+", I would explore three routes that test different hypotheses:");
@@ -120,6 +135,7 @@ function answer(question:string,language:Language,a:LinguisticAnalysis,context?:
   steps=spanish?["Escribe el resultado que quieres conseguir en una frase.","Identifica el principal bloqueo o incertidumbre.","Elige una acción pequeña, con responsable y fecha de revisión."]:["Write the outcome you want in one sentence.","Identify the main blocker or uncertainty.","Choose a small action with an owner and review date."];
  }
  if(a.isFollowUp&&context?.previousResponse)out.unshift(spanish?"Retomo el hilo anterior y desarrollo la idea sin empezar de cero.":"I'll pick up the previous thread and build on it rather than starting over.");
+ if(context?.history?.length&&!a.isFollowUp)out.push(spanish?"También tengo en cuenta el contexto que ya hemos construido en esta conversación.":"I am also taking the context we have built in this conversation into account.");
  const closing=spanish?["Si quieres, el siguiente paso es convertirlo en un plan con responsables y plazos.","La decisión importante ahora es qué hipótesis merece la primera prueba.","Conviene validar esto con un ejemplo real antes de convertirlo en un proceso fijo."]:["The next step is to turn this into a plan with owners and deadlines.","The important decision now is which hypothesis deserves the first test.","Validate this with a real example before turning it into a fixed process."];
  out.push(pick(closing,seed+1));
  return {intent:"advice",response:out.join("\n\n"),calculations:{},matchedData:a.isFollowUp?["conversation.history","conversation.previousResponse"]:["conversation"],steps,action:a.mode==="explain"?"explain":"implement",confidence:a.confidence};
