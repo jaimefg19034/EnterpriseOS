@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { FinancialResults } from "@/domain/financials";
-import { costCenterActualSpend, riskScore, type OperationsState } from "@/domain/operations";
+import { costCenterActualSpend, riskScore, weightedPipeline, type OperationsState } from "@/domain/operations";
 import { useWorkspaceData } from "@/components/workspace-data-context";
 import { aiEngine, type CopilotAnalysis, type CopilotIntent } from "@/domain/ai-engine";
 import type { Language } from "@/i18n/translations";
