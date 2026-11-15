@@ -80,6 +80,8 @@ function intentOf(question: string, context?: IntentContext): CopilotIntent {
  return "unknown";
 }
 
+function localISODate(): string { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+
 function topExpense(operations: OperationsState) {
   return [...operations.expenses].sort((a, b) => b.amount - a.amount)[0] ?? null;
 }
@@ -254,19 +256,39 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
     return { intent, calculations, matchedData, response: base };
   }
 
+  if (intent === "workingCapital") {
+    const invoices=workspace.workingCapitalInvoices??[];
+    const today=localISODate();
+    const receivables=summarizeInvoices(calculateInvoiceAgeing(invoices.filter(x=>x.direction==="receivable"),today),today);
+    const payables=summarizeInvoices(calculateInvoiceAgeing(invoices.filter(x=>x.direction==="payable"),today),today);
+    calculations.receivablesOutstanding=receivables.outstanding; calculations.receivablesOverdue=receivables.overdue; calculations.payablesOutstanding=payables.outstanding; calculations.payablesOverdue=payables.overdue; calculations.receivablesDueNext7Days=receivables.dueNext7Days; calculations.payablesDueNext7Days=payables.dueNext7Days;
+    matchedData.push("workingCapitalInvoices");
+    const overdueTop=invoices.map(invoice=>({invoice,age:calculateInvoiceAgeing([invoice],today)[0]})).filter(x=>x.age.outstanding>0&&x.age.overdueDays>0).sort((a,b)=>b.age.outstanding-a.age.outstanding)[0];
+    return {intent,calculations,matchedData,response:es
+      ? "Registro vivo de facturas: tienes "+money(receivables.outstanding,language)+" pendientes de cobro, de los que "+money(receivables.overdue,language)+" están vencidos; y "+money(payables.outstanding,language)+" pendientes de pago, con "+money(payables.overdue,language)+" vencidos. En los próximos 7 días vencen "+money(receivables.dueNext7Days,language)+" de cobros y "+money(payables.dueNext7Days,language)+" de pagos. "+(overdueTop?"La factura vencida pendiente de mayor importe es "+overdueTop.invoice.counterparty+" ("+money(overdueTop.age.outstanding,language)+").":"No hay facturas vencidas pendientes.")
+      : "Live invoice register: "+money(receivables.outstanding,language)+" receivables remain outstanding, of which "+money(receivables.overdue,language)+" are overdue; "+money(payables.outstanding,language)+" payables remain outstanding, with "+money(payables.overdue,language)+" overdue. Within 7 days, "+money(receivables.dueNext7Days,language)+" of collections and "+money(payables.dueNext7Days,language)+" of payments fall due. "+(overdueTop?"The largest overdue invoice is "+overdueTop.invoice.counterparty+" ("+money(overdueTop.age.outstanding,language)+").":"There are no overdue outstanding invoices.")};
+  }
+
   if (intent === "cash") {
     const statements = calculateThreeStatements(financials, workspace.statementAssumptions ?? DEFAULT_THREE_STATEMENT_ASSUMPTIONS);
     const bs = statements.balanceSheet;
     const cf = statements.cashFlow;
+    const forecast = calculateCashForecast(cf.closingCash, workspace.cashForecastWeeks ?? []);
+    const forecastEnd = forecast.at(-1)?.closingCash ?? cf.closingCash;
+    const forecastLow = forecast.length ? Math.min(...forecast.map(x=>x.closingCash)) : cf.closingCash;
+    const forecastNegativeWeeks = forecast.filter(x=>x.closingCash<0).length;
+    const forecastCollections = forecast.reduce((sum,x)=>sum+x.collections,0);
+    const forecastPayments = forecast.reduce((sum,x)=>sum+x.operatingPayments+x.capitalExpenditure+x.debtService,0);
     calculations.closingCash = round(cf.closingCash);
     calculations.freeCashFlow = round(cf.freeCashFlow);
     calculations.netWorkingCapital = round(bs.netWorkingCapital);
     calculations.netDebt = round(bs.netDebt);
     if (bs.currentRatio !== null) calculations.currentRatio = bs.currentRatio;
-    matchedData.push("financials", "threeStatementAssumptions");
+    calculations.forecastClosingCash=round(forecastEnd); calculations.forecastLowestCash=round(forecastLow); calculations.forecastNegativeWeeks=forecastNegativeWeeks; calculations.forecastCollections=round(forecastCollections); calculations.forecastPayments=round(forecastPayments);
+    matchedData.push("financials", "threeStatementAssumptions", "cashForecastWeeks");
     return { intent, calculations, matchedData, response: es
-      ? `Proyección del modelo de tres estados con las hipótesis actuales:\n• Caja final: ${money(cf.closingCash, language)}.\n• Flujo de caja libre: ${money(cf.freeCashFlow, language)}.\n• Capital circulante neto: ${money(bs.netWorkingCapital, language)}.\n• Deuda neta: ${money(bs.netDebt, language)}.\n• Ratio corriente: ${bs.currentRatio === null ? "no disponible" : bs.currentRatio.toFixed(2) + "x"}.\n${workspace.statementAssumptions ? "He usado las hipótesis editadas en 3 estados." : "Aún no has modificado las hipótesis de 3 estados; se aplican los valores demo iniciales."}`
-      : `Three-statement projection using current assumptions:\n• Closing cash: ${money(cf.closingCash, language)}.\n• Free cash flow: ${money(cf.freeCashFlow, language)}.\n• Net working capital: ${money(bs.netWorkingCapital, language)}.\n• Net debt: ${money(bs.netDebt, language)}.\n• Current ratio: ${bs.currentRatio === null ? "not available" : bs.currentRatio.toFixed(2) + "x"}.\n${workspace.statementAssumptions ? "Using the assumptions edited in 3 statements." : "Three-statement assumptions have not been edited; initial demo defaults are used."}` };
+      ? `Proyección del modelo de tres estados con las hipótesis actuales:\n• Caja final: ${money(cf.closingCash, language)}.\n• Flujo de caja libre: ${money(cf.freeCashFlow, language)}.\n• Capital circulante neto: ${money(bs.netWorkingCapital, language)}.\n• Deuda neta: ${money(bs.netDebt, language)}.\n• Ratio corriente: ${bs.currentRatio === null ? "no disponible" : bs.currentRatio.toFixed(2) + "x"}.\n${workspace.statementAssumptions ? "He usado las hipótesis editadas en 3 estados." : "Aún no has modificado las hipótesis de 3 estados; se aplican los valores demo iniciales."}\n• Previsión directa de 13 semanas desde esa caja: saldo final ${money(forecastEnd,language)}, mínimo ${money(forecastLow,language)} y ${forecastNegativeWeeks} semanas con saldo negativo. Cobros previstos: ${money(forecastCollections,language)}; pagos totales: ${money(forecastPayments,language)}.`
+      : `Three-statement projection using current assumptions:\n• Closing cash: ${money(cf.closingCash, language)}.\n• Free cash flow: ${money(cf.freeCashFlow, language)}.\n• Net working capital: ${money(bs.netWorkingCapital, language)}.\n• Net debt: ${money(bs.netDebt, language)}.\n• Current ratio: ${bs.currentRatio === null ? "not available" : bs.currentRatio.toFixed(2) + "x"}.\n${workspace.statementAssumptions ? "Using the assumptions edited in 3 statements." : "Three-statement assumptions have not been edited; initial demo defaults are used."}\n• 13-week direct forecast from that cash balance: closing cash ${money(forecastEnd,language)}, low point ${money(forecastLow,language)}, and ${forecastNegativeWeeks} negative-balance weeks. Forecast collections: ${money(forecastCollections,language)}; total payments: ${money(forecastPayments,language)}.` };
   }
 
   if (intent === "planning") {
