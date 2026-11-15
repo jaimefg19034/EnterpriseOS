@@ -60,9 +60,12 @@ export function OperationsCommandCentre({ data, setData, language, section, setS
   const [bulkStatus,setBulkStatus] = useState("");
 
   useEffect(() => {
-    try { setSavedViews(JSON.parse(localStorage.getItem(VIEWS_KEY) || "[]")); } catch { setSavedViews([]); }
-    try { setHistory(JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]")); } catch { setHistory([]); }
-    try { setDismissed(JSON.parse(localStorage.getItem(DISMISSED_KEY) || "[]")); } catch { setDismissed([]); }
+    const timer = window.setTimeout(() => {
+      try { setSavedViews(JSON.parse(localStorage.getItem(VIEWS_KEY) || "[]")); } catch { setSavedViews([]); }
+      try { setHistory(JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]")); } catch { setHistory([]); }
+      try { setDismissed(JSON.parse(localStorage.getItem(DISMISSED_KEY) || "[]")); } catch { setDismissed([]); }
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
   useEffect(() => { try { localStorage.setItem(VIEWS_KEY,JSON.stringify(savedViews)); } catch {} },[savedViews]);
   useEffect(() => { try { localStorage.setItem(DISMISSED_KEY,JSON.stringify(dismissed)); } catch {} },[dismissed]);
