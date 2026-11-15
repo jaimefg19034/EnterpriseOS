@@ -914,3 +914,68 @@ body {
 @media(min-width:1500px){.overview-v2{gap:19px!important}.overview-v2-kpi{min-height:108px!important;padding:16px 19px!important}.overview-v2-performance,.overview-v2-bridge{min-height:345px!important}.overview-v2-chart .trend-chart{height:205px!important}}
 @media(min-width:761px) and (max-width:1199px){.overview-v2-main,.overview-v2-lower{grid-template-columns:minmax(0,1fr)!important}.overview-v2-margins{min-height:0!important}}
 @media(max-width:760px){.app-shell>.main-column>.content-area[data-view="overview"]{padding:16px 14px 26px!important}.app-shell>.main-column>.content-area[data-view="overview"]>.workspace-utility-rail{flex-wrap:wrap!important;gap:9px 14px!important}.overview-v2{gap:13px!important}.overview-v2-header{align-items:flex-start!important;flex-direction:column!important;gap:13px!important}.overview-v2-actions{width:100%!important;flex-wrap:wrap!important}.overview-v2-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}.overview-v2-kpi{min-height:92px!important;padding:11px!important}.overview-v2-kpi>strong{font-size:21px!important}.overview-v2-main,.overview-v2-lower{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.overview-v2-performance,.overview-v2-bridge{min-height:0!important}.overview-v2-panel{padding:14px!important}.overview-v2-chart .trend-chart{height:160px!important}.overview-v2-module-grid{grid-template-columns:minmax(0,1fr)!important}.overview-v2-chart-foot{flex-wrap:wrap!important}}
+
+/* Final desktop spacing pass: align Planning title block and give Overview
+   the same breathing room as the other full workspace sections. */
+@media (min-width: 1051px) {
+  .planning-heading {
+    align-items: center !important;
+    min-height: 112px !important;
+    margin-bottom: 22px !important;
+  }
+  .planning-heading > div:first-child {
+    transform: translateY(10px) !important;
+  }
+
+  .overview-v2 {
+    gap: 24px !important;
+  }
+  .overview-v2-header {
+    padding-bottom: 7px !important;
+  }
+  .overview-v2-kpis {
+    gap: 14px !important;
+  }
+  .overview-v2-kpi {
+    min-height: 116px !important;
+    padding: 17px 19px !important;
+    gap: 10px !important;
+  }
+  .overview-v2-main,
+  .overview-v2-lower {
+    gap: 16px !important;
+  }
+  .overview-v2-panel {
+    padding: 22px 23px !important;
+  }
+  .overview-v2-performance,
+  .overview-v2-bridge {
+    min-height: 370px !important;
+  }
+  .overview-v2-chart .trend-chart {
+    height: 220px !important;
+  }
+  .overview-v2-lower .overview-v2-panel {
+    min-height: 228px !important;
+  }
+  .overview-v2-margin-list {
+    gap: 18px !important;
+    padding-top: 9px !important;
+  }
+  .overview-v2-module-grid {
+    gap: 11px !important;
+  }
+  .overview-v2-module-grid button {
+    min-height: 70px !important;
+    padding: 11px 12px !important;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1050px) {
+  .overview-v2 { gap: 19px !important; }
+  .overview-v2-kpi { min-height: 108px !important; padding: 15px 16px !important; }
+  .overview-v2-panel { padding: 19px 20px !important; }
+  .overview-v2-main,
+  .overview-v2-lower { gap: 14px !important; }
+}
+
