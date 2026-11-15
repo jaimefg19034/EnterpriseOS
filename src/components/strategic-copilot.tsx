@@ -1,11 +1,10 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import type { FinancialResults } from "@/domain/financials";
 import { costCenterActualSpend, riskScore, type OperationsState } from "@/domain/operations";
 import { useWorkspaceData } from "@/components/workspace-data-context";
 import { analyzeCopilotQuestion } from "@/domain/strategic-copilot";
-import { translate, type Language } from "@/i18n/translations";
+import type { Language } from "@/i18n/translations";
 type Kind="cut"|"optimize"|"invest"|"implement";
 type Rec={id:string;kind:Kind;title:string;detail:string;action:string;basis:string;impact?:number;priority:"high"|"medium"|"low"};
 type Saved={id:string;title:string;kind:Kind;status:"open"|"done"};
