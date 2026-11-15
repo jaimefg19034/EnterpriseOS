@@ -1321,7 +1321,10 @@ button:focus-visible, input:focus-visible {
   background: #f3f6ff;
   outline: none;
 }
+.planning-workspace { margin-top: -16px; }
 .planning-workspace [id^="planning-"] { scroll-margin-top: 94px; }
+/* Keep the scenario-comparison heading clear of the sticky section navigation. */
+.planning-workspace #scenario-comparison { scroll-margin-top: 108px; }
 @media (max-width: 700px) {
   .planning-section-nav { top: 8px; margin-inline: -2px; }
   .planning-section-nav a { min-height: 34px; padding: 7px 9px; font-size: 9px; }

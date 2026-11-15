@@ -15,6 +15,7 @@ const spanish: Record<string, string> = {
   "A recovery copy is available for the invoice data currently held in this session.": "Hay disponible una copia de recuperación de los datos de facturas que están actualmente en esta sesión.",
   "EnterpriseOS — Scenario Comparison": "EnterpriseOS — Comparación de escenarios",
   "Same actual revenue and annual assumptions across all scenarios": "Mismos ingresos reales e hipótesis anuales en todos los escenarios",
+  "Scenario comparison": "Comparación de escenarios",
   "DECISION SUPPORT": "APOYO A LA DECISIÓN",
   "Compare all scenarios": "Comparar todos los escenarios",
   "All four forecasts use the same annual assumptions and entered actual revenue. Differences reflect scenario settings only.": "Las cuatro previsiones utilizan las mismas hipótesis anuales y los ingresos reales introducidos. Las diferencias se deben únicamente a los ajustes de cada escenario.",
