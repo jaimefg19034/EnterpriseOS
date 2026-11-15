@@ -54,36 +54,68 @@ const INTENT_TERMS: Record<Exclude<CopilotIntent,"greeting"|"social"|"advice"|"u
  kpi:["kpi","indicador","indicadores","objetivo","target","rendimiento","performance","metricas"],
  overview:["resumen","situacion","estado","empresa","negocio","analiza","analisis","panorama","mes","rumbo","como vamos","como va"]
 };
-function scoreIntents(question: string): Record<string,number> {
- const q=normaliseText(question), tokens=q.split(" ");
- const scores:Record<string,number>={};
- for(const [intent,terms] of Object.entries(INTENT_TERMS)){
-  let score=0;
-  for(const term of terms){
-   const t=normaliseText(term);
-   if(q.includes(t)) score+=t.includes(" ")?3:2;
-   else if(t.length>=5&&tokens.some(token=>token.startsWith(t.slice(0,Math.max(4,t.length-2))))) score+=2;
+const INTENT_SYNONYMS: Partial<Record<CopilotIntent, string[]>> = {
+  expense: ["dinero que sale", "salidas", "desembolso", "factura de proveedor", "cargo", "consumo", "partida", "coste fijo", "coste variable", "overhead"],
+  saving: ["economizar", "ajustar", "contener", "apretar", "eliminar gasto", "eficiencia", "reducir presupuesto", "abaratar"],
+  revenue: ["cifra de negocio", "volumen de negocio", "ventas netas", "cobrar por ventas", "vender", "comercializar"],
+  profit: ["resultado", "margen operativo", "lo que queda", "ganancia neta", "rentabilidad neta"],
+  cash: ["dinero disponible", "saldo bancario", "tesoreria", "caja disponible", "liquido", "solvencia", "runway"],
+  workingCapital: ["dinero que me deben", "dinero que debo", "pendiente de cobrar", "pendiente de pagar", "morosidad", "impagado", "deudores", "acreedores"],
+  planning: ["plan financiero", "prevision", "estimacion", "presupuestado", "plan de negocio", "proyeccion"],
+  project: ["iniciativa", "entrega", "proyecto retrasado", "desviacion de proyecto"],
+  risk: ["amenaza", "incertidumbre", "exposicion", "contingencia", "problema potencial"],
+  kpi: ["indicador", "objetivo", "meta", "medida de rendimiento", "cuadro de mando"],
+  investment: ["contratar", "incorporar personal", "comprar maquinaria", "adquirir", "desembolso inicial", "inversion"],
+  margin: ["margen bruto", "margen ebitda", "rentabilidad sobre ventas"]
+};
+const STOP_WORDS = new Set(["que","como","cuando","donde","cual","cuanto","cuanta","cuantos","cuantas","por","para","con","sin","una","uno","unos","unas","del","las","los","esta","este","eso","esa","ese","hay","tengo","tiene","quiero","puedo","deberia","seria","sobre","entre","mi","mis","el","la","un","al","me","se","y","o","a","en","es","son","the","what","how","when","where","which","who","why","would","could","should","my","our","is","are","do","does","can","for","to","of","in","on","and","or"]);
+function stemToken(token: string): string {
+  let value=token;
+  for (const suffix of ["amientos","imientos","aciones","uciones","amente","idades","adores","adoras","iendo","ando","ieron","iesen","isteis","ariamos","eriamos","iria","arian","acion","mente","idad","ivos","ivas","ados","adas","idos","idas","ando","iendo","es","os","as","s"]) {
+    if(value.length>suffix.length+3&&value.endsWith(suffix)){value=value.slice(0,-suffix.length);break;}
   }
-  scores[intent]=score;
- }
- if(/\b(que harias|que harías|si fueras|director financiero|directora financiera|por donde empiezo|no se por donde|que me recomiendas|what would you do|where should i start)\b/.test(q)) scores.advice=8;
- if(/\b(recort\w*|reduc\w*|ahorr\w*|baj\w*|cut\w*|lower\w*)\b/.test(q)) scores.saving=(scores.saving??0)+4;
- if(/\b(inviert\w*|invert\w*|invest\w*)\b/.test(q)) scores.investment=(scores.investment??0)+4;
- if(/\b(hola|buenas|hey|hello|hi|que tal|como estas|buenos dias|buenas tardes|buenas noches)\b/.test(q)&&tokens.length<=7) scores.greeting=10;
- if(/\b(como ves|como va|que tal va|como vamos|how are we doing|how does it look|what is your view)\b/.test(q)) scores.overview=(scores.overview??0)+3;
- if(/\b(gracias|thank you|thanks|perfecto|genial|vale|ok|okay|entiendo|de acuerdo|muy bien|great|got it|and you|y tu)\b/.test(q)&&tokens.length<=8) scores.social=9;
- return scores;
+  return value;
+}
+function tokensOf(value: string): string[] {
+  return normaliseText(value).split(" ").filter(token=>token.length>1&&!STOP_WORDS.has(token)).map(stemToken);
+}
+function scoreIntents(question: string): Record<string,number> {
+  const q=normaliseText(question), tokens=tokensOf(q), scores:Record<string,number>={};
+  for(const [intent,baseTerms] of Object.entries(INTENT_TERMS)){
+    const terms=[...baseTerms,...(INTENT_SYNONYMS[intent as CopilotIntent]??[])];
+    let score=0;
+    for(const term of terms){
+      const normalized=normaliseText(term);
+      const termTokens=tokensOf(normalized);
+      if(!termTokens.length) continue;
+      if(q.includes(normalized)){score+=normalized.includes(" ")?4:3;continue;}
+      const overlap=termTokens.filter(t=>tokens.some(token=>token===t||token.startsWith(t)||t.startsWith(token))).length;
+      if(overlap===termTokens.length) score+=termTokens.length>1?3:2;
+      else if(overlap>0) score+=overlap*1.25;
+    }
+    scores[intent]=score;
+  }
+  const add=(intent:CopilotIntent,pattern:RegExp,weight=4)=>{if(pattern.test(q))scores[intent]=(scores[intent]??0)+weight;};
+  add("advice",/\b(que harias|si estuvieras|si fueras|que me recomiendas|por donde empiezo|como mejorarias|que deberia priorizar|what would you do|where should i start)\b/,7);
+  add("saving",/\b(recort\w*|reduc\w*|ahorr\w*|abarat\w*|optimiza\w*|contener el gasto|gastar menos|coste menor)\b/,3);
+  add("investment",/\b(inviert\w*|invert\w*|contrat\w*|incorpor\w*|compr\w*|adquir\w*|capex)\b/,3);
+  add("greeting",/\b(hola|buenas|hey|hello|hi|buenos dias|buenas tardes|buenas noches)\b/,8);
+  add("overview",/\b(como ves|como va|como vamos|situacion actual|panorama general|que tal estamos|how are we doing)\b/,3);
+  add("social",/\b(gracias|thank you|thanks|perfecto|genial|vale|okay|entiendo|de acuerdo|muy bien|great|got it)\b/,7);
+  return scores;
 }
 function intentOf(question: string, context?: IntentContext): CopilotIntent {
- const q=normaliseText(question), scores=scoreIntents(question);
- if(scores.greeting&&!Object.entries(scores).some(([key,value])=>!["greeting","social","advice"].includes(key)&&value>=2)) return "greeting";
- if(scores.advice) return "advice";
- if(context?.previousIntent&&/\b(y ahora|ahora|y entonces|con eso|en ese caso|y si|que tal ahora|como lo ves|what about now|and now|in that case)\b/.test(q)) return context.previousIntent;
- const ranked=Object.entries(scores).filter(([key,value])=>key!=="greeting"&&key!=="advice"&&value>0).sort((a,b)=>b[1]-a[1]);
- if(ranked.length&&ranked[0][1]>=2) return ranked[0][0] as CopilotIntent;
- return "unknown";
+  const q=normaliseText(question), tokens=tokensOf(q), scores=scoreIntents(question);
+  const followUp=/\b(y por que|por que|y eso|como lo soluciono|como lo arreglo|como lo corrijo|que hago entonces|y si cambio|si cambio esa cifra|esa cifra|ese importe|ese gasto|esa partida|lo anterior|con ese cambio|y ahora|ahora|en ese caso|y si|what about|why is that|how do i fix|how can i solve|what if i change|that amount|that cost)\b/.test(q);
+  if(context?.previousIntent&&followUp) return context.previousIntent;
+  if((scores.greeting??0)>=8 && tokens.length<=7 && !Object.entries(scores).some(([key,value])=>!["greeting","social"].includes(key)&&value>=3)) return "greeting";
+  if((scores.social??0)>=7 && tokens.length<=8 && !Object.entries(scores).some(([key,value])=>!["greeting","social"].includes(key)&&value>=3)) return "social";
+  if((scores.advice??0)>=7) return "advice";
+  const ranked=Object.entries(scores).filter(([key,value])=>!["greeting","social","advice"].includes(key)&&value>0).sort((a,b)=>b[1]-a[1]);
+  if(ranked.length&&ranked[0][1]>=2) return ranked[0][0] as CopilotIntent;
+  if(context?.previousIntent&&tokens.length<=10) return context.previousIntent;
+  return "unknown";
 }
-
 function localISODate(): string { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
 
 function topExpense(operations: OperationsState) {
