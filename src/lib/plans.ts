@@ -1,6 +1,6 @@
 export type PlanId = "essential" | "professional" | "business";
 
-export type WorkspaceView = "overview" | "model" | "planning" | "statements" | "operations" | "advisor" | "reports";
+export type WorkspaceView = "overview" | "model" | "planning" | "statements" | "operations" | "chat" | "recommendations" | "reports";
 
 export const PLANS: Record<PlanId, { name: string; monthlyPrice: number; description: string; features: string[] }> = {
   essential: {
@@ -34,13 +34,14 @@ export function canAccessView(plan: PlanId | null, view: WorkspaceView): boolean
     planning: "professional",
     statements: "professional",
     operations: "business",
-    advisor: "business",
+    chat: "business",
+    recommendations: "business",
   };
   return PLAN_RANK[plan] >= PLAN_RANK[required[view]];
 }
 
 export function minimumPlanForView(view: WorkspaceView): PlanId {
-  if (view === "operations" || view === "advisor") return "business";
+  if (view === "operations" || view === "chat" || view === "recommendations") return "business";
   if (view === "planning" || view === "statements" || view === "reports") return "professional";
   return "essential";
 }
