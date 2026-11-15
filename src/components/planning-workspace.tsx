@@ -203,14 +203,9 @@ function navigateToPlanningSection(event: MouseEvent<HTMLAnchorElement>) {
 export function PlanningWorkspace({ language, previewMode = false }: { language: Language; previewMode?: boolean }) {
   const t = (value: string) => translate(value, language);
   const [savedState, setSavedState] = useState<SavedPlanningState>(INITIAL_PLANNING_STATE);
-  const { planning: sharedPlanning, setPlanning } = useWorkspaceData();
+  const { setPlanning } = useWorkspaceData();
 
   useEffect(() => { const timer = window.setTimeout(() => setPlanning(savedState), 0); return () => window.clearTimeout(timer); }, [savedState, setPlanning]);
-  useEffect(() => {
-    if (!sharedPlanning || JSON.stringify(sharedPlanning) === JSON.stringify(savedState)) return;
-    setSavedState(sharedPlanning);
-    setNewYear(String(Math.max(...Object.keys(sharedPlanning.years).map(Number)) + 1));
-  }, [sharedPlanning, savedState]);
   const [storageReady, setStorageReady] = useState(previewMode);
   const [storageMessage, setStorageMessage] = useState(previewMode ? "PREVIEW MODE · Changes are temporary and are not saved." : "");
   const [newYear, setNewYear] = useState("2027");
