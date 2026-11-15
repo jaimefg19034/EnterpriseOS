@@ -1,16 +1,18 @@
 /**
- * EnterpriseOS local AI engine facade.
- *
- * The engine is intentionally deterministic and offline: it resolves intent,
- * thread references and numeric scenarios against the live workspace model.
- * It is not presented as a generative language model.
+ * EnterpriseOS copilot router.
+ * General business questions are answered independently from financial analysis;
+ * financial questions continue through the deterministic live-workspace engine.
  */
-export {
-  analyzeCopilotQuestion,
-  analyzeCopilotQuestion as aiEngine,
-} from "./strategic-copilot";
-export type {
-  CopilotAnalysis,
-  CopilotIntent,
-  IntentContext,
-} from "./strategic-copilot";
+import { analyzeCopilotQuestion } from "./strategic-copilot";
+import { answerGeneralBusinessQuestion } from "./business-advisor";
+import type { CopilotAnalysis } from "./strategic-copilot";
+
+export { analyzeCopilotQuestion };
+export type { CopilotAnalysis, CopilotIntent, IntentContext } from "./strategic-copilot";
+
+export function aiEngine(...args: Parameters<typeof analyzeCopilotQuestion>): CopilotAnalysis {
+  const [question, , , language] = args;
+  const generalAnswer = answerGeneralBusinessQuestion(question, language);
+  if (generalAnswer) return generalAnswer;
+  return analyzeCopilotQuestion(...args);
+}
