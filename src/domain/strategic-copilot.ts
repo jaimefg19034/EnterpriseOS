@@ -68,6 +68,7 @@ function scoreIntents(question: string): Record<string,number> {
  }
  if(/\b(que harias|que harías|si fueras|director financiero|directora financiera|por donde empiezo|no se por donde|que me recomiendas|what would you do|where should i start)\b/.test(q)) scores.advice=8;
  if(/\b(hola|buenas|hey|hello|hi|que tal|como estas|buenos dias|buenas tardes|buenas noches)\b/.test(q)&&tokens.length<=7) scores.greeting=10;
+ if(/\b(como ves|como va|que tal va|como vamos|how are we doing|how does it look|what is your view)\b/.test(q)) scores.overview=(scores.overview??0)+3;
  if(/\b(gracias|thank you|thanks|perfecto|genial|vale|ok|okay|entiendo|de acuerdo|muy bien|great|got it|and you|y tu)\b/.test(q)&&tokens.length<=8) scores.social=9;
  return scores;
 }
@@ -361,6 +362,6 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
 
   const numeric = amount === null ? "" : ` ${money(amount, language)}`;
   return { intent: "unknown", calculations, matchedData, response: es
-    ? `No puedo asociar con seguridad «${q}» a una métrica concreta. ${numeric ? "He detectado el importe " + numeric + "." : ""} Puedo calcular escenarios sobre ingresos, gastos, ahorro porcentual, inversión, EBITDA y margen, o analizar proyectos, riesgos y KPI. Prueba con una pregunta concreta como «¿qué pasa si invierto 3.000 €?» o «¿qué ahorro supone recortar un 10% de gastos operativos?». No inventaré datos si no existen en el workspace.`
-    : `I cannot safely map “${q}” to a specific metric. ${numeric ? "I detected the amount " + numeric + "." : ""} I can calculate scenarios for revenue, expenses, percentage savings, investment, EBITDA and margin, or analyse projects, risks and KPIs. Try “What if I invest €3,000?” or “What would a 10% operating-cost cut save?” I will not invent data that is not in the workspace.` };
+    ? `Entiendo lo que planteas, aunque todavía no identifico qué dato del negocio quieres que use para responder «${q}». ${numeric ? "También he detectado el importe " + numeric + ". " : ""}Puedo relacionarlo con la cuenta de resultados, caja, facturas, gastos por categoría, proyectos, ventas, riesgos y objetivos. Si hablas de la situación general, dímelo con naturalidad; cruzaré los datos disponibles y señalaré qué información falta, sin inventar tendencias ni resultados.`
+    : `I understand the question, but I cannot yet tell which business data you want me to use for “${q}”. ${numeric ? "I also detected the amount " + numeric + ". " : ""}I can connect it to the P&L, cash, invoices, category spend, projects, sales, risks and targets. If you mean the overall business position, say so naturally; I will combine the available data and point out what is missing without inventing trends or results.` };
 }
