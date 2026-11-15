@@ -37,10 +37,12 @@ function topicOf(question:string,context?:NeuralContext):string{
  const ignored=new Set(["quiero","necesito","puedo","debo","deberia","dame","haz","hacer","hoy","manana","mes","empresa","negocio","mejor","mejorar","como","que","cual","donde","cuando","por","favor","propones","proponer","recomiendas","recomendar","sugieres","sugiero","haria","harias","please","today","week","business","company","need","want","help","give","make","should","could","would"]);
  const follow=FOLLOW.test(normalise(question));
  if(follow&&context?.previousQuestion)return topicOf(context.previousQuestion);
- const words=tokensOf(question).filter(t=>!ignored.has(t)&&!all.some(x=>stem(x)===stem(t))&&!/^(organiz|propon|recomend|suger|capt|atra|crec|planific|gest|lider|explic|mejor|dame|quier|necesit)\\w*$/.test(t));
+ const words=tokensOf(question).filter(t=>!ignored.has(t)&&!all.some(x=>stem(x)===stem(t))&&!/^(organiz|propon|recomend|suger|capt|atra|crec|planific|gest|lider|explic|mejor|dame|quier|necesit)\w*$/.test(t));
  if(words.length)return words.slice(0,5).join(" ");
  const phrase=normalise(question).match(/\b(?:para|sobre|acerca de|regarding|for)\s+(.{3,45})$/);
  if(phrase)return phrase[1].replace(/[?.!,].*$/,"").trim();
+ const possessive=normalise(question).match(/\b(?:mi|my)\s+([a-z\s]{3,35})$/);
+ if(possessive)return possessive[1].trim();
  const previous=tokensOf(context?.previousQuestion??"").filter(t=>!STOP.has(t));
  return previous.slice(0,5).join(" ")||"el objetivo que quieres conseguir";
 }
