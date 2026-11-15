@@ -1,6 +1,6 @@
 export type PlanId = "essential" | "professional" | "business";
 
-export type WorkspaceView = "overview" | "model" | "planning" | "statements" | "operations" | "reports";
+export type WorkspaceView = "overview" | "model" | "planning" | "statements" | "operations" | "advisor" | "reports";
 
 export const PLANS: Record<PlanId, { name: string; monthlyPrice: number; description: string; features: string[] }> = {
   essential: {
@@ -19,7 +19,7 @@ export const PLANS: Record<PlanId, { name: string; monthlyPrice: number; descrip
     name: "Business",
     monthlyPrice: 149,
     description: "Visión financiera y operativa ampliada.",
-    features: ["Todo Professional", "Operaciones y centros de coste", "Análisis operativo ampliado", "Acceso a todas las áreas actuales"],
+    features: ["Todo Professional", "Operaciones y centros de coste", "Análisis operativo ampliado", "Copiloto estratégico y financiero con IA", "Acceso a todas las áreas actuales"],
   },
 };
 
@@ -34,12 +34,13 @@ export function canAccessView(plan: PlanId | null, view: WorkspaceView): boolean
     planning: "professional",
     statements: "professional",
     operations: "business",
+    advisor: "business",
   };
   return PLAN_RANK[plan] >= PLAN_RANK[required[view]];
 }
 
 export function minimumPlanForView(view: WorkspaceView): PlanId {
-  if (view === "operations") return "business";
+  if (view === "operations" || view === "advisor") return "business";
   if (view === "planning" || view === "statements" || view === "reports") return "professional";
   return "essential";
 }
