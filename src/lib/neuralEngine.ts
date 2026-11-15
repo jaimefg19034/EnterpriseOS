@@ -35,8 +35,11 @@ function score(tokens:string[],terms:string[]):number{let total=0;for(const term
 function topicOf(question:string,context?:NeuralContext):string{
  const all=Object.values(LEXICON).flat().filter(x=>!x.includes(" "));
  const ignored=new Set(["quiero","necesito","puedo","debo","deberia","dame","haz","hacer","hoy","manana","semana","mes","empresa","negocio","mejor","mejorar","como","que","cual","donde","cuando","por","favor","propones","proponer","recomiendas","recomendar","sugieres","sugiero","haria","harias","please","today","week","business","company","need","want","help","give","make","should","could","would"]);
- const follow=FOLLOW.test(normalise(question));\n if(follow&&context?.previousQuestion)return topicOf(context.previousQuestion);\n const words=tokensOf(question).filter(t=>!ignored.has(t)&&!all.some(x=>stem(x)===stem(t)));
+ const follow=FOLLOW.test(normalise(question));
+ if(follow&&context?.previousQuestion)return topicOf(context.previousQuestion);\n const words=tokensOf(question).filter(t=>!ignored.has(t)&&!all.some(x=>stem(x)===stem(t)));
  if(words.length)return words.slice(0,5).join(" ");
+ const phrase=normalise(question).match(/\b(?:para|sobre|acerca de|regarding|for)\s+(.{3,45})$/);
+ if(phrase)return phrase[1].replace(/[?.!,].*$/,"").trim();
  const previous=tokensOf(context?.previousQuestion??"").filter(t=>!STOP.has(t));
  return previous.slice(0,5).join(" ")||"el objetivo que quieres conseguir";
 }
@@ -56,7 +59,7 @@ function modeOf(q:string,tokens:string[],context?:NeuralContext):LinguisticAnaly
  if(ranked[0][1]>=2.2)return ranked[0][0] as LinguisticAnalysis["mode"];
  if(/\b(idea|ideas|propuesta|alternativa|innovar|captar|atraer|crecer|brainstorm)\w*/.test(q))return "creative";
  if(/\b(plan|pasos|empezar|comenzar|implementar|ejecutar|priorizar|roadmap|por donde)\w*/.test(q))return "plan";
- if(/\b(equipo|empleados|delegar|liderazgo|productividad|reuniones|procesos|gestionar|organizar)\w*/.test(q))return "management";
+ if(/\b(equipo|empleados|delegar|liderazgo|productividad|reuniones|procesos|gestionar|organiz)\w*/.test(q))return "management";
  if(/\b(explica|explicar|significa|por que|como funciona|define|what is|why|how does)\b/.test(q))return "explain";
  return "open";
 }
