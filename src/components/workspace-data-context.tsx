@@ -31,24 +31,34 @@ export function WorkspaceDataProvider({ financials, language, children }: { fina
   const cloudStatus = useOperationsCloudSync(operations, setOperations, operationsLoaded, language);
 
   useEffect(() => {
-    try {
-      const restored = parseOperationsState(window.localStorage.getItem(OPERATIONS_STORAGE_KEY));
-      if (restored) setOperations(restored);
-      const planningRaw = window.localStorage.getItem(PLANNING_STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_PLANNING_STORAGE_KEY);
-      const restoredPlanning = parseSavedPlanningState(planningRaw);
-      if (restoredPlanning) setPlanning(restoredPlanning);
-    } catch {
-      // The in-memory workspace remains usable if browser storage is unavailable.
-    }
-    setOperationsLoaded(true);
+    const timer = window.setTimeout(() => {
+      try {
+        const restored = parseOperationsState(window.localStorage.getItem(OPERATIONS_STORAGE_KEY));
+        if (restored) setOperations(restored);
+        const planningRaw = window.localStorage.getItem(PLANNING_STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_PLANNING_STORAGE_KEY);
+        const restoredPlanning = parseSavedPlanningState(planningRaw);
+        if (restoredPlanning) setPlanning(restoredPlanning);
+      } catch {
+        // The in-memory workspace remains usable if browser storage is unavailable.
+      }
+      setOperationsLoaded(true);
+    }, 0);
 
     const onStorage = (event: StorageEvent) => {
-      if (event.key !== OPERATIONS_STORAGE_KEY) return;
-      const restored = parseOperationsState(event.newValue);
-      if (restored) setOperations(restored);
+      if (event.key === OPERATIONS_STORAGE_KEY) {
+        const restored = parseOperationsState(event.newValue);
+        if (restored) setOperations(restored);
+      }
+      if (event.key === PLANNING_STORAGE_KEY || event.key === LEGACY_PLANNING_STORAGE_KEY) {
+        const restored = parseSavedPlanningState(event.newValue);
+        if (restored) setPlanning(restored);
+      }
     };
     window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("storage", onStorage);
+    };
   }, []);
 
   useEffect(() => {
