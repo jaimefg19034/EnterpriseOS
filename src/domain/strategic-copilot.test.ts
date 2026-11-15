@@ -123,4 +123,29 @@ describe("analyzeCopilotQuestion", () => {
     expect(result.response.length).toBeGreaterThan(20);
   });
 
+  it("reads the live 13-week cash forecast", () => {
+    const result = analyzeCopilotQuestion("¿Cómo ves la caja y el flujo?", financials, EMPTY_OPERATIONS, "es", {
+      planning: null,
+      statementAssumptions: null,
+      cashForecastWeeks: [{ collections: 1000, operatingPayments: 500, capitalExpenditure: 100, debtService: 50 }],
+    });
+    expect(result.intent).toBe("cash");
+    expect(result.calculations.forecastClosingCash - result.calculations.closingCash).toBe(350);
+    expect(result.matchedData).toContain("cashForecastWeeks");
+  });
+
+  it("reads current receivables and payables from the working-capital register", () => {
+    const invoices = [
+      { id: "r1", direction: "receivable" as const, counterparty: "Customer A", reference: "INV-1", issueDate: "2020-01-01", dueDate: "2020-01-31", amount: 1200, paidAmount: 200 },
+      { id: "p1", direction: "payable" as const, counterparty: "Supplier B", reference: "BILL-1", issueDate: "2020-01-01", dueDate: "2020-01-31", amount: 800, paidAmount: 0 },
+    ];
+    const result = analyzeCopilotQuestion("¿Qué facturas tengo pendientes de cobro y pago?", financials, EMPTY_OPERATIONS, "es", {
+      planning: null, statementAssumptions: null, workingCapitalInvoices: invoices,
+    });
+    expect(result.intent).toBe("workingCapital");
+    expect(result.calculations.receivablesOutstanding).toBe(1000);
+    expect(result.calculations.payablesOutstanding).toBe(800);
+    expect(result.matchedData).toContain("workingCapitalInvoices");
+  });
+
 });
