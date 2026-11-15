@@ -8,6 +8,7 @@ type Kind = keyof OperationsState;
 type RecordItem = { id: string; kind: Kind; title: string; subtitle: string; status: string; date: string; value: string; raw: Record<string, unknown> };
 type SavedView = { id: string; name: string; query: string; status: string; view: ViewMode; section: string };
 type ViewMode = "table" | "kanban" | "calendar";
+type Section = "sales"|"projects"|"risks"|"kpis"|"cost-centers"|"expenses"|"reports";
 type Snapshot = { id: string; createdAt: string; data: OperationsState; summary: string };
 const VIEWS_KEY = "enterpriseos:operations:saved-views:v1";
 const HISTORY_KEY = "enterpriseos:operations:audit-history:v1";
@@ -38,7 +39,7 @@ export function OperationsCommandCentre({ data, setData, language, section, setS
   data: OperationsState;
   setData: React.Dispatch<React.SetStateAction<OperationsState>>;
   language: Language;
-  section: string;
+  section: Section;
   setSection: (section: "sales"|"projects"|"risks"|"kpis"|"cost-centers"|"expenses"|"reports") => void;
   cloudStatus: string;
 }) {
@@ -67,14 +68,17 @@ export function OperationsCommandCentre({ data, setData, language, section, setS
   useEffect(() => { try { localStorage.setItem(DISMISSED_KEY,JSON.stringify(dismissed)); } catch {} },[dismissed]);
   useEffect(() => {
     if (!data || !Array.isArray(data.opportunities)) return;
-    const snapshot: Snapshot = { id:`${Date.now()}-${Math.random().toString(36).slice(2,7)}`,createdAt:new Date().toISOString(),data:JSON.parse(JSON.stringify(data)) as OperationsState,summary:`${recordsFrom(data).length} records · ${section}` };
-    setHistory((current) => {
-      const last = current[0];
-      if (last && JSON.stringify(last.data) === JSON.stringify(data)) return current;
-      const next = [snapshot,...current].slice(0,25);
-      try { localStorage.setItem(HISTORY_KEY,JSON.stringify(next)); } catch {}
-      return next;
-    });
+    const timer = window.setTimeout(() => {
+      const snapshot: Snapshot = { id: String(Date.now()) + "-" + Math.random().toString(36).slice(2,7), createdAt: new Date().toISOString(), data: JSON.parse(JSON.stringify(data)) as OperationsState, summary: recordsFrom(data).length + " records · " + section };
+      setHistory((current) => {
+        const last = current[0];
+        if (last && JSON.stringify(last.data) === JSON.stringify(data)) return current;
+        const next = [snapshot,...current].slice(0,25);
+        try { localStorage.setItem(HISTORY_KEY,JSON.stringify(next)); } catch {}
+        return next;
+      });
+    }, 0);
+    return () => window.clearTimeout(timer);
   },[data,section]);
 
   const allRecords = useMemo(() => recordsFrom(data),[data]);
@@ -159,7 +163,7 @@ export function OperationsCommandCentre({ data, setData, language, section, setS
     {showResults&&<div className="ops-command-results">
       {mode==="table"&&<div className="ops-command-table-wrap"><table className="ops-command-table"><thead><tr><th><input type="checkbox" aria-label={es?"Seleccionar todos":"Select all"} checked={filtered.length>0&&filtered.every(x=>selected.includes(x.kind+":"+x.id))} onChange={e=>setSelected(current=>e.target.checked?Array.from(new Set([...current,...filtered.map(x=>x.kind+":"+x.id)])):current.filter(k=>!filtered.some(x=>k===x.kind+":"+x.id)))}/></th><th>{es?"Registro":"Record"}</th><th>{es?"Módulo":"Module"}</th><th>{es?"Responsable / detalle":"Owner / detail"}</th><th>{es?"Estado":"Status"}</th><th>{es?"Fecha":"Date"}</th><th>{es?"Valor":"Value"}</th></tr></thead><tbody>{filtered.map(item=><tr key={item.kind+":"+item.id}><td><input type="checkbox" checked={selected.includes(item.kind+":"+item.id)} onChange={()=>toggleSelected(item)} aria-label={es?"Seleccionar registro":"Select record"}/></td><td><button className="ops-record-link" onClick={()=>setDetail(item)}>{item.title}</button></td><td>{item.kind}</td><td>{item.subtitle}</td><td><span className="ops-command-status">{item.status}</span></td><td>{item.date?dateLabel(item.date):"—"}</td><td>{item.value}</td></tr>)}</tbody></table></div>}
       {mode==="kanban"&&<div className="ops-kanban">{Array.from(new Set(filtered.map(x=>x.status))).map(group=><div className="ops-kanban-column" key={group}><div className="ops-kanban-heading"><strong>{group}</strong><span>{filtered.filter(x=>x.status===group).length}</span></div>{filtered.filter(x=>x.status===group).map(renderCard)}</div>)}</div>}
-      {mode==="calendar"&&<div className="ops-calendar-list">{filtered.filter(x=>x.date).map(item=><div className="ops-calendar-event" key={item.kind+":"+item.id}><time>{dateLabel(item.date)}</time>{renderCard(item)}</div>)}</div>}
+      {mode==="calendar"&&<div className="ops-calendar-list">{filtered.filter(x=>x.date).map(item=><div className="ops-calendar-event" key={item.kind+":"+item.id}><time>{dateLabel(item.date)}</time>{renderCard(item)}</div>)}{!filtered.some(x=>x.date)&&<div className="ops-command-empty">{es?"Estos registros no tienen fechas para mostrarse en calendario.":"These records have no dates to display in calendar view."}</div>}</div>}
       {!filtered.length&&<div className="ops-command-empty">{query||status!=="all"?(es?"No hay resultados para estos filtros.":"No records match these filters."):(es?"Usa la búsqueda global para localizar cualquier registro de Operaciones.":"Use global search to find any Operations record.")}</div>}
     </div>}
     {selectedItems.length>0&&<div className="ops-bulk-bar"><strong>{selectedItems.length} {es?"seleccionados":"selected"}</strong>{commonStatuses.length>0&&<><select value={bulkStatus} onChange={e=>setBulkStatus(e.target.value)}><option value="">{es?"Cambiar estado…":"Change status…"}</option>{commonStatuses.map(x=><option key={x} value={x}>{x}</option>)}</select><button onClick={applyBulkStatus} disabled={!bulkStatus}>{es?"Aplicar":"Apply"}</button></>}<button className="danger" onClick={deleteSelected}>{es?"Eliminar selección":"Delete selection"}</button><button onClick={()=>setSelected([])}>{es?"Limpiar":"Clear"}</button></div>}
