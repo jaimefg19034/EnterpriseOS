@@ -702,7 +702,7 @@ export default function Home() {
             </div>
           )}
           {view === "overview" && (
-            <div className="eos-overview-v2">
+            <div className="overview-v2">
               <header className="overview-v2-header">
                 <div><div className="eyebrow">{t("EXECUTIVE OFFICE")} <span className="eyebrow-dot" /> {t("FY 2026")} <span className="overview-v2-live">ILLUSTRATIVE MODEL</span></div><h1>{t("Executive overview")}</h1><p>{t("A connected management view built around the financial drivers that shape the company.")}</p></div>
                 <div className="overview-v2-actions"><button className="primary-button" onClick={() => setView("model")}>{t("Open financial model")} <Icon name="arrow" size={15} /></button><button className="secondary-button" onClick={() => setInputs(DEMO_INPUTS)}><Icon name="refresh" size={14} /> {t("Reset demo")}</button></div>
