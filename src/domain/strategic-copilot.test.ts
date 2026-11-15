@@ -161,7 +161,7 @@ describe("analyzeCopilotQuestion", () => {
   it("answers about the specific named project instead of returning a workspace overview", () => {
     const operations = { ...EMPTY_OPERATIONS, projects: [{ id: "p1", name: "Migración ERP", owner: "Ana", budget: 10000, spent: 12500, dueDate: "2026-12-01", status: "active" as const }] };
     const result = analyzeCopilotQuestion("¿Qué está pasando con la migración del ERP?", financials, operations, "es");
-    expect(result.intent).toBe("unknown");
+    expect(result.intent).toBe("project");
     expect(result.matchedData).toContain("operations.projects");
     expect(result.calculations.projectVariance).toBe(2500);
     expect(result.response).toContain("Migración ERP");
