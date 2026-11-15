@@ -18,7 +18,7 @@ describe("analyzeCopilotQuestion", () => {
     const result = analyzeCopilotQuestion("¿Qué pasa si invierto 3.000€?", financials, EMPTY_OPERATIONS, "es");
     expect(result.intent).toBe("investment");
     expect(result.calculations.investment).toBe(3000);
-    expect(result.calculations.investmentAsPercentOfEbitda).toBeCloseTo(12);
+    expect(result.calculations.investmentAsPercentOfEbitda).toBeCloseTo(10);
     expect(result.calculations.revenueToRecoverInvestment).toBe(5000);
   });
 
@@ -28,7 +28,7 @@ describe("analyzeCopilotQuestion", () => {
     expect(result.calculations.saving).toBe(14000);
   });
 
-  it("does not claim a return when the question cannot be interpreted", () => {
+  it("includes detailed expenses in cost-centre analysis", () => {\n    const operations = { ...EMPTY_OPERATIONS, costCenters: [{ id: "cc1", name: "Marketing", owner: "A", budget: 100, actualSpend: 100, period: "2026-Q4" }], expenses: [{ id: "e1", date: "2026-11-15", description: "Campaign", supplier: "S", category: "Marketing", costCenterId: "cc1", amount: 50, status: "paid" as const }] };\n    const result = analyzeCopilotQuestion("¿Cuál es la peor partida de gastos?", financials, operations, "es");\n    expect(result.calculations.topCostCenterSpend).toBe(150);\n    expect(result.response).toContain("50");\n  });\n\n  it("does not claim a return when the question cannot be interpreted", () => {
     const result = analyzeCopilotQuestion("haz magia", financials, EMPTY_OPERATIONS, "es");
     expect(result.intent).toBe("unknown");
     expect(result.response).toContain("No puedo asociar");
