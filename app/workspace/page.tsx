@@ -680,6 +680,13 @@ export default function Home() {
                 </div>
               </header>
 
+              <section className="eos-overview-kpis" aria-label={t("Key financial indicators")}>
+                <article className="eos-overview-kpi"><span>{t("Revenue")}</span><strong>{formatCurrency(results.revenue, true)}</strong><small>{t("FY 2026 · Current model")}</small></article>
+                <article className="eos-overview-kpi"><span>EBITDA</span><strong>{formatCurrency(results.ebitda, true)}</strong><small>{formatPercent(results.ebitdaMarginPercent)} {t("margin")}</small></article>
+                <article className="eos-overview-kpi"><span>{t("Net income")}</span><strong className={results.netIncome < 0 ? "negative-value" : ""}>{formatCurrency(results.netIncome, true)}</strong><small>{formatPercent(results.netMarginPercent)} {t("net margin")}</small></article>
+                <article className="eos-overview-kpi"><span>{t("Gross profit")}</span><strong>{formatCurrency(results.grossProfit, true)}</strong><small>{formatPercent(results.grossMarginPercent)} {t("gross margin")}</small></article>
+              </section>
+
               <section className="eos-executive-stage" aria-label={t("Executive financial overview")}>
                 <div className="eos-stage-performance">
                   <div className="eos-stage-topline">
