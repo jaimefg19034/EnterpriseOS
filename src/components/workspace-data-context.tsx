@@ -5,7 +5,7 @@ import type { Dispatch, ReactNode, SetStateAction } from "react";
 import type { FinancialResults } from "@/domain/financials";
 import { useOperationsCloudSync } from "@/components/use-operations-cloud-sync";
 import type { Language } from "@/i18n/translations";
-import type { SavedPlanningState } from "@/domain/planning-storage";
+import { LEGACY_PLANNING_STORAGE_KEY, parseSavedPlanningState, PLANNING_STORAGE_KEY, type SavedPlanningState } from "@/domain/planning-storage";
 import type { ThreeStatementAssumptions } from "@/domain/three-statements";
 import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, type OperationsState } from "@/domain/operations";
 
@@ -34,6 +34,9 @@ export function WorkspaceDataProvider({ financials, language, children }: { fina
     try {
       const restored = parseOperationsState(window.localStorage.getItem(OPERATIONS_STORAGE_KEY));
       if (restored) setOperations(restored);
+      const planningRaw = window.localStorage.getItem(PLANNING_STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_PLANNING_STORAGE_KEY);
+      const restoredPlanning = parseSavedPlanningState(planningRaw);
+      if (restoredPlanning) setPlanning(restoredPlanning);
     } catch {
       // The in-memory workspace remains usable if browser storage is unavailable.
     }
