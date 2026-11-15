@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { calculateFinancials } from "@/domain/financials";
-import { EMPTY_OPERATIONS } from "@/domain/operations";
-import { analyzeCopilotQuestion } from "@/domain/strategic-copilot";
+import { calculateFinancials } from "./financials";
+import { EMPTY_OPERATIONS } from "./operations";
+import { analyzeCopilotQuestion } from "./strategic-copilot";
 
 const financials = calculateFinancials({ revenue: 100000, costOfGoodsSold: 40000, operatingExpenses: 30000, depreciationAndAmortisation: 5000, interestExpense: 2000, taxRatePercent: 25 });
 
