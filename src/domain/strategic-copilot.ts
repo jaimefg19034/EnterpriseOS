@@ -78,9 +78,9 @@ function intentOf(question: string, context?: IntentContext): CopilotIntent {
  const q=normaliseText(question), scores=scoreIntents(question);
  if(scores.greeting) return "greeting";
  if(scores.advice) return "advice";
+ if(context?.previousIntent&&/\b(y ahora|ahora|y entonces|con eso|en ese caso|y si|que tal ahora|como lo ves|what about now|and now|in that case)\b/.test(q)) return context.previousIntent;
  const ranked=Object.entries(scores).filter(([key,value])=>key!=="greeting"&&key!=="advice"&&value>0).sort((a,b)=>b[1]-a[1]);
  if(ranked.length&&ranked[0][1]>=2) return ranked[0][0] as CopilotIntent;
- if(context?.previousIntent&&/\b(y ahora|ahora|y entonces|con eso|en ese caso|y si|que tal ahora|como lo ves|what about now|and now|in that case)\b/.test(q)) return context.previousIntent;
  return "unknown";
 }
 
