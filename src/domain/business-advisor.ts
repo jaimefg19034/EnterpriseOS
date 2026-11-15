@@ -10,7 +10,7 @@ const GENERAL_PATTERNS: Array<{ test: RegExp; key: "today" | "ideas" | "team" | 
   { test: /\b(como organizo mi equipo|organizar mi equipo|organizar el equipo|gestiono mi equipo|manage my team|organize my team|team structure)\b/, key: "team" },
   { test: /\b(por donde empiezo|por donde empezar|como empiezo|where do i start|how should i start)\b/, key: "start" },
   { test: /\b(dame ideas para mejorar|como mejoro|como mejorar|mejorar el negocio|mejorar la empresa|improve my business|how can i improve)\b/, key: "improve" },
-  { test: /\b(estrategia|plan estrategico|prioridades|productividad|organizar el trabajo|organizar tareas|strategy|productivity|priorities)\b/, key: "strategy" },
+  { test: /\b(estrategia|plan estrategico|prioridades|productividad|organizar el trabajo|organizar tareas|como organizo esto|organizar esto|organizo esto|como organizar|strategy|productivity|priorities)\b/, key: "strategy" },
 ];
 
 export function answerGeneralBusinessQuestion(question: string, language: Language): CopilotAnalysis | null {
