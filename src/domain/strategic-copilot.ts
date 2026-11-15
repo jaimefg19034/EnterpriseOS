@@ -3,8 +3,10 @@ import { costCenterActualSpend, weightedPipeline, type OperationsState } from ".
 import type { Language } from "../i18n/translations";
 import { calculateThreeStatements, DEFAULT_THREE_STATEMENT_ASSUMPTIONS, type ThreeStatementAssumptions } from "./three-statements";
 import type { SavedPlanningState } from "./planning-storage";
+import { calculateCashForecast, type CashForecastWeekInput } from "./cash-forecast";
+import { calculateInvoiceAgeing, summarizeInvoices, type WorkingCapitalInvoice } from "./working-capital";
 
-export type CopilotIntent = "greeting" | "social" | "advice" | "expense" | "saving" | "investment" | "margin" | "profit" | "revenue" | "project" | "risk" | "kpi" | "cash" | "planning" | "overview" | "unknown";
+export type CopilotIntent = "greeting" | "social" | "advice" | "expense" | "saving" | "investment" | "margin" | "profit" | "revenue" | "project" | "risk" | "kpi" | "cash" | "workingCapital" | "planning" | "overview" | "unknown";
 export type CopilotAnalysis = { intent: CopilotIntent; response: string; calculations: Record<string, number>; matchedData: string[] };
 
 const money = (value: number, language: Language) => new Intl.NumberFormat(language === "es" ? "es-ES" : "en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 2 }).format(value);
@@ -82,7 +84,7 @@ function topExpense(operations: OperationsState) {
   return [...operations.expenses].sort((a, b) => b.amount - a.amount)[0] ?? null;
 }
 
-export function analyzeCopilotQuestion(question: string, financials: FinancialResults, operations: OperationsState, language: Language, workspace: { planning: SavedPlanningState | null; statementAssumptions: ThreeStatementAssumptions | null } = { planning: null, statementAssumptions: null }, context?: IntentContext): CopilotAnalysis {
+export function analyzeCopilotQuestion(question: string, financials: FinancialResults, operations: OperationsState, language: Language, workspace: { planning: SavedPlanningState | null; statementAssumptions: ThreeStatementAssumptions | null; cashForecastWeeks?: CashForecastWeekInput[]; workingCapitalInvoices?: WorkingCapitalInvoice[] } = { planning: null, statementAssumptions: null }, context?: IntentContext): CopilotAnalysis {
   const es = language === "es";
   const q = question.trim();
   const intent = intentOf(q, context);
