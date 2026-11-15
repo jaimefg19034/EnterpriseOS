@@ -180,6 +180,60 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
       ? "La respuesta anterior no estaba organizada en puntos numerados, así que no puedo identificar con seguridad cuál es el segundo. Cita esa frase o dime el tema y lo desarrollo sin inventar una referencia."
       : "My previous answer was not structured as a numbered list, so I cannot reliably identify the second point. Quote that phrase or name the topic and I will expand it without guessing." };
   }
+  const asksImplementation = /\b(como lo aplico|como aplico eso|como lo pongo en marcha|como ejecuto|paso a paso|plan de accion|dame un plan|how do i apply|how do i implement|step by step|give me a plan)\b/.test(normaliseText(q));
+  if (asksImplementation && context?.previousIntent) {
+    const steps: string[] = [];
+    if (context.previousIntent === "saving" || context.previousIntent === "expense") {
+      const ranked = [...operations.expenses].sort((a,b) => b.amount-a.amount).slice(0,3);
+      const base = context.previousCalculations?.expenseBase ?? financials.operatingExpenses + financials.costOfGoodsSold;
+      const target = context.previousCalculations?.saving ?? round(base * 0.1);
+      calculations.expenseBase = round(base); calculations.targetSaving = round(target);
+      matchedData.push("financials.operatingExpenses","financials.costOfGoodsSold","operations.expenses");
+      steps.push(es ? "Congela nuevos compromisos no esenciales durante 7 días; no canceles partidas críticas sin validar su efecto." : "Freeze non-essential new commitments for 7 days; do not cancel critical items without validating the effect.");
+      if (ranked[0]) steps.push((es ? "Audita primero " : "Audit ") + ranked[0].description + " (" + ranked[0].category + "): " + money(ranked[0].amount,language) + (es ? "; pide detalle, contrato y responsable." : "; request the invoice, contract and owner."));
+      if (ranked[1]) steps.push((es ? "Contrasta " : "Benchmark ") + ranked[1].description + " (" + money(ranked[1].amount,language) + (es ? ") con al menos dos alternativas y revisa si es recurrente." : ") against at least two alternatives and check whether it recurs."));
+      steps.push((es ? "Fija un objetivo máximo de " : "Set a maximum target of ") + money(target,language) + (es ? " de ahorro para el periodo analizado; registra responsable, fecha y ahorro realmente conseguido." : " for the analysed period; record owner, deadline and realised savings."));
+    } else if (context.previousIntent === "revenue") {
+      const deals = operations.opportunities.filter(x => !["won","lost"].includes(x.stage)).sort((a,b) => b.value-a.value).slice(0,3);
+      const pipeline = weightedPipeline(operations.opportunities.filter(x => !["won","lost"].includes(x.stage)));
+      calculations.weightedPipeline = round(pipeline); matchedData.push("operations.opportunities");
+      steps.push(es ? "Ordena la cartera por valor, probabilidad y fecha prevista de cierre; no confundas pipeline con ingresos reconocidos." : "Rank the pipeline by value, probability and expected close date; do not confuse pipeline with recognised revenue.");
+      deals.forEach((deal,index) => steps.push((index+1) + ". " + deal.company + ": " + money(deal.value,language) + (es ? ", fase " : ", ") + deal.stage + (es ? ", cierre previsto " : ", expected close ") + deal.expectedClose + (es ? ". Define el siguiente contacto y bloqueo." : ". Define the next contact and blocker.")));
+      steps.push(es ? "Revisa semanalmente conversión por fase y margen esperado antes de aprobar descuentos." : "Review stage conversion and expected margin weekly before approving discounts.");
+    } else if (context.previousIntent === "cash" || context.previousIntent === "workingCapital") {
+      const invoices = workspace.workingCapitalInvoices ?? [];
+      const today = localISODate();
+      const overdue = invoices.map(invoice => ({invoice,age:calculateInvoiceAgeing([invoice],today)[0]})).filter(x=>x.age.outstanding>0&&x.age.overdueDays>0).sort((a,b)=>b.age.outstanding-a.age.outstanding);
+      matchedData.push("workingCapitalInvoices","cashForecastWeeks");
+      calculations.overdueReceivables = round(overdue.filter(x=>x.invoice.direction==="receivable").reduce((s,x)=>s+x.age.outstanding,0));
+      steps.push(es ? "Separa cobros vencidos, cobros próximos y pagos comprometidos; prioriza por importe y días de retraso." : "Separate overdue collections, upcoming receipts and committed payments; prioritise by amount and days overdue.");
+      overdue.slice(0,3).forEach((x,index)=>steps.push((index+1) + ". " + (es ? "Contacta con " : "Contact ") + x.invoice.counterparty + " por " + money(x.age.outstanding,language) + (es ? "; vencimiento " : "; due ") + x.invoice.dueDate + "."));
+      steps.push(es ? "Actualiza la previsión de 13 semanas con fechas probables reales y negocia plazos antes del vencimiento." : "Update the 13-week forecast with realistic receipt dates and negotiate terms before due dates.");
+    } else if (context.previousIntent === "project") {
+      const project = operations.projects.filter(x=>x.status!=="completed").map(x=>({...x,variance:x.spent-x.budget})).sort((a,b)=>b.variance-a.variance)[0];
+      matchedData.push("operations.projects");
+      if(project){calculations.projectVariance=round(project.variance);steps.push((es?"Reestima ":"Reforecast ")+project.name+": "+money(project.spent,language)+(es?" gastados frente a ":" spent against ")+money(project.budget,language)+(es?" presupuestados; valida coste pendiente y fecha final.":" budget; validate cost to complete and final date."));}
+      steps.push(es ? "Divide el trabajo restante en hitos, asigna un responsable por hito y aprueba cambios de alcance solo con coste y plazo." : "Break remaining work into milestones, assign one owner per milestone and approve scope changes only with cost and schedule impact.");
+    } else if (context.previousIntent === "risk") {
+      const risk = operations.risks.filter(x=>x.status!=="closed").sort((a,b)=>b.probability*b.impact-a.probability*a.impact)[0];
+      matchedData.push("operations.risks");
+      if(risk){calculations.highestRiskScore=risk.probability*risk.impact;steps.push((es?"Asigna un responsable a «":"Assign an owner to “")+risk.title+(es?"» (riesgo ":"” (risk ")+(risk.probability*risk.impact)+"/25) "+(es?"y convierte la mitigación en tareas verificables.":"and turn mitigation into verifiable tasks."));}
+      steps.push(es ? "Define señal temprana, fecha de revisión y criterio de escalado; actualiza el estado tras cada control." : "Define an early-warning indicator, review date and escalation trigger; update status after each control.");
+    } else {
+      steps.push(es ? "Abre el dato o registro concreto que sustenta la recomendación y confirma periodo, responsable y unidad." : "Open the exact record behind the recommendation and confirm period, owner and unit.");
+      steps.push(es ? "Define una acción reversible, una métrica de éxito y una fecha de revisión a 30 días." : "Define a reversible action, a success metric and a 30-day review date.");
+    }
+    return {intent:context.previousIntent,calculations,matchedData,steps,action:"implement",confidence:0.9,response:es ? "Plan de ejecución ligado al análisis anterior y a los registros actuales. No modificaré datos contables automáticamente; cada paso debe validarse y medirse." : "Execution plan linked to the previous analysis and current records. I will not change accounting data automatically; each step must be validated and measured."};
+  }
+
+  if (context?.previousIntent === "saving" && targetPercent !== null && /\b(sub\w*|aument\w*|elev\w*|increment\w*|raise|increase|boost)\b/.test(normaliseText(q)) && context.previousCalculations?.saving !== undefined) {
+    const previousSaving = context.previousCalculations.saving;
+    const nextSaving = round(previousSaving * (1 + targetPercent / 100));
+    calculations.previousSaving = previousSaving; calculations.savingIncreasePercent = targetPercent; calculations.savingAfterScenario = nextSaving; calculations.incrementalSaving = round(nextSaving - previousSaving);
+    matchedData.push("conversation.previousCalculations","financials");
+    return {intent:"saving",calculations,matchedData,action:"simulate",confidence:0.94,response:es ? "Interpreto «subirlo» como aumentar el objetivo de ahorro anterior un " + percent(targetPercent,language) + ". El objetivo pasaría de " + money(previousSaving,language) + " a " + money(nextSaving,language) + " por el mismo periodo: " + money(nextSaving-previousSaving,language) + " adicionales. Es un objetivo de escenario, no un ahorro realizado." : "I interpret “raise it” as increasing the previous savings target by " + percent(targetPercent,language) + ". The target moves from " + money(previousSaving,language) + " to " + money(nextSaving,language) + " for the same period: " + money(nextSaving-previousSaving,language) + " additional. This is a scenario target, not realised savings."};
+  }
+
   if (intent === "greeting") {
     const openProjects=operations.projects.filter(x=>x.status!=="completed").length;
     const openDeals=operations.opportunities.filter(x=>!["won","lost"].includes(x.stage));
