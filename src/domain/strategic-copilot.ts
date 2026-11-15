@@ -7,7 +7,7 @@ import { calculateCashForecast, type CashForecastWeekInput } from "./cash-foreca
 import { calculateInvoiceAgeing, summarizeInvoices, type WorkingCapitalInvoice } from "./working-capital";
 
 export type CopilotIntent = "greeting" | "social" | "advice" | "expense" | "saving" | "investment" | "margin" | "profit" | "revenue" | "project" | "risk" | "kpi" | "cash" | "workingCapital" | "planning" | "overview" | "unknown";
-export type CopilotAnalysis = { intent: CopilotIntent; response: string; calculations: Record<string, number>; matchedData: string[] };
+export type CopilotAnalysis = { intent: CopilotIntent; response: string; calculations: Record<string, number>; matchedData: string[]; steps?: string[]; action?: "explain" | "simulate" | "implement"; confidence?: number };
 
 const money = (value: number, language: Language) => new Intl.NumberFormat(language === "es" ? "es-ES" : "en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 2 }).format(value);
 const percent = (value: number, language: Language) => new Intl.NumberFormat(language === "es" ? "es-ES" : "en-IE", { style: "percent", maximumFractionDigits: 2 }).format(value / 100);
@@ -30,14 +30,34 @@ function extractAmount(question: string, intent: CopilotIntent): number | null {
   return /\b(?:k|mil)\b/i.test(match[0]) ? parsed * 1000 : parsed;
 }
 
+const NUMBER_WORDS: Record<string, number> = {
+  cero:0, zero:0, uno:1, una:1, un:1, one:1, dos:2, two:2, tres:3, three:3, cuatro:4, four:4,
+  cinco:5, five:5, seis:6, six:6, siete:7, seven:7, ocho:8, eight:8, nueve:9, nine:9,
+  diez:10, ten:10, once:11, eleven:11, doce:12, twelve:12, trece:13, thirteen:13,
+  catorce:14, fourteen:14, quince:15, fifteen:15, dieciseis:16, sixteen:16, diecisiete:17,
+  seventeen:17, dieciocho:18, eighteen:18, diecinueve:19, nineteen:19, veinte:20, twenty:20,
+  treinta:30, thirty:30, cuarenta:40, forty:40, cincuenta:50, fifty:50, sesenta:60, sixty:60,
+  setenta:70, seventy:70, ochenta:80, eighty:80, noventa:90, ninety:90, cien:100, hundred:100,
+};
+function numberWordsValue(raw: string): number | null {
+  const words = normaliseText(raw).split(/\\s+/).filter(x => x !== "y" && x !== "and");
+  if (!words.length || words.some(x => NUMBER_WORDS[x] === undefined)) return null;
+  const values = words.map(x => NUMBER_WORDS[x]);
+  if (values.length === 1) return values[0];
+  if (values.length === 2 && values[0] >= 20 && values[0] % 10 === 0 && values[1] < 10) return values[0] + values[1];
+  return null;
+}
 function extractPercent(question: string): number | null {
-  const match = question.match(/(\d+(?:[.,]\d+)?)\s*%/);
-  if (!match) return null;
-  const value = Number(match[1].replace(",", "."));
-  return Number.isFinite(value) && value >= 0 && value <= 1000 ? value : null;
+  const match = question.match(/(\\d+(?:[.,]\\d+)?)\\s*%/);
+  const numeric = match ? Number(match[1].replace(",", ".")) : null;
+  if (numeric !== null) return Number.isFinite(numeric) && numeric >= 0 && numeric <= 1000 ? numeric : null;
+  const words = normaliseText(question).match(/\\b(cero|zero|uno|una|un|one|dos|two|tres|three|cuatro|four|cinco|five|seis|six|siete|seven|ocho|eight|nueve|nine|diez|ten|once|eleven|doce|twelve|trece|thirteen|catorce|fourteen|quince|fifteen|dieciseis|sixteen|diecisiete|seventeen|dieciocho|eighteen|diecinueve|nineteen|veinte|twenty|treinta|thirty|cuarenta|forty|cincuenta|fifty|sesenta|sixty|setenta|seventy|ochenta|eighty|noventa|ninety|cien|hundred)(?:\\s+y\\s+(?:uno|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve))?\\s+(?:por ciento|percent)\\b/);
+  if (!words) return null;
+  const value = numberWordsValue(words[0].replace(/\\s+(?:por ciento|percent)$/, ""));
+  return value !== null && value >= 0 && value <= 1000 ? value : null;
 }
 
-type IntentContext = { previousIntent?: CopilotIntent; previousQuestion?: string; previousResponse?: string; history?: { role: "user" | "assistant"; content: string }[] };
+export type IntentContext = { previousIntent?: CopilotIntent; previousQuestion?: string; previousResponse?: string; previousCalculations?: Record<string, number>; history?: { role: "user" | "assistant"; content: string }[] };
 const normaliseText = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9€%.,\s]/g, " ").replace(/\s+/g, " ").trim();
 const INTENT_TERMS: Record<Exclude<CopilotIntent,"greeting"|"social"|"advice"|"unknown">, string[]> = {
  investment:["invert","invierto","invierta","inversion","invertir","contratar","contratacion","emplear","personal","capex","inversion","roi","retorno","rentabilidad","capital","investment","hire"],
