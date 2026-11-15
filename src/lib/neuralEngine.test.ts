@@ -17,6 +17,19 @@ describe("local neural conversation engine", () => {
     expect(result?.steps?.length).toBeGreaterThanOrEqual(3);
   });
 
+  it("handles broad daily-priority questions as an action plan", () => {
+    const result = neuralEngine("¿Qué me propones hacer hoy?", "es");
+    expect(result?.intent).toBe("advice");
+    expect(result?.steps?.length).toBeGreaterThanOrEqual(3);
+    expect(result?.calculations).toEqual({});
+  });
+
+  it("does not confuse sales-growth ideas with financial reporting", () => {
+    const result = neuralEngine("Dame ideas para aumentar las ventas y captar clientes", "es");
+    expect(result?.intent).toBe("advice");
+    expect(result?.calculations).toEqual({});
+  });
+
   it("creates a practical team organisation answer", () => {
     const result = neuralEngine("¿Cómo organizo mejor mi equipo?", "es");
     expect(result?.response).toContain("responsable");
