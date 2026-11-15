@@ -1614,3 +1614,17 @@ body { overflow:hidden; }
 .ops-detail-close{height:38px;margin-top:auto;border:1px solid #dfe5ef;border-radius:6px;background:#f7f9fc;color:#52637d;font-size:10px;font-weight:750;cursor:pointer}
 @media(max-width:1050px){.ops-command-toolbar{align-items:stretch}.ops-global-search{flex-basis:100%}.ops-view-select{flex:1;max-width:none}.ops-view-switch{flex:1}.ops-view-switch button{flex:1}.ops-utility-button{flex:1}}
 @media(max-width:650px){.ops-command-centre{padding:9px}.ops-command-meta{align-items:flex-start;flex-direction:column;gap:4px}.ops-command-toolbar{gap:6px}.ops-view-select{min-width:0}.ops-calendar-event{grid-template-columns:1fr;gap:4px}.ops-calendar-event>time{padding:5px 0}.ops-detail-drawer{padding:18px}.ops-bulk-bar{bottom:6px}.ops-bulk-bar strong{flex-basis:100%}}
+
+
+/* Operations command centre: compact, legible version history and date agenda. */
+.ops-history-panel{gap:5px;padding:10px 12px}
+.ops-history-panel .ops-command-panel-heading{align-items:center}
+.ops-history-panel .ops-command-panel-heading p{margin-top:2px}
+.ops-history-count{display:inline-flex;min-width:19px;height:19px;align-items:center;justify-content:center;margin-left:5px;padding:0 5px;border:1px solid #e3e9f2;border-radius:5px;background:#f6f8fb;color:#71809a;font:700 9px Inter,sans-serif;vertical-align:middle}
+.ops-history-panel .ops-history-row{gap:8px;padding:5px 0}
+.ops-history-panel .ops-history-row>div{display:flex;align-items:center;gap:9px}
+.ops-history-panel .ops-history-row strong{font-size:9px;white-space:nowrap}
+.ops-history-panel .ops-history-row span{font-size:9px}
+.ops-history-panel .ops-history-row button{height:25px;padding:0 8px;font-size:8px}
+.ops-calendar-caption{display:flex;justify-content:space-between;align-items:center;padding:0 0 4px;color:#566780;font-size:10px;font-weight:750}
+.ops-calendar-caption span{color:#8a96a8;font-size:9px;font-weight:600}
