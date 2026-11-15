@@ -180,8 +180,9 @@ describe("analyzeCopilotQuestion", () => {
       { id: "e1", date: "2026-11-15", description: "Campaign", supplier: "S", category: "Marketing", costCenterId: "cc1", amount: 1250, status: "paid" as const },
     ], costCenters: [{ id: "cc1", name: "Marketing", owner: "A", budget: 2000, actualSpend: 0, period: "2026-Q4" }] };
     const result = analyzeCopilotQuestion("¿Dónde se está yendo el dinero?", financials, operations, "es");
-    expect(["expense", "overview"]).toContain(result.intent);
+    expect(result.intent).toBe("expense");
     expect(result.response).toContain("Marketing");
+    expect(result.response).toContain("1. Marketing");
   });
 
   it("recognises conversational synonyms and accent-free phrasing", () => {
