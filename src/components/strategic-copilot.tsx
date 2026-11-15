@@ -135,7 +135,7 @@ export function StrategicCopilot({language,mode="chat"}:{language:Language;mode?
   setChatMessages(current=>[...current,userMessage].slice(-500));setChatBusy(true);
   window.setTimeout(async()=>{
    try{
-    let analysis=aiEngine(clean,financials,ops,language,{planning,statementAssumptions,cashForecastWeeks,workingCapitalInvoices},{...conversationContext,history:chatMessages.slice(-500).map(m=>({role:m.role,content:m.text}))});
+    const analysis=aiEngine(clean,financials,ops,language,{planning,statementAssumptions,cashForecastWeeks,workingCapitalInvoices},{...conversationContext,history:chatMessages.slice(-500).map(m=>({role:m.role,content:m.text}))});
     const isSmallTalk=analysis.intent==="greeting"||analysis.intent==="social"||analysis.intent==="unknown";const nextContext:ChatContext={previousIntent:isSmallTalk?conversationContext.previousIntent:analysis.intent,previousQuestion:isSmallTalk?(conversationContext.previousQuestion??clean):clean,previousResponse:isSmallTalk?(conversationContext.previousResponse??analysis.response):analysis.response,previousCalculations:isSmallTalk?(conversationContext.previousCalculations??analysis.calculations):analysis.calculations,history:[...(conversationContext.history??[]),{role:"user" as const,content:clean},{role:"assistant" as const,content:analysis.response}].slice(-500)};
     setConversationContext(nextContext);try{window.localStorage.setItem(CHAT_CONTEXT_KEY,JSON.stringify(nextContext))}catch{}
     const fullText=analysis.response||(es?"No tengo una conclusión fiable con la información disponible. Dime qué cifra, proyecto o partida quieres revisar.":"I cannot reach a reliable conclusion from the available information. Tell me which figure, project or line item to review.");
