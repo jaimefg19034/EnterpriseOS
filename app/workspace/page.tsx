@@ -330,6 +330,9 @@ export default function Home() {
   const [showHelpGuide, setShowHelpGuide] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState("");
+  const [commandIndex, setCommandIndex] = useState(0);
+  const [activityOpen, setActivityOpen] = useState(false);
+  const [recentViews, setRecentViews] = useState<View[]>([]);
   const demoAccessGranted = useSyncExternalStore(subscribeDemoAccess, getDemoAccessSnapshot, getServerDemoAccessSnapshot);
   const [demoCode, setDemoCode] = useState("");
   const [demoCodeError, setDemoCodeError] = useState("");
@@ -365,6 +368,28 @@ export default function Home() {
     { label: t("Export Excel"), detail: "Download current management P&L", run: () => { void exportExcel(); } },
   ];
   const filteredCommands = commandItems.filter((item) => (item.label + " " + item.detail).toLowerCase().includes(commandQuery.toLowerCase()));
+  const viewLabels: Record<View, string> = { overview: t("Overview"), model: t("Financial model"), planning: t("Budget & scenarios"), statements: t("3 statements"), operations: t("Operations & intelligence"), reports: t("Reports & exports") };
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      try {
+        const saved = JSON.parse(window.localStorage.getItem("enterpriseos:recent-views") ?? "[]");
+        if (Array.isArray(saved)) setRecentViews(saved.filter((item): item is View => ["overview","model","planning","statements","operations","reports"].includes(item)).slice(0, 8));
+      } catch { setRecentViews([]); }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setRecentViews((current) => {
+        const next = [view, ...current.filter((item) => item !== view)].slice(0, 8);
+        try { window.localStorage.setItem("enterpriseos:recent-views", JSON.stringify(next)); } catch { /* Recent navigation is an optional convenience. */ }
+        return next;
+      });
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [view]);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -372,12 +397,14 @@ export default function Home() {
 
   useEffect(() => {
     function handleCommandShortcut(event: KeyboardEvent) {
+      const target = event.target as HTMLElement | null;
+      const isTyping = !!target && (target.isContentEditable || ["INPUT","TEXTAREA","SELECT"].includes(target.tagName));
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-        event.preventDefault();
-        setCommandOpen((open) => !open);
-        setCommandQuery("");
+        event.preventDefault(); setCommandOpen((open) => !open); setCommandQuery(""); setCommandIndex(0);
+      } else if (event.key === "/" && !isTyping) {
+        event.preventDefault(); setCommandOpen(true); setCommandQuery(""); setCommandIndex(0);
       }
-      if (event.key === "Escape") setCommandOpen(false);
+      if (event.key === "Escape") { setCommandOpen(false); setActivityOpen(false); }
     }
     window.addEventListener("keydown", handleCommandShortcut);
     return () => window.removeEventListener("keydown", handleCommandShortcut);
@@ -575,9 +602,10 @@ export default function Home() {
             <strong>{view === "overview" ? t("Overview") : view === "model" ? t("Financial model") : view === "planning" ? t("Budget & scenarios") : view === "statements" ? t("3 statements") : view === "operations" ? t("Operations") : t("Reports")}</strong>
           </div>
           <div className="topbar-actions">
-            <button type="button" className="command-launcher" onClick={() => { setCommandOpen(true); setCommandQuery(""); }} aria-label={t("Open command menu")}>
+            <button type="button" className="command-launcher" onClick={() => { setCommandOpen(true); setCommandQuery(""); setCommandIndex(0); }} aria-label={t("Open command menu")}>
               <Icon name="search" size={14} /><span>{t("Quick command")}</span><kbd>⌘ K</kbd>
             </button>
+            <button type="button" className="activity-launcher" onClick={() => setActivityOpen(true)} aria-label={t("Open recent activity")}><Icon name="clock" size={15} /><span>{t("Recent")}</span></button>
             <Link className="product-overview-link" href="/platform">Product overview <Icon name="arrow" size={13} /></Link>
             <div className="language-switch" role="group" aria-label={t("Language")}>
               <button type="button" className={language === "en" ? "selected" : ""} onClick={() => setLanguage("en")} aria-pressed={language === "en"}>EN</button>
@@ -651,16 +679,25 @@ export default function Home() {
               <button type="button" onClick={() => setView("reports")}>{t("Reports")} <Icon name="file" size={13} /></button>
             </div>
           </section>
+          {activityOpen && (
+            <div className="workspace-info-backdrop activity-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setActivityOpen(false); }}>
+              <section className="activity-drawer" role="dialog" aria-modal="true" aria-labelledby="activity-drawer-title">
+                <header><div><span className="panel-kicker">{t("WORKSPACE HISTORY")}</span><h2 id="activity-drawer-title">{t("Recently opened")}</h2><p>{t("Your recent navigation on this device.")}</p></div><button type="button" onClick={() => setActivityOpen(false)} aria-label={t("Close")}>×</button></header>
+                <div className="activity-list">{recentViews.map((item, index) => <button type="button" key={item} onClick={() => { setView(item); setActivityOpen(false); }}><span className="activity-index">{String(index + 1).padStart(2,"0")}</span><span><strong>{viewLabels[item]}</strong><small>{index === 0 ? t("Most recent") : t("Opened on this device")}</small></span><Icon name="arrow" size={15}/></button>)}{recentViews.length === 0 && <p className="activity-empty">{t("Your recently opened workspaces will appear here.")}</p>}</div>
+                <footer><span>{t("Stored locally in this browser")}</span><button type="button" onClick={() => { setRecentViews([]); try { window.localStorage.removeItem("enterpriseos:recent-views"); } catch { /* Ignore unavailable storage. */ } }}>{t("Clear history")}</button></footer>
+              </section>
+            </div>
+          )}
           {commandOpen && (
             <div className="command-palette-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setCommandOpen(false); }}>
               <section className="command-palette" role="dialog" aria-modal="true" aria-label={t("Quick command")}>
-                <div className="command-palette-search"><Icon name="search" size={18} /><input autoFocus value={commandQuery} onChange={(event) => setCommandQuery(event.target.value)} placeholder={t("Search workspaces and actions…")} /><kbd>ESC</kbd></div>
+                <div className="command-palette-search"><Icon name="search" size={18} /><input autoFocus value={commandQuery} onChange={(event) => { setCommandQuery(event.target.value); setCommandIndex(0); }} onKeyDown={(event) => { if (event.key === "ArrowDown") { event.preventDefault(); setCommandIndex((current) => Math.min(filteredCommands.length - 1, current + 1)); } else if (event.key === "ArrowUp") { event.preventDefault(); setCommandIndex((current) => Math.max(0, current - 1)); } else if (event.key === "Enter" && filteredCommands[commandIndex]) { event.preventDefault(); filteredCommands[commandIndex].run(); setCommandOpen(false); } }} placeholder={t("Search workspaces and actions…")} /><kbd>ESC</kbd></div>
                 <div className="command-palette-label">{t("NAVIGATION & ACTIONS")}</div>
                 <div className="command-palette-results">
-                  {filteredCommands.map((item) => <button type="button" key={item.label} onClick={() => { item.run(); setCommandOpen(false); }}><span><strong>{item.label}</strong><small>{item.detail}</small></span><Icon name="arrow" size={15} /></button>)}
+                  {filteredCommands.map((item, index) => <button type="button" key={item.label} className={index === commandIndex ? "is-selected" : ""} onMouseEnter={() => setCommandIndex(index)} onClick={() => { item.run(); setCommandOpen(false); }}><span><strong>{item.label}</strong><small>{item.detail}</small></span><Icon name="arrow" size={15} /></button>)}
                   {filteredCommands.length === 0 && <p className="command-palette-empty">{t("No matching command. Try another search.")}</p>}
                 </div>
-                <footer><span><kbd>↵</kbd> {t("Select action")}</span><span><kbd>⌘ K</kbd> {t("Toggle command menu")}</span></footer>
+                <footer><span><kbd>↑</kbd><kbd>↓</kbd> {t("Navigate")}</span><span><kbd>↵</kbd> {t("Select action")}</span><span><kbd>/</kbd> {t("Search")}</span></footer>
               </section>
             </div>
           )}
