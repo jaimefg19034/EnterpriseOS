@@ -505,7 +505,7 @@ export default function Home() {
   }
 
   return (
-    <WorkspaceDataProvider financials={results}>
+    <WorkspaceDataProvider financials={results} language={language}>
     <main className="app-shell">
       <aside className="sidebar">
         <div className="brand">
