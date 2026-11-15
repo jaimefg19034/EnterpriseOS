@@ -61,7 +61,8 @@ function sourceName(source:string,es:boolean){
 export function StrategicCopilot({language}:{language:Language}){
  const {operations:ops,financials,planning,statementAssumptions,cashForecastWeeks,workingCapitalInvoices}=useWorkspaceData();
  const es=language==="es";
- const [filter,setFilter]=useState<"all"|Kind>("all"),[saved,setSaved]=useState<Saved[]>([]),[applied,setApplied]=useState<string[]>([]),[question,setQuestion]=useState(""),[chatBusy,setChatBusy]=useState(false),[chatMessages,setChatMessages]=useState<ChatMessage[]>(()=>readChatMessages()),[conversationContext,setConversationContext]=useState<ChatContext>(()=>readChatContext()),[diagnosticOpen,setDiagnosticOpen]=useState(false);\n const messageSequence=useRef(0);
+ const [filter,setFilter]=useState<"all"|Kind>("all"),[saved,setSaved]=useState<Saved[]>([]),[applied,setApplied]=useState<string[]>([]),[question,setQuestion]=useState(""),[chatBusy,setChatBusy]=useState(false),[chatMessages,setChatMessages]=useState<ChatMessage[]>(()=>readChatMessages()),[conversationContext,setConversationContext]=useState<ChatContext>(()=>readChatContext()),[diagnosticOpen,setDiagnosticOpen]=useState(false);
+ const messageSequence=useRef(0);
  useEffect(()=>{const timer=window.setTimeout(()=>setSaved(readSaved()),0);return()=>window.clearTimeout(timer)},[]);
  useEffect(()=>{try{window.localStorage.setItem("enterpriseos:copilot-messages:v2",JSON.stringify(chatMessages.slice(-12)))}catch{}},[chatMessages]);
  const recs=useMemo(()=>build(financials,ops,language),[financials,ops,language]),visible=filter==="all"?recs:recs.filter(x=>x.kind===filter),savedIds=new Set(saved.map(x=>x.id)),appliedImpact=recs.filter(x=>applied.includes(x.id)).reduce((s,x)=>s+(x.impact??0),0);
