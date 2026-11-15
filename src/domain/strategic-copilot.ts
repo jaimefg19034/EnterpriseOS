@@ -40,7 +40,7 @@ function extractPercent(question: string): number | null {
 type IntentContext = { previousIntent?: CopilotIntent; previousQuestion?: string };
 const normaliseText = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9€%.,\s]/g, " ").replace(/\s+/g, " ").trim();
 const INTENT_TERMS: Record<Exclude<CopilotIntent,"greeting"|"social"|"advice"|"unknown">, string[]> = {
- investment:["invert","inversion","invertir","contratar","contratacion","emplear","personal","capex","inversion","roi","retorno","rentabilidad","capital","investment","hire"],
+ investment:["invert","invierto","invierta","inversion","invertir","contratar","contratacion","emplear","personal","capex","inversion","roi","retorno","rentabilidad","capital","investment","hire"],
  margin:["margen","margin","rentabilidad","eficiencia","bruto","ebitda margin"],
  saving:["ahorro","ahorrar","recortar","reducir","bajar","optimizar","eficiencia","cost saving","cut","reduce","lower"],
  expense:["gasto","gastos","coste","costes","costo","costos","partida","proveedor","sobrecoste","marketing","nomina","opex","spend","expense","cost","burn"],
