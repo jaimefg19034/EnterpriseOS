@@ -1,0 +1,28 @@
+/* Mobile full-width fallback, loaded last so tablet rules cannot override it. */
+@media screen and (max-width:760px) {
+  html,body { width:100%!important; min-width:0!important; max-width:100%!important; margin:0; overflow-x:hidden!important; }
+  .app-shell { display:flex!important; width:100%!important; min-width:0!important; max-width:100%!important; min-height:100dvh!important; height:auto!important; flex-direction:column!important; align-items:stretch!important; overflow:visible!important; }
+  .app-shell > .sidebar { display:flex!important; position:relative!important; width:100%!important; min-width:0!important; max-width:100%!important; height:auto!important; min-height:0!important; flex:0 0 auto!important; }
+  .app-shell > .main-column { display:flex!important; position:relative!important; width:100%!important; min-width:0!important; max-width:100%!important; height:auto!important; min-height:0!important; flex:1 1 auto!important; flex-direction:column!important; overflow:visible!important; }
+  .app-shell > .main-column > .topbar,.app-shell > .main-column > .content-area { width:100%!important; min-width:0!important; max-width:100%!important; box-sizing:border-box!important; flex:0 1 auto!important; }
+  .app-shell > .main-column > .topbar { display:flex!important; flex-wrap:wrap!important; }
+  .app-shell > .main-column > .content-area { margin:0!important; padding:14px 16px 28px!important; overflow:visible!important; }
+  .content-area[data-view="overview"] { display:block!important; overflow:visible!important; }
+  .content-area[data-view="overview"] > .eos-command { display:flex!important; width:100%!important; min-width:0!important; max-width:100%!important; height:auto!important; min-height:0!important; flex-direction:column!important; align-items:stretch!important; }
+  .content-area[data-view="overview"] > .eos-command > *,
+  .content-area[data-view="overview"] .eos-executive-stage,
+  .content-area[data-view="overview"] .eos-margin-section,
+  .content-area[data-view="overview"] .eos-workspace-section,
+  .content-area[data-view="overview"] .eos-data-note { width:100%!important; min-width:0!important; max-width:100%!important; grid-column:auto!important; grid-row:auto!important; box-sizing:border-box!important; }
+  .content-area[data-view="overview"] .eos-desktop-kpis { display:grid; width:100%; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+  .eos-desktop-kpi { min-width:0; padding:12px; }
+  .content-area[data-view="overview"] .eos-executive-stage { display:grid!important; grid-template-columns:minmax(0,1fr)!important; }
+  .content-area[data-view="overview"] .eos-margin-grid,
+  .content-area[data-view="overview"] .eos-workspace-list,
+  .content-area[data-view="model"] .model-layout { grid-template-columns:minmax(0,1fr)!important; }
+  .content-area[data-view="overview"] .eos-margin-item { width:100%; min-width:0; }
+  .content-area .eos-stage-performance,.content-area .eos-stage-bridge,.content-area .panel { min-width:0; max-width:100%; box-sizing:border-box; }
+  .content-area svg,.content-area img,.content-area canvas { max-width:100%; }
+  .content-area[data-view="model"] .statement-table { max-height:none; }
+  .workspace-utility-rail { flex-wrap:wrap; }
+}
