@@ -6,6 +6,7 @@ import { PlanningWorkspace } from "@/components/planning-workspace";
 import { ThreeStatementsWorkspace } from "@/components/three-statements-workspace";
 import { OperationsWorkspace } from "@/components/operations-workspace";
 import { StrategicCopilot } from "@/components/strategic-copilot";
+import { WorkspaceDataProvider } from "@/components/workspace-data-context";
 import { useAuth } from "@/components/auth-provider";
 import { canAccessView, minimumPlanForView, PLANS } from "@/lib/plans";
 import { translate, type Language } from "@/i18n/translations";
@@ -504,6 +505,7 @@ export default function Home() {
   }
 
   return (
+    <WorkspaceDataProvider financials={results}>
     <main className="app-shell">
       <aside className="sidebar">
         <div className="brand">
@@ -878,5 +880,6 @@ export default function Home() {
         </div>
       </section>
     </main>
+    </WorkspaceDataProvider>
   );
 }
