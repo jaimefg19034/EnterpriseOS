@@ -39,7 +39,7 @@ function intentOf(question: string): CopilotIntent {
   const q = question.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   if (/\b(invert|inviert\w*|inversion|invertir|investment|invest|roi|retorno|capital)\b/.test(q)) return "investment";
   if (/\b(margen|margin|subir margen|mejorar margen)\b/.test(q)) return "margin";
-  if (/\b(ahorr|recort|reduc|optim|saving|save|cut|reduce)\b/.test(q)) return "saving";
+  if (/\b(ahorr\w*|recort\w*|reduc\w*|optim\w*|saving|save|cut|reduce)\b/.test(q)) return "saving";
   if (/\b(gasto|gastos|coste|costes|costo|costos|expense|expenses|spend|partida|proveedor|sobrecoste|perdiendo|peor partida|peor gasto)\b/.test(q)) return "expense";
   if (/\b(caja|cash|liquidez|liquidity|deuda|debt|capital circulante|working capital|balance|flujo de caja|cash flow)\b/.test(q)) return "cash";
   if (/\b(presupuesto|budget|forecast|prevision|planificacion|escenario|scenario|plan anual)\b/.test(q)) return "planning";
