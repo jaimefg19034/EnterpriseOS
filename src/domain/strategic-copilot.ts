@@ -1,8 +1,8 @@
-import type { FinancialResults } from "@/domain/financials";
-import { costCenterActualSpend, weightedPipeline, type OperationsState } from "@/domain/operations";
-import type { Language } from "@/i18n/translations";
-import { calculateThreeStatements, DEFAULT_THREE_STATEMENT_ASSUMPTIONS, type ThreeStatementAssumptions } from "@/domain/three-statements";
-import type { SavedPlanningState } from "@/domain/planning-storage";
+import type { FinancialResults } from "./financials";
+import { costCenterActualSpend, weightedPipeline, type OperationsState } from "./operations";
+import type { Language } from "../i18n/translations";
+import { calculateThreeStatements, DEFAULT_THREE_STATEMENT_ASSUMPTIONS, type ThreeStatementAssumptions } from "./three-statements";
+import type { SavedPlanningState } from "./planning-storage";
 
 export type CopilotIntent = "expense" | "saving" | "investment" | "margin" | "profit" | "revenue" | "project" | "risk" | "kpi" | "cash" | "planning" | "overview" | "unknown";
 export type CopilotAnalysis = { intent: CopilotIntent; response: string; calculations: Record<string, number>; matchedData: string[] };
