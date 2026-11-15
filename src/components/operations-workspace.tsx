@@ -50,6 +50,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   const [data, setData] = useState<OperationsState>(EMPTY_OPERATIONS);
   const [loaded, setLoaded] = useState(false);
   const cloudStatus = useOperationsCloudSync(data, setData, loaded, language);
+  const cloudConnected = ["Sincronizado con tu cuenta","Guardado y sincronizado con tu cuenta","Actualizado desde la nube","Synced to your account","Saved and synced to your account","Updated from cloud"].includes(cloudStatus);
   const [section, setSection] = useState<Section>("sales");
   const [storageMessage, setStorageMessage] = useState("Loading local workspace…");
   const [company, setCompany] = useState("");
@@ -230,7 +231,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
     <section className="operations-workspace">
       <div className="page-heading">
         <div><div className="eyebrow">{t("BUSINESS OPERATIONS")} <span className="eyebrow-dot" /> {t("LOCAL WORKSPACE")}</div><h1>{t("Operations & intelligence")}</h1><p>{t("Manage commercial opportunities, project delivery, business risks and performance targets in one place.")}</p></div>
-        <div className="heading-actions"><span className="demo-badge"><i /> {t("LOCAL DATA")}</span><button className="secondary-button" onClick={() => downloadCsv(data)}><span>↓</span> {t("Export CSV")}</button></div>
+        <div className="heading-actions"><span className="demo-badge"><i /> {t("DATA STATUS")}</span><button className="secondary-button" onClick={() => downloadCsv(data)}><span>↓</span> {t("Export CSV")}</button></div>
       </div>
       <div className="operations-metrics">
         <article className="metric-card"><span className="metric-label">{t("Weighted open pipeline")}</span><strong>{money(openPipeline, language)}</strong><small>{data.opportunities.filter((x) => !["won", "lost"].includes(x.stage)).length} {t("open opportunities")}</small></article>
@@ -371,7 +372,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
         </>}
       </div>
       <div className="operations-storage-note">◉ {t(storageMessage)}</div>
-      <p className="operations-disclaimer">{t("Operations records are stored only in this browser. They are not synced, shared with a team or connected to CRM, HR, project or accounting platforms. Export a CSV backup before clearing browser data. Do not enter confidential company information.")}</p>
+      <p className="operations-disclaimer">{cloudConnected ? t("Operations data is synced to your authenticated account across your devices. It is not shared with other users or connected to CRM, HR, project or accounting platforms. Saved views and version snapshots remain local to this browser. Export a CSV backup before clearing browser data.") : t("Operations records are stored only in this browser. Sign in with a configured account to enable cloud sync across your own devices. Records are not shared with a team or connected to CRM, HR, project or accounting platforms. Export a CSV backup before clearing browser data.")}</p>
     </section>
   );
 }
