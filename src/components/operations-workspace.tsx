@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { translate, type Language } from "@/i18n/translations";
 import { OperationsCommandCentre } from "@/components/operations-command-centre";
-import { useOperationsCloudSync } from "@/components/use-operations-cloud-sync";
 import { useWorkspaceData } from "@/components/workspace-data-context";
 import { isDateWithinReportingPeriodCode, isValidISODate, isValidReportingPeriodCode } from "@/domain/reporting-periods";
 import { costCenterActualSpend, costCenterPerformance, costCenterRunRate, kpiPerformance, projectBudgetVariance, riskScore, weightedPipeline, type BusinessKpi, type CostCenterBudget, type ExpenseRecord, type BusinessRisk, type Opportunity, type OpportunityStage, type OperationsState, type Project, type ProjectStatus } from "@/domain/operations";
@@ -48,8 +47,7 @@ function downloadCsv(state: OperationsState) {
 
 export function OperationsWorkspace({ language }: { language: Language }) {
   const t = (value: string) => translate(value, language);
-  const { operations: data, setOperations: setData, operationsLoaded: loaded } = useWorkspaceData();
-  const cloudStatus = useOperationsCloudSync(data, setData, loaded, language);
+  const { operations: data, setOperations: setData, cloudStatus } = useWorkspaceData();
   const cloudConnected = ["Sincronizado con tu cuenta","Guardado y sincronizado con tu cuenta","Actualizado desde la nube","Synced to your account","Saved and synced to your account","Updated from cloud"].includes(cloudStatus);
   const [section, setSection] = useState<Section>("sales");
   const [storageMessage, setStorageMessage] = useState("Loading local workspace…");
