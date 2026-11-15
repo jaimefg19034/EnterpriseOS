@@ -42,7 +42,7 @@ export function StrategicCopilot({language,financials}:{language:Language;financ
   const v=q.toLocaleLowerCase(language==="es"?"es-ES":"en-IE"), isEs=language==="es";
   const fmt=(n:number)=>money(n,language), rev=Math.max(0,financials.revenue), op=Math.max(0,financials.operatingExpenses), cogs=Math.max(0,financials.costOfGoodsSold);
   const nums=[...q.matchAll(/(?:€\s*)?(\d[\d.,\s]*\d|\d+)(?:\s*€)?/g)].map(m=>Number(m[1].replace(/\s/g,"").replace(/\.(?=\d{3}(?:\D|$))/g,"").replace(",", "."))).filter(n=>Number.isFinite(n)&&n>0);
-  const amount=nums[0]||0, pm=v.match(/(\d+(?:[.,]\d+)?)\s*%/), rate=pm?Number(pm[1].replace(",",".")):0;
+  const pm=v.match(/(\d+(?:[.,]\d+)?)\s*%/), amount=pm?0:(nums[0]||0), rate=pm?Number(pm[1].replace(",",".")):0;
   const margin=rev?financials.ebitda/rev*100:0, expenses=latestOps.expenses.reduce((s,x)=>s+x.amount,0);
   const over=latestOps.costCenters.map(x=>({...x,variance:x.actualSpend-x.budget})).filter(x=>x.variance>0).sort((a,b)=>b.variance-a.variance);
   const topExpense=[...latestOps.expenses].sort((a,b)=>b.amount-a.amount)[0];
