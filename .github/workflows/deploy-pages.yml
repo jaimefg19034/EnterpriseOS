@@ -39,6 +39,9 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
+      - name: Disable Jekyll processing
+        run: touch ./out/.nojekyll
+
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
