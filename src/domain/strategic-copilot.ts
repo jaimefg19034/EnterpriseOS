@@ -21,7 +21,7 @@ function parseNumber(raw: string): number {
 function extractAmount(question: string, intent: CopilotIntent): number | null {
   const match = question.match(/(?:€\s*)?(\d[\d.,\s]*\d|\d)\s*(?:€|eur(?:os?)?|euros?)/i)
     ?? question.match(/\b(\d+(?:[.,]\d+)?)\s*(?:k|mil)\b/i)
-    ?? (intent === "investment" ? question.match(/\b(?:invierto|invierte|invertir|invest|investment)\s+(?:unos?\s+)?(\d[\d.,]*\d|\d)\b/i) : null);
+    ?? (intent === "investment" || intent === "saving" ? question.match(/\b(\d[\d.,]*)\b(?!\s*%)/i) : null);
   if (!match) return null;
   const parsed = parseNumber(match[1]);
   if (!Number.isFinite(parsed) || parsed < 0) return null;
