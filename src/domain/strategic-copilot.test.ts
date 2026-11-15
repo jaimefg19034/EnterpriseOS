@@ -217,7 +217,7 @@ describe("analyzeCopilotQuestion", () => {
     const result = analyzeCopilotQuestion("Dame más detalles del segundo punto", financials, EMPTY_OPERATIONS, "es", undefined, {
       previousIntent: "advice",
       previousQuestion: "¿Qué priorizarías?",
-      previousResponse: "1. Revisar margen bruto\\n2. Reducir concentración de clientes\\n3. Mejorar cobros",
+      previousResponse: ["1. Revisar margen bruto", "2. Reducir concentración de clientes", "3. Mejorar cobros"].join("\n"),
     });
     expect(result.response).toContain("Reducir concentración de clientes");
     expect(result.matchedData).toContain("conversation.previousResponse");
