@@ -117,4 +117,10 @@ describe("analyzeCopilotQuestion", () => {
     expect(result.response).toContain("cargas sociales");
   });
 
+  it("handles thanks and short conversational turns without a blank reply", () => {
+    const result = analyzeCopilotQuestion("¡Perfecto, gracias!", financials, EMPTY_OPERATIONS, "es");
+    expect(result.intent).toBe("social");
+    expect(result.response.length).toBeGreaterThan(20);
+  });
+
 });
