@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import type { FinancialResults } from "@/domain/financials";
 import { costCenterActualSpend, riskScore, type OperationsState } from "@/domain/operations";
 import { useWorkspaceData } from "@/components/workspace-data-context";
-import { analyzeCopilotQuestion, type CopilotAnalysis, type CopilotIntent } from "@/domain/strategic-copilot";
+import { aiEngine, type CopilotAnalysis, type CopilotIntent } from "@/domain/ai-engine";
 import type { Language } from "@/i18n/translations";
 type Kind="cut"|"optimize"|"invest"|"implement";
 type Rec={id:string;kind:Kind;title:string;detail:string;action:string;basis:string;impact?:number;impactMonthly?:number;impactAnnual?:number;impactType?:"one-off"|"run-rate"|"annual-model"|"period-unknown";priority:"high"|"medium"|"low";risk:"high"|"medium"|"low";simulation?:{annualOpexReduction?:number;cogsRateReductionPp?:number;revenueGrowthPp?:number}};
@@ -131,8 +131,8 @@ export function StrategicCopilot({language}:{language:Language}){
   setChatMessages(current=>[...current,userMessage].slice(-12));setChatBusy(true);
   window.setTimeout(()=>{
    try{
-    const analysis=analyzeCopilotQuestion(clean,financials,ops,language,{planning,statementAssumptions,cashForecastWeeks,workingCapitalInvoices},{...conversationContext,history:chatMessages.slice(-8).map(m=>({role:m.role,content:m.text}))});
-    const nextContext:ChatContext={previousIntent:analysis.intent==="greeting"||analysis.intent==="social"||analysis.intent==="unknown"?conversationContext.previousIntent:analysis.intent,previousQuestion:clean,previousResponse:analysis.response,previousCalculations:analysis.calculations,history:[...(conversationContext.history??[]),{role:"user" as const,content:clean},{role:"assistant" as const,content:analysis.response}].slice(-8)};
+    const analysis=aiEngine(clean,financials,ops,language,{planning,statementAssumptions,cashForecastWeeks,workingCapitalInvoices},{...conversationContext,history:chatMessages.slice(-8).map(m=>({role:m.role,content:m.text}))});
+    const isSmallTalk=analysis.intent==="greeting"||analysis.intent==="social"||analysis.intent==="unknown";const nextContext:ChatContext={previousIntent:isSmallTalk?conversationContext.previousIntent:analysis.intent,previousQuestion:isSmallTalk?(conversationContext.previousQuestion??clean):clean,previousResponse:isSmallTalk?(conversationContext.previousResponse??analysis.response):analysis.response,previousCalculations:isSmallTalk?(conversationContext.previousCalculations??analysis.calculations):analysis.calculations,history:[...(conversationContext.history??[]),{role:"user" as const,content:clean},{role:"assistant" as const,content:analysis.response}].slice(-8)};
     setConversationContext(nextContext);try{window.localStorage.setItem(CHAT_CONTEXT_KEY,JSON.stringify(nextContext))}catch{}
     const assistantMessage:ChatMessage={id:String(messageId)+"-a",role:"assistant",text:analysis.response|| (es?"No tengo una conclusión fiable con la información disponible. Dime qué cifra, proyecto o partida quieres revisar.":"I cannot reach a reliable conclusion from the available information. Tell me which figure, project or line item to review."),analysis};setChatMessages(current=>[...current,assistantMessage].slice(-12));
    }catch{const errorMessage:ChatMessage={id:String(messageId)+"-e",role:"assistant",text:es?"No he podido procesar la pregunta. Los datos del workspace siguen intactos. Concreta la cifra, área o registro.":"I could not process that question. Workspace data remains unchanged. Specify the figure, area or record."};setChatMessages(current=>[...current,errorMessage].slice(-12))}
