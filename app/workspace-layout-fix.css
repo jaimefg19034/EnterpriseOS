@@ -184,3 +184,235 @@ body { overflow-x: hidden; }
     grid-template-columns:28px minmax(0,1fr);
   }
 }
+
+
+/* ROOT CAUSE FIX — global body scroll must never be locked by workspace styling. */
+html, body {
+  width:100%;
+  height:auto;
+  min-height:100%;
+  max-width:100%;
+}
+body {
+  overflow-x:hidden;
+  overflow-y:auto;
+}
+
+/* Workspace: explicit flex sizing prevents the content column collapsing. */
+.app-shell {
+  display:flex;
+  align-items:stretch;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  height:100dvh;
+  min-height:100dvh;
+  overflow:hidden;
+}
+.app-shell > .sidebar {
+  flex:0 0 244px;
+  width:244px;
+  min-width:244px;
+  max-width:244px;
+  height:100dvh;
+}
+.app-shell > .main-column {
+  display:flex;
+  flex:1 1 0%;
+  width:auto !important;
+  min-width:0;
+  max-width:none;
+  height:100dvh;
+  min-height:0;
+  flex-direction:column;
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior-y:contain;
+  scrollbar-gutter:stable;
+}
+.app-shell > .main-column > .topbar {
+  flex:0 0 auto;
+  width:100%;
+  min-width:0;
+  max-width:none;
+}
+.app-shell > .main-column > .content-area {
+  display:block;
+  flex:0 0 auto;
+  width:100% !important;
+  min-width:0;
+  max-width:none !important;
+  height:auto;
+  min-height:0;
+  margin:0;
+  padding:clamp(22px,2.3vw,38px) clamp(20px,2.8vw,48px) 34px;
+  overflow:visible;
+  box-sizing:border-box;
+}
+
+/* Overview occupies the entire available canvas; all content remains in flow. */
+.app-shell > .main-column > .content-area[data-view="overview"] {
+  display:block;
+  overflow:visible;
+}
+.app-shell > .main-column > .content-area[data-view="overview"] > .eos-command {
+  display:grid !important;
+  width:100% !important;
+  min-width:0;
+  max-width:none !important;
+  height:auto !important;
+  min-height:0;
+  margin:0;
+  padding:0;
+  grid-template-columns:repeat(12,minmax(0,1fr));
+  grid-template-rows:auto;
+  align-content:start;
+  align-items:stretch;
+  gap:clamp(16px,1.5vw,26px);
+}
+.app-shell > .main-column > .content-area[data-view="overview"] > .eos-command > .eos-command-heading {
+  grid-column:1 / -1;
+  width:100%;
+  min-width:0;
+}
+.app-shell > .main-column > .content-area[data-view="overview"] .eos-executive-stage {
+  grid-column:1 / -1;
+  display:grid;
+  width:100%;
+  min-width:0;
+  height:auto;
+  min-height:0;
+  grid-template-columns:minmax(0,1.35fr) minmax(300px,.9fr);
+  grid-template-rows:auto;
+  overflow:visible;
+}
+.app-shell > .main-column > .content-area[data-view="overview"] .eos-stage-performance,
+.app-shell > .main-column > .content-area[data-view="overview"] .eos-stage-bridge {
+  position:relative;
+  inset:auto;
+  width:auto;
+  min-width:0;
+  height:auto;
+  min-height:0;
+  overflow:visible;
+}
+.app-shell > .main-column > .content-area[data-view="overview"] .eos-margin-section,
+.app-shell > .main-column > .content-area[data-view="overview"] .eos-workspace-section {
+  grid-column:span 6;
+  display:grid;
+  width:100%;
+  min-width:0;
+  height:auto;
+  min-height:0;
+  grid-template-columns:34px minmax(0,1fr);
+  align-items:start;
+  gap:14px;
+}
+.app-shell > .main-column > .content-area[data-view="overview"] .eos-margin-content,
+.app-shell > .main-column > .content-area[data-view="overview"] .eos-workspace-content {
+  width:100%;
+  min-width:0;
+  height:auto;
+  min-height:0;
+  overflow:visible;
+}
+.app-shell > .main-column > .content-area[data-view="overview"] .eos-margin-grid {
+  display:grid;
+  width:100%;
+  min-width:0;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+}
+.app-shell > .main-column > .content-area[data-view="overview"] .eos-margin-item {
+  width:100%;
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.app-shell > .main-column > .content-area[data-view="overview"] .eos-workspace-list {
+  display:grid;
+  width:100%;
+  min-width:0;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.app-shell > .main-column > .content-area[data-view="overview"] .eos-workspace-row {
+  display:grid;
+  width:100%;
+  min-width:0;
+  grid-template-columns:18px 28px minmax(0,1fr) 14px;
+  align-items:start;
+  gap:9px;
+}
+.app-shell > .main-column > .content-area[data-view="overview"] .eos-data-note {
+  grid-column:1 / -1;
+  width:100%;
+  min-width:0;
+}
+
+/* Responsive layouts keep the full-width main column and never introduce a trap. */
+@media (min-width:761px) and (max-width:1100px) {
+  .app-shell > .sidebar { flex-basis:220px; width:220px; min-width:220px; max-width:220px; }
+  .app-shell > .main-column { width:auto !important; }
+  .app-shell > .main-column > .content-area { padding-inline:22px; }
+  .app-shell > .main-column > .content-area[data-view="overview"] .eos-executive-stage {
+    grid-template-columns:minmax(0,1fr);
+  }
+}
+@media (max-width:760px) {
+  html, body { height:auto; min-height:100%; overflow-x:hidden; overflow-y:auto; }
+  .app-shell {
+    display:flex;
+    width:100%;
+    height:auto;
+    min-height:100dvh;
+    flex-direction:column;
+    overflow:visible;
+  }
+  .app-shell > .sidebar {
+    flex:0 0 auto;
+    width:100%;
+    min-width:0;
+    max-width:100%;
+    height:auto;
+    min-height:0;
+  }
+  .app-shell > .main-column {
+    display:flex;
+    flex:1 1 auto;
+    width:100% !important;
+    min-width:0;
+    max-width:100%;
+    height:auto;
+    min-height:0;
+    overflow:visible;
+  }
+  .app-shell > .main-column > .topbar,
+  .app-shell > .main-column > .content-area {
+    width:100% !important;
+    min-width:0;
+    max-width:100% !important;
+    box-sizing:border-box;
+  }
+  .app-shell > .main-column > .content-area {
+    flex:0 0 auto;
+    padding:18px 16px 30px;
+    overflow:visible;
+  }
+  .app-shell > .main-column > .content-area[data-view="overview"] > .eos-command {
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr);
+    gap:18px;
+  }
+  .app-shell > .main-column > .content-area[data-view="overview"] .eos-executive-stage {
+    grid-template-columns:minmax(0,1fr);
+  }
+  .app-shell > .main-column > .content-area[data-view="overview"] .eos-margin-section,
+  .app-shell > .main-column > .content-area[data-view="overview"] .eos-workspace-section {
+    grid-column:1 / -1;
+    grid-template-columns:26px minmax(0,1fr);
+  }
+  .app-shell > .main-column > .content-area[data-view="overview"] .eos-margin-grid,
+  .app-shell > .main-column > .content-area[data-view="overview"] .eos-workspace-list {
+    grid-template-columns:minmax(0,1fr);
+  }
+}
