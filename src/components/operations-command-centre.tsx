@@ -99,7 +99,7 @@ export function OperationsCommandCentre({ data, setData, language, section, setS
     const haystack = [item.title,item.subtitle,item.status,item.kind,item.value,item.date].join(" ").toLowerCase();
     const matchesQuery = !query.trim() || haystack.includes(query.trim().toLowerCase());
     const matchesStatus = status==="all" || item.status===status;
-    const matchesSection = section==="reports" || (section==="sales" ? item.kind==="opportunities" : section==="cost-centers" ? item.kind==="costCenters" : item.kind===section);
+    const matchesSection = Boolean(query.trim()) || section==="reports" || (section==="sales" ? item.kind==="opportunities" : section==="cost-centers" ? item.kind==="costCenters" : item.kind===section);
     return matchesQuery && matchesStatus && matchesSection;
   }).sort((a,b)=>recordDate(a).localeCompare(recordDate(b))),[allRecords,query,status,section]);
 
