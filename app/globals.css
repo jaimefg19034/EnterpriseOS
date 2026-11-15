@@ -1896,3 +1896,16 @@ button:focus-visible, input:focus-visible {
 
 .copilot-filter-label{flex:0 0 100%;color:#8793a5;font-size:8px;font-weight:850;letter-spacing:.75px}
 .copilot-priority-filters .copilot-filter-label{margin-bottom:1px}
+
+
+/* Dedicated AI workspaces: preserve the navy/blue palette and use the full content width. */
+.content-area:has(.strategic-copilot){width:100%;max-width:none;min-width:0;}
+.strategic-copilot{width:100%;max-width:none;min-width:0;}
+.copilot-studio-chat .copilot-studio-main{grid-template-columns:minmax(0,1fr);}
+.copilot-studio-chat .copilot-conversation-panel{min-height:calc(100vh - 310px);display:flex;flex-direction:column;}
+.copilot-studio-chat .copilot-conversation{flex:1;min-height:420px;max-height:calc(100vh - 520px);overflow-y:auto;scroll-behavior:smooth;}
+.copilot-messages-end{height:1px;width:100%;}
+.copilot-studio-recommendations .copilot-recommendation-zone{width:100%;}
+.copilot-studio-recommendations .copilot-recommendations{grid-template-columns:repeat(2,minmax(0,1fr));}
+.ai-nav-group{margin-top:10px;}
+@media(max-width:900px){.copilot-studio-recommendations .copilot-recommendations{grid-template-columns:minmax(0,1fr);}.copilot-studio-chat .copilot-conversation{max-height:none;}}
