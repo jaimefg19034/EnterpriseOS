@@ -1961,3 +1961,11 @@ button:focus-visible, input:focus-visible {
 @media(max-width:1100px){.copilot-executive-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.copilot-recommendation-premium{padding:14px}.copilot-recommendation-live{align-self:flex-start}.copilot-premium-filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.copilot-premium-filters button{flex:0 0 auto}.copilot-premium-grid{grid-template-columns:minmax(0,1fr)}.copilot-premium-card{padding:15px}.copilot-premium-card-footer{align-items:flex-start;flex-direction:column}.copilot-premium-card-footer button{width:100%}}
 @media(max-width:390px){.copilot-executive-summary{grid-template-columns:minmax(0,1fr)}}
+
+/* Local conversation engine: contextual actions and restrained streaming treatment. */
+.copilot-neural-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.copilot-neural-actions button{min-height:31px;padding:0 10px;border:1px solid #dce4ef;border-radius:6px;background:#f7f9fc;color:#365477;font-size:9px;font-weight:750;cursor:pointer;transition:background .15s,border-color .15s}
+.copilot-neural-actions button:hover{border-color:#b8c9df;background:#edf3fb}
+.copilot-neural-actions button:disabled{opacity:.5;cursor:wait}
+.copilot-turn-text{white-space:pre-wrap;overflow-wrap:anywhere}
+.copilot-messages-end{scroll-margin-bottom:22px}
