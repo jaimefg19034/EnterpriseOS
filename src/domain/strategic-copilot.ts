@@ -67,6 +67,8 @@ function scoreIntents(question: string): Record<string,number> {
   scores[intent]=score;
  }
  if(/\b(que harias|que harías|si fueras|director financiero|directora financiera|por donde empiezo|no se por donde|que me recomiendas|what would you do|where should i start)\b/.test(q)) scores.advice=8;
+ if(/\b(recort\w*|reduc\w*|ahorr\w*|baj\w*|cut\w*|lower\w*)\b/.test(q)) scores.saving=(scores.saving??0)+4;
+ if(/\b(inviert\w*|invert\w*|invest\w*)\b/.test(q)) scores.investment=(scores.investment??0)+4;
  if(/\b(hola|buenas|hey|hello|hi|que tal|como estas|buenos dias|buenas tardes|buenas noches)\b/.test(q)&&tokens.length<=7) scores.greeting=10;
  if(/\b(como ves|como va|que tal va|como vamos|how are we doing|how does it look|what is your view)\b/.test(q)) scores.overview=(scores.overview??0)+3;
  if(/\b(gracias|thank you|thanks|perfecto|genial|vale|ok|okay|entiendo|de acuerdo|muy bien|great|got it|and you|y tu)\b/.test(q)&&tokens.length<=8) scores.social=9;
