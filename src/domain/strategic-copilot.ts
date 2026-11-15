@@ -6,7 +6,7 @@ import type { SavedPlanningState } from "./planning-storage";
 import { calculateCashForecast, type CashForecastWeekInput } from "./cash-forecast";
 import { calculateInvoiceAgeing, summarizeInvoices, type WorkingCapitalInvoice } from "./working-capital";
 
-export type CopilotIntent = "greeting" | "social" | "advice" | "expense" | "saving" | "investment" | "margin" | "profit" | "revenue" | "project" | "risk" | "kpi" | "cash" | "workingCapital" | "planning" | "overview" | "unknown";
+export type CopilotIntent = "greeting" | "social" | "advice" | "expense" | "saving" | "investment" | "margin" | "profit" | "revenue" | "project" | "risk" | "kpi" | "cash" | "workingCapital" | "planning" | "overview" | "comparison" | "unknown";
 export type CopilotAnalysis = { intent: CopilotIntent; response: string; calculations: Record<string, number>; matchedData: string[]; steps?: string[]; action?: "explain" | "simulate" | "implement"; confidence?: number };
 
 const money = (value: number, language: Language) => new Intl.NumberFormat(language === "es" ? "es-ES" : "en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 2 }).format(value);
@@ -72,7 +72,7 @@ const INTENT_TERMS: Record<Exclude<CopilotIntent,"greeting"|"social"|"advice"|"u
  project:["proyecto","proyectos","project","projects","entrega","hitos"],
  risk:["riesgo","riesgos","amenaza","mitigacion","risk","risks"],
  kpi:["kpi","indicador","indicadores","objetivo","target","rendimiento","performance","metricas"],
- overview:["resumen","situacion","estado","empresa","negocio","analiza","analisis","panorama","mes","rumbo","como vamos","como va"]
+ overview:["resumen","situacion","estado","empresa","negocio","analiza","analisis","panorama","mes","rumbo","como vamos","como va"],\n comparison:["comparar","comparacion","comparativa","versus","vs","compare","comparison","diferencia entre"]
 };
 const INTENT_SYNONYMS: Partial<Record<CopilotIntent, string[]>> = {
   expense: ["dinero que sale", "salidas", "desembolso", "factura de proveedor", "cargo", "consumo", "partida", "coste fijo", "coste variable", "overhead", "donde se esta yendo el dinero", "en que se gasta el dinero", "que partidas consumen recursos", "a donde va el dinero", "gasto por categoria"],
@@ -232,6 +232,31 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
     calculations.previousSaving = previousSaving; calculations.savingIncreasePercent = targetPercent; calculations.savingAfterScenario = nextSaving; calculations.incrementalSaving = round(nextSaving - previousSaving);
     matchedData.push("conversation.previousCalculations","financials");
     return {intent:"saving",calculations,matchedData,action:"simulate",confidence:0.94,response:es ? "Interpreto «subirlo» como aumentar el objetivo de ahorro anterior un " + percent(targetPercent,language) + ". El objetivo pasaría de " + money(previousSaving,language) + " a " + money(nextSaving,language) + " por el mismo periodo: " + money(nextSaving-previousSaving,language) + " adicionales. Es un objetivo de escenario, no un ahorro realizado." : "I interpret “raise it” as increasing the previous savings target by " + percent(targetPercent,language) + ". The target moves from " + money(previousSaving,language) + " to " + money(nextSaving,language) + " for the same period: " + money(nextSaving-previousSaving,language) + " additional. This is a scenario target, not realised savings."};
+  }
+
+  if (intent === "comparison") {
+    const metrics = [
+      {key:"revenue",label:es?"Ingresos":"Revenue",value:financials.revenue,terms:["ingresos","ingreso","ventas","facturacion","revenue","sales"]},
+      {key:"costOfGoodsSold",label:es?"Coste de ventas":"Cost of goods sold",value:financials.costOfGoodsSold,terms:["coste de ventas","costes directos","cogs","cost of goods sold"]},
+      {key:"operatingExpenses",label:es?"Gastos operativos":"Operating expenses",value:financials.operatingExpenses,terms:["gastos operativos","gasto operativo","opex","operating expenses","overheads","gastos"]},
+      {key:"grossProfit",label:es?"Beneficio bruto":"Gross profit",value:financials.grossProfit,terms:["beneficio bruto","margen bruto en euros","gross profit"]},
+      {key:"ebitda",label:"EBITDA",value:financials.ebitda,terms:["ebitda"]},
+      {key:"netIncome",label:es?"Beneficio neto":"Net income",value:financials.netIncome,terms:["beneficio neto","resultado neto","net income","net profit"]},
+      {key:"grossMarginPercent",label:es?"Margen bruto":"Gross margin",value:financials.grossMarginPercent,terms:["margen bruto","gross margin"]},
+      {key:"ebitdaMarginPercent",label:es?"Margen EBITDA":"EBITDA margin",value:financials.ebitdaMarginPercent,terms:["margen ebitda","ebitda margin"]},
+    ];
+    const qn=normaliseText(q);
+    const matched=metrics.filter(metric=>metric.terms.some(term=>qn.includes(normaliseText(term))));
+    if(matched.length<2){
+      return {intent,calculations,matchedData:["financials"],confidence:0.55,response:es?"He detectado una petición de comparación, pero necesito dos métricas concretas. Por ejemplo: «Compara ingresos con gastos operativos» o «EBITDA frente a beneficio neto».":"I detected a comparison request, but need two specific metrics. For example: “Compare revenue with operating expenses” or “EBITDA versus net income.”"};
+    }
+    const first=matched[0],second=matched[1],difference=round(first.value-second.value),ratio=second.value!==0?round(first.value/second.value):null;
+    calculations.comparisonFirst=first.value;calculations.comparisonSecond=second.value;calculations.comparisonDifference=difference;if(ratio!==null)calculations.comparisonRatio=ratio;
+    matchedData.push("financials");
+    const percentMetric=first.key.toLowerCase().includes("percent")||second.key.toLowerCase().includes("percent");
+    return {intent,calculations,matchedData,action:"explain",confidence:0.96,response:es
+      ? first.label+": "+(percentMetric&&first.key.toLowerCase().includes("percent")?percent(first.value,language):money(first.value,language))+". "+second.label+": "+(percentMetric&&second.key.toLowerCase().includes("percent")?percent(second.value,language):money(second.value,language))+". Diferencia: "+(percentMetric&&first.key.toLowerCase().includes("percent")&&second.key.toLowerCase().includes("percent")?percent(Math.abs(difference),language):money(Math.abs(difference),language))+". "+first.label+" "+(difference>=0?"supera":"queda por debajo de")+" "+second.label+" en ese importe. "+(ratio!==null?"Relación: "+ratio.toFixed(2)+"x. ":"")+"Ambas cifras proceden de la cuenta de resultados del mismo periodo."
+      : first.label+": "+money(first.value,language)+". "+second.label+": "+money(second.value,language)+". Difference: "+money(Math.abs(difference),language)+". "+first.label+" "+(difference>=0?"exceeds":"is below")+" "+second.label+" by that amount. "+(ratio!==null?"Ratio: "+ratio.toFixed(2)+"x. ":"")+"Both figures come from the income statement for the same period."};
   }
 
   if (intent === "greeting") {
