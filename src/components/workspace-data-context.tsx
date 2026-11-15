@@ -36,7 +36,7 @@ export function WorkspaceDataProvider({ financials, language, children }: { fina
         const restored = parseOperationsState(window.localStorage.getItem(OPERATIONS_STORAGE_KEY));
         if (restored) setOperations(restored);
         const planningRaw = window.localStorage.getItem(PLANNING_STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_PLANNING_STORAGE_KEY);
-        const restoredPlanning = parseSavedPlanningState(planningRaw);
+        const restoredPlanning = planningRaw ? parseSavedPlanningState(planningRaw) : null;
         if (restoredPlanning) setPlanning(restoredPlanning);
       } catch {
         // The in-memory workspace remains usable if browser storage is unavailable.
@@ -50,7 +50,7 @@ export function WorkspaceDataProvider({ financials, language, children }: { fina
         if (restored) setOperations(restored);
       }
       if (event.key === PLANNING_STORAGE_KEY || event.key === LEGACY_PLANNING_STORAGE_KEY) {
-        const restored = parseSavedPlanningState(event.newValue);
+        const restored = event.newValue ? parseSavedPlanningState(event.newValue) : null;
         if (restored) setPlanning(restored);
       }
     };
