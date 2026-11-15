@@ -101,7 +101,7 @@ describe("analyzeCopilotQuestion", () => {
     expect(result.matchedData).toContain("operations.kpis");
   });
 
-  it("carries the previous topic into a natural follow-up", () => {
+  it("prioritises the previous topic over incidental words in a natural follow-up", () => {
     const result = analyzeCopilotQuestion("¿Y ahora cómo lo ves?", financials, EMPTY_OPERATIONS, "es", undefined, { previousIntent: "expense", previousQuestion: "¿Qué gastos tengo?" });
     expect(result.intent).toBe("expense");
     expect(result.response).toContain("gastos operativos");
