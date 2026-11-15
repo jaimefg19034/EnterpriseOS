@@ -180,7 +180,10 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
     const plan = workspace.planning?.years[String(workspace.planning.selectedYear)];
     if (!plan) return { intent, calculations, matchedData, response: es ? "Todavía no hay datos de planificación disponibles. Abre Presupuestos y escenarios para cargar el plan y vuelve a preguntarme." : "No planning data is available yet. Open Budget & scenarios to load the plan, then ask again." };
     const budget = plan.assumptions.annualRevenueBudget;
-    const actual = Object.values(plan.actualRevenue).reduce<number>((sum, value) => sum + (typeof value === "number" ? value : 0), 0);
+    let actual = 0;
+    for (const value of Object.values(plan.actualRevenue)) {
+      if (typeof value === "number") actual += value;
+    }
     const budgetEbitda = budget * (1 - plan.assumptions.costOfGoodsSoldPercent / 100) - plan.assumptions.annualOperatingExpenses;
     calculations.selectedPlanningYear = workspace.planning?.selectedYear ?? 0;
     calculations.annualRevenueBudget = budget;
