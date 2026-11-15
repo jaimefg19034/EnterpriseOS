@@ -623,7 +623,7 @@ html{scroll-behavior:smooth;scroll-padding-top:100px}
 
 
 /* Keep the sticky glass navigation attached to the viewport scrollport. */
-.eos-home { overflow:clip; }
+.eos-home { overflow:visible; }
 
 
 /* Elite finish: cursor-responsive light, crisp bevels and a more dimensional hero */
