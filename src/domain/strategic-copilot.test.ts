@@ -175,4 +175,23 @@ describe("analyzeCopilotQuestion", () => {
     expect(result.intent).toBe("cash");
   });
 
+  it("answers indirect spend questions with a live category ranking, not a generic overview", () => {
+    const operations = { ...EMPTY_OPERATIONS, expenses: [
+      { id: "e1", date: "2026-11-15", description: "Campaign", supplier: "S", category: "Marketing", costCenterId: "cc1", amount: 1250, status: "paid" as const },
+      { id: "e2", date: "2026-11-15", description: "Hosting", supplier: "Cloud", category: "Software", costCenterId: "cc2", amount: 420, status: "paid" as const },
+    ], costCenters: [
+      { id: "cc1", name: "Marketing", owner: "A", budget: 2000, actualSpend: 0, period: "2026-Q4" },
+      { id: "cc2", name: "Software", owner: "B", budget: 1000, actualSpend: 0, period: "2026-Q4" },
+    ] };
+    const result = analyzeCopilotQuestion("¿Dónde se está yendo el dinero?", financials, operations, "es");
+    expect(result.intent).toBe("expense");
+    expect(result.response).toContain("1. Marketing");
+    expect(result.response).toContain("2. Software");
+    expect(result.response).not.toContain("Te doy una lectura conjunta");
+
+    const concrete = analyzeCopilotQuestion("¿Qué partida concreta está consumiendo más recursos?", financials, operations, "es");
+    expect(concrete.intent).toBe("expense");
+    expect(concrete.response).toContain("Marketing");
+  });
+
 });

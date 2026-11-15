@@ -55,7 +55,7 @@ const INTENT_TERMS: Record<Exclude<CopilotIntent,"greeting"|"social"|"advice"|"u
  overview:["resumen","situacion","estado","empresa","negocio","analiza","analisis","panorama","mes","rumbo","como vamos","como va"]
 };
 const INTENT_SYNONYMS: Partial<Record<CopilotIntent, string[]>> = {
-  expense: ["dinero que sale", "salidas", "desembolso", "factura de proveedor", "cargo", "consumo", "partida", "coste fijo", "coste variable", "overhead"],
+  expense: ["dinero que sale", "salidas", "desembolso", "factura de proveedor", "cargo", "consumo", "partida", "coste fijo", "coste variable", "overhead", "donde se esta yendo el dinero", "en que se gasta el dinero", "que partidas consumen recursos", "a donde va el dinero", "gasto por categoria"],
   saving: ["economizar", "ajustar", "contener", "apretar", "eliminar gasto", "eficiencia", "reducir presupuesto", "abaratar"],
   revenue: ["cifra de negocio", "volumen de negocio", "ventas netas", "cobrar por ventas", "vender", "comercializar"],
   profit: ["resultado", "margen operativo", "lo que queda", "ganancia neta", "rentabilidad neta"],
@@ -111,6 +111,7 @@ function intentOf(question: string, context?: IntentContext): CopilotIntent {
   if((scores.greeting??0)>=8 && tokens.length<=7 && !Object.entries(scores).some(([key,value])=>!["greeting","social"].includes(key)&&value>=3)) return "greeting";
   if((scores.social??0)>=7 && tokens.length<=8 && !Object.entries(scores).some(([key,value])=>!["greeting","social"].includes(key)&&value>=3)) return "social";
   if((scores.advice??0)>=7) return "advice";
+  if(/\b(recort\w*|reduc\w*|ahorr\w*|abarat\w*|optimiza\w*|gastar menos|contener el gasto)\b/.test(q)) return "saving";
   const ranked=Object.entries(scores).filter(([key,value])=>!["greeting","social","advice"].includes(key)&&value>0).sort((a,b)=>b[1]-a[1]);
   if(ranked.length&&ranked[0][1]>=2) return ranked[0][0] as CopilotIntent;
   if(context?.previousIntent&&tokens.length<=10) return context.previousIntent;
@@ -310,14 +311,20 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
   if (intent === "expense") {
     if (largestExpense) matchedData.push("operations.expenses");
     if (topCenter) matchedData.push("operations.costCenters");
-    const centerText = topCenter ? `${topCenter.center.name}: ${money(topCenter.actual, language)} actual vs ${money(topCenter.center.budget, language)} budget (${money(topCenter.actual-topCenter.center.budget, language)} variance)` : "";
+    const categoryTotals = new Map<string, number>();
+    operations.expenses.forEach(item => categoryTotals.set(item.category, (categoryTotals.get(item.category) ?? 0) + item.amount));
+    const rankedCategories = [...categoryTotals.entries()].sort((a, b) => b[1] - a[1]);
+    const leadingCategories = rankedCategories.slice(0, 3);
+    const centerText = topCenter ? `${topCenter.center.name}: ${money(topCenter.actual, language)} frente a ${money(topCenter.center.budget, language)} de presupuesto (${money(topCenter.actual-topCenter.center.budget, language)} de desviación)` : "";
     const expenseText = largestExpense ? `${largestExpense.description} / ${largestExpense.category}: ${money(largestExpense.amount, language)}` : "";
+    const categoryText = leadingCategories.map(([name, total], index) => `${index + 1}. ${name}: ${money(total, language)}`).join("; ");
     calculations.totalRecordedExpenses = round(actualExpenses);
     if (topCenter) calculations.topCostCenterSpend = round(topCenter.actual);
     if (largestExpense) calculations.largestExpense = round(largestExpense.amount);
+    if (leadingCategories[0]) calculations.largestExpenseCategory = round(leadingCategories[0][1]);
     return { intent, calculations, matchedData, response: es
-      ? `Datos actuales: gastos operativos P&L ${money(financials.operatingExpenses, language)}; coste de ventas ${money(financials.costOfGoodsSold, language)}; gastos detallados registrados en Operaciones ${money(actualExpenses, language)}. ${centerText ? "Centro con mayor gasto: " + centerText + ". " : "No hay centros de coste registrados. "}${expenseText ? "Mayor gasto individual: " + expenseText + "." : "No hay gastos individuales registrados."}`
-      : `Current data: P&L operating expenses ${money(financials.operatingExpenses, language)}; COGS ${money(financials.costOfGoodsSold, language)}; detailed expenses recorded in Operations ${money(actualExpenses, language)}. ${centerText ? "Highest-spend cost centre: " + centerText + ". " : "No cost centres are recorded. "}${expenseText ? "Largest individual expense: " + expenseText + "." : "No individual expenses are recorded."}` };
+      ? `He revisado los ${operations.expenses.length} registros de gasto actuales. Los gastos operativos del P&L son ${money(financials.operatingExpenses, language)} y el coste de ventas ${money(financials.costOfGoodsSold, language)}. El total detallado en Operaciones es ${money(actualExpenses, language)} (separado del P&L para evitar duplicidades). ${categoryText ? "Distribución por categoría, de mayor a menor: " + categoryText + ". " : "No hay gastos categorizados registrados. "}${centerText ? "Centro de coste con mayor consumo: " + centerText + ". " : "No hay centros de coste registrados. "}${expenseText ? "Mayor gasto individual: " + expenseText + "." : "No hay gastos individuales registrados."}`
+      : `I reviewed the ${operations.expenses.length} current expense records. Total detailed spend in Operations is ${money(actualExpenses, language)} (kept separate from P&L expenses to avoid double counting). ${categoryText ? "Category breakdown, highest first: " + categoryText + ". " : "There are no categorised expenses recorded. "}${centerText ? "Highest-spend cost centre: " + centerText + ". " : "No cost centres are recorded. "}${expenseText ? "Largest individual expense: " + expenseText + "." : "No individual expenses are recorded."}` };
   }
 
   if (intent === "revenue" && (targetPercent !== null || amount !== null)) {
