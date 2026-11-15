@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { translate, type Language } from "@/i18n/translations";
 import { OperationsCommandCentre } from "@/components/operations-command-centre";
-import { useOperationsCloudSync } from "@/components/use-operations-cloud-sync";
+import { useWorkspaceData } from "@/components/workspace-data-context";
 import { isDateWithinReportingPeriodCode, isValidISODate, isValidReportingPeriodCode } from "@/domain/reporting-periods";
-import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, costCenterActualSpend, costCenterPerformance, costCenterRunRate, kpiPerformance, projectBudgetVariance, riskScore, weightedPipeline, type BusinessKpi, type CostCenterBudget, type ExpenseRecord, type BusinessRisk, type Opportunity, type OpportunityStage, type OperationsState, type Project, type ProjectStatus } from "@/domain/operations";
+import { costCenterActualSpend, costCenterPerformance, costCenterRunRate, kpiPerformance, projectBudgetVariance, riskScore, weightedPipeline, type BusinessKpi, type CostCenterBudget, type ExpenseRecord, type BusinessRisk, type Opportunity, type OpportunityStage, type OperationsState, type Project, type ProjectStatus } from "@/domain/operations";
 
 type Section = "sales" | "projects" | "risks" | "kpis" | "cost-centers" | "expenses" | "reports";
 const makeId = () => typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `ops-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -47,12 +47,9 @@ function downloadCsv(state: OperationsState) {
 
 export function OperationsWorkspace({ language }: { language: Language }) {
   const t = (value: string) => translate(value, language);
-  const [data, setData] = useState<OperationsState>(EMPTY_OPERATIONS);
-  const [loaded, setLoaded] = useState(false);
-  const cloudStatus = useOperationsCloudSync(data, setData, loaded, language);
+  const { operations: data, setOperations: setData, cloudStatus } = useWorkspaceData();
   const cloudConnected = ["Sincronizado con tu cuenta","Guardado y sincronizado con tu cuenta","Actualizado desde la nube","Synced to your account","Saved and synced to your account","Updated from cloud"].includes(cloudStatus);
   const [section, setSection] = useState<Section>("sales");
-  const [storageMessage, setStorageMessage] = useState("Loading local workspace…");
   const [company, setCompany] = useState("");
   const [contact, setContact] = useState("");
   const [dealValue, setDealValue] = useState("10000");
@@ -87,50 +84,6 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   const [expenseCostCenterId, setExpenseCostCenterId] = useState("");
   const [expenseAmount, setExpenseAmount] = useState("0");
   const [expenseStatus, setExpenseStatus] = useState<"paid" | "unpaid">("unpaid");
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      try {
-        const restored = parseOperationsState(window.localStorage.getItem(OPERATIONS_STORAGE_KEY));
-        setData(restored ?? EMPTY_OPERATIONS);
-        setStorageMessage(restored ? "Saved operations workspace restored." : "Local workspace ready. Add your first records.");
-      } catch {
-        setStorageMessage("Browser storage is unavailable. Changes remain in this session.");
-      }
-      setLoaded(true);
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    function refreshFromBackup() {
-      const timer = window.setTimeout(() => {
-        try {
-          const restored = parseOperationsState(window.localStorage.getItem(OPERATIONS_STORAGE_KEY));
-          if (restored) setData(restored);
-        } catch {
-          setStorageMessage("Browser storage is unavailable. Changes remain in this session.");
-        }
-      }, 0);
-      return timer;
-    }
-    const onRestored = () => { refreshFromBackup(); };
-    window.addEventListener("enterpriseos:operations-updated", onRestored);
-    return () => window.removeEventListener("enterpriseos:operations-updated", onRestored);
-  }, []);
-
-  useEffect(() => {
-    if (!loaded) return;
-    const timer = window.setTimeout(() => {
-      try {
-        window.localStorage.setItem(OPERATIONS_STORAGE_KEY, JSON.stringify(data));
-        setStorageMessage("Changes saved in this browser.");
-      } catch {
-        setStorageMessage("Browser storage is unavailable. Changes remain in this session.");
-      }
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [data, loaded]);
 
   const openPipeline = useMemo(() => weightedPipeline(data.opportunities.filter((x) => !["won", "lost"].includes(x.stage))), [data.opportunities]);
   const activeProjects = data.projects.filter((x) => x.status === "active").length;
@@ -371,7 +324,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
           <p className="operations-note">{t("Each KPI defines whether higher or lower values are better. Progress is capped visually at 150%; the original values remain unchanged.")}</p>
         </>}
       </div>
-      <div className="operations-storage-note">◉ {t(storageMessage)}</div>
+      <div className="operations-storage-note">◉ {cloudStatus}</div>
       <p className="operations-disclaimer">{cloudConnected ? t("Operations data is synced to your authenticated account across your devices. It is not shared with other users or connected to CRM, HR, project or accounting platforms. Saved views and version snapshots remain local to this browser. Export a CSV backup before clearing browser data.") : t("Operations records are stored only in this browser. Sign in with a configured account to enable cloud sync across your own devices. Records are not shared with a team or connected to CRM, HR, project or accounting platforms. Export a CSV backup before clearing browser data.")}</p>
     </section>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   calculateThreeStatements,
   DEFAULT_THREE_STATEMENT_ASSUMPTIONS,
@@ -9,6 +9,7 @@ import {
 } from "@/domain/three-statements";
 import { type FinancialResults } from "@/domain/financials";
 import { translate, type Language } from "@/i18n/translations";
+import { useWorkspaceData } from "@/components/workspace-data-context";
 import { calculateFinancialRatios } from "@/domain/financial-analysis";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
 import { CashForecastWorkspace } from "@/components/cash-forecast-workspace";
@@ -223,6 +224,9 @@ export function ThreeStatementsWorkspace({
     DEFAULT_THREE_STATEMENT_ASSUMPTIONS,
   );
   const [activeTab, setActiveTab] = useState<StatementTab>("income");
+  const { setStatementAssumptions } = useWorkspaceData();
+
+  useEffect(() => { const timer = window.setTimeout(() => setStatementAssumptions(assumptions), 0); return () => window.clearTimeout(timer); }, [assumptions, setStatementAssumptions]);
   const t = (value: string) => translate(value, language);
 
   const model = useMemo(

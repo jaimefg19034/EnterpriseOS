@@ -12,6 +12,7 @@ import {
 import { formatCurrency, formatPercent } from "@/domain/financials";
 import { translate, type Language } from "@/i18n/translations";
 import { downloadExcelWorkbook } from "@/lib/excel-export";
+import { useWorkspaceData } from "@/components/workspace-data-context";
 import {
   addPlanningYear,
   createEmptyActualRevenue,
@@ -202,6 +203,9 @@ function navigateToPlanningSection(event: MouseEvent<HTMLAnchorElement>) {
 export function PlanningWorkspace({ language, previewMode = false }: { language: Language; previewMode?: boolean }) {
   const t = (value: string) => translate(value, language);
   const [savedState, setSavedState] = useState<SavedPlanningState>(INITIAL_PLANNING_STATE);
+  const { setPlanning } = useWorkspaceData();
+
+  useEffect(() => { const timer = window.setTimeout(() => setPlanning(savedState), 0); return () => window.clearTimeout(timer); }, [savedState, setPlanning]);
   const [storageReady, setStorageReady] = useState(previewMode);
   const [storageMessage, setStorageMessage] = useState(previewMode ? "PREVIEW MODE · Changes are temporary and are not saved." : "");
   const [newYear, setNewYear] = useState("2027");
