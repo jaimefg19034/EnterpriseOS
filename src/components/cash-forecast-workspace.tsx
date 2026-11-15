@@ -169,6 +169,7 @@ export function CashForecastWorkspace({ openingCash, language }: CashForecastWor
     if (!storageReady || !forecastStorageWritable) return;
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(weeks));
+      window.dispatchEvent(new Event("enterpriseos:cash-forecast-updated"));
     } catch {
       let originalData: string | null = null;
       try {
