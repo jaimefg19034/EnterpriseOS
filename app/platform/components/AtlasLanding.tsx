@@ -156,7 +156,7 @@ export default function AtlasLanding() {
       return;
     }
     window.sessionStorage.setItem("enterpriseos:demo-access", "granted");
-    window.location.assign("/EnterpriseOS/");
+    window.location.assign("/EnterpriseOS/workspace/");
   }
 
   return <main className="eos-home" id="top">
