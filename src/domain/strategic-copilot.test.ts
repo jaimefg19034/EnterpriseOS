@@ -224,4 +224,28 @@ describe("analyzeCopilotQuestion", () => {
   });
 
 
+
+  it("parses percentages written as words and applies them to the previous savings target", () => {
+    const result = analyzeCopilotQuestion("¿Y si aumento el ahorro anterior un quince por ciento?", financials, EMPTY_OPERATIONS, "es", undefined, {
+      previousIntent: "saving",
+      previousQuestion: "¿Cómo reduzco gastos?",
+      previousCalculations: { expenseBase: 70000, saving: 7000 },
+    });
+    expect(result.intent).toBe("saving");
+    expect(result.calculations.savingAfterScenario).toBe(8050);
+    expect(result.calculations.incrementalSaving).toBe(1050);
+  });
+
+  it("turns an implementation follow-up into a concrete plan tied to the previous analysis", () => {
+    const result = analyzeCopilotQuestion("Dame un plan paso a paso para aplicarlo", financials, EMPTY_OPERATIONS, "es", undefined, {
+      previousIntent: "saving",
+      previousQuestion: "¿Cómo reduzco gastos?",
+      previousCalculations: { expenseBase: 70000, saving: 7000 },
+    });
+    expect(result.action).toBe("implement");
+    expect(result.steps?.length).toBeGreaterThanOrEqual(3);
+    expect(result.calculations.targetSaving).toBe(7000);
+  });
+
+
 });
