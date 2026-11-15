@@ -3,6 +3,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import type { FinancialResults } from "@/domain/financials";
+import { useOperationsCloudSync } from "@/components/use-operations-cloud-sync";
+import type { Language } from "@/i18n/translations";
 import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, type OperationsState } from "@/domain/operations";
 
 type WorkspaceDataValue = {
@@ -10,13 +12,15 @@ type WorkspaceDataValue = {
   operations: OperationsState;
   setOperations: Dispatch<SetStateAction<OperationsState>>;
   operationsLoaded: boolean;
+  cloudStatus: string;
 };
 
 const WorkspaceDataContext = createContext<WorkspaceDataValue | null>(null);
 
-export function WorkspaceDataProvider({ financials, children }: { financials: FinancialResults; children: ReactNode }) {
+export function WorkspaceDataProvider({ financials, language, children }: { financials: FinancialResults; language: Language; children: ReactNode }) {
   const [operations, setOperations] = useState<OperationsState>(EMPTY_OPERATIONS);
   const [operationsLoaded, setOperationsLoaded] = useState(false);
+  const cloudStatus = useOperationsCloudSync(operations, setOperations, operationsLoaded, language);
 
   useEffect(() => {
     try {
@@ -46,7 +50,7 @@ export function WorkspaceDataProvider({ financials, children }: { financials: Fi
     }
   }, [operations, operationsLoaded]);
 
-  const value = useMemo(() => ({ financials, operations, setOperations, operationsLoaded }), [financials, operations, operationsLoaded]);
+  const value = useMemo(() => ({ financials, operations, setOperations, operationsLoaded, cloudStatus }), [financials, operations, operationsLoaded, cloudStatus]);
   return <WorkspaceDataContext.Provider value={value}>{children}</WorkspaceDataContext.Provider>;
 }
 
