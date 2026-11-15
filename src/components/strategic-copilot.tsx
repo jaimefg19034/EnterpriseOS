@@ -140,7 +140,7 @@ export function StrategicCopilot({language,mode="chat"}:{language:Language;mode?
     setConversationContext(nextContext);try{window.localStorage.setItem(CHAT_CONTEXT_KEY,JSON.stringify(nextContext))}catch{}
     const fullText=analysis.response||(es?"No tengo una conclusión fiable con la información disponible. Dime qué cifra, proyecto o partida quieres revisar.":"I cannot reach a reliable conclusion from the available information. Tell me which figure, project or line item to review.");
     const assistantId=String(messageId)+"-a";
-    setChatMessages(current=>[...current,{id:assistantId,role:"assistant",text:"",analysis}].slice(-2000));
+    setChatMessages(current=>[...current,{id:assistantId,role:"assistant" as const,text:"",analysis}].slice(-2000));
     const chunks=fullText.split(/(\s+)/);let streamed="";
     for(let offset=0;offset<chunks.length;offset+=4){
      streamed+=chunks.slice(offset,offset+4).join("");
