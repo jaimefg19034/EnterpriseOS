@@ -371,18 +371,24 @@ export default function Home() {
   const viewLabels: Record<View, string> = { overview: t("Overview"), model: t("Financial model"), planning: t("Budget & scenarios"), statements: t("3 statements"), operations: t("Operations & intelligence"), reports: t("Reports & exports") };
 
   useEffect(() => {
-    try {
-      const saved = JSON.parse(window.localStorage.getItem("enterpriseos:recent-views") ?? "[]");
-      if (Array.isArray(saved)) setRecentViews(saved.filter((item): item is View => ["overview","model","planning","statements","operations","reports"].includes(item)).slice(0, 8));
-    } catch { setRecentViews([]); }
+    const timer = window.setTimeout(() => {
+      try {
+        const saved = JSON.parse(window.localStorage.getItem("enterpriseos:recent-views") ?? "[]");
+        if (Array.isArray(saved)) setRecentViews(saved.filter((item): item is View => ["overview","model","planning","statements","operations","reports"].includes(item)).slice(0, 8));
+      } catch { setRecentViews([]); }
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    setRecentViews((current) => {
-      const next = [view, ...current.filter((item) => item !== view)].slice(0, 8);
-      try { window.localStorage.setItem("enterpriseos:recent-views", JSON.stringify(next)); } catch { /* Recent navigation is an optional convenience. */ }
-      return next;
-    });
+    const timer = window.setTimeout(() => {
+      setRecentViews((current) => {
+        const next = [view, ...current.filter((item) => item !== view)].slice(0, 8);
+        try { window.localStorage.setItem("enterpriseos:recent-views", JSON.stringify(next)); } catch { /* Recent navigation is an optional convenience. */ }
+        return next;
+      });
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [view]);
 
   useEffect(() => {
