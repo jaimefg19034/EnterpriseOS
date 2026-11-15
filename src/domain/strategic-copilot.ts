@@ -37,7 +37,7 @@ function extractPercent(question: string): number | null {
 
 function intentOf(question: string): CopilotIntent {
   const q = question.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  if (/\b(invert|inviert|inversion|invertir|investment|invest|roi|retorno|capital)\b/.test(q)) return "investment";
+  if (/\b(invert|inviert\w*|inversion|invertir|investment|invest|roi|retorno|capital)\b/.test(q)) return "investment";
   if (/\b(margen|margin|subir margen|mejorar margen)\b/.test(q)) return "margin";
   if (/\b(ahorr|recort|reduc|optim|saving|save|cut|reduce)\b/.test(q)) return "saving";
   if (/\b(gasto|gastos|coste|costes|costo|costos|expense|expenses|spend|partida|proveedor|sobrecoste|perdiendo|peor partida|peor gasto)\b/.test(q)) return "expense";
