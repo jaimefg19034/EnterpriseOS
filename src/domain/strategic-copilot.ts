@@ -41,6 +41,8 @@ function intentOf(question: string): CopilotIntent {
   if (/\b(margen|margin|subir margen|mejorar margen)\b/.test(q)) return "margin";
   if (/\b(ahorr|recort|reduc|optim|saving|save|cut|reduce)\b/.test(q)) return "saving";
   if (/\b(gasto|gastos|coste|costes|costo|costos|expense|expenses|spend|partida|proveedor|sobrecoste|perdiendo|peor partida|peor gasto)\b/.test(q)) return "expense";
+  if (/\b(caja|cash|liquidez|liquidity|deuda|debt|capital circulante|working capital|balance|flujo de caja|cash flow)\b/.test(q)) return "cash";
+  if (/\b(presupuesto|budget|forecast|prevision|planificacion|escenario|scenario|plan anual)\b/.test(q)) return "planning";
   if (/\b(beneficio|beneficios|benefit|profit|ebitda|rentabilidad|net income)\b/.test(q)) return "profit";
   if (/\b(ingreso|ingresos|facturacion|ventas|revenue|sales)\b/.test(q)) return "revenue";
   if (/\b(proyecto|proyectos|project|projects)\b/.test(q)) return "project";
@@ -153,8 +155,8 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
     if (bs.currentRatio !== null) calculations.currentRatio = bs.currentRatio;
     matchedData.push("financials", "threeStatementAssumptions");
     return { intent, calculations, matchedData, response: es
-      ? `Proyección del modelo de tres estados con las hipótesis actuales:\\n• Caja final: ${money(cf.closingCash, language)}.\\n• Flujo de caja libre: ${money(cf.freeCashFlow, language)}.\\n• Capital circulante neto: ${money(bs.netWorkingCapital, language)}.\\n• Deuda neta: ${money(bs.netDebt, language)}.\\n• Ratio corriente: ${bs.currentRatio === null ? "no disponible" : bs.currentRatio.toFixed(2) + "x"}.\\n${workspace.statementAssumptions ? "He usado las hipótesis editadas en 3 estados." : "Aún no has modificado las hipótesis de 3 estados; se aplican los valores demo iniciales."}`
-      : `Three-statement projection using current assumptions:\\n• Closing cash: ${money(cf.closingCash, language)}.\\n• Free cash flow: ${money(cf.freeCashFlow, language)}.\\n• Net working capital: ${money(bs.netWorkingCapital, language)}.\\n• Net debt: ${money(bs.netDebt, language)}.\\n• Current ratio: ${bs.currentRatio === null ? "not available" : bs.currentRatio.toFixed(2) + "x"}.\\n${workspace.statementAssumptions ? "Using the assumptions edited in 3 statements." : "Three-statement assumptions have not been edited; initial demo defaults are used."}` };
+      ? `Proyección del modelo de tres estados con las hipótesis actuales:\n• Caja final: ${money(cf.closingCash, language)}.\n• Flujo de caja libre: ${money(cf.freeCashFlow, language)}.\n• Capital circulante neto: ${money(bs.netWorkingCapital, language)}.\n• Deuda neta: ${money(bs.netDebt, language)}.\n• Ratio corriente: ${bs.currentRatio === null ? "no disponible" : bs.currentRatio.toFixed(2) + "x"}.\n${workspace.statementAssumptions ? "He usado las hipótesis editadas en 3 estados." : "Aún no has modificado las hipótesis de 3 estados; se aplican los valores demo iniciales."}`
+      : `Three-statement projection using current assumptions:\n• Closing cash: ${money(cf.closingCash, language)}.\n• Free cash flow: ${money(cf.freeCashFlow, language)}.\n• Net working capital: ${money(bs.netWorkingCapital, language)}.\n• Net debt: ${money(bs.netDebt, language)}.\n• Current ratio: ${bs.currentRatio === null ? "not available" : bs.currentRatio.toFixed(2) + "x"}.\n${workspace.statementAssumptions ? "Using the assumptions edited in 3 statements." : "Three-statement assumptions have not been edited; initial demo defaults are used."}` };
   }
 
   if (intent === "planning") {
