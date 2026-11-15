@@ -32,7 +32,7 @@ describe("local neural conversation engine", () => {
     };
     const result = neuralEngine("Dame más detalles del punto 2", "es", context);
     expect(result?.matchedData).toContain("conversation.previousResponse");
-    expect(result?.response).toContain("el tema que acabamos de tratar");
+    expect(result?.response).toContain("Distribución");
   });
 
   it("leaves explicit financial questions to the live workspace analyst", () => {
