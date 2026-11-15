@@ -25,7 +25,7 @@ const LEXICON: Record<string,string[]> = {
  casual:["hola","buenas","hey","hello","hi","gracias","thanks","thank you","perfecto","genial","vale","ok","okay","buenos dias","buenas tardes","buenas noches"],
  finance:["ingreso","ingresos","facturacion","ventas","venta","gasto","gastos","coste","costes","costo","costos","ebitda","margen","rentabilidad","presupuesto","caja","liquidez","deuda","factura","facturas","cobro","cobros","pago","pagos","inversion","roi","cash","revenue","expense","expenses","cost","costs","profit","margin","budget","forecast","invoice","receivable","payable","balance","financial","financiero","financiera","dinero","euros","eur","ahorro","ahorrar"]
 };
-const FINANCE = /\b(ingresos?|facturacion|ventas?|gastos?|costes?|costos?|ebitda|margen|rentabilidad|presupuesto|tesoreria|caja|liquidez|deuda|facturas?|cobros?|pagos?|inversion(?:es)?|roi|cash flow|cash|revenue|expenses?|costs?|profit|margin|budget|forecast|invoice|receivables?|payables?|financial|financiero|financiera|dinero|euros?|ahorro|ahorrar)\b/;
+const FINANCE = /\b(ingresos?|facturacion|gastos?|costes?|costos?|ebitda|margen|rentabilidad|presupuesto|tesoreria|caja|liquidez|deuda|facturas?|cobros?|pagos?|inversion(?:es)?|roi|cash flow|cash|revenue|expenses?|costs?|profit|margin|budget|forecast|invoice|receivables?|payables?|financial|financiero|financiera|dinero|euros?|ahorro|ahorrar)\b/;
 const FOLLOW = /\b(mas detalles|amplia|desarrolla|profundiza|el punto|punto [123]|el segundo|el primero|eso|esto|lo anterior|hazlo|cambialo|mas agresivo|mas conservador|por donde empiezo|y ahora|siguiente paso|paso a paso|aplica eso|en mi empresa|that|this|it|the second|the first|more detail|expand|go deeper|make it|what next|next step|step by step|apply that|in my company)\b/;
 const normalise=(s:string)=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9€%.,!?'\s-]/g," ").replace(/\s+/g," ").trim();
 function stem(w:string):string{for(const suffix of SUFFIXES)if(w.length>suffix.length+3&&w.endsWith(suffix))return w.slice(0,-suffix.length);if(w.length>5&&w.endsWith("ing"))return w.slice(0,-3);if(w.length>4&&w.endsWith("ed"))return w.slice(0,-2);return w;}
@@ -44,7 +44,8 @@ function topicOf(question:string,context?:NeuralContext):string{
  return previous.slice(0,5).join(" ")||"el objetivo que quieres conseguir";
 }
 function modeOf(q:string,tokens:string[],context?:NeuralContext):LinguisticAnalysis["mode"]{
- if(FINANCE.test(q))return "finance";
+ const explicitSalesMetrics=/\b(cuanto vendimos|cuantas ventas|ventas del mes|analiza las ventas|como van las ventas|sales figures|sales performance|sales revenue)\b/.test(q);
+ if(FINANCE.test(q)||explicitSalesMetrics)return "finance";
  if(/^(hola|buenas|hey|hello|hi|gracias|thanks|thank you|perfecto|genial|vale|ok|okay|buenos dias|buenas tardes|buenas noches)\b/.test(q))return "casual";
  const follow=FOLLOW.test(q)&&!!(context?.previousQuestion||context?.history?.length);
  if(follow&&tokens.length<=8){
@@ -58,7 +59,7 @@ function modeOf(q:string,tokens:string[],context?:NeuralContext):LinguisticAnaly
  const ranked=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
  if(ranked[0][1]>=2.2)return ranked[0][0] as LinguisticAnalysis["mode"];
  if(/\b(idea|ideas|propuesta|alternativa|innovar|captar|atraer|crecer|brainstorm)\w*/.test(q))return "creative";
- if(/\b(plan|pasos|empezar|comenzar|implementar|ejecutar|priorizar|roadmap|por donde)\w*/.test(q))return "plan";
+ if(/\b(plan|pasos|empezar|comenzar|implementar|ejecutar|priorizar|roadmap|por donde|hoy|today)\w*/.test(q))return "plan";
  if(/\b(equipo|empleados|delegar|liderazgo|productividad|reuniones|procesos|gestionar|organiz)\w*/.test(q))return "management";
  if(/\b(explica|explicar|significa|por que|como funciona|define|what is|why|how does)\b/.test(q))return "explain";
  return "open";
@@ -84,13 +85,13 @@ function answer(question:string,language:Language,a:LinguisticAnalysis,context?:
  ];
  if(a.mode==="casual")return {intent:"social",response:spanish?"¡Buenas! Podemos pensar ideas, resolver un problema, ordenar prioridades o analizar el workspace cuando tenga sentido. ¿Qué tienes entre manos?":"Hi. We can brainstorm, work through a problem, organise priorities, or analyse the workspace when it is relevant. What are you working on?",calculations:{},matchedData:["conversation"],confidence:a.confidence};
  const out=[pick(intro,seed)];
- const pointMatch=normalise(question).match(/\\b(?:punto|apartado|point|item)\\s*(1|2|3|uno|dos|tres)\\b/);
+ const pointMatch=normalise(question).match(/\b(?:punto|apartado|point|item)\s*(1|2|3|uno|dos|tres)\b/);
  if(a.isFollowUp&&pointMatch&&context?.previousResponse){
   const number=({uno:"1",dos:"2",tres:"3"} as Record<string,string>)[pointMatch[1]]??pointMatch[1];
-  const selected=context.previousResponse.split(/\\n+/).find(line=>new RegExp("^\\\\s*"+number+"[.)]").test(line.trim()));
+  const selected=context.previousResponse.split(/\n+/).find(line=>new RegExp("^\\s*"+number+"[.)]").test(line.trim()));
   if(selected){
    const detail=selected.replace(/^\\s*\\d+[.)]\\s*/,"").replace(/\\*\\*/g,"");
-   const response=spanish?"El punto "+number+" al que te refieres es: "+detail+"\\n\\nPara desarrollarlo, concreta el cliente o usuario al que afecta, define la acción exacta, prueba una versión pequeña y revisa qué resultado produce.":"The point "+number+" you mean is: "+detail+"\\n\\nTo develop it, define the customer or user it affects, specify the exact action, test a small version, and review the result.";
+   const response=spanish?"El punto "+number+" al que te refieres es: "+detail+"\n\nPara desarrollarlo, concreta el cliente o usuario al que afecta, define la acción exacta, prueba una versión pequeña y revisa qué resultado produce.":"The point "+number+" you mean is: "+detail+"\n\nTo develop it, define the customer or user it affects, specify the exact action, test a small version, and review the result.";
    const steps=spanish?["Define el resultado específico que debe producir este punto.","Asigna un responsable y prepara una primera prueba acotada.","Recoge feedback y objeciones de las personas afectadas.","Decide qué ajustar antes de ampliar la iniciativa."]:["Define the specific outcome this point should produce.","Assign an owner and prepare a tightly scoped first test.","Collect feedback and objections from the people affected.","Decide what to adjust before scaling the initiative."];
    return {intent:"advice",response,calculations:{},matchedData:["conversation.previousResponse"],steps,action:"implement",confidence:0.94};
   }
