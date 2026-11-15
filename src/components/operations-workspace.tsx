@@ -124,6 +124,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
     const timer = window.setTimeout(() => {
       try {
         window.localStorage.setItem(OPERATIONS_STORAGE_KEY, JSON.stringify(data));
+        window.dispatchEvent(new Event("enterpriseos:operations-updated"));
         setStorageMessage("Changes saved in this browser.");
       } catch {
         setStorageMessage("Browser storage is unavailable. Changes remain in this session.");
