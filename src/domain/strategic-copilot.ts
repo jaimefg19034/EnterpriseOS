@@ -155,7 +155,14 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
   }
 
   const queryTokens=tokensOf(q);
-  const recordCandidates: {kind:"project"|"risk"|"kpi"|"expense"|"costCenter"|"opportunity"; label:string; tokens:string[]; item:any}[] = [
+  const recordCandidates: (
+    | {kind:"project";label:string;tokens:string[];item:OperationsState["projects"][number]}
+    | {kind:"risk";label:string;tokens:string[];item:OperationsState["risks"][number]}
+    | {kind:"kpi";label:string;tokens:string[];item:OperationsState["kpis"][number]}
+    | {kind:"expense";label:string;tokens:string[];item:OperationsState["expenses"][number]}
+    | {kind:"costCenter";label:string;tokens:string[];item:OperationsState["costCenters"][number]}
+    | {kind:"opportunity";label:string;tokens:string[];item:OperationsState["opportunities"][number]}
+  )[] = [
     ...operations.projects.map(item=>({kind:"project" as const,label:item.name,tokens:tokensOf(item.name),item})),
     ...operations.risks.map(item=>({kind:"risk" as const,label:item.title,tokens:tokensOf(item.title),item})),
     ...operations.kpis.map(item=>({kind:"kpi" as const,label:item.name,tokens:tokensOf(item.name),item})),
