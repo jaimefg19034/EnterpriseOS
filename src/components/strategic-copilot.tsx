@@ -6,6 +6,7 @@ import { costCenterActualSpend, riskScore, type OperationsState } from "@/domain
 import { useWorkspaceData } from "@/components/workspace-data-context";
 import { aiEngine, type CopilotAnalysis, type CopilotIntent } from "@/domain/ai-engine";
 import type { Language } from "@/i18n/translations";
+import { PLANNING_STORAGE_KEY, serialisePlanningState } from "@/domain/planning-storage";
 type Kind="cut"|"optimize"|"invest"|"implement";
 type Rec={id:string;kind:Kind;title:string;detail:string;action:string;basis:string;impact?:number;impactMonthly?:number;impactAnnual?:number;impactType?:"one-off"|"run-rate"|"annual-model"|"period-unknown";priority:"high"|"medium"|"low";risk:"high"|"medium"|"low";simulation?:{annualOpexReduction?:number;cogsRateReductionPp?:number;revenueGrowthPp?:number}};
 type Saved={id:string;title:string;kind:Kind;status:"open"|"done"};
@@ -45,7 +46,7 @@ function build(f:FinancialResults,o:OperationsState,planning:ReturnType<typeof u
  }
  o.kpis.filter(k=>k.direction==="lower"?k.actual>k.target:k.actual<k.target).slice(0,4).forEach(k=>add({id:"kpi-"+k.id,kind:"implement",title:(es?"Recuperar KPI: ":"Recover KPI: ")+k.name,detail:es?"El valor actual ("+k.actual+" "+k.unit+") no alcanza el objetivo ("+k.target+" "+k.unit+"). Define causa raíz, responsable y revisión semanal.":"Current value ("+k.actual+" "+k.unit+") is off target ("+k.target+" "+k.unit+"). Define root cause, owner and weekly review.",action:es?"Crear plan correctivo de 30 días":"Create a 30-day corrective plan",basis:es?"KPI registrado en Operaciones":"KPI entered in Operations",priority:"high",risk:"medium"}));
  o.risks.filter(x=>x.status!=="closed"&&riskScore(x)>=15).sort((a,b)=>riskScore(b)-riskScore(a)).slice(0,3).forEach(x=>add({id:"risk-"+x.id,kind:"implement",title:(es?"Mitigar riesgo: ":"Mitigate risk: ")+x.title,detail:es?"Puntuación "+riskScore(x)+"/25. "+(x.mitigation?"Comprueba el avance de la mitigación registrada.":"No hay mitigación documentada; asigna una."):"Score "+riskScore(x)+"/25. "+(x.mitigation?"Verify the recorded mitigation.":"No mitigation is documented; assign one."),action:es?"Asignar responsable, fecha límite y control":"Assign owner, deadline and control",basis:es?"Matriz registrada de probabilidad e impacto":"Recorded probability and impact matrix",priority:"high",risk:"high"}));
- if(f.ebitda<0)add({id:"ebitda",kind:"implement",title:es?"Plan de recuperación de EBITDA":"EBITDA recovery plan",detail:es?"El EBITDA del periodo es negativo ("+money(f.ebitda,l)+"). Prioriza margen bruto, costes fijos y rentabilidad por cliente antes de acelerar el crecimiento.":"Period EBITDA is negative ("+money(f.ebitda,l)+"). Prioritise gross margin, fixed costs and customer profitability before accelerating growth.",action:es?"Preparar plan de 90 días con responsables":"Build a 90-day plan with accountable owners",basis:es?"Cuenta de resultados del periodo actual":"Current-period income statement",priority:"high",risk:"high"}));
+ if(f.ebitda<0)add({id:"ebitda",kind:"implement",title:es?"Plan de recuperación de EBITDA":"EBITDA recovery plan",detail:es?"El EBITDA del periodo es negativo ("+money(f.ebitda,l)+"). Prioriza margen bruto, costes fijos y rentabilidad por cliente antes de acelerar el crecimiento.":"Period EBITDA is negative ("+money(f.ebitda,l)+"). Prioritise gross margin, fixed costs and customer profitability before accelerating growth.",action:es?"Preparar plan de 90 días con responsables":"Build a 90-day plan with accountable owners",basis:es?"Cuenta de resultados del periodo actual":"Current-period income statement",priority:"high",risk:"high"});
  if(annualRevenue!==null&&annualRevenue>0&&annualOpex!==null&&annualOpex>=0){
   const sensitivity=annualRevenue*.01;
   add({id:"margin",kind:"invest",title:es?"Sensibilidad: +1 punto de margen bruto":"Sensitivity: +1 percentage point gross margin",detail:es?"Un punto porcentual de mejora sobre los ingresos presupuestados representa "+money(sensitivity,l)+" de EBITDA anual antes de costes de implantación. Es una sensibilidad, no un retorno previsto.":"One percentage point of improvement on budgeted revenue represents "+money(sensitivity,l)+" annual EBITDA before implementation costs. This is a sensitivity, not a forecast return.",action:es?"Medir mermas, mix y precio en un piloto controlado":"Measure waste, mix and pricing in a controlled pilot",basis:es?"1 punto porcentual × presupuesto anual de ingresos":"1 percentage point × annual revenue budget",impact:sensitivity,impactAnnual:sensitivity,impactMonthly:sensitivity/12,impactType:"annual-model",priority:"medium",risk:"medium",simulation:{cogsRateReductionPp:1}});
@@ -106,16 +107,16 @@ export function StrategicCopilot({language}:{language:Language}){
  function apply(x:Rec){
   if(applied.includes(x.id))return;
   if(x.simulation&&planning){
-   setPlanning(current=>{
-    if(!current)return current;
-    const key=String(current.selectedYear),year=current.years[key];
-    if(!year)return current;
+   const key=String(planning.selectedYear),year=planning.years[key];
+   if(year){
     const assumptions={...year.assumptions};
-    if(x.simulation?.annualOpexReduction)assumptions.annualOperatingExpenses=Math.max(0,assumptions.annualOperatingExpenses-x.simulation.annualOpexReduction);
-    if(x.simulation?.cogsRateReductionPp)assumptions.costOfGoodsSoldPercent=Math.max(0,assumptions.costOfGoodsSoldPercent-x.simulation.cogsRateReductionPp);
-    const customRevenueGrowthPercent=x.simulation?.revenueGrowthPp?Math.max(-30,Math.min(30,year.customRevenueGrowthPercent+x.simulation.revenueGrowthPp)):year.customRevenueGrowthPercent;
-    return {...current,years:{...current.years,[key]:{...year,assumptions,scenario:"custom",customRevenueGrowthPercent}},savedAt:new Date().toISOString()};
-   });
+    if(x.simulation.annualOpexReduction)assumptions.annualOperatingExpenses=Math.max(0,assumptions.annualOperatingExpenses-x.simulation.annualOpexReduction);
+    if(x.simulation.cogsRateReductionPp)assumptions.costOfGoodsSoldPercent=Math.max(0,assumptions.costOfGoodsSoldPercent-x.simulation.cogsRateReductionPp);
+    const customRevenueGrowthPercent=x.simulation.revenueGrowthPp?Math.max(-30,Math.min(30,year.customRevenueGrowthPercent+x.simulation.revenueGrowthPp)):year.customRevenueGrowthPercent;
+    const next={...planning,years:{...planning.years,[key]:{...year,assumptions,scenario:"custom" as const,customRevenueGrowthPercent}},savedAt:new Date().toISOString()};
+    setPlanning(next);
+    try{window.localStorage.setItem(PLANNING_STORAGE_KEY,serialisePlanningState(next));window.dispatchEvent(new Event("enterpriseos:planning-updated"))}catch{}
+   }
   }
   setApplied(current=>[...current,x.id]);setAppliedImpactSnapshots(current=>({...current,[x.id]:x.simulation&&planning?(x.impactAnnual??0):0}));save(x);
  }
