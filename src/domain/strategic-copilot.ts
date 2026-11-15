@@ -36,7 +36,7 @@ function extractPercent(question: string): number | null {
 }
 
 type IntentContext = { previousIntent?: CopilotIntent; previousQuestion?: string };
-const normaliseText = (value: string) => value.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().replace(/[^a-z0-9€%.,\\s]/g, " ").replace(/\\s+/g, " ").trim();
+const normaliseText = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9€%.,\s]/g, " ").replace(/\s+/g, " ").trim();
 const INTENT_TERMS: Record<Exclude<CopilotIntent,"greeting"|"advice"|"unknown">, string[]> = {
  investment:["invert","inversion","invertir","contratar","contratacion","emplear","personal","capex","inversion","roi","retorno","rentabilidad","capital","investment","hire"],
  margin:["margen","margin","rentabilidad","eficiencia","bruto","ebitda margin"],
@@ -63,8 +63,8 @@ function scoreIntents(question: string): Record<string,number> {
   }
   scores[intent]=score;
  }
- if(/\\b(que harias|que harías|si fueras|director financiero|directora financiera|por donde empiezo|no se por donde|que me recomiendas|what would you do|where should i start)\\b/.test(q)) scores.advice=8;
- if(/\\b(hola|buenas|hey|hello|hi|que tal|como estas|buenos dias|buenas tardes|buenas noches)\\b/.test(q)&&tokens.length<=7) scores.greeting=10;
+ if(/\b(que harias|que harías|si fueras|director financiero|directora financiera|por donde empiezo|no se por donde|que me recomiendas|what would you do|where should i start)\b/.test(q)) scores.advice=8;
+ if(/\b(hola|buenas|hey|hello|hi|que tal|como estas|buenos dias|buenas tardes|buenas noches)\b/.test(q)&&tokens.length<=7) scores.greeting=10;
  return scores;
 }
 function intentOf(question: string, context?: IntentContext): CopilotIntent {
@@ -73,7 +73,7 @@ function intentOf(question: string, context?: IntentContext): CopilotIntent {
  if(scores.advice) return "advice";
  const ranked=Object.entries(scores).filter(([key,value])=>key!=="greeting"&&key!=="advice"&&value>0).sort((a,b)=>b[1]-a[1]);
  if(ranked.length&&ranked[0][1]>=2) return ranked[0][0] as CopilotIntent;
- if(context?.previousIntent&&/\\b(y ahora|ahora|y entonces|con eso|en ese caso|y si|que tal ahora|como lo ves|what about now|and now|in that case)\\b/.test(q)) return context.previousIntent;
+ if(context?.previousIntent&&/\b(y ahora|ahora|y entonces|con eso|en ese caso|y si|que tal ahora|como lo ves|what about now|and now|in that case)\b/.test(q)) return context.previousIntent;
  return "unknown";
 }
 
