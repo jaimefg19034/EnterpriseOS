@@ -15,7 +15,7 @@ const KEY="enterpriseos:copilot-actions:v1";
 const CHAT_CONTEXT_KEY="enterpriseos:copilot-chat-context:v1";
 type ChatContext={previousIntent?:CopilotIntent;previousQuestion?:string;previousResponse?:string;previousCalculations?:Record<string,number>;history?:{role:"user"|"assistant";content:string}[]};
 function readChatContext():ChatContext{try{const value=JSON.parse(window.localStorage.getItem(CHAT_CONTEXT_KEY)??"{}");return value&&typeof value==="object"?value:{}}catch{return{}}}
-function readChatMessages():ChatMessage[]{try{const value=JSON.parse(window.localStorage.getItem("enterpriseos:copilot-messages:v2")??"[]");return Array.isArray(value)?value.filter((item)=>item&&typeof item.id==="string"&&(item.role==="user"||item.role==="assistant")&&typeof item.text==="string").slice(-200):[]}catch{return[]}}
+function readChatMessages():ChatMessage[]{try{const value=JSON.parse(window.localStorage.getItem("enterpriseos:copilot-messages:v2")??"[]");return Array.isArray(value)?value.filter((item)=>item&&typeof item.id==="string"&&(item.role==="user"||item.role==="assistant")&&typeof item.text==="string").slice(-500):[]}catch{return[]}}
 const money=(n:number,l:Language)=>new Intl.NumberFormat(l==="es"?"es-ES":"en-IE",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
 const pct=(n:number,l:Language)=>new Intl.NumberFormat(l==="es"?"es-ES":"en-IE",{style:"percent",maximumFractionDigits:1}).format(n/100);
 function readSaved():Saved[]{try{const v=JSON.parse(window.localStorage.getItem(KEY)??"[]");return Array.isArray(v)?v.filter(x=>x&&typeof x.id==="string"&&typeof x.title==="string"&&["cut","optimize","invest","implement"].includes(x.kind)&&["open","done"].includes(x.status)):[]}catch{return[]}}
@@ -87,7 +87,7 @@ export function StrategicCopilot({language,mode="chat"}:{language:Language;mode?
  const messageSequence=useRef(0);
  const messagesEndRef=useRef<HTMLDivElement|null>(null);
  useEffect(()=>{const timer=window.setTimeout(()=>setSaved(readSaved()),0);return()=>window.clearTimeout(timer)},[]);
- useEffect(()=>{try{window.localStorage.setItem("enterpriseos:copilot-messages:v2",JSON.stringify(chatMessages.slice(-200)))}catch{}},[chatMessages]);
+ useEffect(()=>{try{window.localStorage.setItem("enterpriseos:copilot-messages:v2",JSON.stringify(chatMessages.slice(-500)))}catch{}},[chatMessages]);
  useEffect(()=>{messagesEndRef.current?.scrollIntoView({behavior:"smooth",block:"end"})},[chatMessages,chatBusy]);
  const recs=useMemo(()=>build(financials,ops,planning,language),[financials,ops,planning,language]),visible=recs.filter(x=>(filter==="all"||(filter==="cut"&&(x.kind==="cut"||x.kind==="optimize"))||(filter==="invest"&&x.kind==="invest")||(filter==="implement"&&x.kind==="implement"))),appliedAnnualImpact=Object.values(appliedImpactSnapshots).reduce((s,x)=>s+x,0),appliedMonthlyImpact=appliedAnnualImpact/12;
  const latestAnalysis=[...chatMessages].reverse().find(m=>m.analysis)?.analysis;
@@ -132,22 +132,22 @@ export function StrategicCopilot({language,mode="chat"}:{language:Language;mode?
   const clean=value.trim();if(!clean||chatBusy)return;setQuestion("");
   const messageId=++messageSequence.current;
   const userMessage:ChatMessage={id:String(messageId)+"-u",role:"user",text:clean};
-  setChatMessages(current=>[...current,userMessage].slice(-200));setChatBusy(true);
+  setChatMessages(current=>[...current,userMessage].slice(-500));setChatBusy(true);
   window.setTimeout(async()=>{
    try{
-    let analysis=aiEngine(clean,financials,ops,language,{planning,statementAssumptions,cashForecastWeeks,workingCapitalInvoices},{...conversationContext,history:chatMessages.slice(-80).map(m=>({role:m.role,content:m.text}))});
-    const isSmallTalk=analysis.intent==="greeting"||analysis.intent==="social"||analysis.intent==="unknown";const nextContext:ChatContext={previousIntent:isSmallTalk?conversationContext.previousIntent:analysis.intent,previousQuestion:isSmallTalk?(conversationContext.previousQuestion??clean):clean,previousResponse:isSmallTalk?(conversationContext.previousResponse??analysis.response):analysis.response,previousCalculations:isSmallTalk?(conversationContext.previousCalculations??analysis.calculations):analysis.calculations,history:[...(conversationContext.history??[]),{role:"user" as const,content:clean},{role:"assistant" as const,content:analysis.response}].slice(-80)};
+    let analysis=aiEngine(clean,financials,ops,language,{planning,statementAssumptions,cashForecastWeeks,workingCapitalInvoices},{...conversationContext,history:chatMessages.slice(-500).map(m=>({role:m.role,content:m.text}))});
+    const isSmallTalk=analysis.intent==="greeting"||analysis.intent==="social"||analysis.intent==="unknown";const nextContext:ChatContext={previousIntent:isSmallTalk?conversationContext.previousIntent:analysis.intent,previousQuestion:isSmallTalk?(conversationContext.previousQuestion??clean):clean,previousResponse:isSmallTalk?(conversationContext.previousResponse??analysis.response):analysis.response,previousCalculations:isSmallTalk?(conversationContext.previousCalculations??analysis.calculations):analysis.calculations,history:[...(conversationContext.history??[]),{role:"user" as const,content:clean},{role:"assistant" as const,content:analysis.response}].slice(-500)};
     setConversationContext(nextContext);try{window.localStorage.setItem(CHAT_CONTEXT_KEY,JSON.stringify(nextContext))}catch{}
     const fullText=analysis.response||(es?"No tengo una conclusión fiable con la información disponible. Dime qué cifra, proyecto o partida quieres revisar.":"I cannot reach a reliable conclusion from the available information. Tell me which figure, project or line item to review.");
     const assistantId=String(messageId)+"-a";
-    setChatMessages(current=>[...current,{id:assistantId,role:"assistant",text:"",analysis}].slice(-200));
+    setChatMessages(current=>[...current,{id:assistantId,role:"assistant",text:"",analysis}].slice(-500));
     const chunks=fullText.split(/(\s+)/);let streamed="";
     for(let offset=0;offset<chunks.length;offset+=4){
      streamed+=chunks.slice(offset,offset+4).join("");
      setChatMessages(current=>current.map(message=>message.id===assistantId?{...message,text:streamed}:message));
      await new Promise(resolve=>window.setTimeout(resolve,14));
     }
-   }catch{const errorMessage:ChatMessage={id:String(messageId)+"-e",role:"assistant",text:es?"No he podido procesar la pregunta. Los datos del workspace siguen intactos. Concreta la cifra, área o registro.":"I could not process that question. Workspace data remains unchanged. Specify the figure, area or record."};setChatMessages(current=>[...current,errorMessage].slice(-200))}
+   }catch{const errorMessage:ChatMessage={id:String(messageId)+"-e",role:"assistant",text:es?"No he podido procesar la pregunta. Los datos del workspace siguen intactos. Concreta la cifra, área o registro.":"I could not process that question. Workspace data remains unchanged. Specify the figure, area or record."};setChatMessages(current=>[...current,errorMessage].slice(-500))}
    finally{setChatBusy(false)}
   },0);
  }
