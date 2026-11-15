@@ -248,4 +248,16 @@ describe("analyzeCopilotQuestion", () => {
   });
 
 
+
+  it("compares the exact two financial metrics named by the user", () => {
+    const result = analyzeCopilotQuestion("Compara ingresos con gastos operativos", financials, EMPTY_OPERATIONS, "es");
+    expect(result.intent).toBe("comparison");
+    expect(result.calculations.comparisonFirst).toBe(100000);
+    expect(result.calculations.comparisonSecond).toBe(30000);
+    expect(result.calculations.comparisonDifference).toBe(70000);
+    expect(result.response).toContain("Ingresos");
+    expect(result.response).toContain("Gastos operativos");
+  });
+
+
 });
