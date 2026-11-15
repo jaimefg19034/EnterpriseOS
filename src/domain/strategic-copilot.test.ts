@@ -175,4 +175,34 @@ describe("analyzeCopilotQuestion", () => {
     expect(result.intent).toBe("cash");
   });
 
+  it("understands a spend question phrased without finance keywords", () => {
+    const operations = { ...EMPTY_OPERATIONS, expenses: [
+      { id: "e1", date: "2026-11-15", description: "Campaign", supplier: "S", category: "Marketing", costCenterId: "cc1", amount: 1250, status: "paid" as const },
+    ], costCenters: [{ id: "cc1", name: "Marketing", owner: "A", budget: 2000, actualSpend: 0, period: "2026-Q4" }] };
+    const result = analyzeCopilotQuestion("¿Dónde se está yendo el dinero?", financials, operations, "es");
+    expect(["expense", "overview"]).toContain(result.intent);
+    expect(result.response).toContain("Marketing");
+  });
+
+  it("recognises conversational synonyms and accent-free phrasing", () => {
+    const result = analyzeCopilotQuestion("Dime como anda la tesoreria y el dinero disponible", financials, EMPTY_OPERATIONS, "es");
+    expect(result.intent).toBe("cash");
+    expect(result.calculations.closingCash).toBeTypeOf("number");
+  });
+
+  it("keeps the previous topic for a why follow-up", () => {
+    const result = analyzeCopilotQuestion("¿Y por qué?", financials, EMPTY_OPERATIONS, "es", undefined, { previousIntent: "cash", previousQuestion: "¿Cómo está la tesorería?" });
+    expect(result.intent).toBe("cash");
+  });
+
+  it("does not replace a concrete expense question with a generic overview", () => {
+    const operations = { ...EMPTY_OPERATIONS, expenses: [
+      { id: "e1", date: "2026-11-15", description: "Hosting", supplier: "Cloud", category: "Software", costCenterId: "cc1", amount: 420, status: "paid" as const },
+    ], costCenters: [{ id: "cc1", name: "Software", owner: "A", budget: 1000, actualSpend: 0, period: "2026-Q4" }] };
+    const result = analyzeCopilotQuestion("¿Qué partida concreta está consumiendo más recursos?", financials, operations, "es");
+    expect(result.intent).toBe("expense");
+    expect(result.response).toContain("Software");
+    expect(result.response).not.toContain("Te doy una lectura conjunta");
+  });
+
 });
