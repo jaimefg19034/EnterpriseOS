@@ -64,7 +64,7 @@ export default function AccountPage() {
 
   useEffect(() => {
     if (!auth.loading && auth.user && auth.plan && mode !== "manage" && mode !== "plans") {
-      window.location.replace("/EnterpriseOS/");
+      window.location.replace("/EnterpriseOS/workspace/");
     }
   }, [auth.loading, auth.user, auth.plan, mode]);
 
@@ -76,7 +76,7 @@ export default function AccountPage() {
     try {
       if (viewMode === "login") {
         await auth.signIn(email, password);
-        window.location.assign("/EnterpriseOS/");
+        window.location.assign("/EnterpriseOS/workspace/");
       } else {
         const signedIn = await auth.signUp(email, password);
         if (signedIn) {
@@ -149,7 +149,7 @@ export default function AccountPage() {
                 <>
                   <p>Tu plan actual es <strong>{PLANS[auth.plan].name}</strong> — {PLANS[auth.plan].monthlyPrice} €/mes. Estado: {auth.subscriptionStatus ?? "verificando"}.</p>
                   <button className="eos-account-submit" type="button" disabled={busy} onClick={openPortal}>{busy ? "Abriendo facturación…" : "Cambiar o cancelar mi plan"}</button>
-                  <button className="eos-account-switch" type="button" onClick={() => window.location.assign("/EnterpriseOS/")}>Volver al workspace</button>
+                  <button className="eos-account-switch" type="button" onClick={() => window.location.assign("/EnterpriseOS/workspace/")}>Volver al workspace</button>
                 </>
               ) : (
                 <>
