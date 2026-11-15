@@ -1552,27 +1552,28 @@ button:focus-visible, input:focus-visible {
 .app-shell > .sidebar .nav-item > small { margin-left: 0 !important; }
 
 
-/* Planning section navigation: fit all six labels across desktop without clipping. */
+/* Planning section navigation: natural label widths, balanced outer margins and full-size text. */
 @media (min-width: 761px) {
   .planning-workspace .planning-section-nav {
     display: grid !important;
-    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
-    align-items: stretch !important;
-    gap: 4px !important;
+    grid-template-columns: repeat(6, max-content) !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    column-gap: 12px !important;
     width: 100% !important;
     overflow: visible !important;
-    padding: 6px !important;
+    padding: 8px 12px !important;
     box-sizing: border-box !important;
   }
   .planning-workspace .planning-section-nav a {
-    display: flex !important;
+    display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     min-width: 0 !important;
-    padding: 7px 3px !important;
-    font-size: 8px !important;
-    line-height: 1.2 !important;
-    letter-spacing: -.025em !important;
+    padding: 8px 7px !important;
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+    letter-spacing: -.01em !important;
     text-align: center !important;
     white-space: nowrap !important;
     overflow: visible !important;
