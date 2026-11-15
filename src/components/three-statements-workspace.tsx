@@ -226,7 +226,7 @@ export function ThreeStatementsWorkspace({
   const [activeTab, setActiveTab] = useState<StatementTab>("income");
   const { setStatementAssumptions } = useWorkspaceData();
 
-  useEffect(() => { setStatementAssumptions(assumptions); }, [assumptions, setStatementAssumptions]);
+  useEffect(() => { const timer = window.setTimeout(() => setStatementAssumptions(assumptions), 0); return () => window.clearTimeout(timer); }, [assumptions, setStatementAssumptions]);
   const t = (value: string) => translate(value, language);
 
   const model = useMemo(
