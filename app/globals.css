@@ -1893,3 +1893,6 @@ button:focus-visible, input:focus-visible {
  .copilot-impact>div+div{padding:8px 0 0;border:0;border-top:1px solid #e1e7ef}
  .copilot-rec-risk{flex-direction:column;gap:6px}
 }
+
+.copilot-filter-label{flex:0 0 100%;color:#8793a5;font-size:8px;font-weight:850;letter-spacing:.75px}
+.copilot-priority-filters .copilot-filter-label{margin-bottom:1px}
