@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import type { FinancialResults } from "@/domain/financials";
 import { costCenterActualSpend, riskScore, type OperationsState } from "@/domain/operations";
 import { useWorkspaceData } from "@/components/workspace-data-context";
 import { analyzeCopilotQuestion, type CopilotIntent } from "@/domain/strategic-copilot";
