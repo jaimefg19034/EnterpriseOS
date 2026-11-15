@@ -1053,6 +1053,8 @@ const spanish: Record<string, string> = {
   "Upside vs. Base": "Optimista vs. Base",
   "Downside vs. Base": "Pesimista vs. Base",
   "Custom vs. Base": "Personalizado vs. Base",
+  "Strategic AI copilot": "Copiloto estratégico IA",
+  "OPEN": "ABIERTO",
 };
 
 
