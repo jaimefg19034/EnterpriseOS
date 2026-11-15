@@ -36,7 +36,8 @@ function topicOf(question:string,context?:NeuralContext):string{
  const all=Object.values(LEXICON).flat().filter(x=>!x.includes(" "));
  const ignored=new Set(["quiero","necesito","puedo","debo","deberia","dame","haz","hacer","hoy","manana","semana","mes","empresa","negocio","mejor","mejorar","como","que","cual","donde","cuando","por","favor","propones","proponer","recomiendas","recomendar","sugieres","sugiero","haria","harias","please","today","week","business","company","need","want","help","give","make","should","could","would"]);
  const follow=FOLLOW.test(normalise(question));
- if(follow&&context?.previousQuestion)return topicOf(context.previousQuestion);\n const words=tokensOf(question).filter(t=>!ignored.has(t)&&!all.some(x=>stem(x)===stem(t)));
+ if(follow&&context?.previousQuestion)return topicOf(context.previousQuestion);
+ const words=tokensOf(question).filter(t=>!ignored.has(t)&&!all.some(x=>stem(x)===stem(t)));
  if(words.length)return words.slice(0,5).join(" ");
  const phrase=normalise(question).match(/\b(?:para|sobre|acerca de|regarding|for)\s+(.{3,45})$/);
  if(phrase)return phrase[1].replace(/[?.!,].*$/,"").trim();
