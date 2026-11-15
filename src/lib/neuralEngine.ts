@@ -90,7 +90,7 @@ function answer(question:string,language:Language,a:LinguisticAnalysis,context?:
   const number=({uno:"1",dos:"2",tres:"3"} as Record<string,string>)[pointMatch[1]]??pointMatch[1];
   const selected=context.previousResponse.split(/\n+/).find(line=>new RegExp("^\\s*"+number+"[.)]").test(line.trim()));
   if(selected){
-   const detail=selected.replace(/^\\s*\\d+[.)]\\s*/,"").replace(/\\*\\*/g,"");
+   const detail=selected.replace(/^\s*\d+[.)]\s*/,"").replace(/\*\*/g,"");
    const response=spanish?"El punto "+number+" al que te refieres es: "+detail+"\n\nPara desarrollarlo, concreta el cliente o usuario al que afecta, define la acción exacta, prueba una versión pequeña y revisa qué resultado produce.":"The point "+number+" you mean is: "+detail+"\n\nTo develop it, define the customer or user it affects, specify the exact action, test a small version, and review the result.";
    const steps=spanish?["Define el resultado específico que debe producir este punto.","Asigna un responsable y prepara una primera prueba acotada.","Recoge feedback y objeciones de las personas afectadas.","Decide qué ajustar antes de ampliar la iniciativa."]:["Define the specific outcome this point should produce.","Assign an owner and prepare a tightly scoped first test.","Collect feedback and objections from the people affected.","Decide what to adjust before scaling the initiative."];
    return {intent:"advice",response,calculations:{},matchedData:["conversation.previousResponse"],steps,action:"implement",confidence:0.94};
