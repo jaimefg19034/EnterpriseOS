@@ -5,6 +5,8 @@ import type { Dispatch, ReactNode, SetStateAction } from "react";
 import type { FinancialResults } from "@/domain/financials";
 import { useOperationsCloudSync } from "@/components/use-operations-cloud-sync";
 import type { Language } from "@/i18n/translations";
+import type { SavedPlanningState } from "@/domain/planning-storage";
+import type { ThreeStatementAssumptions } from "@/domain/three-statements";
 import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, type OperationsState } from "@/domain/operations";
 
 type WorkspaceDataValue = {
@@ -13,6 +15,10 @@ type WorkspaceDataValue = {
   setOperations: Dispatch<SetStateAction<OperationsState>>;
   operationsLoaded: boolean;
   cloudStatus: string;
+  planning: SavedPlanningState | null;
+  setPlanning: Dispatch<SetStateAction<SavedPlanningState | null>>;
+  statementAssumptions: ThreeStatementAssumptions | null;
+  setStatementAssumptions: Dispatch<SetStateAction<ThreeStatementAssumptions | null>>;
 };
 
 const WorkspaceDataContext = createContext<WorkspaceDataValue | null>(null);
@@ -20,6 +26,8 @@ const WorkspaceDataContext = createContext<WorkspaceDataValue | null>(null);
 export function WorkspaceDataProvider({ financials, language, children }: { financials: FinancialResults; language: Language; children: ReactNode }) {
   const [operations, setOperations] = useState<OperationsState>(EMPTY_OPERATIONS);
   const [operationsLoaded, setOperationsLoaded] = useState(false);
+  const [planning, setPlanning] = useState<SavedPlanningState | null>(null);
+  const [statementAssumptions, setStatementAssumptions] = useState<ThreeStatementAssumptions | null>(null);
   const cloudStatus = useOperationsCloudSync(operations, setOperations, operationsLoaded, language);
 
   useEffect(() => {
@@ -50,7 +58,7 @@ export function WorkspaceDataProvider({ financials, language, children }: { fina
     }
   }, [operations, operationsLoaded]);
 
-  const value = useMemo(() => ({ financials, operations, setOperations, operationsLoaded, cloudStatus }), [financials, operations, operationsLoaded, cloudStatus]);
+  const value = useMemo(() => ({ financials, operations, setOperations, operationsLoaded, cloudStatus, planning, setPlanning, statementAssumptions, setStatementAssumptions }), [financials, operations, operationsLoaded, cloudStatus, planning, statementAssumptions]);
   return <WorkspaceDataContext.Provider value={value}>{children}</WorkspaceDataContext.Provider>;
 }
 
