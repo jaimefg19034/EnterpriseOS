@@ -1050,6 +1050,9 @@ const spanish: Record<string, string> = {
   "Prepare and export the current management view.": "Prepara y exporta la información de gestión actual.",
   "Data scope": "Alcance de los datos",
   "This workspace currently uses illustrative sample figures. It is a management-planning MVP, not a connected accounting ledger or statutory reporting system.": "Este espacio utiliza actualmente cifras de ejemplo. Es una primera versión para planificación y control de gestión; todavía no es un libro contable conectado ni un sistema de información financiera oficial.",
+  "Upside vs. Base": "Optimista vs. Base",
+  "Downside vs. Base": "Pesimista vs. Base",
+  "Custom vs. Base": "Personalizado vs. Base",
 };
 
 
