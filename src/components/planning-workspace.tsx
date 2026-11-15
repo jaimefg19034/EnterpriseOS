@@ -205,7 +205,7 @@ export function PlanningWorkspace({ language, previewMode = false }: { language:
   const [savedState, setSavedState] = useState<SavedPlanningState>(INITIAL_PLANNING_STATE);
   const { setPlanning } = useWorkspaceData();
 
-  useEffect(() => { setPlanning(savedState); }, [savedState, setPlanning]);
+  useEffect(() => { const timer = window.setTimeout(() => setPlanning(savedState), 0); return () => window.clearTimeout(timer); }, [savedState, setPlanning]);
   const [storageReady, setStorageReady] = useState(previewMode);
   const [storageMessage, setStorageMessage] = useState(previewMode ? "PREVIEW MODE · Changes are temporary and are not saved." : "");
   const [newYear, setNewYear] = useState("2027");
