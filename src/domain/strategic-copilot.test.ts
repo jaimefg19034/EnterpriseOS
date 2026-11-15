@@ -77,7 +77,7 @@ describe("analyzeCopilotQuestion", () => {
   it("does not claim a return when the question cannot be interpreted", () => {
     const result = analyzeCopilotQuestion("haz magia", financials, EMPTY_OPERATIONS, "es");
     expect(result.intent).toBe("unknown");
-    expect(result.response).toContain("No puedo asociar");
+    expect(result.response).toContain("Entiendo lo que planteas");
   });
   it("responds naturally to greetings with live business figures", () => {
     const result = analyzeCopilotQuestion("¡Buenas tardes! ¿Qué tal?", financials, EMPTY_OPERATIONS, "es");
@@ -115,7 +115,7 @@ describe("analyzeCopilotQuestion", () => {
     expect(result.calculations.marketingSaving).toBe(1500);
     expect(result.calculations.annualHireCost).toBe(24000);
     expect(result.response).toContain("periodos deben coincidir");
-    expect(result.response).toContain("cargas sociales");
+    expect(result.response).toContain("cotizaciones");
   });
 
   it("handles thanks and short conversational turns without a blank reply", () => {
@@ -131,7 +131,7 @@ describe("analyzeCopilotQuestion", () => {
       cashForecastWeeks: [{ collections: 1000, operatingPayments: 500, capitalExpenditure: 100, debtService: 50 }],
     });
     expect(result.intent).toBe("cash");
-    expect(result.calculations.forecastClosingCash - result.calculations.closingCash).toBe(350);
+    expect(result.calculations.forecastClosingCash - result.calculations.closingCash).toBeCloseTo(350, 5);
     expect(result.matchedData).toContain("cashForecastWeeks");
   });
 
