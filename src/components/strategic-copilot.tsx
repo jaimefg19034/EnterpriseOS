@@ -99,7 +99,7 @@ export function StrategicCopilot({language,mode="chat"}:{language:Language;mode?
    revenue:es?["¿Qué pasa si crecen un 10%?","¿Cuánto mejora el EBITDA?","¿Qué margen estoy generando?"]:["What if revenue grows 10%?","How much does EBITDA improve?","What margin am I generating?"],
    project:es?["¿Cuál es la desviación más grande?","¿Qué proyecto está en riesgo?","Dame un plan correctivo"]:["Which project has the largest variance?","Which project is at risk?","Give me a corrective plan"],
    planning:es?["Compara presupuesto y realidad","¿Qué escenario es más prudente?","¿Qué pasa si los costes suben un 5%?"]:["Compare budget with actuals","Which scenario is most prudent?","What if costs rise 5%?"],
-   advice:es?["Prioriza tres acciones concretas","¿Qué dato falta para decidir?","Cuantifica el impacto de cada opción"]:["Prioritise three concrete actions","What data is missing to decide?","Quantify each option"],
+   advice:es?["Dame ideas para crecer","¿Cómo organizo mejor mi equipo?","¿Por dónde empiezo esta semana?"]:["Give me ideas to grow","How should I organise my team?","Where should I start this week?"],
     comparison:es?["Compara ingresos con EBITDA","Compara gastos operativos con coste de ventas","¿Qué diferencia porcentual hay?"]:["Compare revenue with EBITDA","Compare operating expenses with COGS","What is the percentage difference?"]
   };
   return (latestAnalysis ? map[latestAnalysis.intent] : undefined)??(es?["Analiza la rentabilidad","Revisa caja y liquidez","Prioriza las acciones de mayor impacto"]:["Analyse profitability","Review cash and liquidity","Prioritise highest-impact actions"]);
