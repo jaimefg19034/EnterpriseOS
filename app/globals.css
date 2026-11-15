@@ -1725,3 +1725,141 @@ button:focus-visible, input:focus-visible {
   .copilot-chat .copilot-quick-questions button:hover{border-color:#e7ebf2;background:#fff}
   .copilot-rec-action button,.copilot-analyze,.copilot-filters button{touch-action:manipulation}
 }
+
+
+/* Copilot Studio — full-width conversation workspace */
+.copilot-studio{width:100%;max-width:none;min-width:0;color:var(--ink);padding-bottom:20px}
+.copilot-studio-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin:0 0 18px}
+.copilot-studio-header>div:first-child{min-width:0}
+.copilot-studio-eyebrow{display:flex;align-items:center;gap:9px;color:#71809a;font-size:9px;font-weight:850;letter-spacing:1.35px}
+.copilot-live-dot{width:7px;height:7px;border-radius:50%;background:#219b78;box-shadow:0 0 0 4px #219b781a}
+.copilot-studio-header h1{margin:10px 0 5px;color:#17233a;font:800 clamp(25px,2.5vw,34px)/1.15 "Manrope",sans-serif;letter-spacing:-1.1px}
+.copilot-studio-header p{margin:0;color:#748198;font-size:12px;line-height:1.6}
+.copilot-header-actions{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.copilot-engine-state{display:inline-flex;align-items:center;gap:7px;color:#64748b;font-size:10px;font-weight:700;white-space:nowrap}
+.copilot-engine-state i{width:6px;height:6px;border-radius:50%;background:#219b78}
+.copilot-new-chat{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border:1px solid #dbe3ed;border-radius:8px;background:#fff;color:#263b60;font-size:10px;font-weight:750;cursor:pointer}
+.copilot-new-chat:hover{border-color:#9aabd0;background:#f8faff}
+.copilot-live-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:12px 15px;margin-bottom:14px;border:1px solid #e3e9f2;border-radius:10px;background:#fff}
+.copilot-live-strip>div{display:flex;align-items:center;gap:10px;min-width:0;color:#73839b}
+.copilot-live-strip>div+div{padding-left:13px;border-left:1px solid #e8edf4}
+.copilot-live-strip svg{flex:0 0 auto;color:#5872a0}
+.copilot-live-strip span{display:grid;gap:3px;min-width:0}
+.copilot-live-strip b{color:#344660;font-size:10px}
+.copilot-live-strip small{color:#8591a3;font-size:9px;line-height:1.4}
+.copilot-studio-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:17px}
+.copilot-studio-metrics article{display:grid;gap:5px;min-width:0;padding:13px 15px;border:1px solid #e3e9f1;border-radius:9px;background:#fff}
+.copilot-studio-metrics article>span{color:#748198;font-size:9px;font-weight:650}
+.copilot-studio-metrics article>strong{color:#172b4d;font:800 20px/1.15 ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.copilot-studio-metrics article>small{color:#8793a5;font-size:9px}
+.copilot-studio-main{display:grid;grid-template-columns:minmax(0,1fr) 280px;align-items:start;gap:16px}
+.copilot-conversation-panel{display:flex;flex-direction:column;min-width:0;min-height:670px;border:1px solid #e1e7f0;border-radius:12px;background:#fff;box-shadow:0 8px 28px #172b4d09}
+.copilot-conversation-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:19px 21px 14px;border-bottom:1px solid #edf0f5}
+.copilot-conversation-heading h2{margin:5px 0 0;color:#1c2b45;font:750 17px/1.25 "Manrope",sans-serif;letter-spacing:-.25px}
+.copilot-conversation-count{color:#8a96a8;font-size:9px;white-space:nowrap}
+.copilot-conversation{display:flex;flex:1;flex-direction:column;gap:18px;min-height:450px;max-height:66vh;overflow-y:auto;padding:22px clamp(16px,3vw,34px);scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent;overscroll-behavior:contain}
+.copilot-empty-state{display:grid;justify-items:center;align-content:center;min-height:410px;text-align:center}
+.copilot-empty-icon{display:grid;place-items:center;width:48px;height:48px;margin-bottom:14px;border:1px solid #e0e7f1;border-radius:15px;background:#f7f9fd;color:#5872a0}
+.copilot-empty-state h3{margin:0 0 7px;color:#263751;font:750 17px/1.3 "Manrope",sans-serif}
+.copilot-empty-state>p{max-width:470px;margin:0;color:#7b8799;font-size:11px;line-height:1.7}
+.copilot-starter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:min(100%,610px);margin-top:23px}
+.copilot-starter-grid button{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:46px;padding:10px 12px;border:1px solid #e4eaf2;border-radius:8px;background:#fff;color:#465873;text-align:left;font-size:10px;font-weight:650;line-height:1.45;cursor:pointer;transition:border-color .15s,background .15s}
+.copilot-starter-grid button:hover{border-color:#b9c7e2;background:#f8faff}
+.copilot-starter-grid svg{flex:0 0 auto;color:#7b8eae}
+.copilot-turn{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;max-width:100%}
+.copilot-turn.user{margin-left:auto;width:min(88%,760px)}
+.copilot-turn.assistant{width:100%}
+.copilot-turn-avatar{display:grid;place-items:center;width:32px;height:32px;border:1px solid #e2e8f1;border-radius:10px;background:#f6f8fc;color:#526a91;font-size:8px;font-weight:850}
+.copilot-turn.user .copilot-turn-avatar{border-color:#d8e1f0;background:#edf2fa;color:#425a80}
+.copilot-turn-body{min-width:0;padding-top:2px}
+.copilot-turn-meta{display:flex;align-items:center;gap:10px;margin:0 0 7px}
+.copilot-turn-meta strong{color:#344660;font-size:10px;font-weight:800}
+.copilot-turn-meta>span{color:#8995a7;font-size:8px;font-weight:750;letter-spacing:.65px}
+.copilot-turn-text{color:#45566f;font-size:12px;line-height:1.78;white-space:pre-wrap;overflow-wrap:anywhere}
+.copilot-turn.user .copilot-turn-text{display:inline-block;padding:11px 14px;border:1px solid #dce5f3;border-radius:4px 12px 12px 12px;background:#f1f5fb;color:#344862}
+.copilot-answer-data{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px}
+.copilot-answer-metric{display:grid;gap:5px;padding:12px 13px;border:1px solid #e5eaf2;border-radius:8px;background:#fbfcfe}
+.copilot-answer-metric span{color:#8290a4;font-size:9px}
+.copilot-answer-metric strong{color:#1e3557;font:800 16px/1.25 ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.copilot-data-sources{display:flex;align-items:center;flex-wrap:wrap;gap:6px;grid-column:1/-1;padding:10px 0 2px}
+.copilot-data-sources>span{width:100%;color:#8b97a8;font-size:8px;font-weight:850;letter-spacing:.8px}
+.copilot-data-sources small{padding:5px 7px;border:1px solid #e5eaf1;border-radius:5px;background:#fff;color:#687991;font-size:8px}
+.copilot-answer-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;grid-column:1/-1;margin-top:3px;padding-top:10px;border-top:1px solid #edf0f5}
+.copilot-answer-actions button{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 11px;border:1px solid #d7e0ed;border-radius:7px;background:#fff;color:#263b60;font-size:9px;font-weight:750;cursor:pointer}
+.copilot-answer-actions button:hover{border-color:#9badd0;background:#f7f9fd}
+.copilot-answer-actions>span{color:#8a96a7;font-size:8px}
+.copilot-thinking{display:flex;align-items:center;gap:6px;color:#7b8aa0;font-size:9px;padding:8px 0}
+.copilot-thinking span{width:5px;height:5px;border-radius:50%;background:#6681b5;animation:copilotTyping 1s ease-in-out infinite}
+.copilot-thinking span:nth-child(2){animation-delay:.15s}.copilot-thinking span:nth-child(3){animation-delay:.3s}
+.copilot-composer-wrap{position:sticky;bottom:0;z-index:2;padding:12px 18px 15px;border-top:1px solid #edf0f5;border-radius:0 0 12px 12px;background:linear-gradient(180deg,#ffffffed,#fff 22%)}
+.copilot-context-chips{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+.copilot-context-chips>span{width:100%;margin-bottom:1px;color:#8a96a8;font-size:8px;font-weight:850;letter-spacing:.85px}
+.copilot-context-chips button{max-width:100%;padding:6px 9px;border:1px solid #e2e8f1;border-radius:16px;background:#fafbfd;color:#52637c;font-size:8px;line-height:1.4;text-align:left;cursor:pointer}
+.copilot-context-chips button:hover{border-color:#b6c5e1;background:#f5f8fd}
+.copilot-studio-composer{padding:10px 11px 8px;border:1px solid #d9e1ed;border-radius:10px;background:#fff;box-shadow:0 4px 16px #172b4d0b}
+.copilot-studio-composer:focus-within{border-color:#9eafd1;box-shadow:0 0 0 3px #5574df12,0 4px 16px #172b4d0b}
+.copilot-studio-composer textarea{display:block;width:100%;min-height:54px;max-height:160px;resize:vertical;padding:4px 5px;border:0;outline:0;background:transparent;color:#243650;font:inherit;font-size:12px;line-height:1.6}
+.copilot-studio-composer textarea::placeholder{color:#a0aaba}
+.copilot-studio-composer>div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:7px}
+.copilot-studio-composer>div small{color:#97a1b0;font-size:8px}
+.copilot-studio-composer>div button{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 13px;border:0;border-radius:7px;background:#172b4d;color:#fff;font-size:9px;font-weight:750;cursor:pointer}
+.copilot-studio-composer>div button:disabled{opacity:.35;cursor:not-allowed}
+.copilot-insight-rail{display:grid;gap:11px;min-width:0}
+.copilot-insight-card{min-width:0;padding:15px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;box-shadow:0 4px 15px #172b4d07}
+.copilot-rail-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.copilot-rail-title h3{margin:5px 0 0;color:#263751;font:750 13px/1.25 "Manrope",sans-serif}
+.copilot-rail-title>svg{color:#7285a4}
+.copilot-coverage-list{display:grid;gap:0}
+.copilot-coverage-list>div{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f2f6}
+.copilot-coverage-list>div:last-child{border-bottom:0}
+.copilot-coverage-list span{color:#687991;font-size:9px}
+.copilot-coverage-list b{color:#263b60;font:750 10px ui-monospace,SFMono-Regular,Menlo,monospace}
+.copilot-coverage-note,.copilot-insight-card>p{margin:10px 0 0;color:#8995a6;font-size:9px;line-height:1.6}
+.copilot-scenario-total{display:block;color:#1e3557;font:800 22px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+.copilot-insight-card>small{display:block;margin-top:7px;color:#8a96a7;font-size:8px}
+.copilot-rail-title>b{color:#526a91;font:800 14px ui-monospace,SFMono-Regular,Menlo,monospace}
+.copilot-saved-row{display:flex;align-items:flex-start;gap:8px;margin-top:11px}
+.copilot-saved-row>button{display:grid;place-items:center;width:20px;height:20px;flex:0 0 20px;border:1px solid #dce4ef;border-radius:5px;background:#fff;color:#6e819e;cursor:pointer}
+.copilot-saved-row>span{min-width:0;color:#45566f;font-size:9px;line-height:1.45;overflow-wrap:anywhere}
+.copilot-saved-row small{display:block;margin-top:3px;color:#8d98a8;font-size:8px}
+.copilot-recommendation-zone{margin-top:17px;padding:18px;border:1px solid #e2e8f0;border-radius:11px;background:#fff}
+.copilot-recommendation-heading{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.copilot-recommendation-heading h2{margin:5px 0;color:#253751;font:750 16px/1.3 "Manrope",sans-serif}
+.copilot-recommendation-heading p{margin:0;color:#8490a2;font-size:9px;line-height:1.5}
+.copilot-recommendation-heading>button{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 11px;border:1px solid #dce4ef;border-radius:7px;background:#fff;color:#344a6b;font-size:9px;font-weight:750;white-space:nowrap;cursor:pointer}
+.copilot-recommendation-zone .copilot-filters{margin-top:15px}
+.copilot-recommendation-zone .copilot-recommendations{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:10px}
+.copilot-recommendation-zone .copilot-rec-action{align-items:flex-start}
+.copilot-studio-disclaimer{margin-top:14px;padding:10px 12px;border-left:2px solid #d99a42;background:#fbf8f2;color:#7d6d53;font-size:9px;line-height:1.6}
+@media(max-width:1100px){.copilot-studio-main{grid-template-columns:minmax(0,1fr)}.copilot-insight-rail{grid-template-columns:repeat(3,minmax(0,1fr))}.copilot-conversation{max-height:62vh}.copilot-recommendation-zone .copilot-recommendations{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:760px){
+ .copilot-studio-header{align-items:flex-start;flex-direction:column;gap:12px}
+ .copilot-header-actions{width:100%;justify-content:space-between}
+ .copilot-live-strip{grid-template-columns:minmax(0,1fr);gap:9px}
+ .copilot-live-strip>div+div{padding:9px 0 0;border-left:0;border-top:1px solid #edf0f5}
+ .copilot-studio-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .copilot-studio-metrics article{padding:11px}
+ .copilot-studio-metrics article>strong{font-size:17px}
+ .copilot-conversation-panel{min-height:610px}
+ .copilot-conversation{min-height:370px;max-height:58vh;padding:16px 12px}
+ .copilot-conversation-heading{align-items:flex-start;padding:15px 13px 12px}
+ .copilot-conversation-heading h2{font-size:15px}
+ .copilot-turn{grid-template-columns:28px minmax(0,1fr);gap:8px}
+ .copilot-turn-avatar{width:27px;height:27px;border-radius:8px;font-size:7px}
+ .copilot-turn.user{width:96%}
+ .copilot-turn-text{font-size:11px}
+ .copilot-answer-data{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .copilot-answer-metric{padding:9px}
+ .copilot-answer-metric strong{font-size:13px}
+ .copilot-composer-wrap{padding:10px 10px 12px}
+ .copilot-context-chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+ .copilot-context-chips button{flex:0 0 auto}
+ .copilot-context-chips>span{display:none}
+ .copilot-studio-composer textarea{font-size:16px}
+ .copilot-insight-rail{grid-template-columns:minmax(0,1fr)}
+ .copilot-starter-grid{grid-template-columns:minmax(0,1fr)}
+ .copilot-recommendation-zone{padding:13px}
+ .copilot-recommendation-heading{align-items:flex-start;flex-direction:column}
+ .copilot-recommendation-heading>button{width:100%;justify-content:center}
+}
+@media(max-width:390px){.copilot-studio-metrics{grid-template-columns:minmax(0,1fr)}.copilot-answer-data{grid-template-columns:minmax(0,1fr)}.copilot-engine-state{font-size:9px}}
