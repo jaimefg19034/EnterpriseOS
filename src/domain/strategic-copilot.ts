@@ -34,10 +34,10 @@ function extractPercent(question: string): number | null {
 
 function intentOf(question: string): CopilotIntent {
   const q = question.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  if (/\b(invert|inversion|invertir|investment|invest|roi|retorno|capital)\b/.test(q)) return "investment";
+  if (/\b(invert|inviert|inversion|invertir|investment|invest|roi|retorno|capital)\b/.test(q)) return "investment";
   if (/\b(margen|margin|subir margen|mejorar margen)\b/.test(q)) return "margin";
   if (/\b(ahorr|recort|reduc|optim|saving|save|cut|reduce)\b/.test(q)) return "saving";
-  if (/\b(gasto|gastos|coste|costes|costo|costos|expense|expenses|spend|partida|proveedor|sobrecoste|perdiendo)\b/.test(q)) return "expense";
+  if (/\b(gasto|gastos|coste|costes|costo|costos|expense|expenses|spend|partida|proveedor|sobrecoste|perdiendo|peor partida|peor gasto)\b/.test(q)) return "expense";
   if (/\b(beneficio|beneficios|benefit|profit|ebitda|rentabilidad|net income)\b/.test(q)) return "profit";
   if (/\b(ingreso|ingresos|facturacion|ventas|revenue|sales)\b/.test(q)) return "revenue";
   if (/\b(proyecto|proyectos|project|projects)\b/.test(q)) return "project";
@@ -102,7 +102,8 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
   }
 
   if (intent === "margin") {
-    const goal = targetPercent ?? currentMargin + 1;
+    const increaseBy = targetPercent !== null && /\\b(subir|aumentar|mejorar|increase|raise|improve)\\b/.test(q.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase()) && !/\\b(al|hasta|to|target|objetivo)\\b/.test(q.toLowerCase());
+    const goal = targetPercent === null ? currentMargin + 1 : increaseBy ? currentMargin * (1 + targetPercent / 100) : targetPercent;
     const gap = goal - currentMargin;
     const extraEbitda = round(financials.revenue * gap / 100);
     calculations.currentMargin = currentMargin; calculations.targetMargin = goal; calculations.additionalEbitdaRequired = Math.max(0, extraEbitda);
