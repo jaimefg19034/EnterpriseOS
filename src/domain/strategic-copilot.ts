@@ -73,7 +73,7 @@ const INTENT_TERMS: Record<Exclude<CopilotIntent,"greeting"|"social"|"advice"|"u
  risk:["riesgo","riesgos","amenaza","mitigacion","risk","risks"],
  kpi:["kpi","indicador","indicadores","objetivo","target","rendimiento","performance","metricas"],
  overview:["resumen","situacion","estado","empresa","negocio","analiza","analisis","panorama","mes","rumbo","como vamos","como va"],
- comparison:["comparar","comparacion","comparativa","versus","vs","compare","comparison","diferencia entre"]
+ comparison:["compara","comparar","comparacion","comparativa","versus","vs","compare","comparison","diferencia entre"]
 };
 const INTENT_SYNONYMS: Partial<Record<CopilotIntent, string[]>> = {
   expense: ["dinero que sale", "salidas", "desembolso", "factura de proveedor", "cargo", "consumo", "partida", "coste fijo", "coste variable", "overhead", "donde se esta yendo el dinero", "en que se gasta el dinero", "que partidas consumen recursos", "a donde va el dinero", "gasto por categoria"],
