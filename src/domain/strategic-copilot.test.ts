@@ -113,7 +113,8 @@ describe("analyzeCopilotQuestion", () => {
     expect(result.intent).toBe("advice");
     expect(result.calculations.hireMonthlyCost).toBe(2000);
     expect(result.calculations.marketingSaving).toBe(1500);
-    expect(result.calculations.annualHireCost).toBe(24000);\n    expect(result.response).toContain("periodos deben coincidir");
+    expect(result.calculations.annualHireCost).toBe(24000);
+    expect(result.response).toContain("periodos deben coincidir");
     expect(result.response).toContain("cargas sociales");
   });
 
