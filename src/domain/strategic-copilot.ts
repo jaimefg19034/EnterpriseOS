@@ -1,8 +1,10 @@
 import type { FinancialResults } from "@/domain/financials";
 import { costCenterActualSpend, weightedPipeline, type OperationsState } from "@/domain/operations";
 import type { Language } from "@/i18n/translations";
+import { calculateThreeStatements, DEFAULT_THREE_STATEMENT_ASSUMPTIONS, type ThreeStatementAssumptions } from "@/domain/three-statements";
+import type { SavedPlanningState } from "@/domain/planning-storage";
 
-export type CopilotIntent = "expense" | "saving" | "investment" | "margin" | "profit" | "revenue" | "project" | "risk" | "kpi" | "overview" | "unknown";
+export type CopilotIntent = "expense" | "saving" | "investment" | "margin" | "profit" | "revenue" | "project" | "risk" | "kpi" | "cash" | "planning" | "overview" | "unknown";
 export type CopilotAnalysis = { intent: CopilotIntent; response: string; calculations: Record<string, number>; matchedData: string[] };
 
 const money = (value: number, language: Language) => new Intl.NumberFormat(language === "es" ? "es-ES" : "en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 2 }).format(value);
@@ -52,7 +54,7 @@ function topExpense(operations: OperationsState) {
   return [...operations.expenses].sort((a, b) => b.amount - a.amount)[0] ?? null;
 }
 
-export function analyzeCopilotQuestion(question: string, financials: FinancialResults, operations: OperationsState, language: Language): CopilotAnalysis {
+export function analyzeCopilotQuestion(question: string, financials: FinancialResults, operations: OperationsState, language: Language, workspace: { planning: SavedPlanningState | null; statementAssumptions: ThreeStatementAssumptions | null } = { planning: null, statementAssumptions: null }): CopilotAnalysis {
   const es = language === "es";
   const q = question.trim();
   const intent = intentOf(q);
@@ -138,6 +140,37 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
       ? `Ingresos reconocidos del modelo financiero: ${money(financials.revenue, language)}. Coste de ventas: ${money(financials.costOfGoodsSold, language)}. Gastos operativos: ${money(financials.operatingExpenses, language)}. EBITDA: ${money(financials.ebitda, language)} (${percent(currentMargin, language)} de margen). Beneficio neto: ${money(financials.netIncome, language)}. Además, la cartera comercial abierta ponderada es ${money(pipeline, language)}; es pipeline, no facturación reconocida.`
       : `Recognised revenue in the financial model: ${money(financials.revenue, language)}. COGS: ${money(financials.costOfGoodsSold, language)}. Operating expenses: ${money(financials.operatingExpenses, language)}. EBITDA: ${money(financials.ebitda, language)} (${percent(currentMargin, language)} margin). Net income: ${money(financials.netIncome, language)}. Separately, weighted open sales pipeline is ${money(pipeline, language)}; this is pipeline, not recognised revenue.`;
     return { intent, calculations, matchedData, response: base };
+  }
+
+  if (intent === "cash") {
+    const statements = calculateThreeStatements(financials, workspace.statementAssumptions ?? DEFAULT_THREE_STATEMENT_ASSUMPTIONS);
+    const bs = statements.balanceSheet;
+    const cf = statements.cashFlow;
+    calculations.closingCash = round(cf.closingCash);
+    calculations.freeCashFlow = round(cf.freeCashFlow);
+    calculations.netWorkingCapital = round(bs.netWorkingCapital);
+    calculations.netDebt = round(bs.netDebt);
+    if (bs.currentRatio !== null) calculations.currentRatio = bs.currentRatio;
+    matchedData.push("financials", "threeStatementAssumptions");
+    return { intent, calculations, matchedData, response: es
+      ? `Proyección del modelo de tres estados con las hipótesis actuales:\\n• Caja final: ${money(cf.closingCash, language)}.\\n• Flujo de caja libre: ${money(cf.freeCashFlow, language)}.\\n• Capital circulante neto: ${money(bs.netWorkingCapital, language)}.\\n• Deuda neta: ${money(bs.netDebt, language)}.\\n• Ratio corriente: ${bs.currentRatio === null ? "no disponible" : bs.currentRatio.toFixed(2) + "x"}.\\n${workspace.statementAssumptions ? "He usado las hipótesis editadas en 3 estados." : "Aún no has modificado las hipótesis de 3 estados; se aplican los valores demo iniciales."}`
+      : `Three-statement projection using current assumptions:\\n• Closing cash: ${money(cf.closingCash, language)}.\\n• Free cash flow: ${money(cf.freeCashFlow, language)}.\\n• Net working capital: ${money(bs.netWorkingCapital, language)}.\\n• Net debt: ${money(bs.netDebt, language)}.\\n• Current ratio: ${bs.currentRatio === null ? "not available" : bs.currentRatio.toFixed(2) + "x"}.\\n${workspace.statementAssumptions ? "Using the assumptions edited in 3 statements." : "Three-statement assumptions have not been edited; initial demo defaults are used."}` };
+  }
+
+  if (intent === "planning") {
+    const plan = workspace.planning?.years[String(workspace.planning.selectedYear)];
+    if (!plan) return { intent, calculations, matchedData, response: es ? "Todavía no hay datos de planificación disponibles. Abre Presupuestos y escenarios para cargar el plan y vuelve a preguntarme." : "No planning data is available yet. Open Budget & scenarios to load the plan, then ask again." };
+    const budget = plan.assumptions.annualRevenueBudget;
+    const actual = Object.values(plan.actualRevenue).reduce((sum, value) => sum + (typeof value === "number" ? value : 0), 0);
+    const budgetEbitda = budget * (1 - plan.assumptions.costOfGoodsSoldPercent / 100) - plan.assumptions.annualOperatingExpenses;
+    calculations.selectedPlanningYear = workspace.planning?.selectedYear ?? 0;
+    calculations.annualRevenueBudget = budget;
+    calculations.actualRevenueEntered = round(actual);
+    calculations.budgetEbitda = round(budgetEbitda);
+    matchedData.push("planning.selectedYear", "planning.assumptions", "planning.actualRevenue");
+    return { intent, calculations, matchedData, response: es
+      ? `Plan ${workspace.planning?.selectedYear}: presupuesto anual de ingresos ${money(budget, language)}; ingresos reales introducidos mes a mes ${money(actual, language)}; crecimiento de escenario ${plan.scenario === "custom" ? plan.customRevenueGrowthPercent + "%" : plan.scenario}. Con el presupuesto de coste de ventas del ${percent(plan.assumptions.costOfGoodsSoldPercent, language)} y gastos operativos anuales de ${money(plan.assumptions.annualOperatingExpenses, language)}, el EBITDA presupuestado simplificado sería ${money(budgetEbitda, language)} antes de D&A e intereses.`
+      : `Plan ${workspace.planning?.selectedYear}: annual revenue budget ${money(budget, language)}; actual revenue entered month by month ${money(actual, language)}; scenario growth ${plan.scenario === "custom" ? plan.customRevenueGrowthPercent + "%" : plan.scenario}. With budget COGS at ${percent(plan.assumptions.costOfGoodsSoldPercent, language)} and annual operating expenses of ${money(plan.assumptions.annualOperatingExpenses, language)}, simplified budget EBITDA would be ${money(budgetEbitda, language)} before D&A and interest.` };
   }
 
   if (intent === "project") {
