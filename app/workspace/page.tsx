@@ -841,7 +841,7 @@ export default function Home() {
 
           {view === "operations" && <OperationsWorkspace language={language} />}
 
-          {view === "advisor" && <StrategicCopilot language={language} financials={results} />}
+          {view === "advisor" && <StrategicCopilot language={language} />}
 
           {view === "reports" && (
             <>
