@@ -84,6 +84,17 @@ function answer(question:string,language:Language,a:LinguisticAnalysis,context?:
  ];
  if(a.mode==="casual")return {intent:"social",response:spanish?"¡Buenas! Podemos pensar ideas, resolver un problema, ordenar prioridades o analizar el workspace cuando tenga sentido. ¿Qué tienes entre manos?":"Hi. We can brainstorm, work through a problem, organise priorities, or analyse the workspace when it is relevant. What are you working on?",calculations:{},matchedData:["conversation"],confidence:a.confidence};
  const out=[pick(intro,seed)];
+ const pointMatch=normalise(question).match(/\\b(?:punto|apartado|point|item)\\s*(1|2|3|uno|dos|tres)\\b/);
+ if(a.isFollowUp&&pointMatch&&context?.previousResponse){
+  const number=({uno:"1",dos:"2",tres:"3"} as Record<string,string>)[pointMatch[1]]??pointMatch[1];
+  const selected=context.previousResponse.split(/\\n+/).find(line=>new RegExp("^\\\\s*"+number+"[.)]").test(line.trim()));
+  if(selected){
+   const detail=selected.replace(/^\\s*\\d+[.)]\\s*/,"").replace(/\\*\\*/g,"");
+   const response=spanish?"El punto "+number+" al que te refieres es: "+detail+"\\n\\nPara desarrollarlo, concreta el cliente o usuario al que afecta, define la acción exacta, prueba una versión pequeña y revisa qué resultado produce.":"The point "+number+" you mean is: "+detail+"\\n\\nTo develop it, define the customer or user it affects, specify the exact action, test a small version, and review the result.";
+   const steps=spanish?["Define el resultado específico que debe producir este punto.","Asigna un responsable y prepara una primera prueba acotada.","Recoge feedback y objeciones de las personas afectadas.","Decide qué ajustar antes de ampliar la iniciativa."]:["Define the specific outcome this point should produce.","Assign an owner and prepare a tightly scoped first test.","Collect feedback and objections from the people affected.","Decide what to adjust before scaling the initiative."];
+   return {intent:"advice",response,calculations:{},matchedData:["conversation.previousResponse"],steps,action:"implement",confidence:0.94};
+  }
+ }
  let steps:string[]=[];
  if(a.mode==="creative"){
   out.push(spanish?"Para "+topic+", exploraría tres vías que ponen a prueba hipótesis distintas:":"For "+topic+", I would explore three routes that test different hypotheses:");
