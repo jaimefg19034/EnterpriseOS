@@ -149,4 +149,30 @@ describe("analyzeCopilotQuestion", () => {
     expect(result.matchedData).toContain("workingCapitalInvoices");
   });
 
+  it("understands natural-language synonyms without relying on the canonical keyword", () => {
+    const result = analyzeCopilotQuestion("¿Cuánto dinero me deben ahora mismo?", financials, EMPTY_OPERATIONS, "es", {
+      planning: null, statementAssumptions: null,
+      workingCapitalInvoices: [{ id: "r1", direction: "receivable", counterparty: "Cliente", reference: "INV-1", issueDate: "2026-11-01", dueDate: "2026-11-20", amount: 2400, paidAmount: 400 }],
+    });
+    expect(result.intent).toBe("workingCapital");
+    expect(result.calculations.receivablesOutstanding).toBe(2000);
+  });
+
+  it("answers about the specific named project instead of returning a workspace overview", () => {
+    const operations = { ...EMPTY_OPERATIONS, projects: [{ id: "p1", name: "Migración ERP", owner: "Ana", budget: 10000, spent: 12500, dueDate: "2026-12-01", status: "active" as const }] };
+    const result = analyzeCopilotQuestion("¿Qué está pasando con la migración del ERP?", financials, operations, "es");
+    expect(result.intent).toBe("project");
+    expect(result.matchedData).toContain("operations.projects");
+    expect(result.calculations.projectVariance).toBe(2500);
+    expect(result.response).toContain("Migración ERP");
+    expect(result.response).toContain("2.500");
+  });
+
+  it("keeps the previous topic for explanatory and corrective follow-up questions", () => {
+    const result = analyzeCopilotQuestion("¿Y por qué ocurre eso?", financials, EMPTY_OPERATIONS, "es", undefined, {
+      previousIntent: "cash", previousQuestion: "¿Por qué baja la caja?"
+    });
+    expect(result.intent).toBe("cash");
+  });
+
 });
