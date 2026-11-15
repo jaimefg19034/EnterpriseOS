@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { PlanningWorkspace } from "@/components/planning-workspace";
 import { ThreeStatementsWorkspace } from "@/components/three-statements-workspace";
 import { OperationsWorkspace } from "@/components/operations-workspace";
+import { StrategicCopilot } from "@/components/strategic-copilot";
 import { useAuth } from "@/components/auth-provider";
 import { canAccessView, minimumPlanForView, PLANS } from "@/lib/plans";
 import { translate, type Language } from "@/i18n/translations";
@@ -16,7 +17,7 @@ import {
   type FinancialInputs,
 } from "@/domain/financials";
 
-type View = "overview" | "model" | "planning" | "statements" | "operations" | "reports";
+type View = "overview" | "model" | "planning" | "statements" | "operations" | "advisor" | "reports";
 type InputKey = keyof FinancialInputs;
 
 const LANGUAGE_CHANGE_EVENT = "enterpriseos-language-change";
@@ -363,18 +364,19 @@ export default function Home() {
     { label: t("Budget & scenarios"), detail: "02.2 · Planning", run: () => setView("planning") },
     { label: t("3 statements"), detail: "02.3 · Financial statements", run: () => setView("statements") },
     { label: t("Operations & intelligence"), detail: "03.1 · Operations", run: () => setView("operations") },
+    { label: t("Strategic AI copilot"), detail: "03.2 · Strategic and financial recommendations", run: () => setView("advisor") },
     { label: t("Reports & exports"), detail: "03.2 · Reporting", run: () => setView("reports") },
     { label: t("Reset demo"), detail: "Restore illustrative model assumptions", run: () => { setInputs(DEMO_INPUTS); setView("overview"); } },
     { label: t("Export Excel"), detail: "Download current management P&L", run: () => { void exportExcel(); } },
   ];
   const filteredCommands = commandItems.filter((item) => (item.label + " " + item.detail).toLowerCase().includes(commandQuery.toLowerCase()));
-  const viewLabels: Record<View, string> = { overview: t("Overview"), model: t("Financial model"), planning: t("Budget & scenarios"), statements: t("3 statements"), operations: t("Operations & intelligence"), reports: t("Reports & exports") };
+  const viewLabels: Record<View, string> = { overview: t("Overview"), model: t("Financial model"), planning: t("Budget & scenarios"), statements: t("3 statements"), operations: t("Operations & intelligence"), advisor: t("Strategic AI copilot"), reports: t("Reports & exports") };
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
       try {
         const saved = JSON.parse(window.localStorage.getItem("enterpriseos:recent-views") ?? "[]");
-        if (Array.isArray(saved)) setRecentViews(saved.filter((item): item is View => ["overview","model","planning","statements","operations","reports"].includes(item)).slice(0, 8));
+        if (Array.isArray(saved)) setRecentViews(saved.filter((item): item is View => ["overview","model","planning","statements","operations","advisor","reports"].includes(item)).slice(0, 8));
       } catch { setRecentViews([]); }
     }, 0);
     return () => window.clearTimeout(timer);
@@ -565,11 +567,11 @@ export default function Home() {
 
         <div className="sidebar-divider" />
         <div className="nav-label">{t("TOOLS")}</div>
-        <div className="tool-link">
+        <button type="button" className={`tool-link copilot-tool-link ${view === "advisor" ? "active" : ""}`} onClick={() => setView("advisor")} aria-current={view === "advisor" ? "page" : undefined}>
           <span className="tool-icon"><Icon name="sparkle" size={17} /></span>
-          <span>{t("AI assistant")}</span>
-          <span className="soon-label">{t("SOON")}</span>
-        </div>
+          <span>{t("Strategic AI copilot")}</span>
+          <span className="copilot-tool-state">{t("OPEN")}</span>
+        </button>
         <div className="tool-link">
           <span className="tool-icon"><Icon name="wallet" size={17} /></span>
           <span>{t("Data connections")}</span>
@@ -599,7 +601,7 @@ export default function Home() {
         <header className="topbar">
           <div className="breadcrumb">
             <span>{t("Workspace")}</span><span className="breadcrumb-separator">/</span>
-            <strong>{view === "overview" ? t("Overview") : view === "model" ? t("Financial model") : view === "planning" ? t("Budget & scenarios") : view === "statements" ? t("3 statements") : view === "operations" ? t("Operations") : t("Reports")}</strong>
+            <strong>{viewLabels[view]}</strong>
           </div>
           <div className="topbar-actions">
             <button type="button" className="command-launcher" onClick={() => { setCommandOpen(true); setCommandQuery(""); setCommandIndex(0); }} aria-label={t("Open command menu")}>
@@ -836,6 +838,8 @@ export default function Home() {
           {view === "statements" && <ThreeStatementsWorkspace financials={results} language={language} />}
 
           {view === "operations" && <OperationsWorkspace language={language} />}
+
+          {view === "advisor" && <StrategicCopilot language={language} financials={results} />}
 
           {view === "reports" && (
             <>
