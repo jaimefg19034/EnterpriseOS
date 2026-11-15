@@ -9,7 +9,10 @@ type Kind="cut"|"optimize"|"invest"|"implement";
 type Rec={id:string;kind:Kind;title:string;detail:string;action:string;basis:string;impact?:number;priority:"high"|"medium"|"low"};
 type Saved={id:string;title:string;kind:Kind;status:"open"|"done"};
 type ChatMessage={id:number;role:"user"|"assistant";text:string};
-const KEY="enterpriseos:copilot-actions:v1";\nconst CHAT_CONTEXT_KEY="enterpriseos:copilot-chat-context:v1";\ntype ChatContext={previousIntent?:CopilotIntent;previousQuestion?:string};\nfunction readChatContext():ChatContext{try{const value=JSON.parse(window.localStorage.getItem(CHAT_CONTEXT_KEY)??"{}");return value&&typeof value==="object"?value:{}}catch{return{}}}
+const KEY="enterpriseos:copilot-actions:v1";
+const CHAT_CONTEXT_KEY="enterpriseos:copilot-chat-context:v1";
+type ChatContext={previousIntent?:CopilotIntent;previousQuestion?:string};
+function readChatContext():ChatContext{try{const value=JSON.parse(window.localStorage.getItem(CHAT_CONTEXT_KEY)??"{}");return value&&typeof value==="object"?value:{}}catch{return{}}}
 const money=(n:number,l:Language)=>new Intl.NumberFormat(l==="es"?"es-ES":"en-IE",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
 const pct=(n:number,l:Language)=>new Intl.NumberFormat(l==="es"?"es-ES":"en-IE",{style:"percent",maximumFractionDigits:1}).format(n/100);
 function readSaved():Saved[]{try{const v=JSON.parse(window.localStorage.getItem(KEY)??"[]");return Array.isArray(v)?v.filter(x=>x&&typeof x.id==="string"&&typeof x.title==="string"&&["cut","optimize","invest","implement"].includes(x.kind)&&["open","done"].includes(x.status)):[]}catch{return[]}}
