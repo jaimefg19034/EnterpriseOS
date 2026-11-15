@@ -4,7 +4,7 @@ import type { Language } from "../i18n/translations";
 import { calculateThreeStatements, DEFAULT_THREE_STATEMENT_ASSUMPTIONS, type ThreeStatementAssumptions } from "./three-statements";
 import type { SavedPlanningState } from "./planning-storage";
 
-export type CopilotIntent = "greeting" | "advice" | "expense" | "saving" | "investment" | "margin" | "profit" | "revenue" | "project" | "risk" | "kpi" | "cash" | "planning" | "overview" | "unknown";
+export type CopilotIntent = "greeting" | "social" | "advice" | "expense" | "saving" | "investment" | "margin" | "profit" | "revenue" | "project" | "risk" | "kpi" | "cash" | "planning" | "overview" | "unknown";
 export type CopilotAnalysis = { intent: CopilotIntent; response: string; calculations: Record<string, number>; matchedData: string[] };
 
 const money = (value: number, language: Language) => new Intl.NumberFormat(language === "es" ? "es-ES" : "en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 2 }).format(value);
@@ -37,7 +37,7 @@ function extractPercent(question: string): number | null {
 
 type IntentContext = { previousIntent?: CopilotIntent; previousQuestion?: string };
 const normaliseText = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9€%.,\s]/g, " ").replace(/\s+/g, " ").trim();
-const INTENT_TERMS: Record<Exclude<CopilotIntent,"greeting"|"advice"|"unknown">, string[]> = {
+const INTENT_TERMS: Record<Exclude<CopilotIntent,"greeting"|"social"|"advice"|"unknown">, string[]> = {
  investment:["invert","inversion","invertir","contratar","contratacion","emplear","personal","capex","inversion","roi","retorno","rentabilidad","capital","investment","hire"],
  margin:["margen","margin","rentabilidad","eficiencia","bruto","ebitda margin"],
  saving:["ahorro","ahorrar","recortar","reducir","bajar","optimizar","eficiencia","cost saving","cut","reduce","lower"],
@@ -64,7 +64,7 @@ function scoreIntents(question: string): Record<string,number> {
   scores[intent]=score;
  }
  if(/\b(que harias|que harías|si fueras|director financiero|directora financiera|por donde empiezo|no se por donde|que me recomiendas|what would you do|where should i start)\b/.test(q)) scores.advice=8;
- if(/\b(hola|buenas|hey|hello|hi|que tal|como estas|buenos dias|buenas tardes|buenas noches)\b/.test(q)&&tokens.length<=7) scores.greeting=10;
+ if(/\b(hola|buenas|hey|hello|hi|que tal|como estas|buenos dias|buenas tardes|buenas noches)\b/.test(q)&&tokens.length<=7) scores.greeting=10;\n if(/\b(gracias|thank you|thanks|perfecto|genial|vale|ok|okay|entiendo|de acuerdo|muy bien|great|got it|and you|y tu)\b/.test(q)&&tokens.length<=8) scores.social=9;
  return scores;
 }
 function intentOf(question: string, context?: IntentContext): CopilotIntent {
@@ -106,6 +106,11 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
     return {intent,calculations,matchedData,response:es
       ? `¡Hola! Todo listo. Con los últimos datos cargados, la empresa registra ${money(financials.revenue,language)} de ingresos y ${money(financials.ebitda,language)} de EBITDA (${percent(currentMargin,language)} de margen). Hay ${openProjects} proyectos abiertos, ${openDeals.length} oportunidades comerciales abiertas y ${overdueRisks.length} riesgos sin cerrar. La cartera ponderada asciende a ${money(pipeline,language)}; no la cuento como ingreso reconocido. ¿Qué área quieres revisar primero?`
       : `Hello. I have the latest workspace figures: ${money(financials.revenue,language)} revenue and ${money(financials.ebitda,language)} EBITDA (${percent(currentMargin,language)} margin). There are ${openProjects} open projects, ${openDeals.length} open sales opportunities and ${overdueRisks.length} unresolved risks. Weighted pipeline is ${money(pipeline,language)}, not recognised revenue. What would you like to review first?`};
+  }
+  if (intent === "social") {
+    return {intent,calculations,matchedData:["financials"],response:es
+      ? `¡De nada! Seguimos cuando quieras. Tengo cargados los datos actuales: ingresos ${money(financials.revenue,language)} y EBITDA ${money(financials.ebitda,language)}. Si quieres, podemos convertir cualquier duda en un escenario con números.`
+      : `You're welcome. We can pick this up whenever you're ready. I have the current workspace figures: revenue ${money(financials.revenue,language)} and EBITDA ${money(financials.ebitda,language)}. We can turn any question into a quantified scenario.`};
   }
   if (intent === "advice" || (intent === "overview" && /director|por donde empiezo|que harias|recomiend|prioridad|rumbo/.test(normaliseText(q)))) {
     const openProjects=operations.projects.filter(x=>x.status!=="completed");
