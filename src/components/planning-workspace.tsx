@@ -194,11 +194,9 @@ function navigateToPlanningSection(event: MouseEvent<HTMLAnchorElement>) {
   if (!target) return;
 
   event.preventDefault();
-  const navigation = document.querySelector<HTMLElement>(".planning-section-nav");
-  const stickyOffset = (navigation?.offsetHeight ?? 44) + 30;
-  const targetTop = window.scrollY + target.getBoundingClientRect().top - stickyOffset;
   if (window.location.hash !== href) window.history.pushState(null, "", href);
-  window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+  // scrollIntoView targets the nearest scrollable ancestor, unlike window.scrollTo.
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 export function PlanningWorkspace({ language, previewMode = false }: { language: Language; previewMode?: boolean }) {
