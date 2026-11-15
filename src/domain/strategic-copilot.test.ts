@@ -74,10 +74,30 @@ describe("analyzeCopilotQuestion", () => {
     expect(result.calculations.ebitdaAfterScenario).toBe(36000);
   });
 
-  it("does not claim a return when the question cannot be interpreted", () => {
+  it("answers broad or ambiguous questions with a grounded workspace overview", () => {
     const result = analyzeCopilotQuestion("haz magia", financials, EMPTY_OPERATIONS, "es");
-    expect(result.intent).toBe("unknown");
-    expect(result.response).toContain("Entiendo lo que planteas");
+    expect(result.intent).toBe("overview");
+    expect(result.response).toContain("lectura general");
+    expect(result.response).toContain("EBITDA");
+    expect(result.matchedData).toContain("financials");
+  });
+
+  it("recognises a natural-language question about the business today", () => {
+    const result = analyzeCopilotQuestion("¿Cómo ves mi negocio hoy?", financials, EMPTY_OPERATIONS, "es");
+    expect(result.intent).toBe("overview");
+    expect(result.response).toContain("Ingresos");
+    expect(result.response).toContain("EBITDA");
+  });
+
+  it("recognises open-ended weekly advice requests", () => {
+    const result = analyzeCopilotQuestion("¿Qué me aconsejas hacer esta semana?", financials, EMPTY_OPERATIONS, "es");
+    expect(result.intent).toBe("advice");
+    expect(result.response).toContain("prioridad");
+  });
+
+  it("recognises a concern about spending too much", () => {
+    const result = analyzeCopilotQuestion("No sé si estoy gastando demasiado", financials, EMPTY_OPERATIONS, "es");
+    expect(result.intent).toBe("saving");
   });
   it("responds naturally to greetings with live business figures", () => {
     const result = analyzeCopilotQuestion("¡Buenas tardes! ¿Qué tal?", financials, EMPTY_OPERATIONS, "es");

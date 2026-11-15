@@ -117,11 +117,11 @@ function scoreIntents(question: string): Record<string,number> {
     scores[intent]=score;
   }
   const add=(intent:CopilotIntent,pattern:RegExp,weight=4)=>{if(pattern.test(q))scores[intent]=(scores[intent]??0)+weight;};
-  add("advice",/\b(que harias|si estuvieras|si fueras|que me recomiendas|por donde empiezo|como mejorarias|que deberia priorizar|what would you do|where should i start)\b/,7);
-  add("saving",/\b(recort\w*|reduc\w*|ahorr\w*|abarat\w*|optimiza\w*|contener el gasto|gastar menos|coste menor)\b/,8);
+  add("advice",/\b(que harias|si estuvieras|si fueras|que me recomiendas|que me aconsejas|que aconsejas|por donde empiezo|como mejorarias|que deberia priorizar|que hago esta semana|que deberia hacer esta semana|esta semana|what would you do|where should i start|what should i do this week)\b/,7);
+  add("saving",/\b(recort\w*|reduc\w*|ahorr\w*|abarat\w*|optimiza\w*|contener el gasto|gastar menos|coste menor|gastando demasiado|gasto demasiado|gastos demasiado altos|gasto muy alto|me preocupa el gasto|spending too much|spend too much|overspending)\b/,8);
   add("investment",/\b(inviert\w*|invert\w*|contrat\w*|incorpor\w*|compr\w*|adquir\w*|capex)\b/,3);
-  add("greeting",/\b(hola|buenas|hey|hello|hi|buenos dias|buenas tardes|buenas noches)\b/,8);
-  add("overview",/\b(como ves|como va|como vamos|situacion actual|panorama general|que tal estamos|how are we doing)\b/,3);
+  add("greeting",/\b(hola|buenas|hey|hello|hi|buenos dias|buenas tardes|buenas noches|en que puedes ayudarme|que puedes hacer por mi|how can you help)\b/,8);
+  add("overview",/\b(como ves|como va|como vamos|como ves mi negocio|como ves el negocio|mi negocio hoy|el negocio hoy|situacion actual|situacion del negocio|panorama general|que tal estamos|how are we doing|how is my business today|business overview)\b/,6);
   add("social",/\b(gracias|thank you|thanks|perfecto|genial|vale|okay|entiendo|de acuerdo|muy bien|great|got it)\b/,7);
   return scores;
 }
@@ -582,8 +582,11 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
       : (es ? "No hay KPI registrados todavía." : "No KPIs are recorded yet.") };
   }
 
-  const numeric = amount === null ? "" : ` ${money(amount, language)}`;
-  return { intent: "unknown", calculations, matchedData, response: es
-    ? `Entiendo lo que planteas, aunque todavía no identifico qué dato del negocio quieres que use para responder «${q}». ${numeric ? "También he detectado el importe " + numeric + ". " : ""}Puedo relacionarlo con la cuenta de resultados, caja, facturas, gastos por categoría, proyectos, ventas, riesgos y objetivos. Si hablas de la situación general, dímelo con naturalidad; cruzaré los datos disponibles y señalaré qué información falta, sin inventar tendencias ni resultados.`
-    : `I understand the question, but I cannot yet tell which business data you want me to use for “${q}”. ${numeric ? "I also detected the amount " + numeric + ". " : ""}I can connect it to the P&L, cash, invoices, category spend, projects, sales, risks and targets. If you mean the overall business position, say so naturally; I will combine the available data and point out what is missing without inventing trends or results.` };
+  const snapshot = analyzeCopilotQuestion(es ? "como ves mi negocio hoy" : "how is my business doing today", financials, operations, language, workspace, context);
+  const detectedAmount = amount === null ? "" : (es ? " También he detectado el importe " : " I also picked up the amount ") + money(amount, language) + ".";
+  matchedData.push(...snapshot.matchedData.filter(source => !matchedData.includes(source)));
+  return { intent: "overview", calculations: { ...snapshot.calculations, ...calculations }, matchedData,
+    response: es
+      ? `Interpreto tu pregunta («${q}») como una consulta abierta sobre el negocio. No voy a dejarla sin respuesta: te doy la lectura general con los datos disponibles.${detectedAmount}\n\n${snapshot.response}\n\nSi tu pregunta era sobre un tema ajeno a la empresa, este asistente está especializado en el workspace financiero y operativo.`
+      : `I am interpreting your open question (“${q}”) as a broad business question. I will not leave it unanswered: here is the overall view from the available data.${detectedAmount}\n\n${snapshot.response}\n\nIf you meant a topic unrelated to the company, this assistant is specialised in the financial and operational workspace.` };
 }

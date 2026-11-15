@@ -18,7 +18,7 @@ import {
   type FinancialInputs,
 } from "@/domain/financials";
 
-type View = "overview" | "model" | "planning" | "statements" | "operations" | "advisor" | "reports";
+type View = "overview" | "model" | "planning" | "statements" | "operations" | "chat" | "recommendations" | "reports";
 type InputKey = keyof FinancialInputs;
 
 const LANGUAGE_CHANGE_EVENT = "enterpriseos-language-change";
@@ -365,19 +365,20 @@ export default function Home() {
     { label: t("Budget & scenarios"), detail: "02.2 · Planning", run: () => setView("planning") },
     { label: t("3 statements"), detail: "02.3 · Financial statements", run: () => setView("statements") },
     { label: t("Operations & intelligence"), detail: "03.1 · Operations", run: () => setView("operations") },
-    { label: t("Strategic AI copilot"), detail: "03.2 · Strategic and financial recommendations", run: () => setView("advisor") },
+    { label: t("Chat IA"), detail: "04.1 · Asistente conversacional", run: () => setView("chat") },
+    { label: t("Recomendaciones IA"), detail: "04.2 · Centro estratégico", run: () => setView("recommendations") },
     { label: t("Reports & exports"), detail: "03.2 · Reporting", run: () => setView("reports") },
     { label: t("Reset demo"), detail: "Restore illustrative model assumptions", run: () => { setInputs(DEMO_INPUTS); setView("overview"); } },
     { label: t("Export Excel"), detail: "Download current management P&L", run: () => { void exportExcel(); } },
   ];
   const filteredCommands = commandItems.filter((item) => (item.label + " " + item.detail).toLowerCase().includes(commandQuery.toLowerCase()));
-  const viewLabels: Record<View, string> = { overview: t("Overview"), model: t("Financial model"), planning: t("Budget & scenarios"), statements: t("3 statements"), operations: t("Operations & intelligence"), advisor: t("Strategic AI copilot"), reports: t("Reports & exports") };
+  const viewLabels: Record<View, string> = { overview: t("Overview"), model: t("Financial model"), planning: t("Budget & scenarios"), statements: t("3 statements"), operations: t("Operations & intelligence"), chat: t("Chat IA"), recommendations: t("Recomendaciones IA"), reports: t("Reports & exports") };
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
       try {
         const saved = JSON.parse(window.localStorage.getItem("enterpriseos:recent-views") ?? "[]");
-        if (Array.isArray(saved)) setRecentViews(saved.filter((item): item is View => ["overview","model","planning","statements","operations","advisor","reports"].includes(item)).slice(0, 8));
+        if (Array.isArray(saved)) setRecentViews(saved.filter((item): item is View => ["overview","model","planning","statements","operations","chat","recommendations","reports"].includes(item)).slice(0, 8));
       } catch { setRecentViews([]); }
     }, 0);
     return () => window.clearTimeout(timer);
@@ -569,11 +570,17 @@ export default function Home() {
 
         <div className="sidebar-divider" />
         <div className="nav-label">{t("TOOLS")}</div>
-        <button type="button" className={`tool-link copilot-tool-link ${view === "advisor" ? "active" : ""}`} onClick={() => setView("advisor")} aria-current={view === "advisor" ? "page" : undefined}>
-          <span className="tool-icon"><Icon name="sparkle" size={17} /></span>
-          <span>{t("Strategic AI copilot")}</span>
-          <span className="copilot-tool-state">{t("OPEN")}</span>
-        </button>
+        <div className="nav-group ai-nav-group">
+          <div className="nav-group-heading"><span>04</span><strong>{t("ARTIFICIAL INTELLIGENCE")}</strong></div>
+          <nav className="primary-nav" aria-label={t("AI navigation")}>
+            <button type="button" className={`nav-item ${view === "chat" ? "active" : ""}`} onClick={() => setView("chat")} aria-current={view === "chat" ? "page" : undefined}>
+              <Icon name="message-square" size={18} /><span>{t("Chat IA")}</span><small>04.1</small>
+            </button>
+            <button type="button" className={`nav-item ${view === "recommendations" ? "active" : ""}`} onClick={() => setView("recommendations")} aria-current={view === "recommendations" ? "page" : undefined}>
+              <Icon name="target" size={18} /><span>{t("Recomendaciones IA")}</span><small>04.2</small>
+            </button>
+          </nav>
+        </div>
         <div className="tool-link">
           <span className="tool-icon"><Icon name="wallet" size={17} /></span>
           <span>{t("Data connections")}</span>
@@ -841,7 +848,8 @@ export default function Home() {
 
           {view === "operations" && <OperationsWorkspace language={language} />}
 
-          {view === "advisor" && <StrategicCopilot language={language} />}
+          {view === "chat" && <StrategicCopilot language={language} mode="chat" />}
+          {view === "recommendations" && <StrategicCopilot language={language} mode="recommendations" />}
 
           {view === "reports" && (
             <>
