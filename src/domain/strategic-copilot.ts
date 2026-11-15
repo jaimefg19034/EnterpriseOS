@@ -138,6 +138,7 @@ function intentOf(question: string, context?: IntentContext): CopilotIntent {
   if ((scores.greeting ?? 0) >= 8 && tokens.length <= 7 && !Object.entries(scores).some(([key,value]) => !["greeting","social"].includes(key) && value >= 3)) return "greeting";
   if ((scores.social ?? 0) >= 7 && tokens.length <= 8 && !Object.entries(scores).some(([key,value]) => !["greeting","social"].includes(key) && value >= 3)) return "social";
   if ((scores.advice ?? 0) >= 7) return "advice";
+  if (/\b(gastando demasiado|gasto demasiado|gastos demasiado altos|gasto muy alto|me preocupa el gasto|spending too much|spend too much|overspending)\b/.test(q)) return "saving";
   if (lowerAction && /\b(gasto|gastos|coste|costes|costo|costos|presupuesto|spend|expense|cost)\b/.test(q)) return "saving";
   const ranked = Object.entries(scores).filter(([key,value]) => !["greeting","social","advice"].includes(key) && value > 0).sort((a,b) => b[1]-a[1]);
   if (ranked.length && ranked[0][1] >= 2) return ranked[0][0] as CopilotIntent;
