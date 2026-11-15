@@ -195,7 +195,8 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
       calculations.opportunityValue=item.value;matchedData.push("operations.opportunities");
       response=es?"La oportunidad de «"+item.company+"» tiene un valor de "+money(item.value,language)+", etapa "+item.stage+" y fecha estimada de cierre "+item.expectedClose+".":"The opportunity for “"+item.company+"” is worth "+money(item.value,language)+", stage "+item.stage+", expected close "+item.expectedClose+".";
     }
-    return {intent,calculations,matchedData,response};
+    const recordIntent:CopilotIntent=matchedRecord.kind==="costCenter"?"expense":matchedRecord.kind==="opportunity"?"revenue":matchedRecord.kind;
+    return {intent:recordIntent,calculations,matchedData,response};
   }
 
   if (intent === "advice") {
