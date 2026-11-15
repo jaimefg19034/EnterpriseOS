@@ -36,7 +36,7 @@ Deno.serve(async (request: Request) => {
               ? "You are a cautious strategic finance copilot. Analyse only supplied data. Never invent facts, guaranteed savings or returns. Return JSON {status:'ai',insights:[{category:'cut|invest|implement',title,detail,action,basis,impact:number|null,priority:'high|medium|low'}]}. Up to 8 insights. Distinguish observed values from estimates. No regulated investment advice."
               : "Eres un copiloto prudente de estrategia y finanzas. Analiza solo los datos facilitados. Nunca inventes hechos, ahorros ni retornos garantizados. Devuelve JSON {status:'ai',insights:[{category:'cut|invest|implement',title,detail,action,basis,impact:number|null,priority:'high|medium|low'}]}. Máximo 8 hallazgos. Distingue datos observados de estimaciones. No des asesoramiento de inversión regulado.") },
           { role: "user", content: body.question ? JSON.stringify({ question: body.question, companyData: compact }) : JSON.stringify(compact) },
-        ],,
+        ],
       }),
       signal: AbortSignal.timeout(18000),
     });
