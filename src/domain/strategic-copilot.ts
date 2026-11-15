@@ -40,7 +40,7 @@ const NUMBER_WORDS: Record<string, number> = {
   setenta:70, seventy:70, ochenta:80, eighty:80, noventa:90, ninety:90, cien:100, hundred:100,
 };
 function numberWordsValue(raw: string): number | null {
-  const words = normaliseText(raw).split(/\\s+/).filter(x => x !== "y" && x !== "and");
+  const words = normaliseText(raw).split(/\s+/).filter(x => x !== "y" && x !== "and");
   if (!words.length || words.some(x => NUMBER_WORDS[x] === undefined)) return null;
   const values = words.map(x => NUMBER_WORDS[x]);
   if (values.length === 1) return values[0];
@@ -48,12 +48,12 @@ function numberWordsValue(raw: string): number | null {
   return null;
 }
 function extractPercent(question: string): number | null {
-  const match = question.match(/(\\d+(?:[.,]\\d+)?)\\s*%/);
+  const match = question.match(/(\d+(?:[.,]\d+)?)\s*%/);
   const numeric = match ? Number(match[1].replace(",", ".")) : null;
   if (numeric !== null) return Number.isFinite(numeric) && numeric >= 0 && numeric <= 1000 ? numeric : null;
-  const words = normaliseText(question).match(/\\b(cero|zero|uno|una|un|one|dos|two|tres|three|cuatro|four|cinco|five|seis|six|siete|seven|ocho|eight|nueve|nine|diez|ten|once|eleven|doce|twelve|trece|thirteen|catorce|fourteen|quince|fifteen|dieciseis|sixteen|diecisiete|seventeen|dieciocho|eighteen|diecinueve|nineteen|veinte|twenty|treinta|thirty|cuarenta|forty|cincuenta|fifty|sesenta|sixty|setenta|seventy|ochenta|eighty|noventa|ninety|cien|hundred)(?:\\s+y\\s+(?:uno|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve))?\\s+(?:por ciento|percent)\\b/);
+  const words = normaliseText(question).match(/\b(cero|zero|uno|una|un|one|dos|two|tres|three|cuatro|four|cinco|five|seis|six|siete|seven|ocho|eight|nueve|nine|diez|ten|once|eleven|doce|twelve|trece|thirteen|catorce|fourteen|quince|fifteen|dieciseis|sixteen|diecisiete|seventeen|dieciocho|eighteen|diecinueve|nineteen|veinte|twenty|treinta|thirty|cuarenta|forty|cincuenta|fifty|sesenta|sixty|setenta|seventy|ochenta|eighty|noventa|ninety|cien|hundred)(?:\s+y\s+(?:uno|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve))?\s+(?:por ciento|percent)\b/);
   if (!words) return null;
-  const value = numberWordsValue(words[0].replace(/\\s+(?:por ciento|percent)$/, ""));
+  const value = numberWordsValue(words[0].replace(/\s+(?:por ciento|percent)$/, ""));
   return value !== null && value >= 0 && value <= 1000 ? value : null;
 }
 
@@ -125,16 +125,22 @@ function scoreIntents(question: string): Record<string,number> {
   return scores;
 }
 function intentOf(question: string, context?: IntentContext): CopilotIntent {
-  const q=normaliseText(question), tokens=tokensOf(q), scores=scoreIntents(question);
-  const followUp=/\b(y por que|por que|y eso|como lo soluciono|como lo arreglo|como lo corrijo|como bajo eso|como lo bajo|como reducirlo|como lo reduzco|que hago entonces|y si cambio|si cambio esa cifra|esa cifra|ese importe|ese gasto|esa partida|lo anterior|con ese cambio|y ahora|ahora|en ese caso|y si|si lo subo|si lo aumento|mas detalles|amplia|desarrolla|what about|why is that|how do i fix|how can i solve|what if i change|that amount|that cost)\b/.test(q);
-  if(context?.previousIntent&&followUp) return context.previousIntent;
-  if((scores.greeting??0)>=8 && tokens.length<=7 && !Object.entries(scores).some(([key,value])=>!["greeting","social"].includes(key)&&value>=3)) return "greeting";
-  if((scores.social??0)>=7 && tokens.length<=8 && !Object.entries(scores).some(([key,value])=>!["greeting","social"].includes(key)&&value>=3)) return "social";
-  if((scores.advice??0)>=7) return "advice";
-  if(/\b(recort\w*|reduc\w*|ahorr\w*|abarat\w*|optimiza\w*|gastar menos|contener el gasto)\b/.test(q)) return "saving";
-  const ranked=Object.entries(scores).filter(([key,value])=>!["greeting","social","advice"].includes(key)&&value>0).sort((a,b)=>b[1]-a[1]);
-  if(ranked.length&&ranked[0][1]>=2) return ranked[0][0] as CopilotIntent;
-  if(context?.previousIntent&&tokens.length<=10) return context.previousIntent;
+  const q = normaliseText(question), tokens = tokensOf(q), scores = scoreIntents(question);
+  const followUp = /\b(y por que|por que|y eso|como lo soluciono|como lo arreglo|como lo corrijo|como bajo eso|como lo bajo|como reducirlo|como lo reduzco|como lo aplico|como aplico eso|paso a paso|plan de accion|que hago entonces|y si cambio|si cambio esa cifra|esa cifra|ese importe|ese gasto|esa partida|lo anterior|con ese cambio|y ahora|ahora|en ese caso|y si|si lo subo|si lo aumento|mas detalles|amplia|desarrolla|what about|why is that|how do i fix|how can i solve|how do i apply|step by step|what if i change|that amount|that cost)\b/.test(q);
+  const lowerAction = /\b(reduc\w*|baj\w*|recort\w*|disminu\w*|ahorr\w*|lower|reduce|cut)\b/.test(q);
+  const raiseAction = /\b(sub\w*|aument\w*|elev\w*|increment\w*|raise|increase|boost)\b/.test(q);
+  if (context?.previousIntent && followUp) {
+    if (lowerAction && ["expense", "overview"].includes(context.previousIntent)) return "saving";
+    if (raiseAction && context.previousIntent === "revenue") return "revenue";
+    return context.previousIntent;
+  }
+  if ((scores.greeting ?? 0) >= 8 && tokens.length <= 7 && !Object.entries(scores).some(([key,value]) => !["greeting","social"].includes(key) && value >= 3)) return "greeting";
+  if ((scores.social ?? 0) >= 7 && tokens.length <= 8 && !Object.entries(scores).some(([key,value]) => !["greeting","social"].includes(key) && value >= 3)) return "social";
+  if ((scores.advice ?? 0) >= 7) return "advice";
+  if (lowerAction && /\b(gasto|gastos|coste|costes|costo|costos|presupuesto|spend|expense|cost)\b/.test(q)) return "saving";
+  const ranked = Object.entries(scores).filter(([key,value]) => !["greeting","social","advice"].includes(key) && value > 0).sort((a,b) => b[1]-a[1]);
+  if (ranked.length && ranked[0][1] >= 2) return ranked[0][0] as CopilotIntent;
+  if (context?.previousIntent && tokens.length <= 10) return context.previousIntent;
   return "unknown";
 }
 function localISODate(): string { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
