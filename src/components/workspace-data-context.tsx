@@ -6,7 +6,9 @@ import type { FinancialResults } from "@/domain/financials";
 import { useOperationsCloudSync } from "@/components/use-operations-cloud-sync";
 import type { Language } from "@/i18n/translations";
 import { LEGACY_PLANNING_STORAGE_KEY, parseSavedPlanningState, PLANNING_STORAGE_KEY, type SavedPlanningState } from "@/domain/planning-storage";
-import type { ThreeStatementAssumptions } from "@/domain/three-statements";\nimport { createEmptyCashForecast, parseStoredCashForecast, type CashForecastWeekInput } from "@/domain/cash-forecast";\nimport { parseStoredWorkingCapitalInvoices, type WorkingCapitalInvoice } from "@/domain/working-capital";
+import type { ThreeStatementAssumptions } from "@/domain/three-statements";
+import { createEmptyCashForecast, parseStoredCashForecast, type CashForecastWeekInput } from "@/domain/cash-forecast";
+import { parseStoredWorkingCapitalInvoices, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, type OperationsState } from "@/domain/operations";
 
 type WorkspaceDataValue = {
@@ -19,6 +21,8 @@ type WorkspaceDataValue = {
   setPlanning: Dispatch<SetStateAction<SavedPlanningState | null>>;
   statementAssumptions: ThreeStatementAssumptions | null;
   setStatementAssumptions: Dispatch<SetStateAction<ThreeStatementAssumptions | null>>;
+  cashForecastWeeks: CashForecastWeekInput[];
+  workingCapitalInvoices: WorkingCapitalInvoice[];
 };
 
 const WorkspaceDataContext = createContext<WorkspaceDataValue | null>(null);
@@ -27,7 +31,9 @@ export function WorkspaceDataProvider({ financials, language, children }: { fina
   const [operations, setOperations] = useState<OperationsState>(EMPTY_OPERATIONS);
   const [operationsLoaded, setOperationsLoaded] = useState(false);
   const [planning, setPlanning] = useState<SavedPlanningState | null>(null);
-  const [statementAssumptions, setStatementAssumptions] = useState<ThreeStatementAssumptions | null>(null);\n  const [cashForecastWeeks, setCashForecastWeeks] = useState<CashForecastWeekInput[]>(() => createEmptyCashForecast(13));\n  const [workingCapitalInvoices, setWorkingCapitalInvoices] = useState<WorkingCapitalInvoice[]>([]);
+  const [statementAssumptions, setStatementAssumptions] = useState<ThreeStatementAssumptions | null>(null);
+  const [cashForecastWeeks, setCashForecastWeeks] = useState<CashForecastWeekInput[]>(() => createEmptyCashForecast(13));
+  const [workingCapitalInvoices, setWorkingCapitalInvoices] = useState<WorkingCapitalInvoice[]>([]);
   const cloudStatus = useOperationsCloudSync(operations, setOperations, operationsLoaded, language);
 
   useEffect(() => {
@@ -37,7 +43,13 @@ export function WorkspaceDataProvider({ financials, language, children }: { fina
         if (restored) setOperations(restored);
         const planningRaw = window.localStorage.getItem(PLANNING_STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_PLANNING_STORAGE_KEY);
         const restoredPlanning = planningRaw ? parseSavedPlanningState(planningRaw) : null;
-        if (restoredPlanning) setPlanning(restoredPlanning);\n        const cashRaw = window.localStorage.getItem("enterpriseos:cash-forecast:v1");\n        const cashParsed = parseStoredCashForecast(cashRaw);\n        if (cashParsed.ok) setCashForecastWeeks(cashParsed.weeks);\n        const invoiceRaw = window.localStorage.getItem("enterpriseos:working-capital:v1");\n        const invoiceParsed = parseStoredWorkingCapitalInvoices(invoiceRaw);\n        if (invoiceParsed.ok) setWorkingCapitalInvoices(invoiceParsed.invoices);
+        if (restoredPlanning) setPlanning(restoredPlanning);
+        const cashRaw = window.localStorage.getItem("enterpriseos:cash-forecast:v1");
+        const cashParsed = parseStoredCashForecast(cashRaw);
+        if (cashParsed.ok) setCashForecastWeeks(cashParsed.weeks);
+        const invoiceRaw = window.localStorage.getItem("enterpriseos:working-capital:v1");
+        const invoiceParsed = parseStoredWorkingCapitalInvoices(invoiceRaw);
+        if (invoiceParsed.ok) setWorkingCapitalInvoices(invoiceParsed.invoices);
       } catch {
         // The in-memory workspace remains usable if browser storage is unavailable.
       }
@@ -69,7 +81,10 @@ export function WorkspaceDataProvider({ financials, language, children }: { fina
     window.addEventListener("storage", onStorage);
     return () => {
       window.clearTimeout(timer);
-      window.removeEventListener("storage", onStorage);\n      window.removeEventListener("enterpriseos:cash-forecast-updated", onFinanceDataUpdated);\n      window.removeEventListener("enterpriseos:working-capital-updated", onFinanceDataUpdated);\n      window.removeEventListener("storage", onFinanceDataUpdated);
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("enterpriseos:cash-forecast-updated", onFinanceDataUpdated);
+      window.removeEventListener("enterpriseos:working-capital-updated", onFinanceDataUpdated);
+      window.removeEventListener("storage", onFinanceDataUpdated);
     };
   }, []);
 
