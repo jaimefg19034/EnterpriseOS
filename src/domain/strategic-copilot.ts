@@ -111,6 +111,7 @@ function intentOf(question: string, context?: IntentContext): CopilotIntent {
   if((scores.greeting??0)>=8 && tokens.length<=7 && !Object.entries(scores).some(([key,value])=>!["greeting","social"].includes(key)&&value>=3)) return "greeting";
   if((scores.social??0)>=7 && tokens.length<=8 && !Object.entries(scores).some(([key,value])=>!["greeting","social"].includes(key)&&value>=3)) return "social";
   if((scores.advice??0)>=7) return "advice";
+  if(/\b(recort\w*|reduc\w*|ahorr\w*|abarat\w*|optimiza\w*|gastar menos|contener el gasto)\b/.test(q)) return "saving";
   const ranked=Object.entries(scores).filter(([key,value])=>!["greeting","social","advice"].includes(key)&&value>0).sort((a,b)=>b[1]-a[1]);
   if(ranked.length&&ranked[0][1]>=2) return ranked[0][0] as CopilotIntent;
   if(context?.previousIntent&&tokens.length<=10) return context.previousIntent;
@@ -322,7 +323,7 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
     if (largestExpense) calculations.largestExpense = round(largestExpense.amount);
     if (leadingCategories[0]) calculations.largestExpenseCategory = round(leadingCategories[0][1]);
     return { intent, calculations, matchedData, response: es
-      ? `He revisado los ${operations.expenses.length} registros de gasto actuales. El total detallado en Operaciones es ${money(actualExpenses, language)} (separado de los gastos del P&L para evitar duplicidades). ${categoryText ? "Distribución por categoría, de mayor a menor: " + categoryText + ". " : "No hay gastos categorizados registrados. "}${centerText ? "Centro de coste con mayor consumo: " + centerText + ". " : "No hay centros de coste registrados. "}${expenseText ? "Mayor gasto individual: " + expenseText + "." : "No hay gastos individuales registrados."}`
+      ? `He revisado los ${operations.expenses.length} registros de gasto actuales. Los gastos operativos del P&L son ${money(financials.operatingExpenses, language)} y el coste de ventas ${money(financials.costOfGoodsSold, language)}. El total detallado en Operaciones es ${money(actualExpenses, language)} (separado del P&L para evitar duplicidades). ${categoryText ? "Distribución por categoría, de mayor a menor: " + categoryText + ". " : "No hay gastos categorizados registrados. "}${centerText ? "Centro de coste con mayor consumo: " + centerText + ". " : "No hay centros de coste registrados. "}${expenseText ? "Mayor gasto individual: " + expenseText + "." : "No hay gastos individuales registrados."}`
       : `I reviewed the ${operations.expenses.length} current expense records. Total detailed spend in Operations is ${money(actualExpenses, language)} (kept separate from P&L expenses to avoid double counting). ${categoryText ? "Category breakdown, highest first: " + categoryText + ". " : "There are no categorised expenses recorded. "}${centerText ? "Highest-spend cost centre: " + centerText + ". " : "No cost centres are recorded. "}${expenseText ? "Largest individual expense: " + expenseText + "." : "No individual expenses are recorded."}` };
   }
 
