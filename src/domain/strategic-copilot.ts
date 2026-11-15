@@ -153,9 +153,11 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
     const hireEn=multiHire?"\n• Hiring at "+money(hireCost,language)+" per month equals "+money(annualHireCost,language)+" per year, before employer taxes, benefits and other employment costs. It is recurring spend, not a one-off investment.":"";
     const marketingEs=marketingCut?"\n• Reducir marketing un "+rate+"%: el gasto identificado en los registros es "+money(marketingSpend,language)+" en el periodo cubierto; el ahorro matemático sería "+money(saving,language) + " en ese mismo periodo.":"";
     const marketingEn=marketingCut?"\n• Cutting marketing by "+rate+"%: recorded marketing spend is "+money(marketingSpend,language)+" for the period covered; the mathematical saving is "+money(saving,language)+" over that same period.":"";
+    const caveatEs=multiHire&&marketingCut?"\nNo sumo estos impactos al EBITDA todavía: el coste de contratación es mensual y los registros de marketing pueden cubrir otro periodo. Para darte un EBITDA pro forma fiable, ambos periodos deben coincidir.":marketingCut?"\nEl ahorro corresponde al periodo cubierto por los registros; no lo anualizo sin una serie mensual comparable.":"\nEl coste anualizado no incluye cotizaciones, beneficios ni otros costes laborales.";
+    const caveatEn=multiHire&&marketingCut?"\nI am not adding these impacts to EBITDA yet: hiring is monthly, while marketing records may cover a different period. A reliable pro forma EBITDA requires matching periods.":marketingCut?"\nThe saving applies to the period covered by the records; I will not annualise it without a comparable monthly series.":"\nThe annualised cost excludes employer taxes, benefits and other employment costs.";
     return {intent:"advice",calculations,matchedData,response:es
-      ? "He separado los escenarios para no mezclar hipótesis."+hireEs+marketingEs+"\nNo sumo estos impactos al EBITDA todavía: el coste de contratación es mensual y los registros de marketing pueden cubrir otro periodo. Para darte un EBITDA pro forma fiable, ambos periodos deben coincidir."
-      : "I separated the scenarios to avoid mixing assumptions."+hireEn+marketingEn+"\nI am not adding these impacts to EBITDA yet: hiring is monthly, while marketing records may cover a different period. A reliable pro forma EBITDA requires matching periods."};
+      ? "He separado los escenarios para no mezclar hipótesis."+hireEs+marketingEs+caveatEs
+      : "I separated the scenarios to avoid mixing assumptions."+hireEn+marketingEn+caveatEn};
   }
 
 
