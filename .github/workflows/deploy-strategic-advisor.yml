@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   deploy:
-    if: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' && vars.SUPABASE_PROJECT_REF != '' && secrets.OPENAI_API_KEY != '' }}
+    if: ${{ vars.SUPABASE_PROJECT_REF != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,6 +29,10 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
         run: |
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$OPENAI_API_KEY" ]; then
+            echo "::notice::Set SUPABASE_ACCESS_TOKEN and OPENAI_API_KEY to enable deployment."
+            exit 0
+          fi
           supabase functions deploy strategic-advisor --project-ref "$SUPABASE_PROJECT_REF"
           if [ -n "$OPENAI_MODEL" ]; then
             supabase secrets set "OPENAI_API_KEY=$OPENAI_API_KEY" "OPENAI_MODEL=$OPENAI_MODEL" --project-ref "$SUPABASE_PROJECT_REF"
