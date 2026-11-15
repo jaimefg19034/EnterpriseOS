@@ -90,7 +90,8 @@ export function StrategicCopilot({language}:{language:Language}){
  }
  function sendChat(value=question){
   const clean=value.trim();if(!clean||chatBusy)return;setQuestion("");
-  const messageId=++messageSequence.current;\n  const userMessage:ChatMessage={id:String(messageId)+"-u",role:"user",text:clean};
+  const messageId=++messageSequence.current;
+  const userMessage:ChatMessage={id:String(messageId)+"-u",role:"user",text:clean};
   setChatMessages(current=>[...current,userMessage].slice(-12));setChatBusy(true);
   window.setTimeout(()=>{
    try{
