@@ -153,6 +153,51 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
       ? `¡De nada! Seguimos cuando quieras. Tengo cargados los datos actuales: ingresos ${money(financials.revenue,language)} y EBITDA ${money(financials.ebitda,language)}. Si quieres, podemos convertir cualquier duda en un escenario con números.`
       : `You're welcome. We can pick this up whenever you're ready. I have the current workspace figures: revenue ${money(financials.revenue,language)} and EBITDA ${money(financials.ebitda,language)}. We can turn any question into a quantified scenario.`};
   }
+
+  const queryTokens=tokensOf(q);
+  const recordCandidates: {kind:"project"|"risk"|"kpi"|"expense"|"costCenter"|"opportunity"; label:string; tokens:string[]; item:any}[] = [
+    ...operations.projects.map(item=>({kind:"project" as const,label:item.name,tokens:tokensOf(item.name),item})),
+    ...operations.risks.map(item=>({kind:"risk" as const,label:item.title,tokens:tokensOf(item.title),item})),
+    ...operations.kpis.map(item=>({kind:"kpi" as const,label:item.name,tokens:tokensOf(item.name),item})),
+    ...operations.expenses.map(item=>({kind:"expense" as const,label:item.description+" "+item.supplier,tokens:tokensOf(item.description+" "+item.supplier),item})),
+    ...operations.costCenters.map(item=>({kind:"costCenter" as const,label:item.name,tokens:tokensOf(item.name),item})),
+    ...operations.opportunities.map(item=>({kind:"opportunity" as const,label:item.company,tokens:tokensOf(item.company),item}))
+  ].filter(candidate=>candidate.tokens.length>0);
+  const recordMatches=recordCandidates.map(candidate=>{
+    const exact=normaliseText(q).includes(normaliseText(candidate.label));
+    const overlap=candidate.tokens.filter(token=>queryTokens.some(queryToken=>queryToken===token||queryToken.startsWith(token)||token.startsWith(queryToken))).length;
+    const score=exact?10:overlap/(candidate.tokens.length||1);
+    return {...candidate,score,overlap,exact};
+  }).filter(candidate=>candidate.exact||(candidate.overlap>=2&&candidate.score>=0.6)||(candidate.tokens.length===1&&candidate.overlap===1&&candidate.tokens[0].length>=6))
+    .sort((a,b)=>b.score-a.score);
+  const matchedRecord=recordMatches[0];
+  if(matchedRecord){
+    const item=matchedRecord.item;
+    let response="";
+    if(matchedRecord.kind==="project"){
+      const variance=item.spent-item.budget;
+      calculations.projectBudget=item.budget;calculations.projectSpent=item.spent;calculations.projectVariance=round(variance);
+      matchedData.push("operations.projects");
+      response=es?"El proyecto «"+item.name+"» está "+(item.status==="completed"?"completado":item.status==="onHold"?"en pausa":item.status==="active"?"activo":"planificado")+". Ha consumido "+money(item.spent,language)+" de un presupuesto de "+money(item.budget,language)+"; "+(variance>0?"supera":"mantiene un margen de")+" presupuesto de "+money(Math.abs(variance),language)+". Responsable: "+item.owner+". Fecha prevista: "+item.dueDate+".":"Project “"+item.name+"” is "+item.status+". It has used "+money(item.spent,language)+" of a "+money(item.budget,language)+" budget; it is "+(variance>0?"over":"under")+" budget by "+money(Math.abs(variance),language)+". Owner: "+item.owner+". Due date: "+item.dueDate+".";
+    }else if(matchedRecord.kind==="risk"){
+      calculations.riskScore=item.probability*item.impact;matchedData.push("operations.risks");
+      response=es?"El riesgo «"+item.title+"» está "+(item.status==="closed"?"cerrado":item.status==="mitigating"?"en mitigación":"abierto")+" y tiene una puntuación de "+(item.probability*item.impact)+"/25 (probabilidad "+item.probability+"/5 e impacto "+item.impact+"/5). Responsable: "+item.owner+". Mitigación: "+(item.mitigation||"no documentada")+".":"Risk “"+item.title+"” is "+item.status+", with a score of "+(item.probability*item.impact)+"/25 (probability "+item.probability+"/5, impact "+item.impact+"/5). Owner: "+item.owner+". Mitigation: "+(item.mitigation||"not documented")+".";
+    }else if(matchedRecord.kind==="kpi"){
+      const delta=item.actual-item.target;calculations.kpiActual=item.actual;calculations.kpiTarget=item.target;calculations.kpiVariance=round(delta);matchedData.push("operations.kpis");
+      response=es?"El KPI «"+item.name+"» está en "+item.actual+" "+item.unit+", frente al objetivo de "+item.target+" "+item.unit+". La diferencia es "+(delta>0?"+":"")+round(delta)+" "+item.unit+". "+(((item.direction??"higher")==="lower"?item.actual<=item.target:item.actual>=item.target)?"Está dentro del objetivo.":"Está fuera del objetivo."):"KPI “"+item.name+"” is "+item.actual+" "+item.unit+", against a target of "+item.target+" "+item.unit+". The variance is "+(delta>0?"+":"")+round(delta)+" "+item.unit+". "+(((item.direction??"higher")==="lower"?item.actual<=item.target:item.actual>=item.target)?"It is on target.":"It is off target.");
+    }else if(matchedRecord.kind==="expense"){
+      calculations.expenseAmount=item.amount;matchedData.push("operations.expenses");
+      response=es?"El gasto «"+item.description+"» corresponde a "+item.supplier+", categoría "+item.category+". Importe: "+money(item.amount,language)+"; fecha: "+item.date+"; estado: "+(item.status==="paid"?"pagado":"pendiente de pago")+".":"Expense “"+item.description+"” is with "+item.supplier+", category "+item.category+". Amount: "+money(item.amount,language)+"; date: "+item.date+"; status: "+item.status+".";
+    }else if(matchedRecord.kind==="costCenter"){
+      const spend=costCenterActualSpend(item,operations.expenses),variance=spend-item.budget;calculations.costCenterBudget=item.budget;calculations.costCenterSpend=round(spend);calculations.costCenterVariance=round(variance);matchedData.push("operations.costCenters","operations.expenses");
+      response=es?"El centro «"+item.name+"» ha registrado "+money(spend,language)+" frente a un presupuesto de "+money(item.budget,language)+". "+(variance>0?"Está excedido en ":"Quedan ")+money(Math.abs(variance),language)+". Responsable: "+item.owner+"; periodo: "+item.period+".":"Cost centre “"+item.name+"” has recorded "+money(spend,language)+" against a "+money(item.budget,language)+" budget. "+(variance>0?"It is over budget by ":"Remaining budget: ")+money(Math.abs(variance),language)+". Owner: "+item.owner+"; period: "+item.period+".";
+    }else{
+      calculations.opportunityValue=item.value;matchedData.push("operations.opportunities");
+      response=es?"La oportunidad de «"+item.company+"» tiene un valor de "+money(item.value,language)+", etapa "+item.stage+" y fecha estimada de cierre "+item.expectedClose+".":"The opportunity for “"+item.company+"” is worth "+money(item.value,language)+", stage "+item.stage+", expected close "+item.expectedClose+".";
+    }
+    return {intent,calculations,matchedData,response};
+  }
+
   if (intent === "advice") {
     const openProjects=operations.projects.filter(x=>x.status!=="completed");
     const overruns=openProjects.map(x=>({...x,variance:x.spent-x.budget})).filter(x=>x.variance>0).sort((a,b)=>b.variance-a.variance);
