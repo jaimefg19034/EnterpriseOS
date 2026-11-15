@@ -94,16 +94,20 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
   }
 
   if (intent === "saving") {
-    const rate = targetPercent ?? 10;
-    const base = /\b(operativ|operating|opex)\b/.test(q.toLowerCase()) ? financials.operatingExpenses : financials.operatingExpenses + financials.costOfGoodsSold;
-    const saving = round(base * rate / 100);
+    const rate = targetPercent ?? (amount === null ? 10 : 0);
+    const operatingOnly = /\b(operativ\w*|operating|opex)\b/.test(q.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase());
+    const base = operatingOnly ? financials.operatingExpenses : financials.operatingExpenses + financials.costOfGoodsSold;
+    const requestedSaving = targetPercent !== null ? base * rate / 100 : amount ?? base * 0.1;
+    const saving = round(Math.min(base, requestedSaving));
     const nextEbitda = round(financials.ebitda + saving);
     const nextMargin = financials.revenue > 0 ? nextEbitda / financials.revenue * 100 : 0;
-    calculations.expenseBase = round(base); calculations.saving = saving; calculations.ebitdaAfterSaving = nextEbitda; calculations.marginAfterSaving = round(nextMargin);
+    calculations.expenseBase = round(base); calculations.saving = saving; calculations.savingRatePercent = base > 0 ? round(saving / base * 100) : 0; calculations.ebitdaAfterSaving = nextEbitda; calculations.marginAfterSaving = round(nextMargin);
     matchedData.push("financials.operatingExpenses", "financials.costOfGoodsSold", "financials.ebitda", "financials.revenue");
+    const basisLabel = operatingOnly ? (es ? "gastos operativos" : "operating expenses") : (es ? "coste de ventas + gastos operativos" : "COGS + operating expenses");
+    const scenarioLabel = targetPercent !== null ? (es ? "una reducción del " + percent(rate, language) : "a " + percent(rate, language) + " reduction") : (es ? "un recorte fijo de " + money(saving, language) : "a fixed cut of " + money(saving, language));
     return { intent, calculations, matchedData, response: es
-      ? `Aplicando una reducción del ${percent(rate, language)} sobre ${/\b(operativ|operating|opex)\b/.test(q.toLowerCase()) ? "gastos operativos" : "coste de ventas + gastos operativos"}:\n• Base actual: ${money(base, language)}.\n• Ahorro estimado: ${money(saving, language)} por periodo.\n• EBITDA pasaría de ${money(financials.ebitda, language)} a ${money(nextEbitda, language)}.\n• Margen EBITDA pasaría de ${percent(currentMargin, language)} a ${percent(nextMargin, language)}.\nEs un escenario matemático, no un ahorro garantizado; revisa partidas para evitar recortar costes que generen ingresos.`
-      : `Applying a ${percent(rate, language)} reduction to ${/\b(operativ|operating|opex)\b/.test(q.toLowerCase()) ? "operating expenses" : "COGS + operating expenses"}:\n• Current base: ${money(base, language)}.\n• Estimated saving: ${money(saving, language)} per period.\n• EBITDA would move from ${money(financials.ebitda, language)} to ${money(nextEbitda, language)}.\n• EBITDA margin would move from ${percent(currentMargin, language)} to ${percent(nextMargin, language)}.\nThis is a mathematical scenario, not a guaranteed saving; validate line items before cutting productive spend.` };
+      ? "Escenario de " + scenarioLabel + " sobre " + basisLabel + ":\n• Base actual: " + money(base, language) + ".\n• Ahorro calculado: " + money(saving, language) + " (" + percent(calculations.savingRatePercent, language) + " de la base) por periodo.\n• EBITDA pasaría de " + money(financials.ebitda, language) + " a " + money(nextEbitda, language) + ".\n• Margen EBITDA pasaría de " + percent(currentMargin, language) + " a " + percent(nextMargin, language) + ".\nEs una simulación matemática, no un ahorro garantizado; valida las partidas antes de recortar gasto productivo."
+      : "Scenario for " + scenarioLabel + " in " + basisLabel + ":\n• Current base: " + money(base, language) + ".\n• Calculated saving: " + money(saving, language) + " (" + percent(calculations.savingRatePercent, language) + " of the base) per period.\n• EBITDA would move from " + money(financials.ebitda, language) + " to " + money(nextEbitda, language) + ".\n• EBITDA margin would move from " + percent(currentMargin, language) + " to " + percent(nextMargin, language) + ".\nThis is a mathematical simulation, not a guaranteed saving; validate line items before cutting productive spend." };
   }
 
   if (intent === "margin") {
@@ -130,6 +134,19 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
     return { intent, calculations, matchedData, response: es
       ? `Datos actuales: gastos operativos P&L ${money(financials.operatingExpenses, language)}; coste de ventas ${money(financials.costOfGoodsSold, language)}; gastos detallados registrados en Operaciones ${money(actualExpenses, language)}. ${centerText ? "Centro con mayor gasto: " + centerText + ". " : "No hay centros de coste registrados. "}${expenseText ? "Mayor gasto individual: " + expenseText + "." : "No hay gastos individuales registrados."}`
       : `Current data: P&L operating expenses ${money(financials.operatingExpenses, language)}; COGS ${money(financials.costOfGoodsSold, language)}; detailed expenses recorded in Operations ${money(actualExpenses, language)}. ${centerText ? "Highest-spend cost centre: " + centerText + ". " : "No cost centres are recorded. "}${expenseText ? "Largest individual expense: " + expenseText + "." : "No individual expenses are recorded."}` };
+  }
+
+  if (intent === "revenue" && (targetPercent !== null || amount !== null)) {
+    const increase = targetPercent !== null ? financials.revenue * targetPercent / 100 : amount ?? 0;
+    const newRevenue = round(financials.revenue + increase);
+    const addedEbitda = round(increase * grossMarginRatio);
+    const newEbitda = round(financials.ebitda + addedEbitda);
+    const newMargin = newRevenue > 0 ? newEbitda / newRevenue * 100 : 0;
+    calculations.revenueIncrease = round(increase); calculations.revenueAfterScenario = newRevenue; calculations.ebitdaAfterScenario = newEbitda; calculations.marginAfterScenario = round(newMargin);
+    matchedData.push("financials.revenue", "financials.grossMarginPercent", "financials.ebitda");
+    return { intent, calculations, matchedData, response: es
+      ? "Si los ingresos aumentan " + (targetPercent !== null ? percent(targetPercent, language) : money(increase, language)) + ": facturación pasaría de " + money(financials.revenue, language) + " a " + money(newRevenue, language) + ". Manteniendo el margen bruto actual (" + percent(financials.grossMarginPercent, language) + ") y los gastos operativos constantes, el EBITDA estimado pasaría de " + money(financials.ebitda, language) + " a " + money(newEbitda, language) + " y el margen EBITDA sería " + percent(newMargin, language) + ". Es una sensibilidad, no una previsión."
+      : "If revenue increases by " + (targetPercent !== null ? percent(targetPercent, language) : money(increase, language)) + ": sales would move from " + money(financials.revenue, language) + " to " + money(newRevenue, language) + ". Holding current gross margin (" + percent(financials.grossMarginPercent, language) + ") and operating expenses constant, estimated EBITDA would move from " + money(financials.ebitda, language) + " to " + money(newEbitda, language) + " and EBITDA margin would be " + percent(newMargin, language) + ". This is a sensitivity, not a forecast." };
   }
 
   if (intent === "profit" || intent === "revenue" || intent === "overview") {
