@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { translate, type Language } from "@/i18n/translations";
 import { OperationsCommandCentre } from "@/components/operations-command-centre";
 import { useOperationsCloudSync } from "@/components/use-operations-cloud-sync";
+import { useWorkspaceData } from "@/components/workspace-data-context";
 import { isDateWithinReportingPeriodCode, isValidISODate, isValidReportingPeriodCode } from "@/domain/reporting-periods";
-import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, costCenterActualSpend, costCenterPerformance, costCenterRunRate, kpiPerformance, projectBudgetVariance, riskScore, weightedPipeline, type BusinessKpi, type CostCenterBudget, type ExpenseRecord, type BusinessRisk, type Opportunity, type OpportunityStage, type OperationsState, type Project, type ProjectStatus } from "@/domain/operations";
+import { costCenterActualSpend, costCenterPerformance, costCenterRunRate, kpiPerformance, projectBudgetVariance, riskScore, weightedPipeline, type BusinessKpi, type CostCenterBudget, type ExpenseRecord, type BusinessRisk, type Opportunity, type OpportunityStage, type OperationsState, type Project, type ProjectStatus } from "@/domain/operations";
 
 type Section = "sales" | "projects" | "risks" | "kpis" | "cost-centers" | "expenses" | "reports";
 const makeId = () => typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `ops-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -47,8 +48,7 @@ function downloadCsv(state: OperationsState) {
 
 export function OperationsWorkspace({ language }: { language: Language }) {
   const t = (value: string) => translate(value, language);
-  const [data, setData] = useState<OperationsState>(EMPTY_OPERATIONS);
-  const [loaded, setLoaded] = useState(false);
+  const { operations: data, setOperations: setData, operationsLoaded: loaded } = useWorkspaceData();
   const cloudStatus = useOperationsCloudSync(data, setData, loaded, language);
   const cloudConnected = ["Sincronizado con tu cuenta","Guardado y sincronizado con tu cuenta","Actualizado desde la nube","Synced to your account","Saved and synced to your account","Updated from cloud"].includes(cloudStatus);
   const [section, setSection] = useState<Section>("sales");
@@ -87,50 +87,6 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   const [expenseCostCenterId, setExpenseCostCenterId] = useState("");
   const [expenseAmount, setExpenseAmount] = useState("0");
   const [expenseStatus, setExpenseStatus] = useState<"paid" | "unpaid">("unpaid");
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      try {
-        const restored = parseOperationsState(window.localStorage.getItem(OPERATIONS_STORAGE_KEY));
-        setData(restored ?? EMPTY_OPERATIONS);
-        setStorageMessage(restored ? "Saved operations workspace restored." : "Local workspace ready. Add your first records.");
-      } catch {
-        setStorageMessage("Browser storage is unavailable. Changes remain in this session.");
-      }
-      setLoaded(true);
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    function refreshFromBackup() {
-      const timer = window.setTimeout(() => {
-        try {
-          const restored = parseOperationsState(window.localStorage.getItem(OPERATIONS_STORAGE_KEY));
-          if (restored) setData(restored);
-        } catch {
-          setStorageMessage("Browser storage is unavailable. Changes remain in this session.");
-        }
-      }, 0);
-      return timer;
-    }
-    const onRestored = () => { refreshFromBackup(); };
-    window.addEventListener("enterpriseos:operations-updated", onRestored);
-    return () => window.removeEventListener("enterpriseos:operations-updated", onRestored);
-  }, []);
-
-  useEffect(() => {
-    if (!loaded) return;
-    const timer = window.setTimeout(() => {
-      try {
-        window.localStorage.setItem(OPERATIONS_STORAGE_KEY, JSON.stringify(data));
-        setStorageMessage("Changes saved in this browser.");
-      } catch {
-        setStorageMessage("Browser storage is unavailable. Changes remain in this session.");
-      }
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [data, loaded]);
 
   const openPipeline = useMemo(() => weightedPipeline(data.opportunities.filter((x) => !["won", "lost"].includes(x.stage))), [data.opportunities]);
   const activeProjects = data.projects.filter((x) => x.status === "active").length;
