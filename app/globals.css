@@ -1863,3 +1863,36 @@ button:focus-visible, input:focus-visible {
  .copilot-recommendation-heading>button{width:100%;justify-content:center}
 }
 @media(max-width:390px){.copilot-studio-metrics{grid-template-columns:minmax(0,1fr)}.copilot-answer-data{grid-template-columns:minmax(0,1fr)}.copilot-engine-state{font-size:9px}}
+
+
+/* Strategic intelligence upgrade: explicit hierarchy, decision evidence and scenarios. */
+.copilot-filter-groups{display:grid;gap:8px;margin-top:14px;padding:11px 12px;border:1px solid #e3e9f1;border-radius:9px;background:#fafbfd}
+.copilot-filter-groups .copilot-filters{margin:0}
+.copilot-priority-filters{padding-top:8px;border-top:1px solid #e8edf4}
+.copilot-rec-risk{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:9px;padding:8px 10px;border:1px solid #e6ebf2;border-radius:7px;background:#fbfcfe}
+.copilot-rec-risk span{color:#7a879a;font-size:9px}
+.copilot-rec-risk b{color:#3b4f6d;font-weight:800}
+.copilot-rec-simulation{display:grid;gap:5px;margin-top:9px;padding:10px 11px;border:1px solid #dce5f2;border-radius:7px;background:#f5f8fd}
+.copilot-rec-simulation>span{color:#74839a;font-size:8px;font-weight:850;letter-spacing:.7px;text-transform:uppercase}
+.copilot-rec-simulation strong{color:#213b61;font:750 11px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+.copilot-rec-simulation small{color:#7d899b;font-size:8px;line-height:1.5}
+.copilot-answer-steps{grid-column:1/-1;padding:13px 15px;border:1px solid #dfe6f0;border-radius:8px;background:#f8fafd}
+.copilot-answer-steps>b{color:#72819a;font-size:8px;font-weight:850;letter-spacing:.9px}
+.copilot-answer-steps ol{display:grid;gap:9px;margin:10px 0 0;padding-left:20px}
+.copilot-answer-steps li{padding-left:3px;color:#40536e;font-size:10px;line-height:1.65}
+.copilot-recommendations article{border:1px solid #e0e7f0;box-shadow:0 5px 16px #172b4d08}
+.copilot-recommendations article:hover{border-color:#c7d2e3;box-shadow:0 8px 22px #172b4d0d}
+.copilot-impact{gap:14px;border:1px solid #e5eaf2;background:#f8fafd}
+.copilot-impact>div{display:grid;gap:4px;min-width:0}
+.copilot-impact>div+div{padding-left:13px;border-left:1px solid #e1e7ef}
+.copilot-impact strong{font:800 12px ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+@media(max-width:760px){
+ .copilot-filter-groups{padding:9px}
+ .copilot-priority-filters{flex-wrap:nowrap;overflow-x:auto}
+ .copilot-impact{align-items:flex-start;flex-direction:column}
+ .copilot-impact>div+div{padding:8px 0 0;border:0;border-top:1px solid #e1e7ef}
+ .copilot-rec-risk{flex-direction:column;gap:6px}
+}
+
+.copilot-filter-label{flex:0 0 100%;color:#8793a5;font-size:8px;font-weight:850;letter-spacing:.75px}
+.copilot-priority-filters .copilot-filter-label{margin-bottom:1px}

@@ -6,8 +6,8 @@ import type { SavedPlanningState } from "./planning-storage";
 import { calculateCashForecast, type CashForecastWeekInput } from "./cash-forecast";
 import { calculateInvoiceAgeing, summarizeInvoices, type WorkingCapitalInvoice } from "./working-capital";
 
-export type CopilotIntent = "greeting" | "social" | "advice" | "expense" | "saving" | "investment" | "margin" | "profit" | "revenue" | "project" | "risk" | "kpi" | "cash" | "workingCapital" | "planning" | "overview" | "unknown";
-export type CopilotAnalysis = { intent: CopilotIntent; response: string; calculations: Record<string, number>; matchedData: string[] };
+export type CopilotIntent = "greeting" | "social" | "advice" | "expense" | "saving" | "investment" | "margin" | "profit" | "revenue" | "project" | "risk" | "kpi" | "cash" | "workingCapital" | "planning" | "overview" | "comparison" | "unknown";
+export type CopilotAnalysis = { intent: CopilotIntent; response: string; calculations: Record<string, number>; matchedData: string[]; steps?: string[]; action?: "explain" | "simulate" | "implement"; confidence?: number };
 
 const money = (value: number, language: Language) => new Intl.NumberFormat(language === "es" ? "es-ES" : "en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 2 }).format(value);
 const percent = (value: number, language: Language) => new Intl.NumberFormat(language === "es" ? "es-ES" : "en-IE", { style: "percent", maximumFractionDigits: 2 }).format(value / 100);
@@ -30,14 +30,34 @@ function extractAmount(question: string, intent: CopilotIntent): number | null {
   return /\b(?:k|mil)\b/i.test(match[0]) ? parsed * 1000 : parsed;
 }
 
+const NUMBER_WORDS: Record<string, number> = {
+  cero:0, zero:0, uno:1, una:1, un:1, one:1, dos:2, two:2, tres:3, three:3, cuatro:4, four:4,
+  cinco:5, five:5, seis:6, six:6, siete:7, seven:7, ocho:8, eight:8, nueve:9, nine:9,
+  diez:10, ten:10, once:11, eleven:11, doce:12, twelve:12, trece:13, thirteen:13,
+  catorce:14, fourteen:14, quince:15, fifteen:15, dieciseis:16, sixteen:16, diecisiete:17,
+  seventeen:17, dieciocho:18, eighteen:18, diecinueve:19, nineteen:19, veinte:20, twenty:20,
+  treinta:30, thirty:30, cuarenta:40, forty:40, cincuenta:50, fifty:50, sesenta:60, sixty:60,
+  setenta:70, seventy:70, ochenta:80, eighty:80, noventa:90, ninety:90, cien:100, hundred:100,
+};
+function numberWordsValue(raw: string): number | null {
+  const words = normaliseText(raw).split(/\s+/).filter(x => x !== "y" && x !== "and");
+  if (!words.length || words.some(x => NUMBER_WORDS[x] === undefined)) return null;
+  const values = words.map(x => NUMBER_WORDS[x]);
+  if (values.length === 1) return values[0];
+  if (values.length === 2 && values[0] >= 20 && values[0] % 10 === 0 && values[1] < 10) return values[0] + values[1];
+  return null;
+}
 function extractPercent(question: string): number | null {
   const match = question.match(/(\d+(?:[.,]\d+)?)\s*%/);
-  if (!match) return null;
-  const value = Number(match[1].replace(",", "."));
-  return Number.isFinite(value) && value >= 0 && value <= 1000 ? value : null;
+  const numeric = match ? Number(match[1].replace(",", ".")) : null;
+  if (numeric !== null) return Number.isFinite(numeric) && numeric >= 0 && numeric <= 1000 ? numeric : null;
+  const words = normaliseText(question).match(/\b(cero|zero|uno|una|un|one|dos|two|tres|three|cuatro|four|cinco|five|seis|six|siete|seven|ocho|eight|nueve|nine|diez|ten|once|eleven|doce|twelve|trece|thirteen|catorce|fourteen|quince|fifteen|dieciseis|sixteen|diecisiete|seventeen|dieciocho|eighteen|diecinueve|nineteen|veinte|twenty|treinta|thirty|cuarenta|forty|cincuenta|fifty|sesenta|sixty|setenta|seventy|ochenta|eighty|noventa|ninety|cien|hundred)(?:\s+y\s+(?:uno|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve))?\s+(?:por ciento|percent)\b/);
+  if (!words) return null;
+  const value = numberWordsValue(words[0].replace(/\s+(?:por ciento|percent)$/, ""));
+  return value !== null && value >= 0 && value <= 1000 ? value : null;
 }
 
-type IntentContext = { previousIntent?: CopilotIntent; previousQuestion?: string; previousResponse?: string; history?: { role: "user" | "assistant"; content: string }[] };
+export type IntentContext = { previousIntent?: CopilotIntent; previousQuestion?: string; previousResponse?: string; previousCalculations?: Record<string, number>; history?: { role: "user" | "assistant"; content: string }[] };
 const normaliseText = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9€%.,\s]/g, " ").replace(/\s+/g, " ").trim();
 const INTENT_TERMS: Record<Exclude<CopilotIntent,"greeting"|"social"|"advice"|"unknown">, string[]> = {
  investment:["invert","invierto","invierta","inversion","invertir","contratar","contratacion","emplear","personal","capex","inversion","roi","retorno","rentabilidad","capital","investment","hire"],
@@ -52,7 +72,8 @@ const INTENT_TERMS: Record<Exclude<CopilotIntent,"greeting"|"social"|"advice"|"u
  project:["proyecto","proyectos","project","projects","entrega","hitos"],
  risk:["riesgo","riesgos","amenaza","mitigacion","risk","risks"],
  kpi:["kpi","indicador","indicadores","objetivo","target","rendimiento","performance","metricas"],
- overview:["resumen","situacion","estado","empresa","negocio","analiza","analisis","panorama","mes","rumbo","como vamos","como va"]
+ overview:["resumen","situacion","estado","empresa","negocio","analiza","analisis","panorama","mes","rumbo","como vamos","como va"],
+ comparison:["compara","comparar","comparacion","comparativa","versus","vs","compare","comparison","diferencia entre"]
 };
 const INTENT_SYNONYMS: Partial<Record<CopilotIntent, string[]>> = {
   expense: ["dinero que sale", "salidas", "desembolso", "factura de proveedor", "cargo", "consumo", "partida", "coste fijo", "coste variable", "overhead", "donde se esta yendo el dinero", "en que se gasta el dinero", "que partidas consumen recursos", "a donde va el dinero", "gasto por categoria"],
@@ -105,16 +126,22 @@ function scoreIntents(question: string): Record<string,number> {
   return scores;
 }
 function intentOf(question: string, context?: IntentContext): CopilotIntent {
-  const q=normaliseText(question), tokens=tokensOf(q), scores=scoreIntents(question);
-  const followUp=/\b(y por que|por que|y eso|como lo soluciono|como lo arreglo|como lo corrijo|como bajo eso|como lo bajo|como reducirlo|como lo reduzco|que hago entonces|y si cambio|si cambio esa cifra|esa cifra|ese importe|ese gasto|esa partida|lo anterior|con ese cambio|y ahora|ahora|en ese caso|y si|si lo subo|si lo aumento|mas detalles|amplia|desarrolla|what about|why is that|how do i fix|how can i solve|what if i change|that amount|that cost)\b/.test(q);
-  if(context?.previousIntent&&followUp) return context.previousIntent;
-  if((scores.greeting??0)>=8 && tokens.length<=7 && !Object.entries(scores).some(([key,value])=>!["greeting","social"].includes(key)&&value>=3)) return "greeting";
-  if((scores.social??0)>=7 && tokens.length<=8 && !Object.entries(scores).some(([key,value])=>!["greeting","social"].includes(key)&&value>=3)) return "social";
-  if((scores.advice??0)>=7) return "advice";
-  if(/\b(recort\w*|reduc\w*|ahorr\w*|abarat\w*|optimiza\w*|gastar menos|contener el gasto)\b/.test(q)) return "saving";
-  const ranked=Object.entries(scores).filter(([key,value])=>!["greeting","social","advice"].includes(key)&&value>0).sort((a,b)=>b[1]-a[1]);
-  if(ranked.length&&ranked[0][1]>=2) return ranked[0][0] as CopilotIntent;
-  if(context?.previousIntent&&tokens.length<=10) return context.previousIntent;
+  const q = normaliseText(question), tokens = tokensOf(q), scores = scoreIntents(question);
+  const followUp = /\b(y por que|por que|y eso|como lo soluciono|como lo arreglo|como lo corrijo|como bajo eso|como lo bajo|como reducirlo|como lo reduzco|como lo aplico|como aplico eso|paso a paso|plan de accion|que hago entonces|y si cambio|si cambio esa cifra|esa cifra|ese importe|ese gasto|esa partida|lo anterior|con ese cambio|y ahora|ahora|en ese caso|y si|si lo subo|si lo aumento|mas detalles|amplia|desarrolla|what about|why is that|how do i fix|how can i solve|how do i apply|step by step|what if i change|that amount|that cost)\b/.test(q);
+  const lowerAction = /\b(reduc\w*|baj\w*|recort\w*|disminu\w*|ahorr\w*|lower|reduce|cut)\b/.test(q);
+  const raiseAction = /\b(sub\w*|aument\w*|elev\w*|increment\w*|raise|increase|boost)\b/.test(q);
+  if (context?.previousIntent && followUp) {
+    if (lowerAction && ["expense", "overview"].includes(context.previousIntent)) return "saving";
+    if (raiseAction && context.previousIntent === "revenue") return "revenue";
+    return context.previousIntent;
+  }
+  if ((scores.greeting ?? 0) >= 8 && tokens.length <= 7 && !Object.entries(scores).some(([key,value]) => !["greeting","social"].includes(key) && value >= 3)) return "greeting";
+  if ((scores.social ?? 0) >= 7 && tokens.length <= 8 && !Object.entries(scores).some(([key,value]) => !["greeting","social"].includes(key) && value >= 3)) return "social";
+  if ((scores.advice ?? 0) >= 7) return "advice";
+  if (lowerAction && /\b(gasto|gastos|coste|costes|costo|costos|presupuesto|spend|expense|cost)\b/.test(q)) return "saving";
+  const ranked = Object.entries(scores).filter(([key,value]) => !["greeting","social","advice"].includes(key) && value > 0).sort((a,b) => b[1]-a[1]);
+  if (ranked.length && ranked[0][1] >= 2) return ranked[0][0] as CopilotIntent;
+  if (context?.previousIntent && tokens.length <= 10) return context.previousIntent;
   return "unknown";
 }
 function localISODate(): string { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
@@ -154,6 +181,86 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
       ? "La respuesta anterior no estaba organizada en puntos numerados, así que no puedo identificar con seguridad cuál es el segundo. Cita esa frase o dime el tema y lo desarrollo sin inventar una referencia."
       : "My previous answer was not structured as a numbered list, so I cannot reliably identify the second point. Quote that phrase or name the topic and I will expand it without guessing." };
   }
+  const asksImplementation = /\b(como lo aplico|como aplico eso|como lo pongo en marcha|como ejecuto|paso a paso|plan de accion|dame un plan|how do i apply|how do i implement|step by step|give me a plan)\b/.test(normaliseText(q));
+  if (asksImplementation && context?.previousIntent) {
+    const steps: string[] = [];
+    if (context.previousIntent === "saving" || context.previousIntent === "expense") {
+      const ranked = [...operations.expenses].sort((a,b) => b.amount-a.amount).slice(0,3);
+      const base = context.previousCalculations?.expenseBase ?? financials.operatingExpenses + financials.costOfGoodsSold;
+      const target = context.previousCalculations?.saving ?? round(base * 0.1);
+      calculations.expenseBase = round(base); calculations.targetSaving = round(target);
+      matchedData.push("financials.operatingExpenses","financials.costOfGoodsSold","operations.expenses");
+      steps.push(es ? "Congela nuevos compromisos no esenciales durante 7 días; no canceles partidas críticas sin validar su efecto." : "Freeze non-essential new commitments for 7 days; do not cancel critical items without validating the effect.");
+      steps.push(es ? "Asigna un responsable y una fecha de revisión a cada partida; compara el gasto real con la línea base antes de autorizar el recorte." : "Assign an owner and review date to each cost line; compare actual spend with baseline before approving the cut.");
+      if (ranked[0]) steps.push((es ? "Audita primero " : "Audit ") + ranked[0].description + " (" + ranked[0].category + "): " + money(ranked[0].amount,language) + (es ? "; pide detalle, contrato y responsable." : "; request the invoice, contract and owner."));
+      if (ranked[1]) steps.push((es ? "Contrasta " : "Benchmark ") + ranked[1].description + " (" + money(ranked[1].amount,language) + (es ? ") con al menos dos alternativas y revisa si es recurrente." : ") against at least two alternatives and check whether it recurs."));
+      steps.push((es ? "Fija un objetivo máximo de " : "Set a maximum target of ") + money(target,language) + (es ? " de ahorro para el periodo analizado; registra responsable, fecha y ahorro realmente conseguido." : " for the analysed period; record owner, deadline and realised savings."));
+    } else if (context.previousIntent === "revenue") {
+      const deals = operations.opportunities.filter(x => !["won","lost"].includes(x.stage)).sort((a,b) => b.value-a.value).slice(0,3);
+      const pipeline = weightedPipeline(operations.opportunities.filter(x => !["won","lost"].includes(x.stage)));
+      calculations.weightedPipeline = round(pipeline); matchedData.push("operations.opportunities");
+      steps.push(es ? "Ordena la cartera por valor, probabilidad y fecha prevista de cierre; no confundas pipeline con ingresos reconocidos." : "Rank the pipeline by value, probability and expected close date; do not confuse pipeline with recognised revenue.");
+      deals.forEach((deal,index) => steps.push((index+1) + ". " + deal.company + ": " + money(deal.value,language) + (es ? ", fase " : ", ") + deal.stage + (es ? ", cierre previsto " : ", expected close ") + deal.expectedClose + (es ? ". Define el siguiente contacto y bloqueo." : ". Define the next contact and blocker.")));
+      steps.push(es ? "Revisa semanalmente conversión por fase y margen esperado antes de aprobar descuentos." : "Review stage conversion and expected margin weekly before approving discounts.");
+    } else if (context.previousIntent === "cash" || context.previousIntent === "workingCapital") {
+      const invoices = workspace.workingCapitalInvoices ?? [];
+      const today = localISODate();
+      const overdue = invoices.map(invoice => ({invoice,age:calculateInvoiceAgeing([invoice],today)[0]})).filter(x=>x.age.outstanding>0&&x.age.overdueDays>0).sort((a,b)=>b.age.outstanding-a.age.outstanding);
+      matchedData.push("workingCapitalInvoices","cashForecastWeeks");
+      calculations.overdueReceivables = round(overdue.filter(x=>x.invoice.direction==="receivable").reduce((s,x)=>s+x.age.outstanding,0));
+      steps.push(es ? "Separa cobros vencidos, cobros próximos y pagos comprometidos; prioriza por importe y días de retraso." : "Separate overdue collections, upcoming receipts and committed payments; prioritise by amount and days overdue.");
+      overdue.slice(0,3).forEach((x,index)=>steps.push((index+1) + ". " + (es ? "Contacta con " : "Contact ") + x.invoice.counterparty + " por " + money(x.age.outstanding,language) + (es ? "; vencimiento " : "; due ") + x.invoice.dueDate + "."));
+      steps.push(es ? "Actualiza la previsión de 13 semanas con fechas probables reales y negocia plazos antes del vencimiento." : "Update the 13-week forecast with realistic receipt dates and negotiate terms before due dates.");
+    } else if (context.previousIntent === "project") {
+      const project = operations.projects.filter(x=>x.status!=="completed").map(x=>({...x,variance:x.spent-x.budget})).sort((a,b)=>b.variance-a.variance)[0];
+      matchedData.push("operations.projects");
+      if(project){calculations.projectVariance=round(project.variance);steps.push((es?"Reestima ":"Reforecast ")+project.name+": "+money(project.spent,language)+(es?" gastados frente a ":" spent against ")+money(project.budget,language)+(es?" presupuestados; valida coste pendiente y fecha final.":" budget; validate cost to complete and final date."));}
+      steps.push(es ? "Divide el trabajo restante en hitos, asigna un responsable por hito y aprueba cambios de alcance solo con coste y plazo." : "Break remaining work into milestones, assign one owner per milestone and approve scope changes only with cost and schedule impact.");
+    } else if (context.previousIntent === "risk") {
+      const risk = operations.risks.filter(x=>x.status!=="closed").sort((a,b)=>b.probability*b.impact-a.probability*a.impact)[0];
+      matchedData.push("operations.risks");
+      if(risk){calculations.highestRiskScore=risk.probability*risk.impact;steps.push((es?"Asigna un responsable a «":"Assign an owner to “")+risk.title+(es?"» (riesgo ":"” (risk ")+(risk.probability*risk.impact)+"/25) "+(es?"y convierte la mitigación en tareas verificables.":"and turn mitigation into verifiable tasks."));}
+      steps.push(es ? "Define señal temprana, fecha de revisión y criterio de escalado; actualiza el estado tras cada control." : "Define an early-warning indicator, review date and escalation trigger; update status after each control.");
+    } else {
+      steps.push(es ? "Abre el dato o registro concreto que sustenta la recomendación y confirma periodo, responsable y unidad." : "Open the exact record behind the recommendation and confirm period, owner and unit.");
+      steps.push(es ? "Define una acción reversible, una métrica de éxito y una fecha de revisión a 30 días." : "Define a reversible action, a success metric and a 30-day review date.");
+    }
+    return {intent:context.previousIntent,calculations,matchedData,steps,action:"implement",confidence:0.9,response:es ? "Plan de ejecución ligado al análisis anterior y a los registros actuales. No modificaré datos contables automáticamente; cada paso debe validarse y medirse." : "Execution plan linked to the previous analysis and current records. I will not change accounting data automatically; each step must be validated and measured."};
+  }
+
+  if (context?.previousIntent === "saving" && targetPercent !== null && /\b(sub\w*|aument\w*|elev\w*|increment\w*|raise|increase|boost)\b/.test(normaliseText(q)) && context.previousCalculations?.saving !== undefined) {
+    const previousSaving = context.previousCalculations.saving;
+    const nextSaving = round(previousSaving * (1 + targetPercent / 100));
+    calculations.previousSaving = previousSaving; calculations.savingIncreasePercent = targetPercent; calculations.savingAfterScenario = nextSaving; calculations.incrementalSaving = round(nextSaving - previousSaving);
+    matchedData.push("conversation.previousCalculations","financials");
+    return {intent:"saving",calculations,matchedData,action:"simulate",confidence:0.94,response:es ? "Interpreto «subirlo» como aumentar el objetivo de ahorro anterior un " + percent(targetPercent,language) + ". El objetivo pasaría de " + money(previousSaving,language) + " a " + money(nextSaving,language) + " por el mismo periodo: " + money(nextSaving-previousSaving,language) + " adicionales. Es un objetivo de escenario, no un ahorro realizado." : "I interpret “raise it” as increasing the previous savings target by " + percent(targetPercent,language) + ". The target moves from " + money(previousSaving,language) + " to " + money(nextSaving,language) + " for the same period: " + money(nextSaving-previousSaving,language) + " additional. This is a scenario target, not realised savings."};
+  }
+
+  if (intent === "comparison") {
+    const metrics = [
+      {key:"revenue",label:es?"Ingresos":"Revenue",value:financials.revenue,terms:["ingresos","ingreso","ventas","facturacion","revenue","sales"]},
+      {key:"costOfGoodsSold",label:es?"Coste de ventas":"Cost of goods sold",value:financials.costOfGoodsSold,terms:["coste de ventas","costes directos","cogs","cost of goods sold"]},
+      {key:"operatingExpenses",label:es?"Gastos operativos":"Operating expenses",value:financials.operatingExpenses,terms:["gastos operativos","gasto operativo","opex","operating expenses","overheads","gastos"]},
+      {key:"grossProfit",label:es?"Beneficio bruto":"Gross profit",value:financials.grossProfit,terms:["beneficio bruto","margen bruto en euros","gross profit"]},
+      {key:"ebitda",label:"EBITDA",value:financials.ebitda,terms:["ebitda"]},
+      {key:"netIncome",label:es?"Beneficio neto":"Net income",value:financials.netIncome,terms:["beneficio neto","resultado neto","net income","net profit"]},
+      {key:"grossMarginPercent",label:es?"Margen bruto":"Gross margin",value:financials.grossMarginPercent,terms:["margen bruto","gross margin"]},
+      {key:"ebitdaMarginPercent",label:es?"Margen EBITDA":"EBITDA margin",value:financials.ebitdaMarginPercent,terms:["margen ebitda","ebitda margin"]},
+    ];
+    const qn=normaliseText(q);
+    const matched=metrics.filter(metric=>metric.terms.some(term=>qn.includes(normaliseText(term))));
+    if(matched.length<2){
+      return {intent,calculations,matchedData:["financials"],confidence:0.55,response:es?"He detectado una petición de comparación, pero necesito dos métricas concretas. Por ejemplo: «Compara ingresos con gastos operativos» o «EBITDA frente a beneficio neto».":"I detected a comparison request, but need two specific metrics. For example: “Compare revenue with operating expenses” or “EBITDA versus net income.”"};
+    }
+    const first=matched[0],second=matched[1],difference=round(first.value-second.value),ratio=second.value!==0?round(first.value/second.value):null;
+    calculations.comparisonFirst=first.value;calculations.comparisonSecond=second.value;calculations.comparisonDifference=difference;if(ratio!==null)calculations.comparisonRatio=ratio;
+    matchedData.push("financials");
+    const percentMetric=first.key.toLowerCase().includes("percent")||second.key.toLowerCase().includes("percent");
+    return {intent,calculations,matchedData,action:"explain",confidence:0.96,response:es
+      ? first.label+": "+(percentMetric&&first.key.toLowerCase().includes("percent")?percent(first.value,language):money(first.value,language))+". "+second.label+": "+(percentMetric&&second.key.toLowerCase().includes("percent")?percent(second.value,language):money(second.value,language))+". Diferencia: "+(percentMetric&&first.key.toLowerCase().includes("percent")&&second.key.toLowerCase().includes("percent")?percent(Math.abs(difference),language):money(Math.abs(difference),language))+". "+first.label+" "+(difference>=0?"supera":"queda por debajo de")+" "+second.label+" en ese importe. "+(ratio!==null?"Relación: "+ratio.toFixed(2)+"x. ":"")+"Ambas cifras proceden de la cuenta de resultados del mismo periodo."
+      : first.label+": "+money(first.value,language)+". "+second.label+": "+money(second.value,language)+". Difference: "+money(Math.abs(difference),language)+". "+first.label+" "+(difference>=0?"exceeds":"is below")+" "+second.label+" by that amount. "+(ratio!==null?"Ratio: "+ratio.toFixed(2)+"x. ":"")+"Both figures come from the income statement for the same period."};
+  }
+
   if (intent === "greeting") {
     const openProjects=operations.projects.filter(x=>x.status!=="completed").length;
     const openDeals=operations.opportunities.filter(x=>!["won","lost"].includes(x.stage));
