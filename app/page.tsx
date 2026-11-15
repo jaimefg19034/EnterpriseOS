@@ -1,18 +1,18 @@
 "use client";
 
 // The root route renders the same landing component as /platform, so it must
-// load the platform design styles as well. The platform route gets these from
-// app/platform/layout.tsx; the root route does not inherit that nested layout.
+// load the platform design styles as well. Keep these paths aligned with
+// app/platform/layout.tsx.
 import "./platform/platform.css";
-import "./platform/tokens.css";
-import "./platform/design-system.css";
-import "./platform/hero.css";
-import "./platform/capabilities.css";
-import "./platform/product.css";
-import "./platform/interactions.css";
-import "./platform/scenario-matrix.css";
-import "./platform/ticker.css";
-import "./platform/motion-mobile.css";
+import "./platform/platform/tokens.css";
+import "./platform/platform/design-system.css";
+import "./platform/platform/hero.css";
+import "./platform/platform/capabilities.css";
+import "./platform/platform/product.css";
+import "./platform/platform/interactions.css";
+import "./platform/platform/scenario-matrix.css";
+import "./platform/platform/ticker.css";
+import "./platform/platform/motion-mobile.css";
 import "./platform/radical-art-direction.css";
 import "./platform/atlas-rebuild.css";
 import "./platform/conversion-landing.css";
