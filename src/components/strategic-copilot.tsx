@@ -133,9 +133,17 @@ export function StrategicCopilot({language,mode="chat"}:{language:Language;mode?
   const messageId=++messageSequence.current;
   const userMessage:ChatMessage={id:String(messageId)+"-u",role:"user",text:clean};
   setChatMessages(current=>[...current,userMessage].slice(-12));setChatBusy(true);
-  window.setTimeout(()=>{
+  window.setTimeout(async()=>{
    try{
-    const analysis=aiEngine(clean,financials,ops,language,{planning,statementAssumptions,cashForecastWeeks,workingCapitalInvoices},{...conversationContext,history:chatMessages.slice(-8).map(m=>({role:m.role,content:m.text}))});
+    let analysis=aiEngine(clean,financials,ops,language,{planning,statementAssumptions,cashForecastWeeks,workingCapitalInvoices},{...conversationContext,history:chatMessages.slice(-8).map(m=>({role:m.role,content:m.text}))});
+    const advisorUrl=process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if(advisorUrl){
+     try{
+      const anonKey=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      const response=await fetch(advisorUrl.replace(/\\/$/,"")+"/functions/v1/strategic-advisor",{method:"POST",headers:{"Content-Type":"application/json",...(anonKey?{"apikey":anonKey,"Authorization":"Bearer "+anonKey}:{})},body:JSON.stringify({language,question:clean,metrics:{revenue:financials.revenue,costOfGoodsSold:financials.costOfGoodsSold,operatingExpenses:financials.operatingExpenses,grossProfit:financials.grossProfit,ebitda:financials.ebitda,netIncome:financials.netIncome,ebitdaMarginPercent:financials.ebitdaMarginPercent},operations:ops})});
+      if(response.ok){const payload=await response.json() as {status?:string;answer?:string};if(payload.status==="ai"&&typeof payload.answer==="string"&&payload.answer.trim())analysis={...analysis,response:payload.answer.trim().slice(0,5000)};}
+     }catch{/* Keep the local intent-aware answer if the hosted model is unavailable. */}
+    }
     const isSmallTalk=analysis.intent==="greeting"||analysis.intent==="social"||analysis.intent==="unknown";const nextContext:ChatContext={previousIntent:isSmallTalk?conversationContext.previousIntent:analysis.intent,previousQuestion:isSmallTalk?(conversationContext.previousQuestion??clean):clean,previousResponse:isSmallTalk?(conversationContext.previousResponse??analysis.response):analysis.response,previousCalculations:isSmallTalk?(conversationContext.previousCalculations??analysis.calculations):analysis.calculations,history:[...(conversationContext.history??[]),{role:"user" as const,content:clean},{role:"assistant" as const,content:analysis.response}].slice(-8)};
     setConversationContext(nextContext);try{window.localStorage.setItem(CHAT_CONTEXT_KEY,JSON.stringify(nextContext))}catch{}
     const assistantMessage:ChatMessage={id:String(messageId)+"-a",role:"assistant",text:analysis.response|| (es?"No tengo una conclusión fiable con la información disponible. Dime qué cifra, proyecto o partida quieres revisar.":"I cannot reach a reliable conclusion from the available information. Tell me which figure, project or line item to review."),analysis};setChatMessages(current=>[...current,assistantMessage].slice(-12));
