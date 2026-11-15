@@ -62,7 +62,7 @@ function scoreIntents(question: string): Record<string,number> {
   for(const term of terms){
    const t=normaliseText(term);
    if(q.includes(t)) score+=t.includes(" ")?3:2;
-   else if(t.length>=5&&tokens.some(token=>token.startsWith(t.slice(0,Math.max(4,t.length-2))))) score+=1;
+   else if(t.length>=5&&tokens.some(token=>token.startsWith(t.slice(0,Math.max(4,t.length-2))))) score+=2;
   }
   scores[intent]=score;
  }
@@ -119,7 +119,7 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
       ? `¡De nada! Seguimos cuando quieras. Tengo cargados los datos actuales: ingresos ${money(financials.revenue,language)} y EBITDA ${money(financials.ebitda,language)}. Si quieres, podemos convertir cualquier duda en un escenario con números.`
       : `You're welcome. We can pick this up whenever you're ready. I have the current workspace figures: revenue ${money(financials.revenue,language)} and EBITDA ${money(financials.ebitda,language)}. We can turn any question into a quantified scenario.`};
   }
-  if (intent === "advice" || (intent === "overview" && /director|por donde empiezo|que harias|recomiend|prioridad|rumbo/.test(normaliseText(q)))) {
+  if (intent === "advice") {
     const openProjects=operations.projects.filter(x=>x.status!=="completed");
     const overruns=openProjects.map(x=>({...x,variance:x.spent-x.budget})).filter(x=>x.variance>0).sort((a,b)=>b.variance-a.variance);
     const openRisks=operations.risks.filter(x=>x.status!=="closed").sort((a,b)=>b.probability*b.impact-a.probability*b.impact);
@@ -143,7 +143,7 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
       : `As finance lead, I would protect cash and margin before making indiscriminate cuts. Current position: revenue ${money(financials.revenue,language)}, gross margin ${percent(gross,language)}, EBITDA ${money(financials.ebitda,language)} (${percent(currentMargin,language)}), detailed recorded expenses ${money(totalRecorded,language)}, and weighted sales pipeline ${money(pipeline,language)}. Outstanding invoices are ${money(receivables.outstanding,language)} receivable and ${money(payables.outstanding,language)} payable; the 13-week cash forecast closes at ${money(forecastClosing,language)}. Operations show ${openProjects.length} open projects, ${overruns.length} over budget, ${openRisks.length} open risks and ${offKpis.length} off-target KPIs.\n\nMy first priority would be to ${priority}. Then: (1) reconcile detailed expenses to the P&L to avoid double counting; (2) review cash, collections and payments weekly; (3) give every critical project or KPI an owner, deadline and measurable outcome. I cannot claim a monthly trend without comparable historical data: these figures describe the current state, not whether it is improving or deteriorating.`};
   }
   const multiHire=normaliseText(q).match(/(?:contrat|hire|employ)[a-z ]{0,35}(\d[\d.,]*)\s*(?:€|eur|euros?)/);
-  const marketingCut=normaliseText(q).match(/(?:marketing|publicidad|ads)[^%]{0,45}(\d+(?:[.,]\d+)?)\s*%|(?:recort|reduc|cut)[^%]{0,35}(\d+(?:[.,]\d+)?)\s*%[^.]{0,35}(?:marketing|publicidad|ads)/);
+  const marketingCut=normaliseText(q).match(/(?:marketing|publicidad|ads)[^%]{0,45}(\d+(?:[.,]\d+)?)\s*%|(?:recort|reduc|cut)[^0-9%]{0,35}(\d+(?:[.,]\d+)?)\s*%[^.]{0,35}(?:marketing|publicidad|ads)/);
   if (multiHire || marketingCut) {
     const hireCost=multiHire?parseNumber(multiHire[1]):0;
     const rate=marketingCut?Number((marketingCut[1]??marketingCut[2]).replace(",",".")):0;
