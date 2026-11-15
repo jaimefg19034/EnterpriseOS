@@ -1,0 +1,155 @@
+/* Unified workspace layout guardrails.
+   Uses the existing design tokens and palette; no component behavior is changed. */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { min-width: 0; max-width: 100%; }
+body { overflow-x: clip; }
+.app-shell, .main-column, .content-area { min-width: 0; }
+.main-column { flex: 1 1 0; width: auto; max-width: calc(100% - 264px); }
+.topbar, .content-area { min-width: 0; max-width: 100%; }
+.content-area {
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: clip;
+}
+.content-area > *, .content-area [class*="grid"],
+.content-area .panel, .content-area article,
+.content-area table, .content-area .operations-content {
+  min-width: 0;
+  max-width: 100%;
+}
+.content-area img, .content-area svg, .content-area canvas { max-width: 100%; }
+.content-area table { width: 100%; }
+.content-area [class*="table-scroll"],
+.content-area .monthly-table-scroll { max-width: 100%; overflow-x: auto; }
+
+/* Overview: proportioned executive dashboard at desktop widths. */
+@media (min-width: 1101px) {
+  .main-column { width: calc(100% - 264px); max-width: none; }
+  .content-area[data-view="overview"] {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    padding-left: clamp(24px, 2.4vw, 44px);
+    padding-right: clamp(24px, 2.4vw, 44px);
+    overflow-x: clip;
+  }
+  .content-area[data-view="overview"] > .eos-command {
+    width: 100%;
+    max-width: 1680px;
+    min-width: 0;
+    margin-inline: auto;
+    grid-template-columns: minmax(0, 7fr) minmax(340px, 5fr);
+    grid-template-rows: auto minmax(280px, minmax(34vh, 1fr)) auto auto;
+    gap: clamp(12px, 1vw, 18px);
+    align-content: start;
+  }
+  .content-area[data-view="overview"] > .eos-command > .eos-command-heading {
+    grid-column: 1 / -1;
+    min-width: 0;
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+  }
+  .content-area[data-view="overview"] .eos-executive-stage {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    min-width: 0;
+    min-height: 280px;
+    grid-template-columns: minmax(0, 7fr) minmax(320px, 5fr);
+  }
+  .content-area[data-view="overview"] .eos-stage-performance,
+  .content-area[data-view="overview"] .eos-stage-bridge {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .content-area[data-view="overview"] .eos-margin-section {
+    grid-column: 1;
+    grid-row: 3;
+    min-width: 0;
+  }
+  .content-area[data-view="overview"] .eos-workspace-section {
+    grid-column: 2;
+    grid-row: 3;
+    min-width: 0;
+  }
+  .content-area[data-view="overview"] .eos-margin-content,
+  .content-area[data-view="overview"] .eos-workspace-content {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+  .content-area[data-view="overview"] .eos-margin-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    min-width: 0;
+  }
+  .content-area[data-view="overview"] .eos-margin-item {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .content-area[data-view="overview"] .eos-workspace-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-width: 0;
+  }
+  .content-area[data-view="overview"] .eos-workspace-row {
+    min-width: 0;
+    grid-template-columns: 18px 25px minmax(0, 1fr) 13px;
+    gap: 7px;
+  }
+  .content-area[data-view="overview"] .eos-workspace-description {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .content-area[data-view="overview"] .eos-data-note {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    min-width: 0;
+  }
+}
+
+/* Wide desktop: let the dashboard breathe without stretching text indefinitely. */
+@media (min-width: 1600px) {
+  .content-area:not([data-view="overview"]) {
+    max-width: 1720px;
+    margin-inline: auto;
+  }
+  .content-area[data-view="overview"] > .eos-command {
+    max-width: 1680px;
+  }
+}
+
+/* Smaller desktop / laptop: keep columns readable rather than squeezing them. */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .main-column { width: calc(100% - 205px); max-width: none; }
+  .content-area { width: 100%; padding-inline: clamp(16px, 2vw, 24px); }
+  .content-area[data-view="overview"] { overflow: auto; }
+  .content-area[data-view="overview"] > .eos-command {
+    display: grid;
+    height: auto;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+  }
+  .content-area[data-view="overview"] > .eos-command > *,
+  .content-area[data-view="overview"] .eos-executive-stage,
+  .content-area[data-view="overview"] .eos-margin-section,
+  .content-area[data-view="overview"] .eos-workspace-section,
+  .content-area[data-view="overview"] .eos-data-note {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .content-area[data-view="overview"] .eos-executive-stage {
+    grid-template-columns: minmax(0, 1.4fr) minmax(260px, .9fr);
+  }
+  .content-area[data-view="overview"] .eos-margin-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .content-area[data-view="overview"] .eos-workspace-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Preserve the mobile safety-net behavior from mobile-fix.css. */
+@media (max-width: 760px) {
+  .main-column { width: 100% !important; max-width: 100% !important; }
+  .content-area { width: 100% !important; max-width: 100% !important; }
+}
