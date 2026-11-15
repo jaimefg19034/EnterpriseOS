@@ -153,7 +153,7 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
   }
 
   if (intent === "kpi") {
-    const off = operations.kpis.filter(x => x.direction === "lower" ? x.actual > x.target : x.actual < x.target).sort((a,b)=>x => 0);
+    const off = operations.kpis.filter(x => x.direction === "lower" ? x.actual > x.target : x.actual < x.target).sort((a,b) => (a.direction === "lower" ? a.target - a.actual : a.actual - a.target) - (b.direction === "lower" ? b.target - b.actual : b.actual - b.target));
     const first = off[0] ?? operations.kpis[0];
     if (first) matchedData.push("operations.kpis");
     return { intent, calculations, matchedData, response: first
