@@ -97,7 +97,7 @@ function scoreIntents(question: string): Record<string,number> {
   }
   const add=(intent:CopilotIntent,pattern:RegExp,weight=4)=>{if(pattern.test(q))scores[intent]=(scores[intent]??0)+weight;};
   add("advice",/\b(que harias|si estuvieras|si fueras|que me recomiendas|por donde empiezo|como mejorarias|que deberia priorizar|what would you do|where should i start)\b/,7);
-  add("saving",/\b(recort\w*|reduc\w*|ahorr\w*|abarat\w*|optimiza\w*|contener el gasto|gastar menos|coste menor)\b/,3);
+  add("saving",/\b(recort\w*|reduc\w*|ahorr\w*|abarat\w*|optimiza\w*|contener el gasto|gastar menos|coste menor)\b/,8);
   add("investment",/\b(inviert\w*|invert\w*|contrat\w*|incorpor\w*|compr\w*|adquir\w*|capex)\b/,3);
   add("greeting",/\b(hola|buenas|hey|hello|hi|buenos dias|buenas tardes|buenas noches)\b/,8);
   add("overview",/\b(como ves|como va|como vamos|situacion actual|panorama general|que tal estamos|how are we doing)\b/,3);
