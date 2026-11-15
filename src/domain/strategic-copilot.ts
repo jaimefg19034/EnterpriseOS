@@ -130,6 +130,13 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
     const statementCash=calculateThreeStatements(financials,workspace.statementAssumptions??DEFAULT_THREE_STATEMENT_ASSUMPTIONS).cashFlow.closingCash;
     const cashForecast=calculateCashForecast(statementCash,workspace.cashForecastWeeks??[]);
     const forecastClosing=cashForecast.at(-1)?.closingCash??statementCash;
+    const invoices=workspace.workingCapitalInvoices??[];
+    const today=localISODate();
+    const receivables=summarizeInvoices(calculateInvoiceAgeing(invoices.filter(x=>x.direction==="receivable"),today),today);
+    const payables=summarizeInvoices(calculateInvoiceAgeing(invoices.filter(x=>x.direction==="payable"),today),today);
+    const statementCash=calculateThreeStatements(financials,workspace.statementAssumptions??DEFAULT_THREE_STATEMENT_ASSUMPTIONS).cashFlow.closingCash;
+    const cashForecast=calculateCashForecast(statementCash,workspace.cashForecastWeeks??[]);
+    const forecastClosing=cashForecast.at(-1)?.closingCash??statementCash;
     const pipeline=weightedPipeline(operations.opportunities.filter(x=>!["won","lost"].includes(x.stage)));
     const gross=financials.revenue>0?financials.grossProfit/financials.revenue*100:0;
     calculations.revenue=financials.revenue; calculations.ebitda=financials.ebitda; calculations.ebitdaMargin=currentMargin; calculations.grossMargin=gross; calculations.recordedExpenses=totalRecorded; calculations.openProjects=openProjects.length; calculations.projectOverruns=overruns.length; calculations.openRisks=openRisks.length; calculations.offTargetKpis=offKpis.length; calculations.weightedPipeline=pipeline;
