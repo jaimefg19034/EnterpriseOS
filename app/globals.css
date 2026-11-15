@@ -443,7 +443,7 @@ button:focus-visible, input:focus-visible {
 .planning-metric-mark.amber { background: #d39a4b; }
 .planning-metric > strong { display: block; margin-top: 10px; overflow: hidden; color: #223149; text-overflow: ellipsis; white-space: nowrap; font: 800 22px/1.25 "Manrope",sans-serif; letter-spacing: -.7px; font-variant-numeric: tabular-nums; }
 .planning-metric > small { display: block; margin-top: 6px; overflow: hidden; color: #98a3b2; text-overflow: ellipsis; white-space: nowrap; font-size: 8px; }
-.planning-main-grid { display: grid; grid-template-columns: minmax(0,1fr); gap: 16px; align-items: stretch; }
+.planning-main-grid { display: grid; grid-template-columns: minmax(0,1.08fr) minmax(0,.92fr); gap: 16px; align-items: start; }
 .planning-assumptions-panel, .planning-performance-panel { padding: 17px 17px 14px; }
 .planning-assumption-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 26px; margin-top: 11px; }
 .planning-assumption-field {
