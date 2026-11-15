@@ -5,6 +5,7 @@ import "./enterprise-design.css";
 import "./executive-overhaul.css";
 import "./account.css";
 import "./mobile-fix.css";
+import "./workspace-layout-fix.css";
 import { AuthProvider } from "@/components/auth-provider";
 
 export const metadata: Metadata = {
