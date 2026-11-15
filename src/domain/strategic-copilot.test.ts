@@ -45,7 +45,7 @@ describe("analyzeCopilotQuestion", () => {
     expect(result.calculations.targetMargin).toBeCloseTo(34.5);
   });
 
-  it("does not claim a return when the question cannot be interpreted", () => {
+  it("uses edited three-statement assumptions for cash questions", () => {\n    const result = analyzeCopilotQuestion("¿Cómo está la caja y la deuda?", financials, EMPTY_OPERATIONS, "es", { planning: null, statementAssumptions: { daysSalesOutstanding: 30, inventoryDays: 30, payableDays: 30, capitalExpenditure: 1000, debtRepayment: 5000, newBorrowings: 0, dividends: 0 } });\n    expect(result.intent).toBe("cash");\n    expect(result.matchedData).toContain("threeStatementAssumptions");\n    expect(result.calculations.closingCash).toBeTypeOf("number");\n  });\n\n  it("does not claim a return when the question cannot be interpreted", () => {
     const result = analyzeCopilotQuestion("haz magia", financials, EMPTY_OPERATIONS, "es");
     expect(result.intent).toBe("unknown");
     expect(result.response).toContain("No puedo asociar");
