@@ -60,6 +60,20 @@ describe("analyzeCopilotQuestion", () => {
     expect(result.calculations.actualRevenueEntered).toBe(50000);
   });
 
+  it("calculates a fixed-amount operating cost reduction", () => {
+    const result = analyzeCopilotQuestion("Reduce 3.000€ de gastos operativos", financials, EMPTY_OPERATIONS, "es");
+    expect(result.intent).toBe("saving");
+    expect(result.calculations.expenseBase).toBe(30000);
+    expect(result.calculations.saving).toBe(3000);
+  });
+
+  it("models a revenue increase using the current gross margin", () => {
+    const result = analyzeCopilotQuestion("¿Y si aumentan ingresos un 10%?", financials, EMPTY_OPERATIONS, "es");
+    expect(result.intent).toBe("revenue");
+    expect(result.calculations.revenueAfterScenario).toBe(110000);
+    expect(result.calculations.ebitdaAfterScenario).toBe(36000);
+  });
+
   it("does not claim a return when the question cannot be interpreted", () => {
     const result = analyzeCopilotQuestion("haz magia", financials, EMPTY_OPERATIONS, "es");
     expect(result.intent).toBe("unknown");
