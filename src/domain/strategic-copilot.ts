@@ -1,5 +1,5 @@
 import type { FinancialResults } from "@/domain/financials";
-import { costCenterActualSpend, type OperationsState } from "@/domain/operations";
+import { costCenterActualSpend, weightedPipeline, type OperationsState } from "@/domain/operations";
 import type { Language } from "@/i18n/translations";
 
 export type CopilotIntent = "expense" | "saving" | "investment" | "margin" | "profit" | "revenue" | "project" | "risk" | "kpi" | "overview" | "unknown";
@@ -16,7 +16,7 @@ function parseNumber(raw: string): number {
   return Number(value.replace(",", "."));
 }
 
-function extractAmount(question: string): number | null {
+function extractAmount(question: string, intent: CopilotIntent): number | null {
   const match = question.match(/(?:€\s*)?(\d[\d.,\s]*\d|\d)\s*(?:€|eur(?:os?)?|euros?)/i)
     ?? question.match(/\b(\d+(?:[.,]\d+)?)\s*(?:k|mil)\b/i);
   if (!match) return null;
@@ -55,7 +55,7 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
   const es = language === "es";
   const q = question.trim();
   const intent = intentOf(q);
-  const amount = extractAmount(q);
+  const amount = extractAmount(q, intent);
   const targetPercent = extractPercent(q);
   const calculations: Record<string, number> = {};
   const matchedData: string[] = [];
@@ -102,7 +102,8 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
   }
 
   if (intent === "margin") {
-    const increaseBy = targetPercent !== null && /\\b(subir|aumentar|mejorar|increase|raise|improve)\\b/.test(q.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase()) && !/\\b(al|hasta|to|target|objetivo)\\b/.test(q.toLowerCase());
+    const normalisedQuestion = q.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const increaseBy = targetPercent !== null && /\b(subir|aumentar|mejorar|increase|raise|improve)\b/.test(normalisedQuestion) && !/\b(al|hasta|to|target|objetivo)\b/.test(normalisedQuestion);
     const goal = targetPercent === null ? currentMargin + 1 : increaseBy ? currentMargin * (1 + targetPercent / 100) : targetPercent;
     const gap = goal - currentMargin;
     const extraEbitda = round(financials.revenue * gap / 100);
@@ -129,9 +130,12 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
   if (intent === "profit" || intent === "revenue" || intent === "overview") {
     matchedData.push("financials");
     calculations.revenue = financials.revenue; calculations.ebitda = financials.ebitda; calculations.netIncome = financials.netIncome;
+    const pipeline = weightedPipeline(operations.opportunities.filter(x => !["won", "lost"].includes(x.stage)));
+    calculations.weightedOpenPipeline = pipeline;
+    matchedData.push("operations.opportunities");
     const base = es
-      ? `Ingresos: ${money(financials.revenue, language)}. Coste de ventas: ${money(financials.costOfGoodsSold, language)}. Gastos operativos: ${money(financials.operatingExpenses, language)}. EBITDA: ${money(financials.ebitda, language)} (${percent(currentMargin, language)} de margen). Beneficio neto: ${money(financials.netIncome, language)}.`
-      : `Revenue: ${money(financials.revenue, language)}. COGS: ${money(financials.costOfGoodsSold, language)}. Operating expenses: ${money(financials.operatingExpenses, language)}. EBITDA: ${money(financials.ebitda, language)} (${percent(currentMargin, language)} margin). Net income: ${money(financials.netIncome, language)}.`;
+      ? `Ingresos reconocidos del modelo financiero: ${money(financials.revenue, language)}. Coste de ventas: ${money(financials.costOfGoodsSold, language)}. Gastos operativos: ${money(financials.operatingExpenses, language)}. EBITDA: ${money(financials.ebitda, language)} (${percent(currentMargin, language)} de margen). Beneficio neto: ${money(financials.netIncome, language)}. Además, la cartera comercial abierta ponderada es ${money(pipeline, language)}; es pipeline, no facturación reconocida.`
+      : `Recognised revenue in the financial model: ${money(financials.revenue, language)}. COGS: ${money(financials.costOfGoodsSold, language)}. Operating expenses: ${money(financials.operatingExpenses, language)}. EBITDA: ${money(financials.ebitda, language)} (${percent(currentMargin, language)} margin). Net income: ${money(financials.netIncome, language)}. Separately, weighted open sales pipeline is ${money(pipeline, language)}; this is pipeline, not recognised revenue.`;
     return { intent, calculations, matchedData, response: base };
   }
 
