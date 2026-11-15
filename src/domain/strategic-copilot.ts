@@ -4,7 +4,7 @@ import type { Language } from "../i18n/translations";
 import { calculateThreeStatements, DEFAULT_THREE_STATEMENT_ASSUMPTIONS, type ThreeStatementAssumptions } from "./three-statements";
 import type { SavedPlanningState } from "./planning-storage";
 
-export type CopilotIntent = "expense" | "saving" | "investment" | "margin" | "profit" | "revenue" | "project" | "risk" | "kpi" | "cash" | "planning" | "overview" | "unknown";
+export type CopilotIntent = "greeting" | "advice" | "expense" | "saving" | "investment" | "margin" | "profit" | "revenue" | "project" | "risk" | "kpi" | "cash" | "planning" | "overview" | "unknown";
 export type CopilotAnalysis = { intent: CopilotIntent; response: string; calculations: Record<string, number>; matchedData: string[] };
 
 const money = (value: number, language: Language) => new Intl.NumberFormat(language === "es" ? "es-ES" : "en-IE", { style: "currency", currency: "EUR", maximumFractionDigits: 2 }).format(value);
@@ -35,31 +35,56 @@ function extractPercent(question: string): number | null {
   return Number.isFinite(value) && value >= 0 && value <= 1000 ? value : null;
 }
 
-function intentOf(question: string): CopilotIntent {
-  const q = question.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  if (/\b(invert|inviert\w*|inversion|invertir|investment|invest|roi|retorno|capital)\b/.test(q)) return "investment";
-  if (/\b(margen|margin|subir margen|mejorar margen)\b/.test(q)) return "margin";
-  if (/\b(ahorr\w*|recort\w*|reduc\w*|optim\w*|saving|save|cut|reduce)\b/.test(q)) return "saving";
-  if (/\b(gasto|gastos|coste|costes|costo|costos|expense|expenses|spend|partida|proveedor|sobrecoste|perdiendo|peor partida|peor gasto)\b/.test(q)) return "expense";
-  if (/\b(caja|cash|liquidez|liquidity|deuda|debt|capital circulante|working capital|balance|flujo de caja|cash flow)\b/.test(q)) return "cash";
-  if (/\b(presupuesto|budget|forecast|prevision|planificacion|escenario|scenario|plan anual)\b/.test(q)) return "planning";
-  if (/\b(beneficio|beneficios|benefit|profit|ebitda|rentabilidad|net income)\b/.test(q)) return "profit";
-  if (/\b(ingreso|ingresos|facturacion|ventas|revenue|sales)\b/.test(q)) return "revenue";
-  if (/\b(proyecto|proyectos|project|projects)\b/.test(q)) return "project";
-  if (/\b(riesgo|riesgos|risk|risks)\b/.test(q)) return "risk";
-  if (/\b(kpi|indicador|indicadores|objetivo|target|rendimiento|performance)\b/.test(q)) return "kpi";
-  if (/\b(resumen|situacion|estado|overview|analiza|analisis|empresa|negocio)\b/.test(q)) return "overview";
-  return "unknown";
+type IntentContext = { previousIntent?: CopilotIntent; previousQuestion?: string };
+const normaliseText = (value: string) => value.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().replace(/[^a-z0-9€%.,\\s]/g, " ").replace(/\\s+/g, " ").trim();
+const INTENT_TERMS: Record<Exclude<CopilotIntent,"greeting"|"advice"|"unknown">, string[]> = {
+ investment:["invert","inversion","invertir","contratar","contratacion","emplear","personal","capex","inversion","roi","retorno","rentabilidad","capital","investment","hire"],
+ margin:["margen","margin","rentabilidad","eficiencia","bruto","ebitda margin"],
+ saving:["ahorro","ahorrar","recortar","reducir","bajar","optimizar","eficiencia","cost saving","cut","reduce","lower"],
+ expense:["gasto","gastos","coste","costes","costo","costos","partida","proveedor","sobrecoste","marketing","nomina","opex","spend","expense","cost","burn"],
+ cash:["caja","liquidez","deuda","circulante","tesoreria","flujo","cash","liquidity","debt","working capital","cobros","pagos"],
+ planning:["presupuesto","forecast","prevision","planificacion","escenario","plan anual","budget","planning"],
+ profit:["beneficio","beneficios","ebitda","resultado","ganancia","perdida","profit","net income"],
+ revenue:["ingreso","ingresos","facturacion","ventas","venta","revenue","sales","comercial"],
+ project:["proyecto","proyectos","project","projects","entrega","hitos"],
+ risk:["riesgo","riesgos","amenaza","mitigacion","risk","risks"],
+ kpi:["kpi","indicador","indicadores","objetivo","target","rendimiento","performance","metricas"],
+ overview:["resumen","situacion","estado","empresa","negocio","analiza","analisis","panorama","mes","rumbo","como vamos","como va"]
+};
+function scoreIntents(question: string): Record<string,number> {
+ const q=normaliseText(question), tokens=q.split(" ");
+ const scores:Record<string,number>={};
+ for(const [intent,terms] of Object.entries(INTENT_TERMS)){
+  let score=0;
+  for(const term of terms){
+   const t=normaliseText(term);
+   if(q.includes(t)) score+=t.includes(" ")?3:2;
+   else if(t.length>=5&&tokens.some(token=>token.startsWith(t.slice(0,Math.max(4,t.length-2))))) score+=1;
+  }
+  scores[intent]=score;
+ }
+ if(/\\b(que harias|que harías|si fueras|director financiero|directora financiera|por donde empiezo|no se por donde|que me recomiendas|what would you do|where should i start)\\b/.test(q)) scores.advice=8;
+ if(/\\b(hola|buenas|hey|hello|hi|que tal|como estas|buenos dias|buenas tardes|buenas noches)\\b/.test(q)&&tokens.length<=7) scores.greeting=10;
+ return scores;
+}
+function intentOf(question: string, context?: IntentContext): CopilotIntent {
+ const q=normaliseText(question), scores=scoreIntents(question);
+ if(scores.greeting) return "greeting";
+ if(scores.advice) return "advice";
+ const ranked=Object.entries(scores).filter(([key,value])=>key!=="greeting"&&key!=="advice"&&value>0).sort((a,b)=>b[1]-a[1]);
+ if(ranked.length&&ranked[0][1]>=2) return ranked[0][0] as CopilotIntent;
+ if(context?.previousIntent&&/\\b(y ahora|ahora|y entonces|con eso|en ese caso|y si|que tal ahora|como lo ves|what about now|and now|in that case)\\b/.test(q)) return context.previousIntent;
+ return "unknown";
 }
 
 function topExpense(operations: OperationsState) {
   return [...operations.expenses].sort((a, b) => b.amount - a.amount)[0] ?? null;
 }
 
-export function analyzeCopilotQuestion(question: string, financials: FinancialResults, operations: OperationsState, language: Language, workspace: { planning: SavedPlanningState | null; statementAssumptions: ThreeStatementAssumptions | null } = { planning: null, statementAssumptions: null }): CopilotAnalysis {
+export function analyzeCopilotQuestion(question: string, financials: FinancialResults, operations: OperationsState, language: Language, workspace: { planning: SavedPlanningState | null; statementAssumptions: ThreeStatementAssumptions | null } = { planning: null, statementAssumptions: null }, context?: IntentContext): CopilotAnalysis {
   const es = language === "es";
   const q = question.trim();
-  const intent = intentOf(q);
+  const intent = intentOf(q, context);
   const amount = extractAmount(q, intent);
   const targetPercent = extractPercent(q);
   const calculations: Record<string, number> = {};
@@ -71,6 +96,47 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
   const largestExpense = topExpense(operations);
 
   if (!q) return { intent: "unknown", response: es ? "Escribe una pregunta para analizarla." : "Enter a question to analyse.", calculations, matchedData };
+  if (intent === "greeting") {
+    const openProjects=operations.projects.filter(x=>x.status!=="completed").length;
+    const openDeals=operations.opportunities.filter(x=>!["won","lost"].includes(x.stage));
+    const pipeline=weightedPipeline(openDeals);
+    const overdueRisks=operations.risks.filter(x=>x.status!=="closed");
+    matchedData.push("financials","operations.projects","operations.opportunities","operations.risks");
+    calculations.revenue=financials.revenue; calculations.ebitda=financials.ebitda; calculations.openProjects=openProjects; calculations.openOpportunities=openDeals.length; calculations.weightedPipeline=pipeline;
+    return {intent,calculations,matchedData,response:es
+      ? `¡Hola! Todo listo. Con los últimos datos cargados, la empresa registra ${money(financials.revenue,language)} de ingresos y ${money(financials.ebitda,language)} de EBITDA (${percent(currentMargin,language)} de margen). Hay ${openProjects} proyectos abiertos, ${openDeals.length} oportunidades comerciales abiertas y ${overdueRisks.length} riesgos sin cerrar. La cartera ponderada asciende a ${money(pipeline,language)}; no la cuento como ingreso reconocido. ¿Qué área quieres revisar primero?`
+      : `Hello. I have the latest workspace figures: ${money(financials.revenue,language)} revenue and ${money(financials.ebitda,language)} EBITDA (${percent(currentMargin,language)} margin). There are ${openProjects} open projects, ${openDeals.length} open sales opportunities and ${overdueRisks.length} unresolved risks. Weighted pipeline is ${money(pipeline,language)}, not recognised revenue. What would you like to review first?`};
+  }
+  if (intent === "advice" || (intent === "overview" && /director|por donde empiezo|que harias|recomiend|prioridad|rumbo/.test(normaliseText(q)))) {
+    const openProjects=operations.projects.filter(x=>x.status!=="completed");
+    const overruns=openProjects.map(x=>({...x,variance:x.spent-x.budget})).filter(x=>x.variance>0).sort((a,b)=>b.variance-a.variance);
+    const openRisks=operations.risks.filter(x=>x.status!=="closed").sort((a,b)=>b.probability*b.impact-a.probability*b.impact);
+    const offKpis=operations.kpis.filter(x=>x.direction==="lower"?x.actual>x.target:x.actual<x.target);
+    const totalRecorded=operations.expenses.reduce((sum,x)=>sum+x.amount,0);
+    const pipeline=weightedPipeline(operations.opportunities.filter(x=>!["won","lost"].includes(x.stage)));
+    const gross=financials.revenue>0?financials.grossProfit/financials.revenue*100:0;
+    calculations.revenue=financials.revenue; calculations.ebitda=financials.ebitda; calculations.ebitdaMargin=currentMargin; calculations.grossMargin=gross; calculations.recordedExpenses=totalRecorded; calculations.openProjects=openProjects.length; calculations.projectOverruns=overruns.length; calculations.openRisks=openRisks.length; calculations.offTargetKpis=offKpis.length; calculations.weightedPipeline=pipeline;
+    matchedData.push("financials","operations.expenses","operations.projects","operations.risks","operations.kpis","operations.opportunities");
+    const priority=financials.ebitda<0?(es?"recuperar EBITDA y entender qué costes fijos no están cubiertos":"restore positive EBITDA and identify uncovered fixed costs"):overruns[0]?(es?`corregir el sobrecoste de ${overruns[0].name}`:`address the overrun in ${overruns[0].name}`):openRisks[0]?(es?`mitigar el riesgo ${openRisks[0].title}`:`mitigate the risk ${openRisks[0].title}`):offKpis[0]?(es?`recuperar el KPI ${offKpis[0].name}`:`recover KPI ${offKpis[0].name}`):(es?"validar la calidad y evolución mensual de los datos":"validate monthly data quality and trend");
+    return {intent:"advice",calculations,matchedData,response:es
+      ? `Si estuviera dirigiendo finanzas, empezaría por proteger caja y margen, no por recortar a ciegas. La foto actual es: ingresos ${money(financials.revenue,language)}, margen bruto ${percent(gross,language)}, EBITDA ${money(financials.ebitda,language)} (${percent(currentMargin,language)}), gastos detallados registrados ${money(totalRecorded,language)} y cartera comercial ponderada ${money(pipeline,language)}. En operaciones hay ${openProjects.length} proyectos abiertos, ${overruns.length} con sobrecoste, ${openRisks.length} riesgos abiertos y ${offKpis.length} KPI fuera de objetivo.\n\nMi primera prioridad sería ${priority}. Después: (1) conciliar gastos detallados con el P&L para evitar duplicidades; (2) revisar semanalmente caja, cobros y pagos; (3) exigir responsable, fecha y resultado medible a cada proyecto o KPI crítico. No puedo afirmar una tendencia mensual sin una serie histórica comparable: estos datos describen el estado actual, no prueban si mejora o empeora.`
+      : `As finance lead, I would protect cash and margin before making indiscriminate cuts. Current position: revenue ${money(financials.revenue,language)}, gross margin ${percent(gross,language)}, EBITDA ${money(financials.ebitda,language)} (${percent(currentMargin,language)}), detailed recorded expenses ${money(totalRecorded,language)}, and weighted sales pipeline ${money(pipeline,language)}. Operations show ${openProjects.length} open projects, ${overruns.length} over budget, ${openRisks.length} open risks and ${offKpis.length} off-target KPIs.\n\nMy first priority would be to ${priority}. Then: (1) reconcile detailed expenses to the P&L to avoid double counting; (2) review cash, collections and payments weekly; (3) give every critical project or KPI an owner, deadline and measurable outcome. I cannot claim a monthly trend without comparable historical data: these figures describe the current state, not whether it is improving or deteriorating.`};
+  }
+  const multiHire=normaliseText(q).match(/(?:contrat|hire|employ)[a-z ]{0,35}(\\d[\\d.,]*)\\s*(?:€|eur|euros?)/);
+  const marketingCut=normaliseText(q).match(/(?:marketing|publicidad|ads)[^%]{0,45}(\\d+(?:[.,]\\d+)?)\\s*%|(?:recort|reduc|cut)[^%]{0,35}(\\d+(?:[.,]\\d+)?)\\s*%[^.]{0,35}(?:marketing|publicidad|ads)/);
+  if (multiHire || marketingCut) {
+    const hireCost=multiHire?parseNumber(multiHire[1]):0;
+    const rate=marketingCut?Number((marketingCut[1]??marketingCut[2]).replace(",",".")):0;
+    const marketingSpend=operations.expenses.filter(x=>/marketing|publicidad|ads|advertising/i.test(x.category+" "+x.description)).reduce((sum,x)=>sum+x.amount,0);
+    const saving=marketingSpend*rate/100;
+    const nextEbitda=financials.ebitda-hireCost+saving;
+    calculations.hireMonthlyCost=hireCost; calculations.marketingRecordedSpend=marketingSpend; calculations.marketingSaving=saving; calculations.ebitdaAfterCombinedScenario=nextEbitda;
+    matchedData.push("financials.ebitda","operations.expenses");
+    return {intent:"advice",calculations,matchedData,response:es
+      ? `He separado los dos escenarios para no mezclar hipótesis.\\n• Contratar por ${money(hireCost,language)} al mes: si se trata de coste laboral mensual adicional y se mantiene el resto constante, el EBITDA mensual bajaría de ${money(financials.ebitda,language)} a ${money(financials.ebitda-hireCost,language)}. No he añadido cargas sociales porque no están especificadas.\\n• Reducir marketing un ${rate}%: el gasto de marketing identificado en los registros es ${money(marketingSpend,language)}; el ahorro matemático sería ${money(saving,language)} y el EBITDA subiría a ${money(financials.ebitda+saving,language)}. Si no hay gastos de marketing registrados, el ahorro calculable es cero, no una estimación inventada.\\n• Si aplicases ambas medidas, el EBITDA quedaría en ${money(nextEbitda,language)} por periodo comparable. Comprueba que P&L y gastos operativos usan la misma periodicidad antes de tomar la decisión.`
+      : `I separated the alternatives to avoid mixing assumptions.\\n• Hire at ${money(hireCost,language)} per month: treating this as an additional monthly employment cost, EBITDA would fall from ${money(financials.ebitda,language)} to ${money(financials.ebitda-hireCost,language)}. Employer taxes are excluded because they were not specified.\\n• Cut marketing by ${rate}%: marketing spend identified in the records is ${money(marketingSpend,language)}; the mathematical saving is ${money(saving,language)} and EBITDA would rise to ${money(financials.ebitda+saving,language)}. If no marketing expenses are recorded, the calculable saving is zero, not an invented estimate.\\n• If both were applied, EBITDA would be ${money(nextEbitda,language)} per comparable period. Confirm P&L and expense records use the same period before deciding.`};
+  }
+
 
   if (intent === "investment") {
     if (amount === null) {
