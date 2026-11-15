@@ -77,6 +77,76 @@ describe("analyzeCopilotQuestion", () => {
   it("does not claim a return when the question cannot be interpreted", () => {
     const result = analyzeCopilotQuestion("haz magia", financials, EMPTY_OPERATIONS, "es");
     expect(result.intent).toBe("unknown");
-    expect(result.response).toContain("No puedo asociar");
+    expect(result.response).toContain("Entiendo lo que planteas");
   });
+  it("responds naturally to greetings with live business figures", () => {
+    const result = analyzeCopilotQuestion("¡Buenas tardes! ¿Qué tal?", financials, EMPTY_OPERATIONS, "es");
+    expect(result.intent).toBe("greeting");
+    expect(result.response).toContain("100.000");
+    expect(result.matchedData).toContain("financials");
+  });
+
+  it("scores an elaborated strategic question as a cross-workspace overview", () => {
+    const result = analyzeCopilotQuestion("Oye, ¿cómo ves el rumbo de este mes respecto a lo que gastamos?", financials, EMPTY_OPERATIONS, "es");
+    expect(result.intent).toBe("overview");
+    expect(result.response).toContain("EBITDA");
+    expect(result.response).toContain("serie histórica");
+    expect(result.matchedData).toContain("operations.expenses");
+  });
+
+  it("gives a strategic CFO recommendation for open-ended questions", () => {
+    const result = analyzeCopilotQuestion("¿Qué harías tú si fueras mi director financiero?", financials, EMPTY_OPERATIONS, "es");
+    expect(result.intent).toBe("advice");
+    expect(result.response).toContain("Si estuviera dirigiendo finanzas");
+    expect(result.matchedData).toContain("operations.kpis");
+  });
+
+  it("prioritises the previous topic over incidental words in a natural follow-up", () => {
+    const result = analyzeCopilotQuestion("¿Y ahora cómo lo ves?", financials, EMPTY_OPERATIONS, "es", undefined, { previousIntent: "expense", previousQuestion: "¿Qué gastos tengo?" });
+    expect(result.intent).toBe("expense");
+    expect(result.response).toContain("gastos operativos");
+  });
+
+  it("parses a long sentence with a hire cost and a marketing reduction", () => {
+    const operations = { ...EMPTY_OPERATIONS, expenses: [{ id: "m1", date: "2026-11-15", description: "Paid ads", supplier: "S", category: "Marketing", costCenterId: "cc1", amount: 10000, status: "paid" as const }] };
+    const result = analyzeCopilotQuestion("Si contrato a alguien por 2.000 euros al mes o recorto un 15% en marketing, ¿cómo me quedo?", financials, operations, "es");
+    expect(result.intent).toBe("advice");
+    expect(result.calculations.hireMonthlyCost).toBe(2000);
+    expect(result.calculations.marketingSaving).toBe(1500);
+    expect(result.calculations.annualHireCost).toBe(24000);
+    expect(result.response).toContain("periodos deben coincidir");
+    expect(result.response).toContain("cotizaciones");
+  });
+
+  it("handles thanks and short conversational turns without a blank reply", () => {
+    const result = analyzeCopilotQuestion("¡Perfecto, gracias!", financials, EMPTY_OPERATIONS, "es");
+    expect(result.intent).toBe("social");
+    expect(result.response.length).toBeGreaterThan(20);
+  });
+
+  it("reads the live 13-week cash forecast", () => {
+    const result = analyzeCopilotQuestion("¿Cómo ves la caja y el flujo?", financials, EMPTY_OPERATIONS, "es", {
+      planning: null,
+      statementAssumptions: null,
+      cashForecastWeeks: [{ collections: 1000, operatingPayments: 500, capitalExpenditure: 100, debtService: 50 }],
+    });
+    expect(result.intent).toBe("cash");
+    expect(result.calculations.forecastClosingCash - result.calculations.closingCash).toBeCloseTo(350, 5);
+    expect(result.matchedData).toContain("cashForecastWeeks");
+  });
+
+  it("reads current receivables and payables from the working-capital register", () => {
+    const invoices = [
+      { id: "r1", direction: "receivable" as const, counterparty: "Customer A", reference: "INV-1", issueDate: "2020-01-01", dueDate: "2020-01-31", amount: 1200, paidAmount: 200 },
+      { id: "p1", direction: "payable" as const, counterparty: "Supplier B", reference: "BILL-1", issueDate: "2020-01-01", dueDate: "2020-01-31", amount: 800, paidAmount: 0 },
+    ];
+    const result = analyzeCopilotQuestion("¿Qué facturas tengo pendientes de cobro y pago?", financials, EMPTY_OPERATIONS, "es", {
+      planning: null, statementAssumptions: null, workingCapitalInvoices: invoices,
+    });
+    expect(result.intent).toBe("workingCapital");
+    expect(result.calculations.receivablesOutstanding).toBe(1000);
+    expect(result.calculations.payablesOutstanding).toBe(800);
+    expect(result.matchedData).toContain("workingCapitalInvoices");
+  });
+
 });

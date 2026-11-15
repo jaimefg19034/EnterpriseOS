@@ -7,6 +7,8 @@ import { useOperationsCloudSync } from "@/components/use-operations-cloud-sync";
 import type { Language } from "@/i18n/translations";
 import { LEGACY_PLANNING_STORAGE_KEY, parseSavedPlanningState, PLANNING_STORAGE_KEY, type SavedPlanningState } from "@/domain/planning-storage";
 import type { ThreeStatementAssumptions } from "@/domain/three-statements";
+import { createEmptyCashForecast, parseStoredCashForecast, type CashForecastWeekInput } from "@/domain/cash-forecast";
+import { parseStoredWorkingCapitalInvoices, type WorkingCapitalInvoice } from "@/domain/working-capital";
 import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, type OperationsState } from "@/domain/operations";
 
 type WorkspaceDataValue = {
@@ -19,6 +21,8 @@ type WorkspaceDataValue = {
   setPlanning: Dispatch<SetStateAction<SavedPlanningState | null>>;
   statementAssumptions: ThreeStatementAssumptions | null;
   setStatementAssumptions: Dispatch<SetStateAction<ThreeStatementAssumptions | null>>;
+  cashForecastWeeks: CashForecastWeekInput[];
+  workingCapitalInvoices: WorkingCapitalInvoice[];
 };
 
 const WorkspaceDataContext = createContext<WorkspaceDataValue | null>(null);
@@ -28,6 +32,8 @@ export function WorkspaceDataProvider({ financials, language, children }: { fina
   const [operationsLoaded, setOperationsLoaded] = useState(false);
   const [planning, setPlanning] = useState<SavedPlanningState | null>(null);
   const [statementAssumptions, setStatementAssumptions] = useState<ThreeStatementAssumptions | null>(null);
+  const [cashForecastWeeks, setCashForecastWeeks] = useState<CashForecastWeekInput[]>(() => createEmptyCashForecast(13));
+  const [workingCapitalInvoices, setWorkingCapitalInvoices] = useState<WorkingCapitalInvoice[]>([]);
   const cloudStatus = useOperationsCloudSync(operations, setOperations, operationsLoaded, language);
 
   useEffect(() => {
@@ -38,6 +44,12 @@ export function WorkspaceDataProvider({ financials, language, children }: { fina
         const planningRaw = window.localStorage.getItem(PLANNING_STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_PLANNING_STORAGE_KEY);
         const restoredPlanning = planningRaw ? parseSavedPlanningState(planningRaw) : null;
         if (restoredPlanning) setPlanning(restoredPlanning);
+        const cashRaw = window.localStorage.getItem("enterpriseos:cash-forecast:v1");
+        const cashParsed = parseStoredCashForecast(cashRaw);
+        if (cashParsed.ok) setCashForecastWeeks(cashParsed.weeks);
+        const invoiceRaw = window.localStorage.getItem("enterpriseos:working-capital:v1");
+        const invoiceParsed = parseStoredWorkingCapitalInvoices(invoiceRaw);
+        if (invoiceParsed.ok) setWorkingCapitalInvoices(invoiceParsed.invoices);
       } catch {
         // The in-memory workspace remains usable if browser storage is unavailable.
       }
@@ -54,10 +66,25 @@ export function WorkspaceDataProvider({ financials, language, children }: { fina
         if (restored) setPlanning(restored);
       }
     };
+    const refreshCashAndInvoices = () => {
+      try {
+        const cash = parseStoredCashForecast(window.localStorage.getItem("enterpriseos:cash-forecast:v1"));
+        if (cash.ok) setCashForecastWeeks(cash.weeks);
+        const invoices = parseStoredWorkingCapitalInvoices(window.localStorage.getItem("enterpriseos:working-capital:v1"));
+        if (invoices.ok) setWorkingCapitalInvoices(invoices.invoices);
+      } catch { /* Keep the last valid in-memory snapshot if storage is unavailable. */ }
+    };
+    const onFinanceDataUpdated = () => refreshCashAndInvoices();
+    window.addEventListener("enterpriseos:cash-forecast-updated", onFinanceDataUpdated);
+    window.addEventListener("enterpriseos:working-capital-updated", onFinanceDataUpdated);
+    window.addEventListener("storage", onFinanceDataUpdated);
     window.addEventListener("storage", onStorage);
     return () => {
       window.clearTimeout(timer);
       window.removeEventListener("storage", onStorage);
+      window.removeEventListener("enterpriseos:cash-forecast-updated", onFinanceDataUpdated);
+      window.removeEventListener("enterpriseos:working-capital-updated", onFinanceDataUpdated);
+      window.removeEventListener("storage", onFinanceDataUpdated);
     };
   }, []);
 
@@ -71,7 +98,7 @@ export function WorkspaceDataProvider({ financials, language, children }: { fina
     }
   }, [operations, operationsLoaded]);
 
-  const value = useMemo(() => ({ financials, operations, setOperations, operationsLoaded, cloudStatus, planning, setPlanning, statementAssumptions, setStatementAssumptions }), [financials, operations, operationsLoaded, cloudStatus, planning, statementAssumptions]);
+  const value = useMemo(() => ({ financials, operations, setOperations, operationsLoaded, cloudStatus, planning, setPlanning, statementAssumptions, setStatementAssumptions, cashForecastWeeks, workingCapitalInvoices }), [financials, operations, operationsLoaded, cloudStatus, planning, statementAssumptions, cashForecastWeeks, workingCapitalInvoices]);
   return <WorkspaceDataContext.Provider value={value}>{children}</WorkspaceDataContext.Provider>;
 }
 
