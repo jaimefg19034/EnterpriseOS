@@ -1,18 +1,18 @@
 /**
- * EnterpriseOS copilot router.
- * General business questions are answered independently from financial analysis;
- * financial questions continue through the deterministic live-workspace engine.
+ * Local EnterpriseOS conversation router.
+ * Natural-language questions are handled by the local semantic engine.
+ * Explicit financial questions are delegated to the deterministic workspace analyst.
  */
-import { analyzeCopilotQuestion } from "./strategic-copilot";
-import { answerGeneralBusinessQuestion } from "./business-advisor";
+import { analyseCopilotQuestion } from "./strategic-copilot";
+import { neuralEngine, type NeuralContext } from "../lib/neuralEngine";
 import type { CopilotAnalysis } from "./strategic-copilot";
 
-export { analyzeCopilotQuestion };
+export { analyseCopilotQuestion };
 export type { CopilotAnalysis, CopilotIntent, IntentContext } from "./strategic-copilot";
 
-export function aiEngine(...args: Parameters<typeof analyzeCopilotQuestion>): CopilotAnalysis {
-  const [question, , , language] = args;
-  const generalAnswer = answerGeneralBusinessQuestion(question, language);
-  if (generalAnswer) return generalAnswer;
-  return analyzeCopilotQuestion(...args);
+export function aiEngine(...args: Parameters<typeof analyseCopilotQuestion>): CopilotAnalysis {
+  const [question, financials, operations, language, workspace, context] = args;
+  const conversational = neuralEngine(question, language, context as NeuralContext | undefined);
+  if (conversational) return conversational;
+  return analyseCopilotQuestion(question, financials, operations, language, workspace, context);
 }
