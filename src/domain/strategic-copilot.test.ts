@@ -45,7 +45,22 @@ describe("analyzeCopilotQuestion", () => {
     expect(result.calculations.targetMargin).toBeCloseTo(34.5);
   });
 
-  it("uses edited three-statement assumptions for cash questions", () => {\n    const result = analyzeCopilotQuestion("¿Cómo está la caja y la deuda?", financials, EMPTY_OPERATIONS, "es", { planning: null, statementAssumptions: { daysSalesOutstanding: 30, inventoryDays: 30, payableDays: 30, capitalExpenditure: 1000, debtRepayment: 5000, newBorrowings: 0, dividends: 0 } });\n    expect(result.intent).toBe("cash");\n    expect(result.matchedData).toContain("threeStatementAssumptions");\n    expect(result.calculations.closingCash).toBeTypeOf("number");\n  });\n\n  it("does not claim a return when the question cannot be interpreted", () => {
+  it("uses edited three-statement assumptions for cash questions", () => {
+    const result = analyzeCopilotQuestion("¿Cómo está la caja y la deuda?", financials, EMPTY_OPERATIONS, "es", { planning: null, statementAssumptions: { daysSalesOutstanding: 30, inventoryDays: 30, payableDays: 30, capitalExpenditure: 1000, debtRepayment: 5000, newBorrowings: 0, dividends: 0 } });
+    expect(result.intent).toBe("cash");
+    expect(result.matchedData).toContain("threeStatementAssumptions");
+    expect(result.calculations.closingCash).toBeTypeOf("number");
+  });
+
+  it("uses live planning assumptions and actual revenue", () => {
+    const planning = { schemaVersion: 2 as const, selectedYear: 2026, savedAt: "2026-11-15", years: { "2026": { assumptions: { annualRevenueBudget: 500000, costOfGoodsSoldPercent: 40, annualOperatingExpenses: 200000, annualDepreciationAndAmortisation: 10000, annualInterestExpense: 5000, taxRatePercent: 25 }, actualRevenue: { Jan: 50000, Feb: null, Mar: null, Apr: null, May: null, Jun: null, Jul: null, Aug: null, Sep: null, Oct: null, Nov: null, Dec: null }, scenario: "base" as const, customRevenueGrowthPercent: 0 } } };
+    const result = analyzeCopilotQuestion("Analiza mi presupuesto y forecast", financials, EMPTY_OPERATIONS, "es", { planning, statementAssumptions: null });
+    expect(result.intent).toBe("planning");
+    expect(result.calculations.annualRevenueBudget).toBe(500000);
+    expect(result.calculations.actualRevenueEntered).toBe(50000);
+  });
+
+  it("does not claim a return when the question cannot be interpreted", () => {
     const result = analyzeCopilotQuestion("haz magia", financials, EMPTY_OPERATIONS, "es");
     expect(result.intent).toBe("unknown");
     expect(result.response).toContain("No puedo asociar");
