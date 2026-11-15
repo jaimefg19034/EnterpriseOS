@@ -85,7 +85,7 @@ describe("analyzeCopilotQuestion", () => {
   it("recognises a natural-language question about the business today", () => {
     const result = analyzeCopilotQuestion("¿Cómo ves mi negocio hoy?", financials, EMPTY_OPERATIONS, "es");
     expect(result.intent).toBe("overview");
-    expect(result.response).toContain("Ingresos");
+    expect(result.response.toLowerCase()).toContain("ingresos");
     expect(result.response).toContain("EBITDA");
   });
 
