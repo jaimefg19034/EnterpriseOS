@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { translate, type Language } from "@/i18n/translations";
+import { OperationsCommandCentre } from "@/components/operations-command-centre";
+import { useOperationsCloudSync } from "@/components/use-operations-cloud-sync";
 import { isDateWithinReportingPeriodCode, isValidISODate, isValidReportingPeriodCode } from "@/domain/reporting-periods";
 import { EMPTY_OPERATIONS, OPERATIONS_STORAGE_KEY, parseOperationsState, costCenterActualSpend, costCenterPerformance, costCenterRunRate, kpiPerformance, projectBudgetVariance, riskScore, weightedPipeline, type BusinessKpi, type CostCenterBudget, type ExpenseRecord, type BusinessRisk, type Opportunity, type OpportunityStage, type OperationsState, type Project, type ProjectStatus } from "@/domain/operations";
 
@@ -47,6 +49,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   const t = (value: string) => translate(value, language);
   const [data, setData] = useState<OperationsState>(EMPTY_OPERATIONS);
   const [loaded, setLoaded] = useState(false);
+  const cloudStatus = useOperationsCloudSync(data, setData, loaded, language);
   const [section, setSection] = useState<Section>("sales");
   const [storageMessage, setStorageMessage] = useState("Loading local workspace…");
   const [company, setCompany] = useState("");
@@ -238,6 +241,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
       <div className="operations-tabs" role="tablist" aria-label={t("Operations modules")}>
         {sections.map((item) => <button key={item.id} role="tab" aria-selected={section === item.id} className={section === item.id ? "active" : ""} onClick={() => setSection(item.id)}>{t(item.label)} <span>{item.count}</span></button>)}
       </div>
+      <OperationsCommandCentre data={data} setData={setData} language={language} section={section} setSection={setSection} cloudStatus={cloudStatus} />
       <div className="operations-content">
         {section === "sales" && <>
           <div className="operations-section-heading"><div><div className="panel-kicker">{t("CUSTOMER RELATIONSHIPS")}</div><h2>{t("Sales pipeline")}</h2><p>{t("Track opportunities from first contact to closed outcome. Weighted pipeline uses editable stage probabilities.")}</p></div></div>
