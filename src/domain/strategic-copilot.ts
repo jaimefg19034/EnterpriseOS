@@ -37,7 +37,7 @@ function extractPercent(question: string): number | null {
   return Number.isFinite(value) && value >= 0 && value <= 1000 ? value : null;
 }
 
-type IntentContext = { previousIntent?: CopilotIntent; previousQuestion?: string };
+type IntentContext = { previousIntent?: CopilotIntent; previousQuestion?: string; previousResponse?: string; history?: { role: "user" | "assistant"; content: string }[] };
 const normaliseText = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9€%.,\s]/g, " ").replace(/\s+/g, " ").trim();
 const INTENT_TERMS: Record<Exclude<CopilotIntent,"greeting"|"social"|"advice"|"unknown">, string[]> = {
  investment:["invert","invierto","invierta","inversion","invertir","contratar","contratacion","emplear","personal","capex","inversion","roi","retorno","rentabilidad","capital","investment","hire"],
@@ -106,7 +106,7 @@ function scoreIntents(question: string): Record<string,number> {
 }
 function intentOf(question: string, context?: IntentContext): CopilotIntent {
   const q=normaliseText(question), tokens=tokensOf(q), scores=scoreIntents(question);
-  const followUp=/\b(y por que|por que|y eso|como lo soluciono|como lo arreglo|como lo corrijo|que hago entonces|y si cambio|si cambio esa cifra|esa cifra|ese importe|ese gasto|esa partida|lo anterior|con ese cambio|y ahora|ahora|en ese caso|y si|what about|why is that|how do i fix|how can i solve|what if i change|that amount|that cost)\b/.test(q);
+  const followUp=/\b(y por que|por que|y eso|como lo soluciono|como lo arreglo|como lo corrijo|como bajo eso|como lo bajo|como reducirlo|como lo reduzco|que hago entonces|y si cambio|si cambio esa cifra|esa cifra|ese importe|ese gasto|esa partida|lo anterior|con ese cambio|y ahora|ahora|en ese caso|y si|si lo subo|si lo aumento|mas detalles|amplia|desarrolla|what about|why is that|how do i fix|how can i solve|what if i change|that amount|that cost)\b/.test(q);
   if(context?.previousIntent&&followUp) return context.previousIntent;
   if((scores.greeting??0)>=8 && tokens.length<=7 && !Object.entries(scores).some(([key,value])=>!["greeting","social"].includes(key)&&value>=3)) return "greeting";
   if((scores.social??0)>=7 && tokens.length<=8 && !Object.entries(scores).some(([key,value])=>!["greeting","social"].includes(key)&&value>=3)) return "social";
@@ -138,6 +138,22 @@ export function analyzeCopilotQuestion(question: string, financials: FinancialRe
   const largestExpense = topExpense(operations);
 
   if (!q) return { intent: "unknown", response: es ? "Escribe una pregunta para analizarla." : "Enter a question to analyse.", calculations, matchedData };
+  const asksForSecondPoint = /\b(segundo punto|punto dos|punto 2|segundo apartado|apartado dos|second point|second item)\b/.test(normaliseText(q))
+    && /\b(detall|explic|ampl|desarroll|more detail|explain|expand)\w*\b/.test(normaliseText(q));
+  if (asksForSecondPoint) {
+    const numbered = (context?.previousResponse ?? "").split(/\n/).map(line => line.trim())
+      .filter(line => /^(?:2[.)]|[-*]\s*(?:2[.)])?)/.test(line));
+    if (numbered.length) {
+      const second = numbered[0].replace(/^(?:2[.)]\s*|[-*]\s*)/, "");
+      matchedData.push("conversation.previousResponse");
+      return { intent, calculations, matchedData, response: es
+        ? "El segundo punto de mi respuesta anterior era: «" + second + "». Puedo desarrollarlo usando los registros actuales, manteniendo esa referencia exacta."
+        : "The second point in my previous answer was: “" + second + "”. I can expand it using current records while keeping the reference exact." };
+    }
+    return { intent, calculations, matchedData: ["conversation.previousResponse"], response: es
+      ? "La respuesta anterior no estaba organizada en puntos numerados, así que no puedo identificar con seguridad cuál es el segundo. Cita esa frase o dime el tema y lo desarrollo sin inventar una referencia."
+      : "My previous answer was not structured as a numbered list, so I cannot reliably identify the second point. Quote that phrase or name the topic and I will expand it without guessing." };
+  }
   if (intent === "greeting") {
     const openProjects=operations.projects.filter(x=>x.status!=="completed").length;
     const openDeals=operations.opportunities.filter(x=>!["won","lost"].includes(x.stage));

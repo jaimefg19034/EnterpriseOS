@@ -194,4 +194,34 @@ describe("analyzeCopilotQuestion", () => {
     expect(concrete.response).toContain("Marketing");
   });
 
+
+  it("keeps a short follow-up attached to the previous financial topic", () => {
+    const result = analyzeCopilotQuestion("¿Y cómo bajo eso?", financials, EMPTY_OPERATIONS, "es", undefined, {
+      previousIntent: "saving",
+      previousQuestion: "¿Qué gastos tengo?",
+    });
+    expect(result.intent).toBe("saving");
+    expect(result.calculations.saving).toBe(7000);
+  });
+
+  it("recalculates a percentage change in a contextual follow-up", () => {
+    const result = analyzeCopilotQuestion("¿Qué pasa si lo subo un 20%?", financials, EMPTY_OPERATIONS, "es", undefined, {
+      previousIntent: "revenue",
+      previousQuestion: "¿Cómo van los ingresos?",
+    });
+    expect(result.intent).toBe("revenue");
+    expect(result.calculations.revenueAfterScenario).toBe(120000);
+  });
+
+  it("resolves an explicit second-point reference from the previous answer", () => {
+    const result = analyzeCopilotQuestion("Dame más detalles del segundo punto", financials, EMPTY_OPERATIONS, "es", undefined, {
+      previousIntent: "advice",
+      previousQuestion: "¿Qué priorizarías?",
+      previousResponse: ["1. Revisar margen bruto", "2. Reducir concentración de clientes", "3. Mejorar cobros"].join("\n"),
+    });
+    expect(result.response).toContain("Reducir concentración de clientes");
+    expect(result.matchedData).toContain("conversation.previousResponse");
+  });
+
+
 });
