@@ -50,7 +50,6 @@ export function OperationsWorkspace({ language }: { language: Language }) {
   const { operations: data, setOperations: setData, cloudStatus } = useWorkspaceData();
   const cloudConnected = ["Sincronizado con tu cuenta","Guardado y sincronizado con tu cuenta","Actualizado desde la nube","Synced to your account","Saved and synced to your account","Updated from cloud"].includes(cloudStatus);
   const [section, setSection] = useState<Section>("sales");
-  const [storageMessage, setStorageMessage] = useState("Loading local workspace…");
   const [company, setCompany] = useState("");
   const [contact, setContact] = useState("");
   const [dealValue, setDealValue] = useState("10000");
@@ -325,7 +324,7 @@ export function OperationsWorkspace({ language }: { language: Language }) {
           <p className="operations-note">{t("Each KPI defines whether higher or lower values are better. Progress is capped visually at 150%; the original values remain unchanged.")}</p>
         </>}
       </div>
-      <div className="operations-storage-note">◉ {t(storageMessage)}</div>
+      <div className="operations-storage-note">◉ {cloudStatus}</div>
       <p className="operations-disclaimer">{cloudConnected ? t("Operations data is synced to your authenticated account across your devices. It is not shared with other users or connected to CRM, HR, project or accounting platforms. Saved views and version snapshots remain local to this browser. Export a CSV backup before clearing browser data.") : t("Operations records are stored only in this browser. Sign in with a configured account to enable cloud sync across your own devices. Records are not shared with a team or connected to CRM, HR, project or accounting platforms. Export a CSV backup before clearing browser data.")}</p>
     </section>
   );
